@@ -12,6 +12,7 @@ namespace ArxOne.Weavisor
     using System.Linq;
     using System.Reflection;
     using Advice;
+    using Annotation;
     using Utility;
 
     /// <summary>
@@ -106,9 +107,11 @@ namespace ArxOne.Weavisor
         {
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndParents().ToArray();
             var assemblyAndParents = typeAndParents.Select(t => t.Assembly).Distinct();
-            return assemblyAndParents.SelectMany(GetAdvices)
+            var advices = assemblyAndParents.SelectMany(GetAdvices)
                 .Union(typeAndParents.SelectMany(GetAdvices))
-                .Union(GetAdvices(targetMethod)).Distinct().ToArray();
+                .Union(GetAdvices(targetMethod)).Distinct()
+                .OrderByDescending(Priority.Get).ToArray();
+            return advices;
         }
 
         /// <summary>

@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="Advice\CallContext.cs" />
     <Compile Include="Advice\Call.cs" />
+    <Compile Include="Annotation\Priority.cs" />
     <Compile Include="Invocation.cs" />
     <Compile Include="IAdvice.cs" />
     <Compile Include="Advice\IMethodAdvice.cs" />
