@@ -16,7 +16,7 @@ It will come as a NuGet package using Fody weaver, but currently, the job is not
 ## Philosophy
 
 Currently, Weavisor won't bring you any aspect out-of-the-box.
-This means you'll have to write your own.
+This means you'll have to write your own aspects.
 
 ## How to implement your own aspects
 
