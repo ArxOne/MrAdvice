@@ -67,6 +67,22 @@ namespace ArxOne.Weavisor
         }
 
         /// <summary>
+        /// Processes the runtime initializers.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        // ReSharper disable once UnusedMember.Global
+        public static void ProcessInitializers(Assembly assembly)
+        {
+            foreach (var type in assembly.GetTypes())
+                foreach (var methodInfo in type.GetMethods())
+                {
+                    var runtimeInitializers = GetAttributes<IMethodInitializer>(methodInfo).ToArray();
+                    foreach (var runtimeInitializer in runtimeInitializers)
+                        runtimeInitializer.Initialize(methodInfo);
+                }
+        }
+
+        /// <summary>
         /// Creates the call context, given a calling method and the inner method name.
         /// </summary>
         /// <param name="methodInfo">The method information.</param>
@@ -89,7 +105,7 @@ namespace ArxOne.Weavisor
                     innerMethod = innerMethods.Single(m => m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes));
                     break;
             }
-            var advices = GetAllAdvices(methodInfo);
+            var advices = GetAdvices<IMethodAdvice>(methodInfo);
             return new CallContext
             {
                 Advices = advices,
@@ -102,13 +118,14 @@ namespace ArxOne.Weavisor
         /// </summary>
         /// <param name="targetMethod">The target method.</param>
         /// <returns></returns>
-        private static IList<IMethodAdvice> GetAllAdvices(MethodInfo targetMethod)
+        private static IList<TAdvice> GetAdvices<TAdvice>(MethodInfo targetMethod)
+            where TAdvice : class, IAdvice
         {
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndParents().ToArray();
             var assemblyAndParents = typeAndParents.Select(t => t.Assembly).Distinct();
-            var advices = assemblyAndParents.SelectMany(GetAdvices)
-                .Union(typeAndParents.SelectMany(GetAdvices))
-                .Union(GetAdvices(targetMethod)).Distinct()
+            var advices = assemblyAndParents.SelectMany(GetAttributes<TAdvice>)
+                .Union(typeAndParents.SelectMany(GetAttributes<TAdvice>))
+                .Union(GetAttributes<TAdvice>(targetMethod)).Distinct()
                 .OrderByDescending(Priority.Get).ToArray();
             return advices;
         }
@@ -118,9 +135,9 @@ namespace ArxOne.Weavisor
         /// </summary>
         /// <param name="provider">The provider.</param>
         /// <returns></returns>
-        private static IEnumerable<IMethodAdvice> GetAdvices(Assembly provider)
+        private static IEnumerable<TAttribute> GetAttributes<TAttribute>(Assembly provider)
         {
-            return provider.GetCustomAttributes(false).OfType<IMethodAdvice>();
+            return provider.GetCustomAttributes(false).OfType<TAttribute>();
         }
 
         /// <summary>
@@ -128,9 +145,9 @@ namespace ArxOne.Weavisor
         /// </summary>
         /// <param name="provider">The provider.</param>
         /// <returns></returns>
-        private static IEnumerable<IMethodAdvice> GetAdvices(Type provider)
+        private static IEnumerable<TAttribute> GetAttributes<TAttribute>(Type provider)
         {
-            return provider.GetCustomAttributes(false).OfType<IMethodAdvice>();
+            return provider.GetCustomAttributes(false).OfType<TAttribute>();
         }
 
         /// <summary>
@@ -138,9 +155,9 @@ namespace ArxOne.Weavisor
         /// </summary>
         /// <param name="provider">The provider.</param>
         /// <returns></returns>
-        private static IEnumerable<IMethodAdvice> GetAdvices(MemberInfo provider)
+        private static IEnumerable<TAttribute> GetAttributes<TAttribute>(MemberInfo provider)
         {
-            return provider.GetCustomAttributes(false).OfType<IMethodAdvice>();
+            return provider.GetCustomAttributes(false).OfType<TAttribute>();
         }
     }
 }

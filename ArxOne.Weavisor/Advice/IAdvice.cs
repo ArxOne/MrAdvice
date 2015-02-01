@@ -4,7 +4,7 @@
 // https://github.com/ArxOne/Weavisor
 // Release under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
-namespace ArxOne.Weavisor
+namespace ArxOne.Weavisor.Advice
 {
     /// <summary>
     /// Represents an advice

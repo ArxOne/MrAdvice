@@ -8,6 +8,7 @@ namespace MethodLevelTest.Advices
 {
     using System;
     using ArxOne.Weavisor;
+    using ArxOne.Weavisor.Advice;
 
     public class EmptyAdvice : Attribute, IAdvice
     {

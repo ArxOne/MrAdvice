@@ -63,7 +63,7 @@
     <Compile Include="TypeResolver.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="Utility\GenericParameterExtensions.cs" />
-    <Compile Include="Utility\InstructionsExtensions.cs" />
+    <Compile Include="Utility\Instructions.cs" />
     <Compile Include="Utility\TypeReferenceExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

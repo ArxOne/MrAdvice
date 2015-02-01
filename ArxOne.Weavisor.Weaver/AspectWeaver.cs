@@ -32,14 +32,49 @@ namespace ArxOne.Weavisor.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         public void Weave(ModuleDefinition moduleDefinition)
         {
-            var aspectMarkerInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceMarkerName);
-            if (aspectMarkerInterface == null)
+            var adviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName);
+            if (adviceInterface == null)
             {
-                Logger.WriteWarning("Aspect marker interface not found, exiting");
+                Logger.WriteWarning("IAdvice interface not found here, exiting");
                 return;
             }
-            foreach (var method in GetWeavableMethods(moduleDefinition, aspectMarkerInterface).ToArray())
+            var weavableMethods = GetMethods(moduleDefinition, adviceInterface).ToArray();
+            foreach (var method in weavableMethods)
                 Weave(method);
+
+            var runtimeInitializerInterface = TypeResolver.Resolve(moduleDefinition, Binding.RuntimeInitializerInterfaceName);
+            if (GetMethods(moduleDefinition, runtimeInitializerInterface).Any())
+                WeaveRuntimeInitializer(moduleDefinition);
+        }
+
+        private void WeaveRuntimeInitializer(ModuleDefinition moduleDefinition)
+        {
+            var moduleType = moduleDefinition.Types.Single(t => t.Name == "<Module>");
+
+            const string cctorMethodName = ".cctor";
+            var staticCtor = moduleType.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
+            if (staticCtor == null)
+            {
+                staticCtor = new MethodDefinition(cctorMethodName,
+                           MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName |
+                           MethodAttributes.RTSpecialName,
+                           moduleDefinition.Import(typeof(void)));
+                moduleType.Methods.Add(staticCtor);
+            }
+
+            var instructions = new Instructions(staticCtor.Body.Instructions);
+
+            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationProceedTypeName);
+            if (invocationType == null)
+                return;
+            var proceedRuntimeInitializersReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProcessRuntimeInitializersMethodName);
+            if (proceedRuntimeInitializersReference == null)
+                return;
+            var proceedMethod = moduleDefinition.Import(proceedRuntimeInitializersReference);
+
+            instructions.Emit(OpCodes.Call, moduleDefinition.Import(ReflectionUtility.GetMethodInfo(() => Assembly.GetExecutingAssembly())));
+            instructions.Emit(OpCodes.Call, proceedMethod);
+            instructions.Emit(OpCodes.Ret);
         }
 
         /// <summary>
@@ -73,7 +108,7 @@ namespace ArxOne.Weavisor.Weaver
             // now empty the old one and make it call the inner method...
             method.Body.Instructions.Clear();
             method.Body.Variables.Clear();
-            var instructions = method.Body.Instructions;
+            var instructions = new Instructions(method.Body.Instructions);
 
             var isStatic = method.Attributes.HasFlag(MethodAttributes.Static);
             var firstParameter = isStatic ? 0 : 1;
@@ -157,14 +192,15 @@ namespace ArxOne.Weavisor.Weaver
         /// Gets all weavable methods from module.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="aspectMarkerInterface">The aspect marker interface.</param>
+        /// <param name="markerInterface">The aspect marker interface.</param>
         /// <returns></returns>
-        private IEnumerable<MethodDefinition> GetWeavableMethods(ModuleDefinition moduleDefinition, TypeDefinition aspectMarkerInterface)
+        private IEnumerable<MethodDefinition> GetMethods(ModuleDefinition moduleDefinition, TypeDefinition markerInterface)
         {
-            bool weaveAssembly = HasMethodAspects(moduleDefinition.Assembly, aspectMarkerInterface);
+            IDictionary<TypeReference, bool> markerCache = new Dictionary<TypeReference, bool>();
+            bool weaveAssembly = HasMethodMarkers(moduleDefinition.Assembly, markerInterface, markerCache);
             foreach (var typeDefinition in moduleDefinition.GetTypes())
             {
-                var weaveType = HasMethodAspects(typeDefinition, aspectMarkerInterface);
+                var weaveType = HasMethodMarkers(typeDefinition, markerInterface, markerCache);
                 if (weaveType && typeDefinition.HasGenericParameters)
                 {
                     Logger.WriteWarning("Generic type {0} can not be weaved", typeDefinition.FullName);
@@ -173,11 +209,11 @@ namespace ArxOne.Weavisor.Weaver
                 // methods
                 foreach (var methodDefinition in typeDefinition.GetMethods())
                 {
-                    if (weaveAssembly || weaveType || HasMethodAspects(methodDefinition, aspectMarkerInterface))
+                    if (weaveAssembly || weaveType || HasMethodMarkers(methodDefinition, markerInterface, markerCache))
                     {
                         if (methodDefinition.HasGenericParameters)
                         {
-                            Logger.WriteWarning("Generic method {0} can not be weaved", methodDefinition.FullName);
+                            Logger.WriteWarning("Generic method {0} can not be weaved", methodDefinition.FullName, markerCache);
                             continue;
                         }
                         yield return methodDefinition;
@@ -186,7 +222,7 @@ namespace ArxOne.Weavisor.Weaver
                 // properties have methods too
                 foreach (var propertyDefinition in typeDefinition.Properties)
                 {
-                    if (weaveAssembly || weaveType || HasMethodAspects(propertyDefinition, aspectMarkerInterface))
+                    if (weaveAssembly || weaveType || HasMethodMarkers(propertyDefinition, markerInterface, markerCache))
                     {
                         if (propertyDefinition.GetMethod != null)
                             yield return propertyDefinition.GetMethod;
@@ -203,32 +239,32 @@ namespace ArxOne.Weavisor.Weaver
         /// </summary>
         /// <param name="attributeProvider">The attribute provider.</param>
         /// <param name="aspectMarkerInterface">The aspect marker interface.</param>
+        /// <param name="markerInterface">The marker interface.</param>
         /// <returns></returns>
-        private bool HasMethodAspects(ICustomAttributeProvider attributeProvider, TypeDefinition aspectMarkerInterface)
+        private bool HasMethodMarkers(ICustomAttributeProvider attributeProvider, TypeDefinition aspectMarkerInterface, IDictionary<TypeReference, bool> markerInterface)
         {
-            return attributeProvider.CustomAttributes.Any(a => IsAspect(a.AttributeType, aspectMarkerInterface));
+            return attributeProvider.CustomAttributes.Any(a => HasMarker(a.AttributeType, aspectMarkerInterface, markerInterface));
         }
-
-        private readonly IDictionary<TypeReference, bool> _isAspect = new Dictionary<TypeReference, bool>();
 
         /// <summary>
         /// Determines whether the specified type reference is aspect.
         /// </summary>
         /// <param name="typeReference">The type reference.</param>
         /// <param name="aspectMarkerInterface">The aspect marker interface.</param>
+        /// <param name="markerInterface">The marker interface.</param>
         /// <returns></returns>
-        private bool IsAspect(TypeReference typeReference, TypeDefinition aspectMarkerInterface)
+        private bool HasMarker(TypeReference typeReference, TypeDefinition aspectMarkerInterface, IDictionary<TypeReference, bool> markerInterface)
         {
             // there is a cache, because the same attribute may be found several time
             // and we're in a hurry, the developper is waiting for his program to start!
             bool isAspect;
-            if (_isAspect.TryGetValue(typeReference, out isAspect))
+            if (markerInterface.TryGetValue(typeReference, out isAspect))
                 return isAspect;
 
             // otherwise look for type or implemented interfaces (recursively)
             var interfaces = typeReference.Resolve().Interfaces;
-            _isAspect[typeReference] = isAspect = typeReference.SafeEquivalent(aspectMarkerInterface)
-                || interfaces.Any(i => IsAspect(i, aspectMarkerInterface));
+            markerInterface[typeReference] = isAspect = typeReference.SafeEquivalent(aspectMarkerInterface)
+                || interfaces.Any(i => HasMarker(i, aspectMarkerInterface, markerInterface));
             return isAspect;
         }
     }
