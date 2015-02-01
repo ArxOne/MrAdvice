@@ -2,8 +2,8 @@
 
 ## Summary
 
-Weavisor is an open source (and free or charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net/)
-Weavisor can weave assemblies for
+Weavisor is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net/)
+Weavisor can weave assemblies for:
 * .NET framework (4 and above)
 * Mono
 * Silverlight (4 & 5)
@@ -11,7 +11,7 @@ Weavisor can weave assemblies for
 
 ## How it works
 
-It will come as a NuGet package using Fody weaver, but currently, the job is not done.
+It will come as a NuGet package using Fody weaver, but currently, the job is not done (stay tuned, it will be available before the end of February 2015).
 
 ## Philosophy
 
@@ -22,7 +22,7 @@ This means you'll have to write your own.
 
 Here is the minimal sample:
 ```csharp
-public class ChangeParameter : Attribute, IMethodAdvice
+public class MyProudAdvice : Attribute, IMethodAdvice
 {
 	public void Advise(Call<MethodCallContext> call)
 	{
@@ -32,3 +32,4 @@ public class ChangeParameter : Attribute, IMethodAdvice
     }
 }
 ```
+You then just need to mark the method(s) with the attribute and that's it.
