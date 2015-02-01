@@ -95,7 +95,8 @@ namespace ArxOne.Weavisor.Weaver
             var innerMethodAttributes = method.Attributes & attributesToKeep | MethodAttributes.Private;
             // first is fun, second is nice: hard to decide which naming style to pick
             //var innerMethodName = string.Format("<{0}>b", method.Name );
-            var innerMethodName = string.Format("{0}\u200B", method.Name);
+            string innerMethodName;
+            innerMethodName = string.Format("{0}\u200B", method.Name);
             var innerMethod = new MethodDefinition(innerMethodName, innerMethodAttributes, method.ReturnType);
             innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
             innerMethod.ImplAttributes = method.ImplAttributes;
