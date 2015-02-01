@@ -7,8 +7,11 @@
 
 namespace MethodLevelTest
 {
+    using System;
+    using System.Linq;
     using System.Reflection;
     using Advices;
+    using ArxOne.Weavisor;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     public class EmptyAdvisedClass
@@ -44,17 +47,22 @@ namespace MethodLevelTest
         }
 
         [EmptyAdvice]
-        public void MethodWithGenericParameterTest<TValue>(TValue six)
+        public static int Overload(int a)
         {
-            Assert.AreEqual(6, six);
+            return a;
         }
 
-        // this is for reference :)
-        public void NonAdvisedMethodTest()
+        [EmptyAdvice]
+        public static int Overload(int a, int b)
         {
-            var thisMethod = MethodBase.GetCurrentMethod();
-            Assert.AreEqual("NonAdvisedMethodTest", thisMethod.Name);
+            return a + b;
         }
+
+        ////[EmptyAdvice]
+        ////public void MethodWithGenericParameterTest<TValue>(TValue six)
+        ////{
+        ////    Assert.AreEqual(6, six);
+        ////}
     }
 
     [TestClass]
@@ -87,12 +95,20 @@ namespace MethodLevelTest
         {
             EmptyAdvisedClass.StaticMethodWithParameterTest(3);
         }
-        
-        //[TestMethod]
-        //[TestCategory("Weaving")]
-        public void MethodWithGenericParameterTest()
+
+        [TestMethod]
+        [TestCategory("Interception")]
+        public void ResolveOverloadTest()
         {
-            new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
+            var r = EmptyAdvisedClass.Overload(2);
+            Assert.AreEqual(2, r);
         }
+
+        ////[TestMethod]
+        ////[TestCategory("Weaving")]
+        ////public void MethodWithGenericParameterTest()
+        ////{
+        ////    new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
+        ////}
     }
 }

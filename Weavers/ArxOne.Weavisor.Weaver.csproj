@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utility\ReflectionUtility.cs" />
     <Compile Include="Weavisor.cs" />
     <Compile Include="AspectWeaver.cs" />
     <Compile Include="Binding.cs" />

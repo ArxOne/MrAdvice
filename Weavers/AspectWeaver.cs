@@ -4,15 +4,19 @@
 // https://github.com/ArxOne/Weavisor
 // Release under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace ArxOne.Weavisor.Weaver
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
     using Utility;
+    using ICustomAttributeProvider = Mono.Cecil.ICustomAttributeProvider;
+    using MethodAttributes = Mono.Cecil.MethodAttributes;
 
     /// <summary>
     /// Aspect weaver core
@@ -63,7 +67,7 @@ namespace ArxOne.Weavisor.Weaver
             innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
             innerMethod.ImplAttributes = method.ImplAttributes;
             innerMethod.SemanticsAttributes = method.SemanticsAttributes;
-            innerMethod.Body.InitLocals = method.Body.InitLocals;
+            innerMethod.Body.InitLocals = false;//method.Body.InitLocals;
             innerMethod.Parameters.AddRange(method.Parameters);
             innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
             innerMethod.Body.Variables.AddRange(method.Body.Variables);
@@ -77,12 +81,12 @@ namespace ArxOne.Weavisor.Weaver
             var firstParameter = isStatic ? 0 : 1;
 
             // parameters
-            var parametersLocal = new VariableDefinition("parameters", moduleDefinition.Import(typeof(object[])));
-            method.Body.Variables.Add(parametersLocal);
+            var parametersVariable = new VariableDefinition("parameters", moduleDefinition.Import(typeof(object[])));
+            method.Body.Variables.Add(parametersVariable);
 
             instructions.EmitLdc(method.Parameters.Count);
             instructions.Emit(OpCodes.Newarr, moduleDefinition.Import(typeof(object)));
-            instructions.EmitStloc(parametersLocal);
+            instructions.EmitStloc(parametersVariable);
             // setups parameters array
             for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; parameterIndex++)
             {
@@ -90,7 +94,7 @@ namespace ArxOne.Weavisor.Weaver
                 // we don't care about output parameters
                 if (!parameter.IsOut)
                 {
-                    instructions.EmitLdloc(parametersLocal); // array
+                    instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
                     instructions.EmitLdarg(parameterIndex + firstParameter); // loads given parameter...
                     if (parameter.IsIn && parameter.IsOut) // ...if ref, loads it as referenced value
@@ -103,27 +107,15 @@ namespace ArxOne.Weavisor.Weaver
             instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
 
             // parameters
-            instructions.EmitLdloc(parametersLocal);
+            instructions.EmitLdloc(parametersVariable);
 
             // methods...
-            // (I probably didn't find the most elegant way to get a MethodInfo from a ldftn)
-            // ...target 
-            var actionType = moduleDefinition.Import(typeof(Action));
-            var actionCtor = moduleDefinition.Import(actionType.Resolve().GetConstructors().Single());
-
-            var delegateType = moduleDefinition.Import(typeof(Delegate));
-            var getMethod = moduleDefinition.Import(delegateType.Resolve().Methods.Single(m => m.Name == "get_Method"));
-
-            instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
-            instructions.Emit(OpCodes.Ldftn, method);
-            instructions.Emit(OpCodes.Newobj, actionCtor);
-            instructions.Emit(OpCodes.Call, getMethod);
+            // ...target
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+            instructions.Emit(OpCodes.Call, moduleDefinition.Import(ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod())));
 
             // ...inner
-            instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
-            instructions.Emit(OpCodes.Ldftn, innerMethod);
-            instructions.Emit(OpCodes.Newobj, actionCtor);
-            instructions.Emit(OpCodes.Call, getMethod);
+            instructions.Emit(OpCodes.Ldstr, innerMethodName);
 
             // invoke the method
             var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationProceedTypeName);
@@ -149,7 +141,7 @@ namespace ArxOne.Weavisor.Weaver
                 if (parameter.IsOut)
                 {
                     instructions.EmitLdarg(parameterIndex + firstParameter); // loads given parameter (it is a ref)
-                    instructions.EmitLdloc(parametersLocal); // array
+                    instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
                     instructions.Emit(OpCodes.Ldelem_Ref); // now we have boxed out/ref value
                     instructions.EmitUnboxOrCastIfNecessary(parameter.ParameterType);
@@ -175,11 +167,23 @@ namespace ArxOne.Weavisor.Weaver
             foreach (var typeDefinition in moduleDefinition.GetTypes())
             {
                 var weaveType = HasMethodAspects(typeDefinition, aspectMarkerInterface);
+                if (weaveType && typeDefinition.HasGenericParameters)
+                {
+                    Logger.WriteWarning("Generic type {0} can not be weaved", typeDefinition.FullName);
+                    continue;
+                }
                 // methods
                 foreach (var methodDefinition in typeDefinition.GetMethods())
                 {
                     if (weaveAssembly || weaveType || HasMethodAspects(methodDefinition, aspectMarkerInterface))
+                    {
+                        if (methodDefinition.HasGenericParameters)
+                        {
+                            Logger.WriteWarning("Generic method {0} can not be weaved", methodDefinition.FullName);
+                            continue;
+                        }
                         yield return methodDefinition;
+                    }
                 }
                 // properties have methods too
                 foreach (var propertyDefinition in typeDefinition.Properties)

@@ -41,6 +41,11 @@ namespace ArxOne.Weavisor.Weaver.Utility
             instructions.Add(Instruction.Create(opCode, value));
         }
 
+        public static void Emit(this ICollection<Instruction> instructions, OpCode opCode, string value)
+        {
+            instructions.Add(Instruction.Create(opCode, value));
+        }
+
         /// <summary>
         /// Emits a ldarg instruction
         /// </summary>
@@ -187,7 +192,7 @@ namespace ArxOne.Weavisor.Weaver.Utility
         /// <param name="targetType">Type of the target.</param>
         public static void EmitBoxIfNecessary(this ICollection<Instruction> instructions, TypeReference targetType)
         {
-            if (targetType.IsValueType)
+            if (targetType.IsValueType || targetType.IsGenericParameter)
                 instructions.Emit(OpCodes.Box, targetType);
         }
 
