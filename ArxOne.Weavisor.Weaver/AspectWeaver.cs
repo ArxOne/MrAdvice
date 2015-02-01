@@ -4,10 +4,8 @@
 // https://github.com/ArxOne/Weavisor
 // Release under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
-
 namespace ArxOne.Weavisor.Weaver
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;

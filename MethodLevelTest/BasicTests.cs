@@ -4,14 +4,10 @@
 // https://github.com/ArxOne/Weavisor
 // Release under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
-
 namespace MethodLevelTest
 {
-    using System;
-    using System.Linq;
     using System.Reflection;
     using Advices;
-    using ArxOne.Weavisor;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     public class EmptyAdvisedClass
