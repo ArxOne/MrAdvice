@@ -93,9 +93,12 @@ namespace ArxOne.Weavisor.Weaver
                                                       MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
                                                       MethodAttributes.RequireSecObject;
             var innerMethodAttributes = method.Attributes & attributesToKeep | MethodAttributes.Private;
-            // first is fun, second is nice: hard to decide which naming style to pick
-            //var innerMethodName = string.Format("<{0}>b", method.Name );
             string innerMethodName;
+            if (method.IsGetter)
+                innerMethodName = string.Format("\u200B{0}.get", method.Name.Substring(4));
+            else if(method.IsSetter)
+                innerMethodName = string.Format("\u200B{0}.set", method.Name.Substring(4));
+            else
             innerMethodName = string.Format("{0}\u200B", method.Name);
             var innerMethod = new MethodDefinition(innerMethodName, innerMethodAttributes, method.ReturnType);
             innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
