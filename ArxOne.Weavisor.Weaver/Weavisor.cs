@@ -53,6 +53,16 @@ public class Weavisor
     // ReSharper disable once MemberCanBePrivate.Global
     public IAssemblyResolver AssemblyResolver { get; set; }
 
+    /// <summary>
+    /// Gets or sets the assembly path.
+    /// For some unkown reason, Fody won't weave on some platforms (Vista + VS2010) if this property is missing
+    /// </summary>
+    /// <value>
+    /// The assembly path.
+    /// </value>
+    // ReSharper disable once UnusedMember.Global
+    public string AssemblyPath { get; set; }
+
     public Weavisor()
     {
         LogInfo = m => { };
