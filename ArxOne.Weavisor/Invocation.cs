@@ -28,14 +28,7 @@ namespace ArxOne.Weavisor
             public MethodInfo InnerMethod;
         }
 
-        private class ConstructorCallChain
-        {
-            public IList<IConstructorAdvice> Advices;
-            public MethodInfo InnerMethod;
-        }
-
-        private static readonly IDictionary<MethodInfo, MethodCallChain> MethodCallContexts = new Dictionary<MethodInfo, MethodCallChain>();
-        private static readonly IDictionary<ConstructorInfo, ConstructorCallChain> ConstructorCallContexts = new Dictionary<ConstructorInfo, ConstructorCallChain>();
+        private static readonly IDictionary<MethodBase, MethodCallChain> MethodCallContexts = new Dictionary<MethodBase, MethodCallChain>();
 
         /// <summary>
         /// Runs a method interception.
@@ -52,40 +45,18 @@ namespace ArxOne.Weavisor
         // ReSharper disable once UnusedMethodReturnValue.Global
         public static object ProceedMethod(object target, object[] parameters, MethodBase methodBase, string innerMethodName)
         {
-            var methodInfo = (MethodInfo)methodBase;
             MethodCallChain methodCallChain;
             lock (MethodCallContexts)
             {
-                if (!MethodCallContexts.TryGetValue(methodInfo, out methodCallChain))
-                    MethodCallContexts[methodInfo] = methodCallChain = CreateCallContext(methodInfo, innerMethodName);
+                if (!MethodCallContexts.TryGetValue(methodBase, out methodCallChain))
+                    MethodCallContexts[methodBase] = methodCallChain = CreateCallContext(methodBase, innerMethodName);
             }
 
-            var methodInvocation = new MethodCallContext(target, parameters, methodInfo, methodCallChain.InnerMethod, methodCallChain.Advices);
+            var methodInvocation = new MethodCallContext(target, parameters, methodBase, methodCallChain.InnerMethod, methodCallChain.Advices);
             methodInvocation.Proceed(0);
             return methodInvocation.ReturnValue;
         }
-
-        /// <summary>
-        /// Runs a constructor interception.
-        /// </summary>
-        /// <param name="target">The target.</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="methodBase">The method base.</param>
-        /// <param name="innerMethodName">Name of the inner method.</param>
-        public static void ProceedConstructor(object target, object[] parameters, MethodBase methodBase, string innerMethodName)
-        {
-            var constructorInfo = (ConstructorInfo)methodBase;
-            ConstructorCallChain constructorCallChain;
-            lock (ConstructorCallContexts)
-            {
-                if (!ConstructorCallContexts.TryGetValue(constructorInfo, out constructorCallChain))
-                    ConstructorCallContexts[constructorInfo] = constructorCallChain = CreateCallContext(constructorInfo, innerMethodName);
-            }
-
-            var invocation = new ConstructorCallContext(target, parameters, constructorInfo, constructorCallChain.InnerMethod, constructorCallChain.Advices);
-            invocation.Proceed(0);
-        }
-
+        
         /// <summary>
         /// Processes the runtime initializers.
         /// </summary>
@@ -105,33 +76,18 @@ namespace ArxOne.Weavisor
         /// <summary>
         /// Creates the method call context, given a calling method and the inner method name.
         /// </summary>
-        /// <param name="methodInfo">The method information.</param>
+        /// <param name="methodBase">The method information.</param>
         /// <param name="innerMethodName">Name of the inner method.</param>
         /// <returns></returns>
-        private static MethodCallChain CreateCallContext(MethodInfo methodInfo, string innerMethodName)
+        private static MethodCallChain CreateCallContext(MethodBase methodBase, string innerMethodName)
         {
             return new MethodCallChain
             {
-                Advices = GetAdvices<IMethodAdvice>(methodInfo),
-                InnerMethod = GetInnerMethod(methodInfo, innerMethodName)
+                Advices = GetAdvices<IMethodAdvice>(methodBase),
+                InnerMethod = GetInnerMethod(methodBase, innerMethodName)
             };
         }
-
-        /// <summary>
-        /// Creates the ctor call context, given a calling method and the inner method name.
-        /// </summary>
-        /// <param name="constructorInfo">The method information.</param>
-        /// <param name="innerMethodName">Name of the inner method.</param>
-        /// <returns></returns>
-        private static ConstructorCallChain CreateCallContext(ConstructorInfo constructorInfo, string innerMethodName)
-        {
-            return new ConstructorCallChain
-            {
-                Advices = GetAdvices<IConstructorAdvice>(constructorInfo),
-                InnerMethod = GetInnerMethod(constructorInfo, innerMethodName)
-            };
-        }
-
+        
         private static MethodInfo GetInnerMethod(MethodBase methodInfo, string innerMethodName)
         {
             MethodInfo innerMethod;

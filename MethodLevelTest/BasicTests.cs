@@ -84,7 +84,8 @@ namespace MethodLevelTest
     {
         [RecordCall]
         public MethodAdvisedCtorClass()
-        { }
+        {
+        }
     }
 
     [TestClass]

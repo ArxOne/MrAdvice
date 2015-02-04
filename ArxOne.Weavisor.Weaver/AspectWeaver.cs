@@ -42,9 +42,6 @@ namespace ArxOne.Weavisor.Weaver
             var weavableMethods = GetMethods(moduleDefinition, TypeResolver.Resolve(moduleDefinition, Binding.MethodAdviceInterfaceName)).ToArray();
             foreach (var method in weavableMethods)
                 Weave(method);
-            var weavableConstructors = GetMethods(moduleDefinition, TypeResolver.Resolve(moduleDefinition, Binding.ConstructorAdviceInterfaceName)).ToArray();
-            foreach (var constructor in weavableConstructors)
-                Weave(constructor);
 
             var runtimeInitializerInterface = TypeResolver.Resolve(moduleDefinition, Binding.RuntimeInitializerInterfaceName);
             if (GetMethods(moduleDefinition, runtimeInitializerInterface).Any())
@@ -162,8 +159,7 @@ namespace ArxOne.Weavisor.Weaver
             var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationProceedTypeName);
             if (invocationType == null)
                 return;
-            var invocationProceedMethodMethodName = method.IsConstructor ? Binding.InvocationProceedConstructorMethodName : Binding.InvocationProceedMethodMethodName;
-            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == invocationProceedMethodMethodName);
+            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedMethodMethodName);
             if (proceedMethodReference == null)
                 return;
             var proceedMethod = moduleDefinition.Import(proceedMethodReference);

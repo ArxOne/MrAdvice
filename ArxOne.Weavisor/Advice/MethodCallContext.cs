@@ -43,7 +43,7 @@ namespace ArxOne.Weavisor.Advice
         /// <value>
         /// The target method.
         /// </value>
-        public MethodInfo TargetMethod { get; private set; }
+        public MethodBase TargetMethod { get; private set; }
 
         private readonly MethodInfo _innerMethod;
         private readonly IList<IMethodAdvice> _advices;
@@ -56,7 +56,7 @@ namespace ArxOne.Weavisor.Advice
         /// <param name="targetMethod">The target method.</param>
         /// <param name="innerMethod">The inner method.</param>
         /// <param name="advices">The advices.</param>
-        public MethodCallContext(object target, object[] parameters, MethodInfo targetMethod, MethodInfo innerMethod, IList<IMethodAdvice> advices)
+        public MethodCallContext(object target, object[] parameters, MethodBase targetMethod, MethodInfo innerMethod, IList<IMethodAdvice> advices)
         {
             _innerMethod = innerMethod;
             _advices = advices;
