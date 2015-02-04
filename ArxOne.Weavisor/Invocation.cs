@@ -12,6 +12,7 @@ namespace ArxOne.Weavisor
     using System.Reflection;
     using Advice;
     using Annotation;
+    using Initializer;
     using Utility;
 
     /// <summary>
@@ -80,13 +81,42 @@ namespace ArxOne.Weavisor
         public static void ProcessInitializers(Assembly assembly)
         {
             foreach (var type in assembly.GetTypes())
-                foreach (var methodInfo in type.GetMethods())
+            {
+                const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Instance;
+                foreach (var methodInfo in type.GetMethods(bindingFlags))
+                    ProcessMethodInitializers(methodInfo);
+                foreach (var propertyInfo in type.GetProperties(bindingFlags))
                 {
-                    var runtimeInitializers = GetAttributes<IMethodInitializer>(methodInfo).ToArray();
-                    foreach (var runtimeInitializer in runtimeInitializers)
-                        runtimeInitializer.Initialize(methodInfo);
+                    ProcessMethodInitializers(propertyInfo.GetGetMethod());
+                    ProcessMethodInitializers(propertyInfo.GetSetMethod());
+                    ProcessPropertyInitializers(propertyInfo);
                 }
+            }
         }
+
+        /// <summary>
+        /// Processes the initializers for MethodInfo.
+        /// </summary>
+        /// <param name="methodInfo">The method information.</param>
+        private static void ProcessMethodInitializers(MethodInfo methodInfo)
+        {
+            if (methodInfo == null)
+                return;
+            var methodInitializers = GetAttributes<IMethodInitializer>(methodInfo);
+            foreach (var methodInitializer in methodInitializers)
+                methodInitializer.Initialize(methodInfo);
+        }
+
+        /// <summary>
+        /// Processes the initializers for ProperyInfo.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        private static void ProcessPropertyInitializers(PropertyInfo propertyInfo)
+        {
+            var propertyInitializers = GetAttributes<IPropertyInitializer>(propertyInfo);
+            foreach (var propertyInitializer in propertyInitializers)
+                propertyInitializer.Initialize(propertyInfo);
+            }
 
         /// <summary>
         /// Creates the method call context, given a calling method and the inner method name.

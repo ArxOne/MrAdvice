@@ -9,6 +9,9 @@ namespace MethodLevelTest
     [TestClass]
     public class InitializeTest
     {
+        [RecordProperties]
+        public int Property { get; set; }
+
         [TestMethod]
         [TestCategory("Initialize")]
         [RecordMethods]
@@ -17,6 +20,14 @@ namespace MethodLevelTest
             var currentMethod = (MethodInfo)MethodBase.GetCurrentMethod();
             var methodInfos = RecordMethods.MethodInfos;
             Assert.IsTrue(methodInfos.Any(m => m.Name == "RecordMethodTest" && m.DeclaringType == currentMethod.DeclaringType));
+        }
+
+        [TestMethod]
+        [TestCategory("Initialize")]
+        public void RecordPropertyTest()
+        {
+            var propertyInfos = RecordProperties.PropertyInfos;
+            Assert.IsTrue(propertyInfos.Any(p => p.Name == "Property"));
         }
     }
 }
