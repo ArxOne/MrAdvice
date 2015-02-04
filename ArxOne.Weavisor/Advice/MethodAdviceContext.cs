@@ -1,4 +1,10 @@
-﻿namespace ArxOne.Weavisor.Advice
+﻿#region Weavisor
+// Weavisor
+// A simple post build weaving package
+// https://github.com/ArxOne/Weavisor
+// Release under MIT license http://opensource.org/licenses/mit-license.php
+#endregion
+namespace ArxOne.Weavisor.Advice
 {
     using System.Reflection;
 
@@ -28,30 +34,24 @@
         public MethodBase TargetMethod { get; private set; }
 
         private readonly IMethodAdvice _methodAdvice;
-        private readonly MethodInfo _innerMethod;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodAdviceContext" /> class.
         /// </summary>
-        /// <param name="adviceValues">The call values.</param>
         /// <param name="methodAdvice">The method advice.</param>
         /// <param name="targetMethod">The target method.</param>
+        /// <param name="adviceValues">The call values.</param>
         /// <param name="nextAdviceContext">The next advice context.</param>
-        /// <param name="innerMethod">The inner method.</param>
-        internal MethodAdviceContext(AdviceValues adviceValues, IMethodAdvice methodAdvice, MethodBase targetMethod, AdviceContext nextAdviceContext, MethodInfo innerMethod)
+        internal MethodAdviceContext(IMethodAdvice methodAdvice, MethodBase targetMethod, AdviceValues adviceValues, AdviceContext nextAdviceContext)
             : base(adviceValues, nextAdviceContext)
         {
             _methodAdvice = methodAdvice;
-            _innerMethod = innerMethod;
             TargetMethod = targetMethod;
         }
 
         public override void Invoke()
         {
-            if (_methodAdvice != null)
-                _methodAdvice.Advise(this);
-            else
-                ReturnValue = _innerMethod.Invoke(Target, Parameters);
+            _methodAdvice.Advise(this);
         }
     }
 }

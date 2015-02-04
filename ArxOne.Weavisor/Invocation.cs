@@ -26,6 +26,8 @@ namespace ArxOne.Weavisor
         {
             public IList<IAdvice> Advices;
             public MethodInfo InnerMethod;
+            public PropertyInfo PropertyInfo { get; set; }
+            public bool IsSetter { get; set; }
         }
 
         private static readonly IDictionary<MethodBase, AdviceChain> AdviceChains = new Dictionary<MethodBase, AdviceChain>();
@@ -55,15 +57,15 @@ namespace ArxOne.Weavisor
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
             var adviceValues = new AdviceValues(target, parameters);
             // at least there is one context
-            AdviceContext adviceContext = new MethodAdviceContext(adviceValues, null, methodBase, null, adviceChain.InnerMethod);
+            AdviceContext adviceContext = new InnerMethodContext(adviceValues, adviceChain.InnerMethod);
             foreach (var advice in adviceChain.Advices.Reverse())
             {
                 var methodAdvice = advice as IMethodAdvice;
                 if (methodAdvice != null)
-                {
-                    adviceContext = new MethodAdviceContext(adviceValues, methodAdvice, methodBase, adviceContext, adviceChain.InnerMethod);
-                    continue;
-                }
+                    adviceContext = new MethodAdviceContext(methodAdvice, methodBase, adviceValues, adviceContext);
+                var propertyAdvice = advice as IPropertyAdvice;
+                if (propertyAdvice != null)
+                    adviceContext = new PropertyAdviceContext(propertyAdvice, adviceChain.PropertyInfo, adviceChain.IsSetter, adviceValues, adviceContext);
             }
 
             adviceContext.Invoke();
@@ -94,10 +96,14 @@ namespace ArxOne.Weavisor
         /// <returns></returns>
         private static AdviceChain CreateCallContext(MethodBase methodBase, string innerMethodName)
         {
+            Tuple<PropertyInfo, bool> relatedPropertyInfo;
+            var advices = GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
             return new AdviceChain
             {
-                Advices = GetAdvices<IAdvice>(methodBase),
-                InnerMethod = GetInnerMethod(methodBase, innerMethodName)
+                Advices = advices,
+                InnerMethod = GetInnerMethod(methodBase, innerMethodName),
+                PropertyInfo = relatedPropertyInfo.Item1,
+                IsSetter = relatedPropertyInfo.Item2
             };
         }
 
@@ -124,16 +130,22 @@ namespace ArxOne.Weavisor
         /// <summary>
         /// Gets all advices available for this method.
         /// </summary>
+        /// <typeparam name="TAdvice">The type of the advice.</typeparam>
         /// <param name="targetMethod">The target method.</param>
+        /// <param name="relatedPropertyInfo">The related property information.</param>
         /// <returns></returns>
-        private static IList<TAdvice> GetAdvices<TAdvice>(MemberInfo targetMethod)
+        private static IList<TAdvice> GetAdvices<TAdvice>(MemberInfo targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
             where TAdvice : class, IAdvice
         {
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndParents().ToArray();
             var assemblyAndParents = typeAndParents.Select(t => t.Assembly).Distinct();
-            var advices = assemblyAndParents.SelectMany(GetAttributes<TAdvice>)
+            var allAdvices = assemblyAndParents.SelectMany(GetAttributes<TAdvice>)
                 .Union(typeAndParents.SelectMany(GetAttributes<TAdvice>))
-                .Union(GetAttributes<TAdvice>(targetMethod)).Distinct()
+                .Union(GetAttributes<TAdvice>(targetMethod));
+            relatedPropertyInfo = GetPropertyInfo(targetMethod);
+            if (relatedPropertyInfo != null)
+                allAdvices = allAdvices.Union(GetAttributes<TAdvice>(relatedPropertyInfo.Item1));
+            var advices = allAdvices.Distinct()
                 .OrderByDescending(Priority.Get).ToArray();
             return advices;
         }
@@ -166,6 +178,32 @@ namespace ArxOne.Weavisor
         private static IEnumerable<TAttribute> GetAttributes<TAttribute>(MemberInfo provider)
         {
             return provider.GetCustomAttributes(false).OfType<TAttribute>();
+        }
+
+        /// <summary>
+        /// Gets the PropertyInfo, related to a method.
+        /// </summary>
+        /// <param name="memberInfo">The member information.</param>
+        /// <returns>A tuple with the PropertyInfo and true is method is a setter (false for a getter)</returns>
+        private static Tuple<PropertyInfo, bool> GetPropertyInfo(MemberInfo memberInfo)
+        {
+            var methodInfo = memberInfo as MethodInfo;
+            if (methodInfo == null || !methodInfo.IsSpecialName)
+                return null;
+
+            var isGetter = methodInfo.Name.StartsWith("get_");
+            var isSetter = methodInfo.Name.StartsWith("set_");
+            if (!isGetter && !isSetter)
+                return null;
+
+            // hard-coded, because the property name generates two methods: "get_xxx" and "set_xxx" where xxx is the property name
+            var propertyName = methodInfo.Name.Substring(4);
+            // now try to find the property
+            var propertyInfo = methodInfo.DeclaringType.GetProperty(propertyName);
+            if (propertyInfo == null)
+                return null; // this should never happen
+
+            return Tuple.Create(propertyInfo, isSetter);
         }
     }
 }

@@ -37,7 +37,10 @@
     <Compile Include="Advice\AdviceContext.cs" />
     <Compile Include="Advice\AdviceValues.cs" />
     <Compile Include="Advice\IMethodInitializer.cs" />
+    <Compile Include="Advice\InnerMethodContext.cs" />
+    <Compile Include="Advice\IPropertyAdvice.cs" />
     <Compile Include="Advice\MethodAdviceContext.cs" />
+    <Compile Include="Advice\PropertyAdviceContext.cs" />
     <Compile Include="Annotation\Priority.cs" />
     <Compile Include="Invocation.cs" />
     <Compile Include="Advice\IAdvice.cs" />

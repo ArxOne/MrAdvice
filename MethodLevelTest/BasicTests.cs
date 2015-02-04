@@ -73,6 +73,23 @@ namespace MethodLevelTest
             }
         }
 
+        [EmptyPropertyAdvice]
+        public int Property2
+        {
+            get
+            {
+                var thisMethod = MethodBase.GetCurrentMethod();
+                Assert.AreNotEqual("get_Property2", thisMethod.Name);
+                return _property;
+            }
+            set
+            {
+                var thisMethod = MethodBase.GetCurrentMethod();
+                Assert.AreNotEqual("set_Property2", thisMethod.Name);
+                _property = value;
+            }
+        }
+
         ////[EmptyMethodAdvice]
         ////public void MethodWithGenericParameterTest<TValue>(TValue six)
         ////{
@@ -125,6 +142,14 @@ namespace MethodLevelTest
         {
             var c = new EmptyAdvisedClass();
             c.Property++; // which calls a getter and a setter
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void PropertyAtPropertyLevelTest()
+        {
+            var c = new EmptyAdvisedClass();
+            c.Property2++; // which calls a getter and a setter
         }
 
         [TestMethod]

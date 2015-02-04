@@ -19,7 +19,7 @@ namespace ArxOne.Weavisor.Advice
         public object Target { get { return AdviceValues.Target; } set { AdviceValues.Target = value; } }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdviceContext"/> class.
+        /// Initializes a new instance of the <see cref="AdviceContext" /> class.
         /// </summary>
         /// <param name="adviceValues">The advice values.</param>
         /// <param name="nextAdviceContext">The next advice context.</param>

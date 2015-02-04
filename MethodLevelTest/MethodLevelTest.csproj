@@ -54,6 +54,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Advices\ChangeParameter.cs" />
+    <Compile Include="Advices\EmptyPropertyAdvice.cs" />
     <Compile Include="Advices\RecordCall.cs" />
     <Compile Include="Advices\RecordMethods.cs" />
     <Compile Include="BasicTests.cs" />
