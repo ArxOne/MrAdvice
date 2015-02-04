@@ -13,7 +13,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>
+    <TargetFrameworkProfile>Profile3</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -39,6 +39,8 @@
   <ItemGroup>
     <Compile Include="Advice\CallContext.cs" />
     <Compile Include="Advice\Call.cs" />
+    <Compile Include="Advice\IConstructorAdvice.cs" />
+    <Compile Include="Advice\ConstructorCallContext.cs" />
     <Compile Include="Advice\IMethodInitializer.cs" />
     <Compile Include="Annotation\Priority.cs" />
     <Compile Include="Invocation.cs" />
