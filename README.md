@@ -27,11 +27,11 @@ Here is the minimal sample:
 ```csharp
 public class MyProudAdvice : Attribute, IMethodAdvice
 {
-	public void Advise(Call<MethodCallContext> call)
-	{
-	    // do things you want here
-        call.Proceed(); // this calls the original method
-		// do other things here
+    public void Advise(MethodCallContext context)
+    {
+        // do things you want here
+        context.Proceed(); // this calls the original method
+        // do other things here
     }
 }
 ```
