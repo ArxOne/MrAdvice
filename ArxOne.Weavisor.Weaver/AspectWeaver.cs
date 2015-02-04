@@ -39,7 +39,7 @@ namespace ArxOne.Weavisor.Weaver
                 Logger.WriteWarning("IAdvice interface not found here, exiting");
                 return;
             }
-            var weavableMethods = GetMethods(moduleDefinition, TypeResolver.Resolve(moduleDefinition, Binding.MethodAdviceInterfaceName)).ToArray();
+            var weavableMethods = GetMethods(moduleDefinition, TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName)).ToArray();
             foreach (var method in weavableMethods)
                 Weave(method);
 
@@ -48,6 +48,10 @@ namespace ArxOne.Weavisor.Weaver
                 WeaveRuntimeInitializer(moduleDefinition);
         }
 
+        /// <summary>
+        /// Weaves the runtime initializers for the given module.
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
         private void WeaveRuntimeInitializer(ModuleDefinition moduleDefinition)
         {
             var moduleType = moduleDefinition.Types.Single(t => t.Name == "<Module>");

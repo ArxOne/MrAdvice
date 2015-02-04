@@ -34,19 +34,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Advice\CallContext.cs" />
-    <Compile Include="Advice\Call.cs" />
+    <Compile Include="Advice\AdviceContext.cs" />
+    <Compile Include="Advice\AdviceValues.cs" />
     <Compile Include="Advice\IMethodInitializer.cs" />
+    <Compile Include="Advice\MethodAdviceContext.cs" />
     <Compile Include="Annotation\Priority.cs" />
     <Compile Include="Invocation.cs" />
     <Compile Include="Advice\IAdvice.cs" />
     <Compile Include="Advice\IMethodAdvice.cs" />
-    <Compile Include="Advice\MethodCallContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\TypeExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

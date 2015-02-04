@@ -26,13 +26,13 @@ namespace MethodLevelTest.Advices
             set { _newReturnValue = value; }
         }
 
-        public void Advise(Call<MethodCallContext> call)
+        public void Advise(MethodAdviceContext call)
         {
             if (_newParameter.HasValue)
-                call.Context.Parameters[0] = _newParameter.Value;
+                call.Parameters[0] = _newParameter.Value;
             call.Proceed();
             if (_newReturnValue.HasValue)
-                call.Context.ReturnValue = _newReturnValue.Value;
+                call.ReturnValue = _newReturnValue.Value;
         }
     }
 }

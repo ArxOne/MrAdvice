@@ -22,13 +22,13 @@ namespace ArxOne.Weavisor
     // ReSharper disable once UnusedMember.Global
     public static class Invocation
     {
-        private class MethodCallChain
+        private class AdviceChain
         {
-            public IList<IMethodAdvice> Advices;
+            public IList<IAdvice> Advices;
             public MethodInfo InnerMethod;
         }
 
-        private static readonly IDictionary<MethodBase, MethodCallChain> MethodCallContexts = new Dictionary<MethodBase, MethodCallChain>();
+        private static readonly IDictionary<MethodBase, AdviceChain> AdviceChains = new Dictionary<MethodBase, AdviceChain>();
 
         /// <summary>
         /// Runs a method interception.
@@ -45,18 +45,31 @@ namespace ArxOne.Weavisor
         // ReSharper disable once UnusedMethodReturnValue.Global
         public static object ProceedMethod(object target, object[] parameters, MethodBase methodBase, string innerMethodName)
         {
-            MethodCallChain methodCallChain;
-            lock (MethodCallContexts)
+            AdviceChain adviceChain;
+            lock (AdviceChains)
             {
-                if (!MethodCallContexts.TryGetValue(methodBase, out methodCallChain))
-                    MethodCallContexts[methodBase] = methodCallChain = CreateCallContext(methodBase, innerMethodName);
+                if (!AdviceChains.TryGetValue(methodBase, out adviceChain))
+                    AdviceChains[methodBase] = adviceChain = CreateCallContext(methodBase, innerMethodName);
             }
 
-            var methodInvocation = new MethodCallContext(target, parameters, methodBase, methodCallChain.InnerMethod, methodCallChain.Advices);
-            methodInvocation.Proceed(0);
-            return methodInvocation.ReturnValue;
+            // from here, we build an advice chain, with at least one final advice: the one who calls the method
+            var adviceValues = new AdviceValues(target, parameters);
+            // at least there is one context
+            AdviceContext adviceContext = new MethodAdviceContext(adviceValues, null, methodBase, null, adviceChain.InnerMethod);
+            foreach (var advice in adviceChain.Advices.Reverse())
+            {
+                var methodAdvice = advice as IMethodAdvice;
+                if (methodAdvice != null)
+                {
+                    adviceContext = new MethodAdviceContext(adviceValues, methodAdvice, methodBase, adviceContext, adviceChain.InnerMethod);
+                    continue;
+                }
+            }
+
+            adviceContext.Invoke();
+            return adviceValues.ReturnValue;
         }
-        
+
         /// <summary>
         /// Processes the runtime initializers.
         /// </summary>
@@ -79,15 +92,15 @@ namespace ArxOne.Weavisor
         /// <param name="methodBase">The method information.</param>
         /// <param name="innerMethodName">Name of the inner method.</param>
         /// <returns></returns>
-        private static MethodCallChain CreateCallContext(MethodBase methodBase, string innerMethodName)
+        private static AdviceChain CreateCallContext(MethodBase methodBase, string innerMethodName)
         {
-            return new MethodCallChain
+            return new AdviceChain
             {
-                Advices = GetAdvices<IMethodAdvice>(methodBase),
+                Advices = GetAdvices<IAdvice>(methodBase),
                 InnerMethod = GetInnerMethod(methodBase, innerMethodName)
             };
         }
-        
+
         private static MethodInfo GetInnerMethod(MethodBase methodInfo, string innerMethodName)
         {
             MethodInfo innerMethod;

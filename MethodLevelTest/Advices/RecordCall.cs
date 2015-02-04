@@ -8,7 +8,7 @@ namespace MethodLevelTest.Advices
     {
         public static int Count;
 
-        public void Advise(Call<MethodCallContext> call)
+        public void Advise(MethodAdviceContext call)
         {
             Count++;
             call.Proceed();

@@ -16,7 +16,7 @@ namespace ArxOne.Weavisor.Advice
         /// Implements advice logic.
         /// Usually, advice must invoke call.Proceed()
         /// </summary>
-        /// <param name="call">The call.</param>
-        void Advise(Call<MethodCallContext> call);
+        /// <param name="context">The method advice context.</param>
+        void Advise(MethodAdviceContext context);
     }
 }
