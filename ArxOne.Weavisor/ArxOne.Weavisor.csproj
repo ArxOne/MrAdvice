@@ -68,6 +68,7 @@
     <Compile Include="Advice\MethodAdviceContext.cs" />
     <Compile Include="Advice\PropertyAdviceContext.cs" />
     <Compile Include="Annotation\Priority.cs" />
+    <Compile Include="Collection\ArrayWrapper.cs" />
     <Compile Include="Invocation.cs" />
     <Compile Include="Advice\IAdvice.cs" />
     <Compile Include="Advice\IMethodAdvice.cs" />

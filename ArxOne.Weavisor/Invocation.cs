@@ -102,8 +102,8 @@ namespace ArxOne.Weavisor
             {
                 Advices = advices,
                 InnerMethod = GetInnerMethod(methodBase, innerMethodName),
-                PropertyInfo = relatedPropertyInfo.Item1,
-                IsSetter = relatedPropertyInfo.Item2
+                PropertyInfo = relatedPropertyInfo != null ? relatedPropertyInfo.Item1 : null,
+                IsSetter = relatedPropertyInfo != null ? relatedPropertyInfo.Item2 : false
             };
         }
 

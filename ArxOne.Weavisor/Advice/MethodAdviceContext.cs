@@ -6,6 +6,8 @@
 #endregion
 namespace ArxOne.Weavisor.Advice
 {
+    using System;
+    using System.Collections.Generic;
     using System.Reflection;
 
     public class MethodAdviceContext : AdviceContext
@@ -17,14 +19,46 @@ namespace ArxOne.Weavisor.Advice
         /// <value>
         /// The parameters.
         /// </value>
-        public object[] Parameters { get { return AdviceValues.Parameters; } }
+        public IList<object> Parameters { get { return AdviceValues.Parameters; } }
+
+        /// <summary>
+        /// Gets a value indicating whether the advised method has a return value.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance has return value; otherwise, <c>false</c>.
+        /// </value>
+        public bool HasReturnValue
+        {
+            get
+            {
+                var methodInfo = TargetMethod as MethodInfo;
+                if (methodInfo == null) // ctor
+                    return false;
+                return methodInfo.ReturnType != typeof (void);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the return value (after Call.Proceed()).
         /// </summary>
         /// <value>
         /// The return value.
         /// </value>
-        public object ReturnValue { get { return AdviceValues.ReturnValue; } set { AdviceValues.ReturnValue = value; } }
+        public object ReturnValue
+        {
+            get
+            {
+                if(!HasReturnValue)
+                    throw new InvalidOperationException("Method has no ReturnValue");
+                return AdviceValues.ReturnValue;
+            }
+            set
+            {
+                if (!HasReturnValue)
+                    throw new InvalidOperationException("Method has no ReturnValue");
+                AdviceValues.ReturnValue = value;
+            }
+        }
         /// <summary>
         /// Gets the target method.
         /// </summary>
@@ -49,6 +83,9 @@ namespace ArxOne.Weavisor.Advice
             TargetMethod = targetMethod;
         }
 
+        /// <summary>
+        /// Invokes the current aspect (related to this instance).
+        /// </summary>
         public override void Invoke()
         {
             _methodAdvice.Advise(this);
