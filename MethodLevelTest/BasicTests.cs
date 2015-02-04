@@ -12,21 +12,21 @@ namespace MethodLevelTest
 
     public class EmptyAdvisedClass
     {
-        [EmptyAdvice]
+        [EmptyMethodAdvice]
         public void MethodTest()
         {
             var thisMethod = MethodBase.GetCurrentMethod();
             Assert.AreNotEqual("MethodTest", thisMethod.Name);
         }
 
-        [EmptyAdvice]
+        [EmptyMethodAdvice]
         public static void StaticMethodTest()
         {
             var thisMethod = MethodBase.GetCurrentMethod();
             Assert.AreNotEqual("StaticMethodTest", thisMethod.Name);
         }
 
-        [EmptyAdvice]
+        [EmptyMethodAdvice]
         public void MethodWithParameterTest(int two)
         {
             var thisMethod = MethodBase.GetCurrentMethod();
@@ -34,7 +34,7 @@ namespace MethodLevelTest
             Assert.AreEqual(2, two);
         }
 
-        [EmptyAdvice]
+        [EmptyMethodAdvice]
         public static void StaticMethodWithParameterTest(int three)
         {
             var thisMethod = MethodBase.GetCurrentMethod();
@@ -42,13 +42,13 @@ namespace MethodLevelTest
             Assert.AreEqual(3, three);
         }
 
-        [EmptyAdvice]
+        [EmptyMethodAdvice]
         public static int Overload(int a)
         {
             return a;
         }
 
-        [EmptyAdvice]
+        [EmptyMethodAdvice]
         public static int Overload(int a, int b)
         {
             return a + b;
@@ -56,7 +56,7 @@ namespace MethodLevelTest
 
         private int _property;
 
-        [EmptyAdvice]
+        [EmptyMethodAdvice]
         public int Property
         {
             get
@@ -73,11 +73,18 @@ namespace MethodLevelTest
             }
         }
 
-        ////[EmptyAdvice]
+        ////[EmptyMethodAdvice]
         ////public void MethodWithGenericParameterTest<TValue>(TValue six)
         ////{
         ////    Assert.AreEqual(6, six);
         ////}
+    }
+
+    public class MethodAdvisedCtorClass
+    {
+        [RecordCall]
+        public MethodAdvisedCtorClass()
+        { }
     }
 
     [TestClass]
@@ -126,6 +133,16 @@ namespace MethodLevelTest
             var r = EmptyAdvisedClass.Overload(2);
             Assert.AreEqual(2, r);
         }
+
+        [TestMethod]
+        [TestCategory("Constructor")]
+        public void EmptyAdvisedWithMethodCtorTest()
+        {
+            var count = RecordCall.Count;
+            var instance = new MethodAdvisedCtorClass();
+            Assert.AreEqual(count + 1, RecordCall.Count);
+        }
+
 
         ////[TestMethod]
         ////[TestCategory("Weaving")]

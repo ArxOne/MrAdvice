@@ -54,9 +54,10 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Advices\ChangeParameter.cs" />
+    <Compile Include="Advices\RecordCall.cs" />
     <Compile Include="Advices\RecordMethods.cs" />
     <Compile Include="BasicTests.cs" />
-    <Compile Include="Advices\EmptyAdvice.cs" />
+    <Compile Include="Advices\EmptyMethodAdvice.cs" />
     <Compile Include="ParametersTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="InitializeTest.cs" />

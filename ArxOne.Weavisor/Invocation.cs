@@ -20,18 +20,25 @@ namespace ArxOne.Weavisor
     /// Semantically, it is internal.
     /// </summary>
     // ReSharper disable once UnusedMember.Global
-    public class Invocation
+    public static class Invocation
     {
-        private class CallContext
+        private class MethodCallChain
         {
             public IList<IMethodAdvice> Advices;
             public MethodInfo InnerMethod;
         }
 
-        private static readonly IDictionary<MethodInfo, CallContext> CallContexts = new Dictionary<MethodInfo, CallContext>();
+        private class ConstructorCallChain
+        {
+            public IList<IConstructorAdvice> Advices;
+            public MethodInfo InnerMethod;
+        }
+
+        private static readonly IDictionary<MethodInfo, MethodCallChain> MethodCallContexts = new Dictionary<MethodInfo, MethodCallChain>();
+        private static readonly IDictionary<ConstructorInfo, ConstructorCallChain> ConstructorCallContexts = new Dictionary<ConstructorInfo, ConstructorCallChain>();
 
         /// <summary>
-        /// Runs an interception.
+        /// Runs a method interception.
         /// We use a static method here, if one day we want to reuse Invocations or change mecanism,
         /// it will be easier from C# code
         /// </summary>
@@ -45,25 +52,38 @@ namespace ArxOne.Weavisor
         // ReSharper disable once UnusedMethodReturnValue.Global
         public static object ProceedMethod(object target, object[] parameters, MethodBase methodBase, string innerMethodName)
         {
-            var methodInfo = methodBase as MethodInfo;
-            // MethodInfo case
-            if (methodInfo != null)
+            var methodInfo = (MethodInfo)methodBase;
+            MethodCallChain methodCallChain;
+            lock (MethodCallContexts)
             {
-                CallContext callContext;
-                lock (CallContexts)
-                {
-                    if (!CallContexts.TryGetValue(methodInfo, out callContext))
-                        CallContexts[methodInfo] = callContext = CreateCallContext(methodInfo, innerMethodName);
-                }
-
-                var invocation = new MethodCallContext(target, parameters, methodInfo, callContext.InnerMethod, callContext.Advices);
-                invocation.Proceed(0);
-                return invocation.ReturnValue;
+                if (!MethodCallContexts.TryGetValue(methodInfo, out methodCallChain))
+                    MethodCallContexts[methodInfo] = methodCallChain = CreateCallContext(methodInfo, innerMethodName);
             }
 
-            // Ctor case
-            // TODO implement ctors
-            throw new NotImplementedException();
+            var methodInvocation = new MethodCallContext(target, parameters, methodInfo, methodCallChain.InnerMethod, methodCallChain.Advices);
+            methodInvocation.Proceed(0);
+            return methodInvocation.ReturnValue;
+        }
+
+        /// <summary>
+        /// Runs a constructor interception.
+        /// </summary>
+        /// <param name="target">The target.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="methodBase">The method base.</param>
+        /// <param name="innerMethodName">Name of the inner method.</param>
+        public static void ProceedConstructor(object target, object[] parameters, MethodBase methodBase, string innerMethodName)
+        {
+            var constructorInfo = (ConstructorInfo)methodBase;
+            ConstructorCallChain constructorCallChain;
+            lock (ConstructorCallContexts)
+            {
+                if (!ConstructorCallContexts.TryGetValue(constructorInfo, out constructorCallChain))
+                    ConstructorCallContexts[constructorInfo] = constructorCallChain = CreateCallContext(constructorInfo, innerMethodName);
+            }
+
+            var invocation = new ConstructorCallContext(target, parameters, constructorInfo, constructorCallChain.InnerMethod, constructorCallChain.Advices);
+            invocation.Proceed(0);
         }
 
         /// <summary>
@@ -83,12 +103,36 @@ namespace ArxOne.Weavisor
         }
 
         /// <summary>
-        /// Creates the call context, given a calling method and the inner method name.
+        /// Creates the method call context, given a calling method and the inner method name.
         /// </summary>
         /// <param name="methodInfo">The method information.</param>
         /// <param name="innerMethodName">Name of the inner method.</param>
         /// <returns></returns>
-        private static CallContext CreateCallContext(MethodInfo methodInfo, string innerMethodName)
+        private static MethodCallChain CreateCallContext(MethodInfo methodInfo, string innerMethodName)
+        {
+            return new MethodCallChain
+            {
+                Advices = GetAdvices<IMethodAdvice>(methodInfo),
+                InnerMethod = GetInnerMethod(methodInfo, innerMethodName)
+            };
+        }
+
+        /// <summary>
+        /// Creates the ctor call context, given a calling method and the inner method name.
+        /// </summary>
+        /// <param name="constructorInfo">The method information.</param>
+        /// <param name="innerMethodName">Name of the inner method.</param>
+        /// <returns></returns>
+        private static ConstructorCallChain CreateCallContext(ConstructorInfo constructorInfo, string innerMethodName)
+        {
+            return new ConstructorCallChain
+            {
+                Advices = GetAdvices<IConstructorAdvice>(constructorInfo),
+                InnerMethod = GetInnerMethod(constructorInfo, innerMethodName)
+            };
+        }
+
+        private static MethodInfo GetInnerMethod(MethodBase methodInfo, string innerMethodName)
         {
             MethodInfo innerMethod;
             var innerMethods = methodInfo.DeclaringType.GetMethods(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
@@ -105,12 +149,7 @@ namespace ArxOne.Weavisor
                     innerMethod = innerMethods.Single(m => m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes));
                     break;
             }
-            var advices = GetAdvices<IMethodAdvice>(methodInfo);
-            return new CallContext
-            {
-                Advices = advices,
-                InnerMethod = innerMethod
-            };
+            return innerMethod;
         }
 
         /// <summary>
@@ -118,7 +157,7 @@ namespace ArxOne.Weavisor
         /// </summary>
         /// <param name="targetMethod">The target method.</param>
         /// <returns></returns>
-        private static IList<TAdvice> GetAdvices<TAdvice>(MethodInfo targetMethod)
+        private static IList<TAdvice> GetAdvices<TAdvice>(MemberInfo targetMethod)
             where TAdvice : class, IAdvice
         {
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndParents().ToArray();

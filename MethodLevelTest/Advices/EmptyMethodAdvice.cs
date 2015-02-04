@@ -7,10 +7,13 @@
 namespace MethodLevelTest.Advices
 {
     using System;
-    using ArxOne.Weavisor;
     using ArxOne.Weavisor.Advice;
 
-    public class EmptyAdvice : Attribute, IAdvice
+    public class EmptyMethodAdvice : Attribute, IMethodAdvice
     {
+        public void Advise(Call<MethodCallContext> call)
+        {
+            call.Proceed();
+        }
     }
 }

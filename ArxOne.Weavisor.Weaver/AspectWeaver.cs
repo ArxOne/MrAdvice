@@ -32,15 +32,19 @@ namespace ArxOne.Weavisor.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         public void Weave(ModuleDefinition moduleDefinition)
         {
+            // TODO not sure we'll need to keep the IAdvice interface
             var adviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName);
             if (adviceInterface == null)
             {
                 Logger.WriteWarning("IAdvice interface not found here, exiting");
                 return;
             }
-            var weavableMethods = GetMethods(moduleDefinition, adviceInterface).ToArray();
+            var weavableMethods = GetMethods(moduleDefinition, TypeResolver.Resolve(moduleDefinition, Binding.MethodAdviceInterfaceName)).ToArray();
             foreach (var method in weavableMethods)
                 Weave(method);
+            var weavableConstructors = GetMethods(moduleDefinition, TypeResolver.Resolve(moduleDefinition, Binding.ConstructorAdviceInterfaceName)).ToArray();
+            foreach (var constructor in weavableConstructors)
+                Weave(constructor);
 
             var runtimeInitializerInterface = TypeResolver.Resolve(moduleDefinition, Binding.RuntimeInitializerInterfaceName);
             if (GetMethods(moduleDefinition, runtimeInitializerInterface).Any())
@@ -96,10 +100,10 @@ namespace ArxOne.Weavisor.Weaver
             string innerMethodName;
             if (method.IsGetter)
                 innerMethodName = string.Format("\u200B{0}.get", method.Name.Substring(4));
-            else if(method.IsSetter)
+            else if (method.IsSetter)
                 innerMethodName = string.Format("\u200B{0}.set", method.Name.Substring(4));
             else
-            innerMethodName = string.Format("{0}\u200B", method.Name);
+                innerMethodName = string.Format("{0}\u200B", method.Name);
             var innerMethod = new MethodDefinition(innerMethodName, innerMethodAttributes, method.ReturnType);
             innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
             innerMethod.ImplAttributes = method.ImplAttributes;
@@ -158,7 +162,8 @@ namespace ArxOne.Weavisor.Weaver
             var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationProceedTypeName);
             if (invocationType == null)
                 return;
-            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedMethodMethodName);
+            var invocationProceedMethodMethodName = method.IsConstructor ? Binding.InvocationProceedConstructorMethodName : Binding.InvocationProceedMethodMethodName;
+            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == invocationProceedMethodMethodName);
             if (proceedMethodReference == null)
                 return;
             var proceedMethod = moduleDefinition.Import(proceedMethodReference);
@@ -222,6 +227,12 @@ namespace ArxOne.Weavisor.Weaver
                         }
                         yield return methodDefinition;
                     }
+                }
+                // ctors
+                foreach (var ctorDefinition in typeDefinition.GetConstructors())
+                {
+                    if (weaveAssembly || weaveType || HasMethodMarkers(ctorDefinition, markerInterface, markerCache))
+                        yield return ctorDefinition;
                 }
                 // properties have methods too
                 foreach (var propertyDefinition in typeDefinition.Properties)
