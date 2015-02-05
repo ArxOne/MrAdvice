@@ -178,7 +178,7 @@ namespace ArxOne.Weavisor
             if (relatedPropertyInfo != null)
                 allAdvices = allAdvices.Union(GetAttributes<TAdvice>(relatedPropertyInfo.Item1));
             var advices = allAdvices.Distinct()
-                .OrderByDescending(Priority.Get).ToArray();
+                .OrderByDescending(Priority.GetLevel).ToArray();
             return advices;
         }
 

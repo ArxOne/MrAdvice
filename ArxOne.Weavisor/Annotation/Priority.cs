@@ -45,7 +45,7 @@ namespace ArxOne.Weavisor.Annotation
         /// </summary>
         /// <param name="advice">The advice.</param>
         /// <returns></returns>
-        public static int Get(object advice)
+        public static int GetLevel(object advice)
         {
             var priorityAttribute = advice.GetType().GetCustomAttributes(typeof (Priority), false).Cast<Priority>().SingleOrDefault();
             if (priorityAttribute != null)
