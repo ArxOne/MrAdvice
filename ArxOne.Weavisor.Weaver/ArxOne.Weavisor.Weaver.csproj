@@ -63,6 +63,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ArxOne.Weavisor\Introduction\IntroductionRules.cs">
+      <Link>Introduction\IntroductionRules.cs</Link>
+    </Compile>
     <Compile Include="..\ArxOne.Weavisor\Properties\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
     </Compile>

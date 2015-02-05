@@ -71,6 +71,8 @@
     <Compile Include="Annotation\Priority.cs" />
     <Compile Include="Collection\ArrayWrapper.cs" />
     <Compile Include="Advice\IPropertyInfoAdvice.cs" />
+    <Compile Include="Introduction\IntroducedField.cs" />
+    <Compile Include="Introduction\IntroductionRules.cs" />
     <Compile Include="Invocation.cs" />
     <Compile Include="Advice\IAdvice.cs" />
     <Compile Include="Advice\IMethodAdvice.cs" />

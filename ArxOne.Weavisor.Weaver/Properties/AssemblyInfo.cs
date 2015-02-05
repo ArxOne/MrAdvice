@@ -12,3 +12,4 @@ using System.Reflection;
 // associated with an assembly.
 [assembly: AssemblyTitle("Weavisor")]
 [assembly: AssemblyDescription("Aspect library")]
+

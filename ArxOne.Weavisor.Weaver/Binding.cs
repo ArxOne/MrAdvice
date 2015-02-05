@@ -14,6 +14,7 @@ namespace ArxOne.Weavisor.Weaver
     {
         public const string AdviceInterfaceName = "ArxOne.Weavisor.Advice.IAdvice";
         public const string InfoAdviceInterfaceName = "ArxOne.Weavisor.Advice.IInfoAdvice";
+        public const string IntroducedFieldTypeName = "ArxOne.Weavisor.Introduction.IntroducedField`1";
         public const string InvocationProceedTypeName = "ArxOne.Weavisor.Invocation";
         public const string InvocationProceedMethodMethodName = "ProceedMethod";
         public const string InvocationProcessRuntimeInitializersMethodName = "ProcessInitializers";

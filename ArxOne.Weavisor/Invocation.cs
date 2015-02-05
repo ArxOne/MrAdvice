@@ -12,6 +12,7 @@ namespace ArxOne.Weavisor
     using System.Reflection;
     using Advice;
     using Annotation;
+    using Introduction;
     using Utility;
 
     /// <summary>
@@ -105,7 +106,10 @@ namespace ArxOne.Weavisor
                 return;
             var methodInitializers = GetAttributes<IMethodInfoAdvice>(methodInfo);
             foreach (var methodInitializer in methodInitializers)
+            {
+                SafeInjectIntroducedFields(methodInitializer as IAdvice, methodInfo.DeclaringType);
                 methodInitializer.Advise(methodInfo);
+            }
         }
 
         /// <summary>
@@ -116,8 +120,11 @@ namespace ArxOne.Weavisor
         {
             var propertyInitializers = GetAttributes<IPropertyInfoAdvice>(propertyInfo);
             foreach (var propertyInitializer in propertyInitializers)
+            {
+                SafeInjectIntroducedFields(propertyInitializer as IAdvice, propertyInfo.DeclaringType);
                 propertyInitializer.Advise(propertyInfo);
             }
+        }
 
         /// <summary>
         /// Creates the method call context, given a calling method and the inner method name.
@@ -129,6 +136,8 @@ namespace ArxOne.Weavisor
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
             var advices = GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
+            foreach (var advice in advices)
+                InjectIntroducedFields(advice, methodBase.DeclaringType);
             return new AdviceChain
             {
                 Advices = advices,
@@ -138,10 +147,74 @@ namespace ArxOne.Weavisor
             };
         }
 
+        private static readonly object[] NoParameter = new object[0];
+
+        private static void SafeInjectIntroducedFields(IAdvice advice, Type advisedType)
+        {
+            // shame, but easy here
+            if (advice == null)
+                return;
+            InjectIntroducedFields(advice, advisedType);
+        }
+
+        /// <summary>
+        /// Injects the introduced fields to advice.
+        /// </summary>
+        /// <param name="advice">The advice.</param>
+        /// <param name="advisedType">Type of the advised.</param>
+        private static void InjectIntroducedFields(IAdvice advice, Type advisedType)
+        {
+            // shame, but easy here
+            if (advice == null)
+                return;
+            var adviceType = advice.GetType();
+            // for fields
+            foreach (var fieldInfo in adviceType.GetFields().Where(f => IsIntroduction(f.FieldType)))
+            {
+                var fieldValue = fieldInfo.GetValue(advice);
+                if (fieldValue == null)
+                {
+                    var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, fieldInfo.Name);
+                    var introducedField = advisedType.GetField(introducedFieldName);
+                    fieldInfo.SetValue(advice, Activator.CreateInstance(fieldInfo.FieldType, introducedField));
+                }
+            }
+            // and for properties
+            foreach (var propertyInfo in adviceType.GetProperties().Where(f => IsIntroduction(f.PropertyType)))
+            {
+                var propertyValue = propertyInfo.GetValue(advice, NoParameter);
+                if (propertyValue == null)
+                {
+                    var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, propertyInfo.Name);
+                    var introducedField = advisedType.GetField(introducedFieldName);
+                    propertyInfo.SetValue(advice, Activator.CreateInstance(propertyInfo.PropertyType, introducedField), NoParameter);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the specified member type is introduction.
+        /// </summary>
+        /// <param name="memberType">Type of the member.</param>
+        /// <returns></returns>
+        private static bool IsIntroduction(Type memberType)
+        {
+            if (!memberType.IsGenericType)
+                return false;
+            return memberType.GetGenericTypeDefinition() == typeof(IntroducedField<>);
+        }
+
+        /// <summary>
+        /// Gets the inner method, based on a name and original method signature (for overloads).
+        /// </summary>
+        /// <param name="methodInfo">The method information.</param>
+        /// <param name="innerMethodName">Name of the inner method.</param>
+        /// <returns></returns>
+        /// <exception cref="System.InvalidOperationException">WTF?</exception>
         private static MethodInfo GetInnerMethod(MethodBase methodInfo, string innerMethodName)
         {
             MethodInfo innerMethod;
-            var innerMethods = methodInfo.DeclaringType.GetMethods(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
+            var innerMethods = methodInfo.DeclaringType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
                 .Where(m => m.Name == innerMethodName).ToArray();
             switch (innerMethods.Length)
             {

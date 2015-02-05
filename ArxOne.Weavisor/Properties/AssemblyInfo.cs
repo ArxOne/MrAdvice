@@ -5,6 +5,7 @@
 // Release under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using System;
 using System.Reflection;
 
 // General Information about an assembly is controlled through the following 
@@ -12,3 +13,5 @@ using System.Reflection;
 // associated with an assembly.
 [assembly: AssemblyTitle("Weavisor")]
 [assembly: AssemblyDescription("Aspect library")]
+
+[assembly: CLSCompliant(true)]

@@ -10,7 +10,6 @@ namespace ArxOne.Weavisor.Advice
     using System.Collections.Generic;
     using System.Reflection;
 
-    [CLSCompliant(true)]
     public class MethodAdviceContext : AdviceContext
     {
         /// <summary>

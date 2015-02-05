@@ -6,13 +6,16 @@
 #endregion
 namespace ArxOne.Weavisor.Weaver
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Introduction;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
     using Utility;
+    using FieldAttributes = Mono.Cecil.FieldAttributes;
     using ICustomAttributeProvider = Mono.Cecil.ICustomAttributeProvider;
     using MethodAttributes = Mono.Cecil.MethodAttributes;
 
@@ -25,6 +28,16 @@ namespace ArxOne.Weavisor.Weaver
     {
         public Logger Logger { get; set; }
         public TypeResolver TypeResolver { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether all additional methods and fields are injected as prived.
+        /// Just because Silverlight does not like invoking private methods or fields, even by reflection
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [inject as private]; otherwise, <c>false</c>.
+        /// </value>
+        public bool InjectAsPrivate { get; set; }
+
+        private readonly IDictionary<Tuple<string, string>, bool> _isInterface = new Dictionary<Tuple<string, string>, bool>();
 
         /// <summary>
         /// Weaves the specified module definition.
@@ -39,20 +52,92 @@ namespace ArxOne.Weavisor.Weaver
                 Logger.WriteWarning("IAdvice interface not found here, exiting");
                 return;
             }
-            var weavableMethods = GetMethods(moduleDefinition, TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName)).ToArray();
+            var weavableMethods = GetMethods(moduleDefinition, adviceInterface).ToArray();
             foreach (var method in weavableMethods)
-                Weave(method);
+            {
+                WeaveAdvices(method);
+                WeaveIntroductions(method, adviceInterface);
+            }
 
             var initializerInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName);
             if (GetMethods(moduleDefinition, initializerInterface).Any())
-                WeaveRuntimeInitializer(moduleDefinition);
+                WeaveInfoAdvices(moduleDefinition);
+        }
+
+        /// <summary>
+        /// Weaves the introductions.
+        /// </summary>
+        /// <param name="method">The method.</param>
+        /// <param name="adviceInterface">The advice interface.</param>
+        private void WeaveIntroductions(MethodDefinition method, TypeDefinition adviceInterface)
+        {
+            var typeDefinition = method.DeclaringType;
+            var advices = GetAllAdvices(method, adviceInterface);
+            foreach (var advice in advices)
+            {
+                var adviceDefinition = advice.Resolve();
+                foreach (var field in adviceDefinition.Fields)
+                    IntroduceMember(method.Module, field.Name, field.FieldType, advice, typeDefinition);
+                foreach (var property in adviceDefinition.Properties)
+                    IntroduceMember(method.Module, property.Name, property.PropertyType, advice, typeDefinition);
+            }
+        }
+
+        /// <summary>
+        /// Introduces the member.
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="memberName">Name of the member.</param>
+        /// <param name="memberType">Type of the member.</param>
+        /// <param name="adviceType">The advice.</param>
+        /// <param name="advisedType">The type definition.</param>
+        private void IntroduceMember(ModuleDefinition moduleDefinition, string memberName, TypeReference memberType, TypeReference adviceType, TypeDefinition advisedType)
+        {
+            TypeReference introducedFieldType;
+            if (IsIntroduction(moduleDefinition, memberType, out introducedFieldType))
+            {
+                var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, memberName);
+                if (advisedType.Fields.All(f => f.Name != introducedFieldName))
+                {
+                    var introducedField = new FieldDefinition(introducedFieldName,
+                       (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized, moduleDefinition.Import(introducedFieldType));
+                    advisedType.Fields.Add(introducedField);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the advice member is introduction, based on its type.
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="adviceMemberTypeReference">The type reference.</param>
+        /// <param name="introducedFieldType">Type of the introduced field.</param>
+        /// <returns></returns>
+        private bool IsIntroduction(ModuleDefinition moduleDefinition, TypeReference adviceMemberTypeReference, out TypeReference introducedFieldType)
+        {
+            if (!adviceMemberTypeReference.IsGenericInstance)
+            {
+                introducedFieldType = null;
+                return false;
+            }
+            var index = adviceMemberTypeReference.FullName.IndexOf('<');
+            var genericTypeName = adviceMemberTypeReference.FullName.Substring(0, index);
+            if (genericTypeName != Binding.IntroducedFieldTypeName)
+            {
+                introducedFieldType = null;
+                return false;
+            }
+
+            var introducedFieldTypeName = adviceMemberTypeReference.FullName.Substring(index + 1, adviceMemberTypeReference.FullName.Length - index - 2);
+            introducedFieldType = TypeResolver.Resolve(moduleDefinition, introducedFieldTypeName);
+            return true;
         }
 
         /// <summary>
         /// Weaves the runtime initializers for the given module.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        private void WeaveRuntimeInitializer(ModuleDefinition moduleDefinition)
+        private void WeaveInfoAdvices(ModuleDefinition moduleDefinition)
         {
             var moduleType = moduleDefinition.Types.Single(t => t.Name == "<Module>");
 
@@ -61,8 +146,8 @@ namespace ArxOne.Weavisor.Weaver
             if (staticCtor == null)
             {
                 staticCtor = new MethodDefinition(cctorMethodName,
-                           MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName |
-                           MethodAttributes.RTSpecialName,
+                           (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
+                           | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                            moduleDefinition.Import(typeof(void)));
                 moduleType.Methods.Add(staticCtor);
             }
@@ -86,7 +171,7 @@ namespace ArxOne.Weavisor.Weaver
         /// Weaves the specified method.
         /// </summary>
         /// <param name="method">The method.</param>
-        private void Weave(MethodDefinition method)
+        private void WeaveAdvices(MethodDefinition method)
         {
             Logger.WriteDebug("Weaving method '{0}'", method.FullName);
 
@@ -97,7 +182,7 @@ namespace ArxOne.Weavisor.Weaver
             const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PInvokeImpl |
                                                       MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
                                                       MethodAttributes.RequireSecObject;
-            var innerMethodAttributes = method.Attributes & attributesToKeep | MethodAttributes.Private;
+            var innerMethodAttributes = method.Attributes & attributesToKeep | (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public);
             string innerMethodName;
             if (method.IsGetter)
                 innerMethodName = string.Format("\u200B{0}.get", method.Name.Substring(4));
@@ -222,24 +307,16 @@ namespace ArxOne.Weavisor.Weaver
         /// <returns></returns>
         private IEnumerable<MethodDefinition> GetMethods(ModuleDefinition moduleDefinition, TypeDefinition markerInterface)
         {
-            IDictionary<TypeReference, bool> markerCache = new Dictionary<TypeReference, bool>();
-            bool weaveAssembly = HasMethodMarkers(moduleDefinition.Assembly, markerInterface, markerCache);
             foreach (var typeDefinition in moduleDefinition.GetTypes())
             {
-                var weaveType = HasMethodMarkers(typeDefinition, markerInterface, markerCache);
-                if (weaveType && typeDefinition.HasGenericParameters)
-                {
-                    Logger.WriteWarning("Generic type {0} can not be weaved", typeDefinition.FullName);
-                    continue;
-                }
                 // methods
                 foreach (var methodDefinition in typeDefinition.GetMethods())
                 {
-                    if (weaveAssembly || weaveType || HasMethodMarkers(methodDefinition, markerInterface, markerCache))
+                    if (GetAllAdvices(methodDefinition, markerInterface).Any())
                     {
-                        if (methodDefinition.HasGenericParameters)
+                        if (typeDefinition.HasGenericParameters || methodDefinition.HasGenericParameters)
                         {
-                            Logger.WriteWarning("Generic method {0} can not be weaved", methodDefinition.FullName, markerCache);
+                            Logger.WriteWarning("Generic method {0} can not be weaved", methodDefinition.FullName);
                             continue;
                         }
                         yield return methodDefinition;
@@ -248,13 +325,13 @@ namespace ArxOne.Weavisor.Weaver
                 // ctors
                 foreach (var ctorDefinition in typeDefinition.GetConstructors())
                 {
-                    if (weaveAssembly || weaveType || HasMethodMarkers(ctorDefinition, markerInterface, markerCache))
+                    if (GetAllAdvices(ctorDefinition, markerInterface).Any())
                         yield return ctorDefinition;
                 }
                 // properties have methods too
                 foreach (var propertyDefinition in typeDefinition.Properties)
                 {
-                    if (weaveAssembly || weaveType || HasMethodMarkers(propertyDefinition, markerInterface, markerCache))
+                    if (GetAllAdvices(propertyDefinition, markerInterface).Any())
                     {
                         if (propertyDefinition.GetMethod != null)
                             yield return propertyDefinition.GetMethod;
@@ -266,37 +343,50 @@ namespace ArxOne.Weavisor.Weaver
         }
 
         /// <summary>
+        /// Gets all advices, applied at member level, type level and assembly level.
+        /// </summary>
+        /// <param name="methodDefinition">The method definition.</param>
+        /// <param name="adviceInterface">The advice interface.</param>
+        /// <returns></returns>
+        private IEnumerable<TypeReference> GetAllAdvices(IMemberDefinition methodDefinition, TypeDefinition adviceInterface)
+        {
+            return GetAdvices(methodDefinition.DeclaringType.Module.Assembly, adviceInterface)
+                .Concat(GetAdvices(methodDefinition.DeclaringType, adviceInterface))
+                .Concat(GetAdvices(methodDefinition, adviceInterface))
+                .Distinct();
+        }
+
+        /// <summary>
         /// Determines whether the specified method (attribute provider) has aspects, given a marker.
         /// It searches through all attributes to find one implementing the marker
         /// </summary>
         /// <param name="attributeProvider">The attribute provider.</param>
-        /// <param name="aspectMarkerInterface">The aspect marker interface.</param>
-        /// <param name="markerInterface">The marker interface.</param>
+        /// <param name="adviceInterface">The aspect marker interface.</param>
         /// <returns></returns>
-        private bool HasMethodMarkers(ICustomAttributeProvider attributeProvider, TypeDefinition aspectMarkerInterface, IDictionary<TypeReference, bool> markerInterface)
+        private IEnumerable<TypeReference> GetAdvices(ICustomAttributeProvider attributeProvider, TypeDefinition adviceInterface)
         {
-            return attributeProvider.CustomAttributes.Any(a => HasMarker(a.AttributeType, aspectMarkerInterface, markerInterface));
+            return attributeProvider.CustomAttributes.Select(a => a.AttributeType).Where(t => IsAdvice(t, adviceInterface));
         }
 
         /// <summary>
         /// Determines whether the specified type reference is aspect.
         /// </summary>
         /// <param name="typeReference">The type reference.</param>
-        /// <param name="aspectMarkerInterface">The aspect marker interface.</param>
-        /// <param name="markerInterface">The marker interface.</param>
+        /// <param name="adviceInterface">The aspect marker interface.</param>
         /// <returns></returns>
-        private bool HasMarker(TypeReference typeReference, TypeDefinition aspectMarkerInterface, IDictionary<TypeReference, bool> markerInterface)
+        private bool IsAdvice(TypeReference typeReference, TypeDefinition adviceInterface)
         {
+            var key = Tuple.Create(typeReference.FullName, adviceInterface.FullName);
             // there is a cache, because the same attribute may be found several time
             // and we're in a hurry, the developper is waiting for his program to start!
             bool isAspect;
-            if (markerInterface.TryGetValue(typeReference, out isAspect))
+            if (_isInterface.TryGetValue(key, out isAspect))
                 return isAspect;
 
             // otherwise look for type or implemented interfaces (recursively)
             var interfaces = typeReference.Resolve().Interfaces;
-            markerInterface[typeReference] = isAspect = typeReference.SafeEquivalent(aspectMarkerInterface)
-                || interfaces.Any(i => HasMarker(i, aspectMarkerInterface, markerInterface));
+            _isInterface[key] = isAspect = typeReference.SafeEquivalent(adviceInterface)
+                || interfaces.Any(i => IsAdvice(i, adviceInterface));
             return isAspect;
         }
     }
