@@ -17,7 +17,7 @@ namespace ArxOne.Weavisor.Initializer
         /// <summary>
         /// Invoked once per method, when assembly is loaded
         /// </summary>
-        /// <param name="methodInfo">The method information.</param>
-        void Initialize(MethodInfo methodInfo);
+        /// <param name="methodBase"></param>
+        void Initialize(MethodBase methodBase);
     }
 }

@@ -85,6 +85,8 @@ namespace ArxOne.Weavisor
                 const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Instance;
                 foreach (var methodInfo in type.GetMethods(bindingFlags))
                     ProcessMethodInitializers(methodInfo);
+                foreach (var constructorInfo in type.GetConstructors(bindingFlags))
+                    ProcessMethodInitializers(constructorInfo);
                 foreach (var propertyInfo in type.GetProperties(bindingFlags))
                 {
                     ProcessMethodInitializers(propertyInfo.GetGetMethod());
@@ -98,7 +100,7 @@ namespace ArxOne.Weavisor
         /// Processes the initializers for MethodInfo.
         /// </summary>
         /// <param name="methodInfo">The method information.</param>
-        private static void ProcessMethodInitializers(MethodInfo methodInfo)
+        private static void ProcessMethodInitializers(MethodBase methodInfo)
         {
             if (methodInfo == null)
                 return;
