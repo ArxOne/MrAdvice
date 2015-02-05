@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodLevelTest", "MethodLevelTest\MethodLevelTest.csproj", "{77928F8C-A708-4C49-B6E2-772256E75E4D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
@@ -13,6 +15,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArxOne.Weavisor.Weaver", "ArxOne.Weavisor.Weaver\ArxOne.Weavisor.Weaver.csproj", "{2CCCBE1D-9CC5-40A9-A816-484F98B10774}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VBMethodLevelTest", "VBMethodLevelTest\VBMethodLevelTest.vbproj", "{27F8E96F-59E0-4980-9790-F436C9532BA0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A667E5E2-B090-4BD4-8181-99C7846AFD07}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
