@@ -12,6 +12,7 @@ namespace ArxOne.Weavisor.Advice
     using System.Reflection;
     using Collection;
 
+    [CLSCompliant(true)]
     public class PropertyAdviceContext : AdviceContext
     {
         /// <summary>

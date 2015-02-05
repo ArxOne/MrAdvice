@@ -6,6 +6,7 @@
 #endregion
 namespace ArxOne.Weavisor.Weaver
 {
+    using System.IO;
     using System.Linq;
     using Mono.Cecil;
 
@@ -63,8 +64,19 @@ namespace ArxOne.Weavisor.Weaver
         /// <returns></returns>
         private TypeDefinition ResolveReferences(ModuleDefinition moduleDefinition, string fullName)
         {
-            var assemblyDefinitions = moduleDefinition.AssemblyReferences.Select(a => AssemblyResolver.Resolve(a)).ToArray();
+            var assemblyDefinitions = moduleDefinition.AssemblyReferences.Select(TryResolve).Where(a => a != null).ToArray();
             return assemblyDefinitions.Select(a => ResolveAssembly(a, fullName)).FirstOrDefault(t => t != null);
+        }
+
+        private AssemblyDefinition TryResolve(AssemblyNameReference assemblyNameReference)
+        {
+            try
+            {
+                return AssemblyResolver.Resolve(assemblyNameReference);
+            }
+            catch (FileNotFoundException)
+            { }
+            return null;
         }
 
         /// <summary>

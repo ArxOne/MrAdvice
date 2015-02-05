@@ -181,13 +181,11 @@ namespace ArxOne.Weavisor.Weaver
                 instructions.Emit(OpCodes.Pop); // if no return type, ignore Proceed() result
 
             // loads back out/ref parameters
-            Logger.WriteDebug("Checking out/ref parameters");
             for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; parameterIndex++)
             {
                 var parameter = method.Parameters[parameterIndex];
                 if (parameter.ParameterType.IsByReference)
                 {
-                    Logger.WriteDebug("Found out/ref parameter {0}", parameter.Name);
                     instructions.EmitLdarg(parameterIndex + firstParameter); // loads given parameter (it is a ref)
                     instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
