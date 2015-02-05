@@ -4,13 +4,13 @@ namespace MethodLevelTest.Advices
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using ArxOne.Weavisor.Initializer;
+    using ArxOne.Weavisor.Advice;
 
-    public class RecordMethods : Attribute, IMethodInitializer
+    public class RecordMethods : Attribute, IMethodInfoAdvice
     {
         public static readonly IList<MethodInfo> MethodInfos = new List<MethodInfo>();
 
-        public void Initialize(MethodBase methodBase)
+        public void Advise(MethodBase methodBase)
         {
             var methodInfo = methodBase as MethodInfo;
             if (methodInfo != null)

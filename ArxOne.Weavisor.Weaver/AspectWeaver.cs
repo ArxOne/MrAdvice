@@ -43,7 +43,7 @@ namespace ArxOne.Weavisor.Weaver
             foreach (var method in weavableMethods)
                 Weave(method);
 
-            var initializerInterface = TypeResolver.Resolve(moduleDefinition, Binding.InitializerInterfaceName);
+            var initializerInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName);
             if (GetMethods(moduleDefinition, initializerInterface).Any())
                 WeaveRuntimeInitializer(moduleDefinition);
         }

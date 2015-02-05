@@ -13,7 +13,7 @@ namespace ArxOne.Weavisor.Weaver
     public static class Binding
     {
         public const string AdviceInterfaceName = "ArxOne.Weavisor.Advice.IAdvice";
-        public const string InitializerInterfaceName = "ArxOne.Weavisor.Initializer.IInitializer";
+        public const string InfoAdviceInterfaceName = "ArxOne.Weavisor.Advice.IInfoAdvice";
         public const string InvocationProceedTypeName = "ArxOne.Weavisor.Invocation";
         public const string InvocationProceedMethodMethodName = "ProceedMethod";
         public const string InvocationProcessRuntimeInitializersMethodName = "ProcessInitializers";

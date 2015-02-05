@@ -4,13 +4,13 @@ namespace MethodLevelTest.Advices
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using ArxOne.Weavisor.Initializer;
+    using ArxOne.Weavisor.Advice;
 
-    public class RecordProperties : Attribute, IPropertyInitializer
+    public class RecordProperties : Attribute, IPropertyInfoAdvice
     {
         public static readonly IList<PropertyInfo> PropertyInfos = new List<PropertyInfo>();
 
-        public void Initialize(PropertyInfo propertyInfo)
+        public void Advise(PropertyInfo propertyInfo)
         {
             PropertyInfos.Add(propertyInfo);
         }

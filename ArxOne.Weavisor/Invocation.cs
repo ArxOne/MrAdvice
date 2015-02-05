@@ -12,7 +12,6 @@ namespace ArxOne.Weavisor
     using System.Reflection;
     using Advice;
     using Annotation;
-    using Initializer;
     using Utility;
 
     /// <summary>
@@ -104,9 +103,9 @@ namespace ArxOne.Weavisor
         {
             if (methodInfo == null)
                 return;
-            var methodInitializers = GetAttributes<IMethodInitializer>(methodInfo);
+            var methodInitializers = GetAttributes<IMethodInfoAdvice>(methodInfo);
             foreach (var methodInitializer in methodInitializers)
-                methodInitializer.Initialize(methodInfo);
+                methodInitializer.Advise(methodInfo);
         }
 
         /// <summary>
@@ -115,9 +114,9 @@ namespace ArxOne.Weavisor
         /// <param name="propertyInfo">The property information.</param>
         private static void ProcessPropertyInitializers(PropertyInfo propertyInfo)
         {
-            var propertyInitializers = GetAttributes<IPropertyInitializer>(propertyInfo);
+            var propertyInitializers = GetAttributes<IPropertyInfoAdvice>(propertyInfo);
             foreach (var propertyInitializer in propertyInitializers)
-                propertyInitializer.Initialize(propertyInfo);
+                propertyInitializer.Advise(propertyInfo);
             }
 
         /// <summary>

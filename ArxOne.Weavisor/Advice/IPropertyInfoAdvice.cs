@@ -5,19 +5,19 @@
 // Release under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
-namespace ArxOne.Weavisor.Initializer
+namespace ArxOne.Weavisor.Advice
 {
     using System.Reflection;
 
     /// <summary>
     /// Runtime initialization for properties
     /// </summary>
-    public interface IPropertyInitializer : IInitializer
+    public interface IPropertyInfoAdvice : IInfoAdvice
     {
         /// <summary>
         /// Invoked once per property, when assembly is loaded
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
-        void Initialize(PropertyInfo propertyInfo);
+        void Advise(PropertyInfo propertyInfo);
     }
 }
