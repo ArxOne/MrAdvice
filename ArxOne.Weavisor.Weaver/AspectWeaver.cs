@@ -139,9 +139,13 @@ namespace ArxOne.Weavisor.Weaver
                     instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
                     instructions.EmitLdarg(parameterIndex + firstParameter); // loads given parameter...
-                    if (parameter.IsIn && parameter.IsOut) // ...if ref, loads it as referenced value
-                        instructions.EmitLdind(parameter.ParameterType);
-                    instructions.EmitBoxIfNecessary(parameter.ParameterType); // ... and boxes it
+                    var parameterType = parameter.ParameterType;
+                    if (parameter.ParameterType.IsByReference) // ...if ref, loads it as referenced value
+                    {
+                        parameterType = GetReferencedType(moduleDefinition, parameter.ParameterType);
+                        instructions.EmitLdind(parameterType);
+                    }
+                    instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
                     instructions.Emit(OpCodes.Stelem_Ref);
                 }
             }
@@ -177,16 +181,18 @@ namespace ArxOne.Weavisor.Weaver
                 instructions.Emit(OpCodes.Pop); // if no return type, ignore Proceed() result
 
             // loads back out/ref parameters
+            Logger.WriteDebug("Checking out/ref parameters");
             for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; parameterIndex++)
             {
                 var parameter = method.Parameters[parameterIndex];
-                if (parameter.IsOut)
+                if (parameter.ParameterType.IsByReference)
                 {
+                    Logger.WriteDebug("Found out/ref parameter {0}", parameter.Name);
                     instructions.EmitLdarg(parameterIndex + firstParameter); // loads given parameter (it is a ref)
                     instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
                     instructions.Emit(OpCodes.Ldelem_Ref); // now we have boxed out/ref value
-                    instructions.EmitUnboxOrCastIfNecessary(parameter.ParameterType);
+                    instructions.EmitUnboxOrCastIfNecessary(GetReferencedType(moduleDefinition, parameter.ParameterType));
                     instructions.EmitStind(parameter.ParameterType); // result is stored in ref parameter
                 }
             }
@@ -195,6 +201,19 @@ namespace ArxOne.Weavisor.Weaver
             instructions.Emit(OpCodes.Ret);
 
             method.DeclaringType.Methods.Add(innerMethod);
+        }
+
+        /// <summary>
+        /// Gets the type of the referenced type.
+        /// (isolates all the crap)
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="referenceType">Type of the reference.</param>
+        /// <returns></returns>
+        private TypeReference GetReferencedType(ModuleDefinition moduleDefinition, TypeReference referenceType)
+        {
+            // not sure this is the best way to do things, but it is a working way anyway
+            return moduleDefinition.Import(TypeResolver.Resolve(moduleDefinition, referenceType.FullName.TrimEnd('&')));
         }
 
         /// <summary>

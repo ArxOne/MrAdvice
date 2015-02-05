@@ -90,6 +90,19 @@ namespace MethodLevelTest
             }
         }
 
+        [EmptyMethodAdvice]
+        public int UsesRef(int a, ref int b)
+        {
+            b = a + b;
+            return b;
+        }
+
+        [EmptyMethodAdvice]
+        public void UsesOut(int a, out int b)
+        {
+            b = a;
+        }
+
         ////[EmptyMethodAdvice]
         ////public void MethodWithGenericParameterTest<TValue>(TValue six)
         ////{
@@ -169,6 +182,26 @@ namespace MethodLevelTest
             Assert.AreEqual(count + 1, RecordCall.Count);
         }
 
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void RefParameterTest()
+        {
+            var c = new EmptyAdvisedClass();
+            int b = 10;
+            var r = c.UsesRef(3, ref b);
+            Assert.AreEqual(r, b);
+            Assert.AreEqual(13, b);
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void OutParameterTest()
+        {
+            var c = new EmptyAdvisedClass();
+            int b;
+            c.UsesOut(4, out b);
+            Assert.AreEqual(4, b);
+        }
 
         ////[TestMethod]
         ////[TestCategory("Weaving")]
