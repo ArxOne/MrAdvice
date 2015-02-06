@@ -10,10 +10,12 @@ namespace ArxOne.Weavisor.Weaver
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.Versioning;
     using Introduction;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
+    using Reflection;
     using Utility;
     using FieldAttributes = Mono.Cecil.FieldAttributes;
     using ICustomAttributeProvider = Mono.Cecil.ICustomAttributeProvider;
@@ -45,13 +47,19 @@ namespace ArxOne.Weavisor.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         public void Weave(ModuleDefinition moduleDefinition)
         {
-            // TODO not sure we'll need to keep the IAdvice interface
+            // sanity check
             var adviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName);
             if (adviceInterface == null)
             {
                 Logger.WriteWarning("IAdvice interface not found here, exiting");
                 return;
             }
+            // runtime check
+            var targetFramework = GetTargetFramework(moduleDefinition);
+            Logger.Write("Assembly '{0}' targets framework {1}", moduleDefinition.Assembly.FullName, targetFramework);
+            InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
+
+            // weave methods (they can be property-related, too)
             var weavableMethods = GetMethods(moduleDefinition, adviceInterface).ToArray();
             foreach (var method in weavableMethods)
             {
@@ -59,13 +67,45 @@ namespace ArxOne.Weavisor.Weaver
                 WeaveIntroductions(method, adviceInterface);
             }
 
-            var initializerInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName);
-            if (GetMethods(moduleDefinition, initializerInterface).Any())
+            // and then, the info advices
+            var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName);
+            if (GetMethods(moduleDefinition, infoAdviceInterface).Any())
                 WeaveInfoAdvices(moduleDefinition);
         }
 
         /// <summary>
+        /// Gets the target framework.
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentOutOfRangeException"></exception>
+        private static TargetFramework GetTargetFramework(ModuleDefinition moduleDefinition)
+        {
+            var targetFrameworkAttributeType = moduleDefinition.Import(typeof(TargetFrameworkAttribute));
+            var targetFrameworkAttribute = moduleDefinition.Assembly.CustomAttributes.SingleOrDefault(a => a.AttributeType.SafeEquivalent(targetFrameworkAttributeType));
+            if (targetFrameworkAttribute == null)
+            {
+                switch (moduleDefinition.Runtime)
+                {
+                    case TargetRuntime.Net_1_0:
+                        return new TargetFramework(new Version(1, 0));
+                    case TargetRuntime.Net_1_1:
+                        return new TargetFramework(new Version(1, 1));
+                    case TargetRuntime.Net_2_0:
+                        return new TargetFramework(new Version(2, 0));
+                    case TargetRuntime.Net_4_0:
+                        return new TargetFramework(new Version(4, 0));
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            return new TargetFramework((string)targetFrameworkAttribute.ConstructorArguments[0].Value);
+        }
+
+        /// <summary>
         /// Weaves the introductions.
+        /// Introduces members as requested by aspects
         /// </summary>
         /// <param name="method">The method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
@@ -154,7 +194,7 @@ namespace ArxOne.Weavisor.Weaver
 
             var instructions = new Instructions(staticCtor.Body.Instructions);
 
-            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationProceedTypeName);
+            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName);
             if (invocationType == null)
                 return;
             var proceedRuntimeInitializersReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProcessRuntimeInitializersMethodName);
@@ -249,7 +289,7 @@ namespace ArxOne.Weavisor.Weaver
             instructions.Emit(OpCodes.Ldstr, innerMethodName);
 
             // invoke the method
-            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationProceedTypeName);
+            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName);
             if (invocationType == null)
                 return;
             var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedMethodMethodName);

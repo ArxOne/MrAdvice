@@ -7,7 +7,6 @@
 
 namespace ArxOne.Weavisor.Introduction
 {
-    using System.Diagnostics.CodeAnalysis;
     using System.Reflection;
     using Advice;
 

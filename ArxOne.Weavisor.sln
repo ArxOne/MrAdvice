@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodLevelTest", "MethodLevelTest\MethodLevelTest.csproj", "{77928F8C-A708-4C49-B6E2-772256E75E4D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
@@ -26,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A667E5
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrityTest", "IntegrityTest\IntegrityTest.csproj", "{492263E1-7372-47C4-BD57-14A70BB028F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +48,10 @@ Global
 		{27F8E96F-59E0-4980-9790-F436C9532BA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27F8E96F-59E0-4980-9790-F436C9532BA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27F8E96F-59E0-4980-9790-F436C9532BA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{492263E1-7372-47C4-BD57-14A70BB028F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{492263E1-7372-47C4-BD57-14A70BB028F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{492263E1-7372-47C4-BD57-14A70BB028F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{492263E1-7372-47C4-BD57-14A70BB028F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,5 +59,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{77928F8C-A708-4C49-B6E2-772256E75E4D} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
 		{27F8E96F-59E0-4980-9790-F436C9532BA0} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
+		{492263E1-7372-47C4-BD57-14A70BB028F0} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
 	EndGlobalSection
 EndGlobal

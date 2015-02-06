@@ -3,4 +3,5 @@
 	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue">Weavisor&#xD;
 A simple post build weaving package&#xD;
 https://github.com/ArxOne/Weavisor&#xD;
-Release under MIT license http://opensource.org/licenses/mit-license.php</s:String></wpf:ResourceDictionary>
+Released under MIT license http://opensource.org/licenses/mit-license.php</s:String>
+	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=PCL/@EntryIndexedValue">PCL</s:String></wpf:ResourceDictionary>

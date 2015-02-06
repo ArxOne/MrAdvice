@@ -107,6 +107,7 @@ namespace ArxOne.Weavisor
             var methodInitializers = GetAttributes<IMethodInfoAdvice>(methodInfo);
             foreach (var methodInitializer in methodInitializers)
             {
+                // actually, introducing fields does not make sense here, until we introduce static fields
                 SafeInjectIntroducedFields(methodInitializer as IAdvice, methodInfo.DeclaringType);
                 methodInitializer.Advise(methodInfo);
             }
@@ -168,6 +169,7 @@ namespace ArxOne.Weavisor
             if (advice == null)
                 return;
             var adviceType = advice.GetType();
+            const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             // for fields
             foreach (var fieldInfo in adviceType.GetFields().Where(f => IsIntroduction(f.FieldType)))
             {
@@ -175,7 +177,7 @@ namespace ArxOne.Weavisor
                 if (fieldValue == null)
                 {
                     var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, fieldInfo.Name);
-                    var introducedField = advisedType.GetField(introducedFieldName);
+                    var introducedField = advisedType.GetField(introducedFieldName, bindingFlags);
                     fieldInfo.SetValue(advice, Activator.CreateInstance(fieldInfo.FieldType, introducedField));
                 }
             }
@@ -186,7 +188,7 @@ namespace ArxOne.Weavisor
                 if (propertyValue == null)
                 {
                     var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, propertyInfo.Name);
-                    var introducedField = advisedType.GetField(introducedFieldName);
+                    var introducedField = advisedType.GetField(introducedFieldName, bindingFlags);
                     propertyInfo.SetValue(advice, Activator.CreateInstance(propertyInfo.PropertyType, introducedField), NoParameter);
                 }
             }
