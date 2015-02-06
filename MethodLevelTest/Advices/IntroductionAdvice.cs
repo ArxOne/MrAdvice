@@ -29,7 +29,7 @@ namespace MethodLevelTest.Advices
             if (RandomString[context] == null)
                 RandomString[context] = "1";
             else
-            RandomString[context] += "0";
+                RandomString[context] += "0";
             LastRandomString = RandomString[context];
             context.Proceed();
         }

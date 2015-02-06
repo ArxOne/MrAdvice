@@ -10,9 +10,9 @@ namespace MethodLevelTest.Advices
     {
         public static readonly IList<MethodInfo> MethodInfos = new List<MethodInfo>();
 
-        public void Advise(MethodBase methodBase)
+        public void Advise(MethodInfoAdviceContext context)
         {
-            var methodInfo = methodBase as MethodInfo;
+            var methodInfo = context.TargetMethod as MethodInfo;
             if (methodInfo != null)
                 MethodInfos.Add(methodInfo);
         }

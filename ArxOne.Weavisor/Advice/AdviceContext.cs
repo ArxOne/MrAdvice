@@ -4,7 +4,7 @@ namespace ArxOne.Weavisor.Advice
     /// <summary>
     /// Advice context base class
     /// </summary>
-    public abstract class AdviceContext
+    public abstract class AdviceContext : IAdviceContextTarget
     {
         private readonly AdviceContext _nextAdviceContext;
         internal AdviceValues AdviceValues { get; private set; }

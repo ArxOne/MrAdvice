@@ -7,17 +7,20 @@
 
 namespace ArxOne.Weavisor.Advice
 {
-    using System.Reflection;
-
     /// <summary>
-    /// Runtime initialization for properties
+    /// Base class for advice information context
     /// </summary>
-    public interface IPropertyInfoAdvice : IInfoAdvice
+    public class AdviceInfoContext : IAdviceContextTarget
     {
         /// <summary>
-        /// Invoked once per property, when assembly is loaded
+        /// Gets the target.
         /// </summary>
-        /// <param name="context"></param>
-        void Advise(PropertyInfoAdviceContext context);
+        /// <value>
+        /// The target.
+        /// </value>
+        public object Target
+        {
+            get { return null; }
+        }
     }
 }

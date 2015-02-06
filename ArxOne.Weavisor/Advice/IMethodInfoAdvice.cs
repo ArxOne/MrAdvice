@@ -17,7 +17,7 @@ namespace ArxOne.Weavisor.Advice
         /// <summary>
         /// Invoked once per method, when assembly is loaded
         /// </summary>
-        /// <param name="methodBase"></param>
-        void Advise(MethodBase methodBase);
+        /// <param name="context"></param>
+        void Advise(MethodInfoAdviceContext context);
     }
 }

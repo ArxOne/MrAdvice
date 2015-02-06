@@ -61,13 +61,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Advice\AdviceContext.cs" />
+    <Compile Include="Advice\AdviceInfoContext.cs" />
     <Compile Include="Advice\AdviceValues.cs" />
+    <Compile Include="Advice\IAdviceContextTarget.cs" />
     <Compile Include="Advice\IInfoAdvice.cs" />
     <Compile Include="Advice\IMethodInfoAdvice.cs" />
     <Compile Include="Advice\InnerMethodContext.cs" />
     <Compile Include="Advice\IPropertyAdvice.cs" />
     <Compile Include="Advice\MethodAdviceContext.cs" />
+    <Compile Include="Advice\MethodInfoAdviceContext.cs" />
     <Compile Include="Advice\PropertyAdviceContext.cs" />
+    <Compile Include="Advice\PropertyInfoAdviceContext.cs" />
     <Compile Include="Annotation\Priority.cs" />
     <Compile Include="Collection\ArrayWrapper.cs" />
     <Compile Include="Advice\IPropertyInfoAdvice.cs" />

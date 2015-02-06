@@ -14,5 +14,9 @@ namespace MethodLevelTest
         [IntroductionAdvice]
         public void AMethod()
         { }
+
+        [StaticIntroductionAdvice]
+        public void BMethod()
+        { }
     }
 }

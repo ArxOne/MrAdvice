@@ -59,6 +59,7 @@
     <Compile Include="Advices\RecordCall.cs" />
     <Compile Include="Advices\RecordProperties.cs" />
     <Compile Include="Advices\RecordMethods.cs" />
+    <Compile Include="Advices\StaticIntroductionAdvice.cs" />
     <Compile Include="BasicTests.cs" />
     <Compile Include="Advices\EmptyMethodAdvice.cs" />
     <Compile Include="EmptyAdvisedClass.cs" />

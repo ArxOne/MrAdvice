@@ -117,9 +117,9 @@ namespace ArxOne.Weavisor.Weaver
             {
                 var adviceDefinition = advice.Resolve();
                 foreach (var field in adviceDefinition.Fields)
-                    IntroduceMember(method.Module, field.Name, field.FieldType, advice, typeDefinition);
+                    IntroduceMember(method.Module, field.Name, field.FieldType, field.IsStatic, advice, typeDefinition);
                 foreach (var property in adviceDefinition.Properties)
-                    IntroduceMember(method.Module, property.Name, property.PropertyType, advice, typeDefinition);
+                    IntroduceMember(method.Module, property.Name, property.PropertyType, !property.HasThis, advice, typeDefinition);
             }
         }
 
@@ -129,9 +129,10 @@ namespace ArxOne.Weavisor.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="memberName">Name of the member.</param>
         /// <param name="memberType">Type of the member.</param>
+        /// <param name="isStatic">if set to <c>true</c> [is static].</param>
         /// <param name="adviceType">The advice.</param>
         /// <param name="advisedType">The type definition.</param>
-        private void IntroduceMember(ModuleDefinition moduleDefinition, string memberName, TypeReference memberType, TypeReference adviceType, TypeDefinition advisedType)
+        private void IntroduceMember(ModuleDefinition moduleDefinition, string memberName, TypeReference memberType, bool isStatic, TypeReference adviceType, TypeDefinition advisedType)
         {
             TypeReference introducedFieldType;
             if (IsIntroduction(moduleDefinition, memberType, out introducedFieldType))
@@ -139,8 +140,11 @@ namespace ArxOne.Weavisor.Weaver
                 var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, memberName);
                 if (advisedType.Fields.All(f => f.Name != introducedFieldName))
                 {
+                    var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
+                    if (isStatic)
+                        fieldAttributes |= FieldAttributes.Static;
                     var introducedField = new FieldDefinition(introducedFieldName,
-                       (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized, moduleDefinition.Import(introducedFieldType));
+                       fieldAttributes, moduleDefinition.Import(introducedFieldType));
                     advisedType.Fields.Add(introducedField);
                 }
             }
@@ -218,7 +222,6 @@ namespace ArxOne.Weavisor.Weaver
             var moduleDefinition = method.DeclaringType.Module;
 
             // create inner method
-            Logger.WriteDebug("> attributes '{0}'", method.Attributes);
             const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PInvokeImpl |
                                                       MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
                                                       MethodAttributes.RequireSecObject;

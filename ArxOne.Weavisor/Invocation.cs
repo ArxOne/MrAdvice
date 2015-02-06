@@ -109,7 +109,7 @@ namespace ArxOne.Weavisor
             {
                 // actually, introducing fields does not make sense here, until we introduce static fields
                 SafeInjectIntroducedFields(methodInitializer as IAdvice, methodInfo.DeclaringType);
-                methodInitializer.Advise(methodInfo);
+                methodInitializer.Advise(new MethodInfoAdviceContext(methodInfo));
             }
         }
 
@@ -123,7 +123,7 @@ namespace ArxOne.Weavisor
             foreach (var propertyInitializer in propertyInitializers)
             {
                 SafeInjectIntroducedFields(propertyInitializer as IAdvice, propertyInfo.DeclaringType);
-                propertyInitializer.Advise(propertyInfo);
+                propertyInitializer.Advise(new PropertyInfoAdviceContext(propertyInfo));
             }
         }
 

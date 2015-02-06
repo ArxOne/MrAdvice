@@ -19,6 +19,7 @@ namespace ArxOne.Weavisor.Introduction
     public class IntroducedField<TFieldType>
     {
         private readonly FieldInfo _introducedField;
+        private bool IsStatic { get { return _introducedField.IsStatic; } }
 
         /// <summary>
         /// Gets or sets the <see cref="TFieldType"/> with the specified context.
@@ -28,10 +29,10 @@ namespace ArxOne.Weavisor.Introduction
         /// </value>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        public TFieldType this[AdviceContext context]
+        public TFieldType this[IAdviceContextTarget context]
         {
-            get { return (TFieldType)_introducedField.GetValue(context.Target); }
-            set { _introducedField.SetValue(context.Target, value); }
+            get { return (TFieldType)_introducedField.GetValue(IsStatic ? null : context.Target); }
+            set { _introducedField.SetValue(IsStatic ? null : context.Target, value); }
         }
 
         /// <summary>

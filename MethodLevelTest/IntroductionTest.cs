@@ -27,6 +27,20 @@ namespace MethodLevelTest
 
         [TestMethod]
         [TestCategory("Introduction")]
+        public void SimpleStaticIntroductionByFieldTest()
+        {
+            var z = StaticIntroductionAdvice.LastStaticAdvicesCount;
+
+            var c1 = new IntroducedClass();
+            var c2 = new IntroducedClass();
+            c1.BMethod();
+            c2.BMethod();
+
+            Assert.AreEqual(2, StaticIntroductionAdvice.LastStaticAdvicesCount - z);
+        }
+
+        [TestMethod]
+        [TestCategory("Introduction")]
         public void SimpleIntroductionByPropertyTest()
         {
             var c = new IntroducedClass();

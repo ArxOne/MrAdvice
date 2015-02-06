@@ -10,9 +10,9 @@ namespace MethodLevelTest.Advices
     {
         public static readonly IList<PropertyInfo> PropertyInfos = new List<PropertyInfo>();
 
-        public void Advise(PropertyInfo propertyInfo)
+        public void Advise(PropertyInfoAdviceContext context)
         {
-            PropertyInfos.Add(propertyInfo);
+            PropertyInfos.Add(context.TargetProperty);
         }
     }
 }
