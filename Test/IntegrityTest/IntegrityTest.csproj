@@ -50,11 +50,11 @@
     <Compile Include="TargetFrameworkTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ArxOne.Weavisor.Weaver\ArxOne.Weavisor.Weaver.csproj">
+    <ProjectReference Include="..\..\ArxOne.Weavisor.Weaver\ArxOne.Weavisor.Weaver.csproj">
       <Project>{2CCCBE1D-9CC5-40A9-A816-484F98B10774}</Project>
       <Name>ArxOne.Weavisor.Weaver</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ArxOne.Weavisor\ArxOne.Weavisor.csproj">
+    <ProjectReference Include="..\..\ArxOne.Weavisor\ArxOne.Weavisor.csproj">
       <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
       <Name>ArxOne.Weavisor</Name>
     </ProjectReference>

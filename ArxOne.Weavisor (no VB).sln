@@ -1,16 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodLevelTest", "MethodLevelTest\MethodLevelTest.csproj", "{77928F8C-A708-4C49-B6E2-772256E75E4D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
-	EndProjectSection
-EndProject
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0D80F141-D37F-4354-959F-15C3AF0FF701}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArxOne.Weavisor", "ArxOne.Weavisor\ArxOne.Weavisor.csproj", "{3C764938-4C4A-4128-B20F-97EF2ED4A49B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArxOne.Weavisor.Weaver", "ArxOne.Weavisor.Weaver\ArxOne.Weavisor.Weaver.csproj", "{2CCCBE1D-9CC5-40A9-A816-484F98B10774}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrityTest", "Test\IntegrityTest\IntegrityTest.csproj", "{492263E1-7372-47C4-BD57-14A70BB028F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodLevelTest", "Test\MethodLevelTest\MethodLevelTest.csproj", "{77928F8C-A708-4C49-B6E2-772256E75E4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,10 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{77928F8C-A708-4C49-B6E2-772256E75E4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77928F8C-A708-4C49-B6E2-772256E75E4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77928F8C-A708-4C49-B6E2-772256E75E4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77928F8C-A708-4C49-B6E2-772256E75E4D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3C764938-4C4A-4128-B20F-97EF2ED4A49B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3C764938-4C4A-4128-B20F-97EF2ED4A49B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C764938-4C4A-4128-B20F-97EF2ED4A49B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -30,11 +27,20 @@ Global
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774}.Release|Any CPU.Build.0 = Release|Any CPU
+		{492263E1-7372-47C4-BD57-14A70BB028F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{492263E1-7372-47C4-BD57-14A70BB028F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{492263E1-7372-47C4-BD57-14A70BB028F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{492263E1-7372-47C4-BD57-14A70BB028F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77928F8C-A708-4C49-B6E2-772256E75E4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77928F8C-A708-4C49-B6E2-772256E75E4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77928F8C-A708-4C49-B6E2-772256E75E4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77928F8C-A708-4C49-B6E2-772256E75E4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{492263E1-7372-47C4-BD57-14A70BB028F0} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
 		{77928F8C-A708-4C49-B6E2-772256E75E4D} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
 	EndGlobalSection
 EndGlobal
