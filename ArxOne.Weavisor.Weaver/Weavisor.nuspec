@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Weavisor.Fody</id>
-    <version>$version$</version>
+    <version>$version$-beta</version>
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
@@ -11,7 +11,7 @@
     <iconUrl>https://raw.githubusercontent.com/ArxOne/Weavisor/master/Icon/Weavisor32.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>First package.</releaseNotes>
+    <releaseNotes></releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>weaver aspect advice</tags>
     <dependencies>
@@ -21,7 +21,7 @@
   </metadata>
   <files>
     <file src="NuGet\**\*" target="."/>
-    <file src="$SolutionDir$ArxOne.Weavisor\bin\$ConfigurationName$\Weavisor.dll" target="lib\portable-net40-client+sl5"/>
+    <file src="$SolutionDir$ArxOne.Weavisor\bin\$ConfigurationName$\Weavisor.dll" target="lib\portable-net40+sl5"/>
     <!--<file src="$TargetPath$" target="."/>-->
   </files>
 </package>

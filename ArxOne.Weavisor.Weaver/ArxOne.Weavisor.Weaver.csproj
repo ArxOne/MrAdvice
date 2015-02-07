@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ArxOne.Weavisor.Weaver</RootNamespace>
-    <AssemblyName>Weavisor.Weaver</AssemblyName>
+    <AssemblyName>Weavisor.Weaver.Fody</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -113,11 +113,16 @@ if not exist %25weaversDir%25 mkdir %25weaversDir%25
 
 copy $(TargetPath) %25weaversDir%25\Weavers.dll
 
-rem --------------------------------------------------------------------------------------------------------
+rem --- NuGet pack and push ------------------------------------------------------------------------------
 
 if not "$(ConfigurationName)"=="Release" goto :noRelease
 
 "$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectPath)" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Properties Configuration=$(ConfigurationName) -Tool
+
+set apiKeyFile="$(SolutionDir)\..\nuget-api-key.txt"
+if not exist %25apiKeyFile%25 goto noPush
+rem "$(SolutionDir)\.nuget\NuGet.exe" push 
+:noPush
 
 :noRelease
 </PostBuildEvent>
