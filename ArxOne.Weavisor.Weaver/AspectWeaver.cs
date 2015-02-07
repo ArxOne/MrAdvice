@@ -289,7 +289,17 @@ namespace ArxOne.Weavisor.Weaver
             instructions.Emit(OpCodes.Call, moduleDefinition.Import(ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod())));
 
             // ...inner
-            instructions.Emit(OpCodes.Ldstr, innerMethodName);
+            var actionType = moduleDefinition.Import(typeof(Action));
+            var actionCtor = moduleDefinition.Import(actionType.Resolve().GetConstructors().Single());
+
+            var delegateType = moduleDefinition.Import(typeof(Delegate));
+            var getMethod = moduleDefinition.Import(delegateType.Resolve().Methods.Single(m => m.Name == "get_Method"));
+
+            // ...inner
+            instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
+            instructions.Emit(OpCodes.Ldftn, innerMethod);
+            instructions.Emit(OpCodes.Newobj, actionCtor);
+            instructions.Emit(OpCodes.Call, getMethod);
 
             // invoke the method
             var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName);

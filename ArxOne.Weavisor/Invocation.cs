@@ -41,18 +41,18 @@ namespace ArxOne.Weavisor
         /// <param name="target">The target.</param>
         /// <param name="parameters">The parameters.</param>
         /// <param name="methodBase">The raw method base.</param>
-        /// <param name="innerMethodName">Name of the inner method.</param>
+        /// <param name="innerMethod">The inner method.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedMethod(object target, object[] parameters, MethodBase methodBase, string innerMethodName)
+        public static object ProceedMethod(object target, object[] parameters, MethodBase methodBase, MethodInfo innerMethod)
         {
             AdviceChain adviceChain;
             lock (AdviceChains)
             {
                 if (!AdviceChains.TryGetValue(methodBase, out adviceChain))
-                    AdviceChains[methodBase] = adviceChain = CreateCallContext(methodBase, innerMethodName);
+                    AdviceChains[methodBase] = adviceChain = CreateCallContext(methodBase, innerMethod);
             }
 
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
@@ -131,9 +131,9 @@ namespace ArxOne.Weavisor
         /// Creates the method call context, given a calling method and the inner method name.
         /// </summary>
         /// <param name="methodBase">The method information.</param>
-        /// <param name="innerMethodName">Name of the inner method.</param>
+        /// <param name="innerMethod">Name of the inner method.</param>
         /// <returns></returns>
-        private static AdviceChain CreateCallContext(MethodBase methodBase, string innerMethodName)
+        private static AdviceChain CreateCallContext(MethodBase methodBase, MethodInfo innerMethod)
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
             var advices = GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
@@ -142,7 +142,7 @@ namespace ArxOne.Weavisor
             return new AdviceChain
             {
                 Advices = advices,
-                InnerMethod = GetInnerMethod(methodBase, innerMethodName),
+                InnerMethod = innerMethod,
                 PropertyInfo = relatedPropertyInfo != null ? relatedPropertyInfo.Item1 : null,
                 IsSetter = relatedPropertyInfo != null ? relatedPropertyInfo.Item2 : false
             };
@@ -204,33 +204,6 @@ namespace ArxOne.Weavisor
             if (!memberType.IsGenericType)
                 return false;
             return memberType.GetGenericTypeDefinition() == typeof(IntroducedField<>);
-        }
-
-        /// <summary>
-        /// Gets the inner method, based on a name and original method signature (for overloads).
-        /// </summary>
-        /// <param name="methodInfo">The method information.</param>
-        /// <param name="innerMethodName">Name of the inner method.</param>
-        /// <returns></returns>
-        /// <exception cref="System.InvalidOperationException">WTF?</exception>
-        private static MethodInfo GetInnerMethod(MethodBase methodInfo, string innerMethodName)
-        {
-            MethodInfo innerMethod;
-            var innerMethods = methodInfo.DeclaringType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
-                .Where(m => m.Name == innerMethodName).ToArray();
-            switch (innerMethods.Length)
-            {
-                case 0:
-                    throw new InvalidOperationException("WTF?");
-                case 1:
-                    innerMethod = innerMethods[0];
-                    break;
-                default:
-                    var parameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray();
-                    innerMethod = innerMethods.Single(m => m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes));
-                    break;
-            }
-            return innerMethod;
         }
 
         /// <summary>

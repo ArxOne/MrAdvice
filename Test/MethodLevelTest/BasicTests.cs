@@ -6,6 +6,9 @@
 #endregion
 namespace MethodLevelTest
 {
+    using System;
+    using System.Linq.Expressions;
+    using System.Reflection;
     using Advices;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -101,6 +104,18 @@ namespace MethodLevelTest
             c.UsesOut(4, out b);
             Assert.AreEqual(4, b);
         }
+
+        [TestMethod]
+        public void NonGenericExpression()
+        {
+            Z(new Action(NonGenericExpression));
+            //Expression<Action> e = () => NonGenericExpression();
+            //var m = (MethodInfo)MethodBase.GetCurrentMethod();
+            //var f = Expression.Call(m,Expression.Constant(this));
+        }
+
+        private void Z(Delegate d)
+        {}
 
         ////[TestMethod]
         ////[TestCategory("Weaving")]
