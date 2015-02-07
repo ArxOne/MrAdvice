@@ -85,10 +85,24 @@ function UnlockWeaversXml($project)
     }   
 }
 
+function MoveAssemblyFromToolsToPackageRoot($toolsPath, $installPath)
+{
+    Write-Host "MoveAssemblyFromToolsToPackageRoot $toolsPath --> $installPath"
+
+	$weaverFileName = "Weavisor.Weaver.dll"
+	$weaverFilePath = $toolsPath + "\" +$weaverFileName
+	if ([System.IO.File]::Exists($weaverFilePath)
+	{
+		[System.IO.File]::Move($weaverFilePath, $installPath)
+	}
+}
+
 UnlockWeaversXml($project)
 
 RemoveForceProjectLevelHack $project
 
 Update-FodyConfig $package.Id.Replace(".Fody", "") $project
+
+MoveAssemblyFromToolsToPackageRoot($toolsPath, $installPath)
 
 #Fix-ReferencesCopyLocal $package $project

@@ -20,7 +20,7 @@
     <developmentDependency>true</developmentDependency>
   </metadata>
   <files>
-    <file src="nupkg\**\*" target="."/>
+    <file src="NuGet\**\*" target="."/>
     <file src="$SolutionDir$ArxOne.Weavisor\bin\$ConfigurationName$\Weavisor.dll" target="lib\portable-net40-client+sl5"/>
     <!--<file src="$TargetPath$" target="."/>-->
   </files>
