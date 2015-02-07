@@ -37,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Icon", "Icon", "{C24CF080-E
 	ProjectSection(SolutionItems) = preProject
 		Icon\Weavisor.ai = Icon\Weavisor.ai
 		Icon\Weavisor.png = Icon\Weavisor.png
+		Icon\Weavisor32.png = Icon\Weavisor32.png
 	EndProjectSection
 EndProject
 Global

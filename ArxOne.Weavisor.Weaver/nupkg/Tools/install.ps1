@@ -91,4 +91,4 @@ RemoveForceProjectLevelHack $project
 
 Update-FodyConfig $package.Id.Replace(".Fody", "") $project
 
-Fix-ReferencesCopyLocal $package $project
+#Fix-ReferencesCopyLocal $package $project

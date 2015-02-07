@@ -9,11 +9,11 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ArxOne.Weavisor.Weaver</RootNamespace>
-    <AssemblyName>Weavisor.Weaver.Fody</AssemblyName>
+    <AssemblyName>Weavisor.Weaver</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <NuGetPackageImportStamp>d1e53ec4</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>73cd9cba</NuGetPackageImportStamp>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -73,7 +73,7 @@
     <Compile Include="Reflection\TargetFramework.cs" />
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
     <Compile Include="Utility\ReflectionUtility.cs" />
-    <Compile Include="Weavisor.cs" />
+    <Compile Include="ModuleWeaver.cs" />
     <Compile Include="AspectWeaver.cs" />
     <Compile Include="Binding.cs" />
     <Compile Include="Logger.cs" />
@@ -87,8 +87,8 @@
     <None Include="..\ArxOne.Weavisor\Properties\Weavisor.snk">
       <Link>Properties\Weavisor.snk</Link>
     </None>
-    <None Include="NuGetBuild\Tools\install.ps1" />
-    <None Include="NuGetBuild\Tools\uninstall.ps1" />
+    <None Include="nupkg\Tools\install.ps1" />
+    <None Include="nupkg\Tools\uninstall.ps1" />
     <None Include="Weavisor.nuspec">
       <SubType>Designer</SubType>
     </None>
@@ -97,7 +97,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="NuGetBuild\Content\" />
+    <None Include="nupkg\Content\Fody_ToBeDeleted.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
@@ -120,7 +120,7 @@ rem ----------------------------------------------------------------------------
 
 if not "$(ConfigurationName)"=="Release" goto :noRelease
 
-"$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectPath)" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive
+"$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectPath)" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Properties Configuration=$(ConfigurationName) -Tool
 
 :noRelease
 </PostBuildEvent>

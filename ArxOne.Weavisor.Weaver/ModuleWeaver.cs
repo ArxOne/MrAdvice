@@ -14,7 +14,7 @@ using Mono.Cecil;
 /// </summary>
 // ReSharper disable once UnusedMember.Global
 // ReSharper disable once CheckNamespace
-public class Weavisor
+public class ModuleWeaver
 {
     /// <summary>
     /// Gets or sets the module definition (injected by Fody).
@@ -63,7 +63,7 @@ public class Weavisor
     // ReSharper disable once UnusedMember.Global
     public string AssemblyPath { get; set; }
 
-    public Weavisor()
+    public ModuleWeaver()
     {
         LogInfo = m => { };
         LogWarning = m => { };
