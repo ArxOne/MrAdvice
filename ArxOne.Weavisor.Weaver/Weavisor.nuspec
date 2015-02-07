@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Weavisor.Fody</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://opensource.org/licenses/mit-license.php</licenseUrl>
+    <projectUrl>https://github.com/ArxOne/Weavisor</projectUrl>
+    <iconUrl>http://github.com/ArxOne/Weavisor/Icon/Weavisor.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>First package.</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>weaver aspect advice</tags>
+    <dependencies>
+      <dependency id="Fody" version="1.26.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="NuGetBuild\Tools\install.ps1" target="tools"/>
+    <file src="NuGetBuild\Tools\uninstall.ps1" target="tools"/>
+  </files>
+</package>
