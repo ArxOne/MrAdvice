@@ -12,7 +12,7 @@ Weavisor can weave assemblies for:
 
 ## How it works
 
-It will come as a NuGet package using Fody weaver, but currently, the job is not done (stay tuned, it will be available before the end of February 2015).
+It is available as a NuGet package (https://www.nuget.org/packages/Weavisor.Fody/)
 
 ## Philosophy
 
@@ -51,3 +51,8 @@ Your aspects can be injected at assembly, type or method level, simply by settin
 * When an aspect is injected at asembly level, all methods of all types are weaved.
 * When the aspect is injected at type level, all of its methods are weaved.
 * And of course, if the aspect is injected on a method, only the method is weaved.
+
+## Contact and links
+
+Project owner is [picrap](https://github.com/picrap), feel free to drop a mail :email:.  
+Project company is [Arx One](http://arxone.com), a french company editor of backup software solutions.  
