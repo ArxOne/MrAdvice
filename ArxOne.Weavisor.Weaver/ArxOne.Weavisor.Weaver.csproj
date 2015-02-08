@@ -119,11 +119,6 @@ if not "$(ConfigurationName)"=="Release" goto :noRelease
 
 "$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectPath)" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Properties Configuration=$(ConfigurationName) -Tool
 
-set apiKeyFile="$(SolutionDir)\..\nuget-api-key.txt"
-if not exist %25apiKeyFile%25 goto noPush
-rem "$(SolutionDir)\.nuget\NuGet.exe" push 
-:noPush
-
 :noRelease
 </PostBuildEvent>
   </PropertyGroup>
