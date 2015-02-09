@@ -114,6 +114,21 @@ namespace MethodLevelTest
             //var f = Expression.Call(m,Expression.Constant(this));
         }
 
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void TryBlockUnusedTest()
+        {
+            new EmptyAdvisedClass().TryBlockUnused();
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void TryBlockUsedTest()
+        {
+            new EmptyAdvisedClass().TryBlockUsed();
+        }
+
+
         private void Z(Delegate d)
         {}
 

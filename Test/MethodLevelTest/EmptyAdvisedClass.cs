@@ -97,6 +97,31 @@ namespace MethodLevelTest
             b = a;
         }
 
+        [EmptyMethodAdvice]
+        public void TryBlockUnused()
+        {
+            Overload(1);
+        }
+
+        [EmptyMethodAdvice]
+        public void TryBlockUsed()
+        {
+            try
+            {
+                Overload(1);
+            }
+            finally
+            {
+            }
+        }
+
+        public void TryBlocksTest()
+        {
+            TryBlockUsed();
+            TryBlockUnused();
+        }
+        
+
         ////[EmptyMethodAdvice]
         ////public void MethodWithGenericParameterTest<TValue>(TValue six)
         ////{

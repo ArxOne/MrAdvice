@@ -111,7 +111,7 @@ rem      this requires the assembly to be named "Weavers.dll" and placed in ".\W
 set weaversDir="$(SolutionDir)\Weavers\bin\$(ConfigurationName)"
 if not exist %25weaversDir%25 mkdir %25weaversDir%25
 
-copy $(TargetPath) %25weaversDir%25\Weavers.dll
+copy "$(TargetPath)" %25weaversDir%25\Weavers.dll
 
 rem --- NuGet pack and push ------------------------------------------------------------------------------
 

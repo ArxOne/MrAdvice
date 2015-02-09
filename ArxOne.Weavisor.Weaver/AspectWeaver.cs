@@ -241,10 +241,12 @@ namespace ArxOne.Weavisor.Weaver
             innerMethod.Parameters.AddRange(method.Parameters);
             innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
             innerMethod.Body.Variables.AddRange(method.Body.Variables);
+            innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
 
             // now empty the old one and make it call the inner method...
             method.Body.Instructions.Clear();
             method.Body.Variables.Clear();
+            method.Body.ExceptionHandlers.Clear();
             var instructions = new Instructions(method.Body.Instructions);
 
             var isStatic = method.Attributes.HasFlag(MethodAttributes.Static);
