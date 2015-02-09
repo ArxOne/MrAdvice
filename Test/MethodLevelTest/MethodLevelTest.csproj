@@ -55,6 +55,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Advices\Async.cs" />
     <Compile Include="Advices\ChangeParameter.cs" />
     <Compile Include="Advices\EmptyPropertyAdvice.cs" />
     <Compile Include="Advices\IntroductionAdvice.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Advices\RecordProperties.cs" />
     <Compile Include="Advices\RecordMethods.cs" />
     <Compile Include="Advices\StaticIntroductionAdvice.cs" />
+    <Compile Include="AdvisedClass.cs" />
     <Compile Include="BasicTests.cs" />
     <Compile Include="Advices\EmptyMethodAdvice.cs" />
     <Compile Include="EmptyAdvisedClass.cs" />

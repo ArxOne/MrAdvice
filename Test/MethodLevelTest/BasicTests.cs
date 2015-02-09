@@ -105,14 +105,14 @@ namespace MethodLevelTest
             Assert.AreEqual(4, b);
         }
 
-        [TestMethod]
-        public void NonGenericExpression()
-        {
-            Z(new Action(NonGenericExpression));
-            //Expression<Action> e = () => NonGenericExpression();
-            //var m = (MethodInfo)MethodBase.GetCurrentMethod();
-            //var f = Expression.Call(m,Expression.Constant(this));
-        }
+        //[TestMethod]
+        //public void NonGenericExpression()
+        //{
+        //    Z(new Action(NonGenericExpression));
+        //    //Expression<Action> e = () => NonGenericExpression();
+        //    //var m = (MethodInfo)MethodBase.GetCurrentMethod();
+        //    //var f = Expression.Call(m,Expression.Constant(this));
+        //}
 
         [TestMethod]
         [TestCategory("Weaving")]
@@ -128,9 +128,17 @@ namespace MethodLevelTest
             new EmptyAdvisedClass().TryBlockUsed();
         }
 
+        [TestMethod]
+        [TestCategory("Interception")]
+        public void AsyncTest()
+        {
+            var c = new AdvisedClass();
+            Assert.IsTrue(c.LaunchAsyncMethod());
+        }
+
 
         private void Z(Delegate d)
-        {}
+        { }
 
         ////[TestMethod]
         ////[TestCategory("Weaving")]
