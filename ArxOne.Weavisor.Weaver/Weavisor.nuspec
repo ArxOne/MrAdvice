@@ -22,6 +22,6 @@
   <files>
     <file src="NuGet\**\*" target="."/>
     <file src="$SolutionDir$ArxOne.Weavisor\bin\$ConfigurationName$\Weavisor.dll" target="lib\portable-net40+sl5"/>
-    <!--<file src="$TargetPath$" target="."/>-->
+    <file src="$SolutionDir$ArxOne.Weavisor\bin\$ConfigurationName$\Weavisor.xml" target="lib\portable-net40+sl5"/>
   </files>
 </package>

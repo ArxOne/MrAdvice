@@ -10,14 +10,14 @@ namespace ArxOne.Weavisor.Advice
     using System.Reflection;
 
     /// <summary>
-    /// Runtime initialization for properties
+    /// Advices for <see cref="PropertyInfo"/>
     /// </summary>
     public interface IPropertyInfoAdvice : IInfoAdvice
     {
         /// <summary>
         /// Invoked once per property, when assembly is loaded
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">The property info advice context</param>
         void Advise(PropertyInfoAdviceContext context);
     }
 }

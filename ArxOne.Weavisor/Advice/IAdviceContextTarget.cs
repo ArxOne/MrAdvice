@@ -3,6 +3,7 @@ namespace ArxOne.Weavisor.Advice
 {
     /// <summary>
     /// Target part with advice context
+    /// Used by introduced fields
     /// </summary>
     public interface IAdviceContextTarget
     {

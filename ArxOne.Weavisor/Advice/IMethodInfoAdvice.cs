@@ -10,14 +10,14 @@ namespace ArxOne.Weavisor.Advice
     using System.Reflection;
 
     /// <summary>
-    /// Runtime initialization for methods
+    /// Advices for <see cref="MethodInfo"/>
     /// </summary>
     public interface IMethodInfoAdvice: IInfoAdvice
     {
         /// <summary>
         /// Invoked once per method, when assembly is loaded
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">The method info advice context</param>
         void Advise(MethodInfoAdviceContext context);
     }
 }

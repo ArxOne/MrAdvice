@@ -8,8 +8,8 @@
 namespace ArxOne.Weavisor.Advice
 {
     /// <summary>
-    /// Advices implementing this interface can intercept access to properties
-    /// In a more precise way than IMethodAdvice would
+    /// Advices implementing this interface can intercept access to properties,
+    /// in a more precise way than IMethodAdvice would.
     /// </summary>
     public interface IPropertyAdvice: IAdvice
     {

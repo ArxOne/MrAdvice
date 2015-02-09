@@ -9,6 +9,9 @@ namespace ArxOne.Weavisor.Advice
 {
     using System.Reflection;
 
+    /// <summary>
+    /// Special terminal advice, which calls the final method
+    /// </summary>
     internal class InnerMethodContext : AdviceContext
     {
         private readonly MethodInfo _innerMethod;

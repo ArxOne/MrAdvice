@@ -7,9 +7,8 @@
 namespace ArxOne.Weavisor.Advice
 {
     /// <summary>
-    /// Represents an advice
-    /// This is the base class for all advices
-    /// You don't have to explicitly implement this interface, since all other interfaces implement it
+    /// Represents an advice; this is the base marker for all advices
+    /// You don't have to explicitly implement this interface, since all other interfaces inherit it
     /// </summary>
     public interface IAdvice
     {
