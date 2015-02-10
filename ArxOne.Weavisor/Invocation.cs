@@ -82,7 +82,7 @@ namespace ArxOne.Weavisor
         {
             foreach (var type in assembly.GetTypes())
             {
-                const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Instance;
+                const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
                 foreach (var methodInfo in type.GetMethods(bindingFlags))
                     ProcessMethodInitializers(methodInfo);
                 foreach (var constructorInfo in type.GetConstructors(bindingFlags))
