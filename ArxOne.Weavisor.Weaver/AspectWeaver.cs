@@ -237,7 +237,7 @@ namespace ArxOne.Weavisor.Weaver
             innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
             innerMethod.ImplAttributes = method.ImplAttributes;
             innerMethod.SemanticsAttributes = method.SemanticsAttributes;
-            innerMethod.Body.InitLocals = false;//method.Body.InitLocals;
+            innerMethod.Body.InitLocals = true;
             innerMethod.Parameters.AddRange(method.Parameters);
             innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
             innerMethod.Body.Variables.AddRange(method.Body.Variables);
