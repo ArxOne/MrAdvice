@@ -22,10 +22,10 @@ namespace ArxOne.Weavisor.Introduction
         private bool IsStatic { get { return _introducedField.IsStatic; } }
 
         /// <summary>
-        /// Gets or sets the <see cref="TFieldType"/> with the specified context.
+        /// Gets or sets the <see typeparamref="TFieldType"/> with the specified context.
         /// </summary>
         /// <value>
-        /// The <see cref="TFieldType"/>.
+        /// The <see typeparamref="TFieldType"/>.
         /// </value>
         /// <param name="context">The context.</param>
         /// <returns></returns>

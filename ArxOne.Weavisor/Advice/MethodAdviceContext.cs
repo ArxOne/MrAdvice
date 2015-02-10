@@ -8,8 +8,13 @@ namespace ArxOne.Weavisor.Advice
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Reflection;
 
+    /// <summary>
+    /// Method advice context, passed to method advisors
+    /// </summary>
+    [DebuggerDisplay("MethodInfo {TargetMethod}")]
     public class MethodAdviceContext : AdviceContext
     {
         /// <summary>

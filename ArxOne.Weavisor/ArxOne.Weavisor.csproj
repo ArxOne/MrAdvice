@@ -45,6 +45,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\Weavisor.XML</DocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -75,7 +76,7 @@
     <Compile Include="Advice\PropertyAdviceContext.cs" />
     <Compile Include="Advice\PropertyInfoAdviceContext.cs" />
     <Compile Include="Annotation\Priority.cs" />
-    <Compile Include="Collection\ArrayWrapper.cs" />
+    <Compile Include="Collection\ArraySpan.cs" />
     <Compile Include="Advice\IPropertyInfoAdvice.cs" />
     <Compile Include="Introduction\IntroducedField.cs" />
     <Compile Include="Introduction\IntroductionRules.cs" />

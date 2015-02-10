@@ -7,11 +7,13 @@
 
 namespace ArxOne.Weavisor.Advice
 {
+    using System.Diagnostics;
     using System.Reflection;
 
     /// <summary>
     /// Info context for MethodBase
     /// </summary>
+    [DebuggerDisplay("Property: {TargetProperty}")]
     public class PropertyInfoAdviceContext : AdviceInfoContext
     {
         /// <summary>

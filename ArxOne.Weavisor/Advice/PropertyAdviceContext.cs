@@ -9,9 +9,14 @@ namespace ArxOne.Weavisor.Advice
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Reflection;
     using Collection;
 
+    /// <summary>
+    /// Property advice context, passed to property advisors
+    /// </summary>
+    [DebuggerDisplay("Property: {TargetProperty}, {DebuggerGetSet}")]
     public class PropertyAdviceContext : AdviceContext
     {
         /// <summary>
@@ -103,6 +108,8 @@ namespace ArxOne.Weavisor.Advice
         /// </value>
         public bool IsSetter { get; private set; }
 
+        private string DebuggerGetSet{get { return IsGetter ? "Getter" : "Setter"; }}
+
         /// <summary>
         /// Gets the target property.
         /// </summary>
@@ -129,9 +136,9 @@ namespace ArxOne.Weavisor.Advice
             TargetProperty = propertyInfo;
             IsSetter = isSetter;
             if (IsGetter)
-                Index = new ArrayWrapper<object>(AdviceValues.Parameters, 0, AdviceValues.Parameters.Length);
+                Index = new ArraySpan<object>(AdviceValues.Parameters, 0, AdviceValues.Parameters.Length);
             else
-                Index = new ArrayWrapper<object>(AdviceValues.Parameters, 1, AdviceValues.Parameters.Length - 1);
+                Index = new ArraySpan<object>(AdviceValues.Parameters, 1, AdviceValues.Parameters.Length - 1);
         }
 
         /// <summary>
