@@ -31,7 +31,7 @@ Here is the minimal sample:
 ```csharp
 public class MyProudAdvice : Attribute, IMethodAdvice
 {
-    public void Advise(MethodCallContext context)
+    public void Advise(MethodAdviceContext context)
     {
         // do things you want here
         context.Proceed(); // this calls the original method
