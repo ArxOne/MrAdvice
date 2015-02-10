@@ -13,7 +13,7 @@ namespace MethodLevelTest
         public int Property { get; set; }
 
         [TestMethod]
-        [TestCategory("Initialize")]
+        [TestCategory("Info advice")]
         [RecordMethods]
         public void RecordMethodTest()
         {
@@ -23,7 +23,7 @@ namespace MethodLevelTest
         }
 
         [TestMethod]
-        [TestCategory("Initialize")]
+        [TestCategory("Info advice")]
         public void RecordPropertyTest()
         {
             var propertyInfos = RecordProperties.PropertyInfos;

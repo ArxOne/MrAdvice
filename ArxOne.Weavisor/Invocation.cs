@@ -46,7 +46,7 @@ namespace ArxOne.Weavisor
         /// <exception cref="System.NotImplementedException"></exception>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedMethod(object target, object[] parameters, MethodBase methodBase, MethodInfo innerMethod)
+        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodInfo innerMethod)
         {
             AdviceChain adviceChain;
             lock (AdviceChains)
@@ -74,56 +74,63 @@ namespace ArxOne.Weavisor
         }
 
         /// <summary>
-        /// Processes the runtime initializers.
+        /// Processes the info advices.
         /// </summary>
         /// <param name="assembly">The assembly.</param>
         // ReSharper disable once UnusedMember.Global
-        public static void ProcessInitializers(Assembly assembly)
+        public static void ProcessInfoAdvices(Assembly assembly)
         {
             foreach (var type in assembly.GetTypes())
+                ProcessInfoAdvices(type);
+        }
+
+        /// <summary>
+        /// Processes the info advices.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        public static void ProcessInfoAdvices(Type type)
+        {
+            const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+            foreach (var methodInfo in type.GetMethods(bindingFlags))
+                ProcessMethodInfoAdvices(methodInfo);
+            foreach (var constructorInfo in type.GetConstructors(bindingFlags))
+                ProcessMethodInfoAdvices(constructorInfo);
+            foreach (var propertyInfo in type.GetProperties(bindingFlags))
             {
-                const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-                foreach (var methodInfo in type.GetMethods(bindingFlags))
-                    ProcessMethodInitializers(methodInfo);
-                foreach (var constructorInfo in type.GetConstructors(bindingFlags))
-                    ProcessMethodInitializers(constructorInfo);
-                foreach (var propertyInfo in type.GetProperties(bindingFlags))
-                {
-                    ProcessMethodInitializers(propertyInfo.GetGetMethod());
-                    ProcessMethodInitializers(propertyInfo.GetSetMethod());
-                    ProcessPropertyInitializers(propertyInfo);
-                }
+                ProcessMethodInfoAdvices(propertyInfo.GetGetMethod());
+                ProcessMethodInfoAdvices(propertyInfo.GetSetMethod());
+                ProcessPropertyInfoAdvices(propertyInfo);
             }
         }
 
         /// <summary>
-        /// Processes the initializers for MethodInfo.
+        /// Processes the info advices for MethodInfo.
         /// </summary>
         /// <param name="methodInfo">The method information.</param>
-        private static void ProcessMethodInitializers(MethodBase methodInfo)
+        private static void ProcessMethodInfoAdvices(MethodBase methodInfo)
         {
             if (methodInfo == null)
                 return;
-            var methodInitializers = GetAttributes<IMethodInfoAdvice>(methodInfo);
-            foreach (var methodInitializer in methodInitializers)
+            var methodInfoAdvices = GetAttributes<IMethodInfoAdvice>(methodInfo);
+            foreach (var methodInfoAdvice in methodInfoAdvices)
             {
                 // actually, introducing fields does not make sense here, until we introduce static fields
-                SafeInjectIntroducedFields(methodInitializer as IAdvice, methodInfo.DeclaringType);
-                methodInitializer.Advise(new MethodInfoAdviceContext(methodInfo));
+                SafeInjectIntroducedFields(methodInfoAdvice as IAdvice, methodInfo.DeclaringType);
+                methodInfoAdvice.Advise(new MethodInfoAdviceContext(methodInfo));
             }
         }
 
         /// <summary>
-        /// Processes the initializers for ProperyInfo.
+        /// Processes the info advices for PropertyInfo.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
-        private static void ProcessPropertyInitializers(PropertyInfo propertyInfo)
+        private static void ProcessPropertyInfoAdvices(PropertyInfo propertyInfo)
         {
-            var propertyInitializers = GetAttributes<IPropertyInfoAdvice>(propertyInfo);
-            foreach (var propertyInitializer in propertyInitializers)
+            var propertyInfoAdvices = GetAttributes<IPropertyInfoAdvice>(propertyInfo);
+            foreach (var propertyInfoAdvice in propertyInfoAdvices)
             {
-                SafeInjectIntroducedFields(propertyInitializer as IAdvice, propertyInfo.DeclaringType);
-                propertyInitializer.Advise(new PropertyInfoAdviceContext(propertyInfo));
+                SafeInjectIntroducedFields(propertyInfoAdvice as IAdvice, propertyInfo.DeclaringType);
+                propertyInfoAdvice.Advise(new PropertyInfoAdviceContext(propertyInfo));
             }
         }
 

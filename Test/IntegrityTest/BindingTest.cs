@@ -7,6 +7,7 @@
 
 namespace IntegrityTest
 {
+    using System.Reflection;
     using ArxOne.Weavisor;
     using ArxOne.Weavisor.Advice;
     using ArxOne.Weavisor.Introduction;
@@ -49,15 +50,15 @@ namespace IntegrityTest
         [TestCategory("Integrity")]
         public void InvocationProceedMethodMethodNameTest()
         {
-            var invocationProceedMethodMethod = ReflectionUtility.GetMethodInfo(() => Invocation.ProceedMethod(null, null, null, null));
-            Assert.AreEqual(invocationProceedMethodMethod.Name, Binding.InvocationProceedMethodMethodName);
+            var invocationProceedMethodMethod = ReflectionUtility.GetMethodInfo(() => Invocation.ProceedAdvice(null, null, null, null));
+            Assert.AreEqual(invocationProceedMethodMethod.Name, Binding.InvocationProceedAdviceMethodName);
         }
         [TestMethod]
         [TestCategory("Integrity")]
         public void InvocationProcessRuntimeInitializersMethodNameTest()
         {
-            var invocationProcessRuntimeInitializersMethod = ReflectionUtility.GetMethodInfo(() => Invocation.ProcessInitializers(null));
-            Assert.AreEqual(invocationProcessRuntimeInitializersMethod.Name, Binding.InvocationProcessRuntimeInitializersMethodName);
+            var invocationProcessRuntimeInitializersMethod = ReflectionUtility.GetMethodInfo(() => Invocation.ProcessInfoAdvices((Assembly)null));
+            Assert.AreEqual(invocationProcessRuntimeInitializersMethod.Name, Binding.InvocationProcessInfoAdvicesMethodName);
         }
     }
 }

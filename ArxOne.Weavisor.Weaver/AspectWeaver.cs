@@ -47,6 +47,8 @@ namespace ArxOne.Weavisor.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         public void Weave(ModuleDefinition moduleDefinition)
         {
+            var start = DateTime.UtcNow;
+
             // sanity check
             var adviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName);
             if (adviceInterface == null)
@@ -56,7 +58,6 @@ namespace ArxOne.Weavisor.Weaver
             }
             // runtime check
             var targetFramework = GetTargetFramework(moduleDefinition);
-            Logger.Write("Assembly '{0}' targets framework {1}", moduleDefinition.Assembly.FullName, targetFramework);
             InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
 
             // weave methods (they can be property-related, too)
@@ -69,8 +70,20 @@ namespace ArxOne.Weavisor.Weaver
 
             // and then, the info advices
             var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName);
-            if (GetMethods(moduleDefinition, infoAdviceInterface).Any())
-                WeaveInfoAdvices(moduleDefinition);
+            //if (GetMethods(moduleDefinition, infoAdviceInterface).Any())
+            //    WeaveInfoAdvices(moduleDefinition);
+            foreach (var typeDefinition in moduleDefinition.GetTypes())
+            {
+                if (GetMethods(typeDefinition, infoAdviceInterface).Any())
+                {
+                    Logger.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
+                    WeaveInfoAdvices(typeDefinition, moduleDefinition, false);
+                }
+            }
+
+            var end = DateTime.UtcNow;
+            Logger.Write("Weavisor weaved module '{0}' (targeting framework {2}) in {1}ms",
+                moduleDefinition.Assembly.FullName, (int)(end - start).TotalMilliseconds, targetFramework);
         }
 
         /// <summary>
@@ -178,35 +191,62 @@ namespace ArxOne.Weavisor.Weaver
         }
 
         /// <summary>
-        /// Weaves the runtime initializers for the given module.
+        /// Weaves the info advices for the given module.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         private void WeaveInfoAdvices(ModuleDefinition moduleDefinition)
         {
             var moduleType = moduleDefinition.Types.Single(t => t.Name == "<Module>");
+            WeaveInfoAdvices(moduleType, moduleDefinition, true);
+        }
+
+        /// <summary>
+        /// Weaves the info advices for the given type.
+        /// </summary>
+        /// <param name="infoAdvisedType">Type of the module.</param>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="useWholeAssembly">if set to <c>true</c> [use whole assembly].</param>
+        private void WeaveInfoAdvices(TypeDefinition infoAdvisedType, ModuleDefinition moduleDefinition, bool useWholeAssembly)
+        {
+            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName);
+            if (invocationType == null)
+                return;
+            var proceedRuntimeInitializersReference = (from m in invocationType.GetMethods()
+                                                       where m.IsStatic && m.Name == Binding.InvocationProcessInfoAdvicesMethodName
+                                                       let parameters = m.Parameters
+                                                       where parameters.Count == 1
+                                                             && parameters[0].ParameterType.SafeEquivalent(
+                                                             moduleDefinition.Import(useWholeAssembly ? typeof(Assembly) : typeof(Type)))
+                                                       select m).SingleOrDefault();
+            if (proceedRuntimeInitializersReference == null)
+            {
+                Logger.WriteWarning("Info advice method not foud");
+                return;
+            }
 
             const string cctorMethodName = ".cctor";
-            var staticCtor = moduleType.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
+            var staticCtor = infoAdvisedType.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
             if (staticCtor == null)
             {
                 staticCtor = new MethodDefinition(cctorMethodName,
-                           (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
-                           | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
-                           moduleDefinition.Import(typeof(void)));
-                moduleType.Methods.Add(staticCtor);
+                    (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
+                    | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+                    moduleDefinition.Import(typeof(void)));
+                infoAdvisedType.Methods.Add(staticCtor);
             }
 
             var instructions = new Instructions(staticCtor.Body.Instructions);
 
-            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName);
-            if (invocationType == null)
-                return;
-            var proceedRuntimeInitializersReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProcessRuntimeInitializersMethodName);
-            if (proceedRuntimeInitializersReference == null)
-                return;
             var proceedMethod = moduleDefinition.Import(proceedRuntimeInitializersReference);
 
-            instructions.Emit(OpCodes.Call, moduleDefinition.Import(ReflectionUtility.GetMethodInfo(() => Assembly.GetExecutingAssembly())));
+            if (useWholeAssembly)
+                instructions.Emit(OpCodes.Call, moduleDefinition.Import(ReflectionUtility.GetMethodInfo(() => Assembly.GetExecutingAssembly())));
+            else
+            {
+                instructions.Emit(OpCodes.Ldtoken, moduleDefinition.Import(infoAdvisedType));
+                var getTypeFromHandleMethodInfo = ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()));
+                instructions.Emit(OpCodes.Call, moduleDefinition.Import(getTypeFromHandleMethodInfo));
+            }
             instructions.Emit(OpCodes.Call, proceedMethod);
             instructions.Emit(OpCodes.Ret);
         }
@@ -307,7 +347,7 @@ namespace ArxOne.Weavisor.Weaver
             var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName);
             if (invocationType == null)
                 return;
-            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedMethodMethodName);
+            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedAdviceMethodName);
             if (proceedMethodReference == null)
                 return;
             var proceedMethod = moduleDefinition.Import(proceedMethodReference);
@@ -362,37 +402,45 @@ namespace ArxOne.Weavisor.Weaver
         /// <returns></returns>
         private IEnumerable<MethodDefinition> GetMethods(ModuleDefinition moduleDefinition, TypeDefinition markerInterface)
         {
-            foreach (var typeDefinition in moduleDefinition.GetTypes())
+            return moduleDefinition.GetTypes().SelectMany(typeDefinition => GetMethods(typeDefinition, markerInterface));
+        }
+
+        /// <summary>
+        /// Gets all weavable methors from type.
+        /// </summary>
+        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="markerInterface">The marker interface.</param>
+        /// <returns></returns>
+        private IEnumerable<MethodDefinition> GetMethods(TypeDefinition typeDefinition, TypeDefinition markerInterface)
+        {
+            // methods
+            foreach (var methodDefinition in typeDefinition.GetMethods())
             {
-                // methods
-                foreach (var methodDefinition in typeDefinition.GetMethods())
+                if (GetAllAdvices(methodDefinition, markerInterface).Any())
                 {
-                    if (GetAllAdvices(methodDefinition, markerInterface).Any())
+                    if (typeDefinition.HasGenericParameters || methodDefinition.HasGenericParameters)
                     {
-                        if (typeDefinition.HasGenericParameters || methodDefinition.HasGenericParameters)
-                        {
-                            Logger.WriteWarning("Generic method {0} can not be weaved", methodDefinition.FullName);
-                            continue;
-                        }
-                        yield return methodDefinition;
+                        Logger.WriteWarning("Generic method {0} can not be weaved", methodDefinition.FullName);
+                        continue;
                     }
+                    yield return methodDefinition;
                 }
-                // ctors
-                foreach (var ctorDefinition in typeDefinition.GetConstructors())
+            }
+            // ctors
+            foreach (var ctorDefinition in typeDefinition.GetConstructors())
+            {
+                if (GetAllAdvices(ctorDefinition, markerInterface).Any())
+                    yield return ctorDefinition;
+            }
+            // properties have methods too
+            foreach (var propertyDefinition in typeDefinition.Properties)
+            {
+                if (GetAllAdvices(propertyDefinition, markerInterface).Any())
                 {
-                    if (GetAllAdvices(ctorDefinition, markerInterface).Any())
-                        yield return ctorDefinition;
-                }
-                // properties have methods too
-                foreach (var propertyDefinition in typeDefinition.Properties)
-                {
-                    if (GetAllAdvices(propertyDefinition, markerInterface).Any())
-                    {
-                        if (propertyDefinition.GetMethod != null)
-                            yield return propertyDefinition.GetMethod;
-                        if (propertyDefinition.SetMethod != null)
-                            yield return propertyDefinition.SetMethod;
-                    }
+                    if (propertyDefinition.GetMethod != null)
+                        yield return propertyDefinition.GetMethod;
+                    if (propertyDefinition.SetMethod != null)
+                        yield return propertyDefinition.SetMethod;
                 }
             }
         }

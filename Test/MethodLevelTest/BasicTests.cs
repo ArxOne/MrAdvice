@@ -10,6 +10,7 @@ namespace MethodLevelTest
     using System.Linq.Expressions;
     using System.Reflection;
     using Advices;
+    using ArxOne.Weavisor;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     public class MethodAdvisedCtorClass
@@ -138,7 +139,9 @@ namespace MethodLevelTest
 
 
         private void Z(Delegate d)
-        { }
+        {
+            Invocation.ProcessInfoAdvices(typeof(BasicTests));
+        }
 
         ////[TestMethod]
         ////[TestCategory("Weaving")]
