@@ -1,10 +1,16 @@
-﻿
+﻿#region Mr. Advice
+// Mr. Advice
+// A simple post build weaving package
+// https://github.com/ArxOne/MrAdvice
+// Released under MIT license http://opensource.org/licenses/mit-license.php
+#endregion
+
 namespace MethodLevelTest.Advices
 {
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using ArxOne.Weavisor.Advice;
+    using ArxOne.MrAdvice.Advice;
 
     public class RecordMethods : Attribute, IMethodInfoAdvice
     {

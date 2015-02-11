@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>MrAdvice.Fody</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://opensource.org/licenses/mit-license.php</licenseUrl>
+    <projectUrl>https://github.com/ArxOne/MrAdvice</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/ArxOne/MrAdvice/master/Icon/MrAdvice.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>weaver aspect advice</tags>
+    <dependencies>
+      <dependency id="Fody" />
+    </dependencies>
+    <developmentDependency>true</developmentDependency>
+  </metadata>
+  <files>
+    <file src="NuGet\**\*" target="."/>
+    <file src="$SolutionDir$MrAdvice\bin\$ConfigurationName$\MrAdvice.dll" target="lib\portable-net40+sl5"/>
+    <file src="$SolutionDir$MrAdvice\bin\$ConfigurationName$\MrAdvice.xml" target="lib\portable-net40+sl5"/>
+  </files>
+</package>

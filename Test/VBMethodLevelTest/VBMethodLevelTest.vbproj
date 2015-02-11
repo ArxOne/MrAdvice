@@ -82,16 +82,16 @@
     <Compile Include="BasicTest.vb" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ArxOne.Weavisor\ArxOne.Weavisor.csproj">
-      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
-      <Name>ArxOne.Weavisor</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj">
+      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
+      <Name>MrAdvice</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

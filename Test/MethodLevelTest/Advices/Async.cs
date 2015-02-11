@@ -1,10 +1,15 @@
-﻿
+﻿#region Mr. Advice
+// Mr. Advice
+// A simple post build weaving package
+// https://github.com/ArxOne/MrAdvice
+// Released under MIT license http://opensource.org/licenses/mit-license.php
+#endregion
+
 namespace BlueDwarf.Utility
 {
     using System;
-    using System.Reflection;
     using System.Threading;
-    using ArxOne.Weavisor.Advice;
+    using ArxOne.MrAdvice.Advice;
 
     /// <summary>
     /// Allows to invoke a method asynchronously (here, in a background thread)

@@ -1,4 +1,4 @@
-﻿Imports ArxOne.Weavisor.Advice
+﻿Imports ArxOne.MrAdvice.Advice
 
 Namespace Advices
     Public Class EmptyMethodAdvice

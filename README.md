@@ -1,12 +1,12 @@
-# Weavisor
+# MrAdvice
 
 ## Summary
 
-Weavisor is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net).  
+MrAdvice is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net).  
 It intends to inject aspects at build-time. Advices are written in the form of attributes, and marking methods with them makes the pointcut, resulting in a nice and easy aspect injection.  
 More information about what is an aspect at [Wikipedia](http://en.wikipedia.org/wiki/Aspect-oriented_programming).  
 
-Weavisor can weave assemblies for:
+MrAdvice can weave assemblies for:
 
 * .NET framework (4 and above)
 * Mono
@@ -15,11 +15,11 @@ Weavisor can weave assemblies for:
 
 ## How it works
 
-It is available as a NuGet package (https://www.nuget.org/packages/Weavisor.Fody)
+It is available as a NuGet package (https://www.nuget.org/packages/MrAdvice.Fody)
 
 ## Philosophy
 
-Currently, Weavisor won't bring you any aspect out-of-the-box.
+Currently, MrAdvice won't bring you any aspect out-of-the-box.
 This means you'll have to write your own aspects.  
 So it brings us to the next chapter, which is...
 
@@ -59,7 +59,7 @@ Your aspects can be injected at assembly, type or method level, simply by settin
 ## Some disclaimer 
 (almost hidden at the almost end of this almost interesting readme)
 
-Weavisor exposes an API (such as `IAdvice`, `IMethodAdvice`, etc.), which is subject to change until we reach the version 1.0.  
+MrAdvice exposes an API (such as `IAdvice`, `IMethodAdvice`, etc.), which is subject to change until we reach the version 1.0.  
 Of course, there shouldn't be any structural change, but methods might be renamed, or parameters changed if we need it to improve the product.
 
 ## Contact and links

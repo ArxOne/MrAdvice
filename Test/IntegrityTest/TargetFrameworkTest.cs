@@ -1,14 +1,13 @@
-﻿#region Weavisor
-// Weavisor
+﻿#region Mr. Advice
+// Mr. Advice
 // A simple post build weaving package
-// https://github.com/ArxOne/Weavisor
+// https://github.com/ArxOne/MrAdvice
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
-
 namespace IntegrityTest
 {
     using System;
-    using ArxOne.Weavisor.Weaver.Reflection;
+    using ArxOne.MrAdvice.Weaver.Reflection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
