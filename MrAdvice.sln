@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Icon", "Icon", "{C24CF080-EAAE-4F62-9A1B-E6F03421FB0C}"
 	ProjectSection(SolutionItems) = preProject
+		Icon\MrAdvice.ai = Icon\MrAdvice.ai
+		Icon\MrAdvice.png = Icon\MrAdvice.png
 		Icon\Weavisor.ai = Icon\Weavisor.ai
 		Icon\Weavisor.png = Icon\Weavisor.png
 		Icon\Weavisor32.png = Icon\Weavisor32.png
