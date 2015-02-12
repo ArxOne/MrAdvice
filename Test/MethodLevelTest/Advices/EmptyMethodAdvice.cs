@@ -11,9 +11,9 @@ namespace MethodLevelTest.Advices
 
     public class EmptyMethodAdvice : Attribute, IMethodAdvice
     {
-        public void Advise(MethodAdviceContext call)
+        public void Advise(MethodAdviceContext context)
         {
-            call.Proceed();
+            context.Proceed();
         }
     }
 }
