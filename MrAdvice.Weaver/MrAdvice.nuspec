@@ -13,7 +13,7 @@
     <description>$description$</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2015</copyright>
-    <tags>weaver aspect advice</tags>
+    <tags>weaver aspect advice pointcut .net attributes injection</tags>
     <dependencies>
       <dependency id="Fody" />
     </dependencies>
