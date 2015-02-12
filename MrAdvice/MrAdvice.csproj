@@ -79,12 +79,14 @@
     <Compile Include="Collection\ArraySpan.cs" />
     <Compile Include="Advice\IPropertyInfoAdvice.cs" />
     <Compile Include="Introduction\IntroducedField.cs" />
+    <Compile Include="Introduction\IntroducedFieldAttribute.cs" />
     <Compile Include="Introduction\IntroductionRules.cs" />
     <Compile Include="Invocation.cs" />
     <Compile Include="Advice\IAdvice.cs" />
     <Compile Include="Advice\IMethodAdvice.cs" />
     <Compile Include="Properties\ProductInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\MemberInfoExtensions.cs" />
     <Compile Include="Utility\TypeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

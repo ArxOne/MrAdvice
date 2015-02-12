@@ -65,7 +65,7 @@ namespace ArxOne.MrAdvice.Weaver
             foreach (var method in weavableMethods)
             {
                 WeaveAdvices(method);
-                WeaveIntroductions(method, adviceInterface);
+                WeaveIntroductions(method, adviceInterface, moduleDefinition);
             }
 
             // and then, the info advices
@@ -122,17 +122,19 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="method">The method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
-        private void WeaveIntroductions(MethodDefinition method, TypeDefinition adviceInterface)
+        /// <param name="moduleDefinition">The module definition.</param>
+        private void WeaveIntroductions(MethodDefinition method, TypeDefinition adviceInterface, ModuleDefinition moduleDefinition)
         {
             var typeDefinition = method.DeclaringType;
             var advices = GetAllAdvices(method, adviceInterface);
+            var markerAttributeCtor = moduleDefinition.Import(TypeResolver.Resolve(moduleDefinition, Binding.IntroducedFieldAttributeName).GetConstructors().Single());
             foreach (var advice in advices)
             {
                 var adviceDefinition = advice.Resolve();
                 foreach (var field in adviceDefinition.Fields)
-                    IntroduceMember(method.Module, field.Name, field.FieldType, field.IsStatic, advice, typeDefinition);
+                    IntroduceMember(method.Module, field.Name, field.FieldType, field.IsStatic, advice, typeDefinition, markerAttributeCtor);
                 foreach (var property in adviceDefinition.Properties)
-                    IntroduceMember(method.Module, property.Name, property.PropertyType, !property.HasThis, advice, typeDefinition);
+                    IntroduceMember(method.Module, property.Name, property.PropertyType, !property.HasThis, advice, typeDefinition, markerAttributeCtor);
             }
         }
 
@@ -145,7 +147,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="isStatic">if set to <c>true</c> [is static].</param>
         /// <param name="adviceType">The advice.</param>
         /// <param name="advisedType">The type definition.</param>
-        private void IntroduceMember(ModuleDefinition moduleDefinition, string memberName, TypeReference memberType, bool isStatic, TypeReference adviceType, TypeDefinition advisedType)
+        /// <param name="markerAttributeCtor">The marker attribute ctor.</param>
+        private void IntroduceMember(ModuleDefinition moduleDefinition, string memberName, TypeReference memberType, bool isStatic,
+            TypeReference adviceType, TypeDefinition advisedType, MethodReference markerAttributeCtor)
         {
             TypeReference introducedFieldType;
             if (IsIntroduction(moduleDefinition, memberType, out introducedFieldType))
@@ -156,8 +160,8 @@ namespace ArxOne.MrAdvice.Weaver
                     var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
                     if (isStatic)
                         fieldAttributes |= FieldAttributes.Static;
-                    var introducedField = new FieldDefinition(introducedFieldName,
-                       fieldAttributes, moduleDefinition.Import(introducedFieldType));
+                    var introducedField = new FieldDefinition(introducedFieldName, fieldAttributes, moduleDefinition.Import(introducedFieldType));
+                    introducedField.CustomAttributes.Add(new CustomAttribute(markerAttributeCtor));
                     advisedType.Fields.Add(introducedField);
                 }
             }

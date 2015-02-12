@@ -8,6 +8,8 @@ namespace ArxOne.MrAdvice.Utility
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
 
     /// <summary>
     /// Extensions to type
@@ -26,6 +28,17 @@ namespace ArxOne.MrAdvice.Utility
                 yield return type;
                 type = type.BaseType;
             }
+        }
+
+        /// <summary>
+        /// Gets the fields and properties.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="bindingFlags">The binding flags.</param>
+        /// <returns></returns>
+        public static IEnumerable<MemberInfo> GetFieldsAndProperties(this Type type, BindingFlags bindingFlags)
+        {
+            return type.GetFields(bindingFlags).Cast<MemberInfo>().Concat(type.GetProperties(bindingFlags));
         }
     }
 }
