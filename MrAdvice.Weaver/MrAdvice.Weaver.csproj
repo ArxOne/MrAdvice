@@ -88,6 +88,8 @@
       <Link>Properties\MrAdvice.snk</Link>
     </None>
     <None Include="MrAdvice.nuspec" />
+    <None Include="NuGet\tools\install.ps1" />
+    <None Include="NuGet\tools\uninstall.ps1" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
