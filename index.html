@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Mr. Advice by ArxOne</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Mr. Advice</h1>
+          <h2>.NET aspect weaver</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/ArxOne/MrAdvice/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/ArxOne/MrAdvice/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/ArxOne/MrAdvice" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="summary" class="anchor" href="#summary" aria-hidden="true"><span class="octicon octicon-link"></span></a>Summary</h1>
+
+<p>Mr. Advice is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see <a href="https://www.postsharp.net">https://www.postsharp.net</a>).<br>
+It intends to inject aspects at build-time. Advices are written in the form of attributes, and marking methods with them makes the pointcut, resulting in a nice and easy aspect injection.<br>
+More information about what is an aspect at <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Wikipedia</a>.  </p>
+
+<p>MrAdvice can weave assemblies for:</p>
+
+<ul>
+<li>.NET framework (4 and above)</li>
+<li>Mono</li>
+<li>Silverlight (4 &amp; 5)</li>
+<li>Windows Phone (8 and above)</li>
+</ul>
+
+<h1>
+<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it works</h1>
+
+<p>It is available as a NuGet package (<a href="https://www.nuget.org/packages/MrAdvice.Fody">https://www.nuget.org/packages/MrAdvice.Fody</a>)</p>
+
+<h1>
+<a id="philosophy" class="anchor" href="#philosophy" aria-hidden="true"><span class="octicon octicon-link"></span></a>Philosophy</h1>
+
+<p>Currently, MrAdvice won't bring you any aspect out-of-the-box.
+This means you'll have to write your own aspects.<br>
+So it brings us to the next chapter, which is...</p>
+
+<h1>
+<a id="how-to-implement-your-own-aspects" class="anchor" href="#how-to-implement-your-own-aspects" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to implement your own aspects</h1>
+
+<h2>
+<a id="in-a-nutshell" class="anchor" href="#in-a-nutshell" aria-hidden="true"><span class="octicon octicon-link"></span></a>In a nutshell</h2>
+
+<p>Here is the minimal sample:</p>
+
+<div class="highlight highlight-csharp"><pre><span class="pl-s">public</span> <span class="pl-s">class</span> <span class="pl-en">MyProudAdvice</span> : <span class="pl-st">Attribute</span>, <span class="pl-st">IMethodAdvice</span>
+{
+    <span class="pl-s">public</span> <span class="pl-st">void</span> <span class="pl-en">Advise</span>(<span class="pl-st">MethodAdviceContext</span> <span class="pl-vpf">context</span>)
+    {
+        <span class="pl-c">// do things you want here</span>
+        context.Proceed(); <span class="pl-c">// this calls the original method</span>
+        <span class="pl-c">// do other things here</span>
+    }
+}</pre></div>
+
+<p>You then just need to mark the method(s) with the attribute and that's it, your aspect is injected!</p>
+
+<div class="highlight highlight-csharp"><pre>[MyProudAdvice]
+<span class="pl-s">public</span> <span class="pl-st">void</span> MyProudMethod()
+{
+}</pre></div>
+
+<h2>
+<a id="more-details" class="anchor" href="#more-details" aria-hidden="true"><span class="octicon octicon-link"></span></a>More details</h2>
+
+<p>Your aspects can be injected at assembly, type or method level, simply by setting the attribute:</p>
+
+<ul>
+<li>When an aspect is injected at asembly level, all methods of all types are weaved.</li>
+<li>When the aspect is injected at type level, all of its methods are weaved.</li>
+<li>And of course, if the aspect is injected on a method, only the method is weaved.</li>
+</ul>
+
+<h1>
+<a id="some-disclaimer" class="anchor" href="#some-disclaimer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Some disclaimer</h1>
+
+<p>(almost hidden at the almost end of this almost interesting readme)</p>
+
+<p>MrAdvice exposes an API (such as <code>IAdvice</code>, <code>IMethodAdvice</code>, etc.), which is subject to change until we reach the version 1.0.<br>
+Of course, there shouldn't be any structural change, but methods might be renamed, or parameters changed if we need it to improve the product.</p>
+
+<h1>
+<a id="contact-and-links" class="anchor" href="#contact-and-links" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contact and links</h1>
+
+<p>Project owner is <a href="https://github.com/picrap">picrap</a>, feel free to drop a mail <img class="emoji" title=":email:" alt=":email:" src="https://assets-cdn.github.com/images/icons/emoji/unicode/2709.png" height="20" width="20" align="absmiddle">.<br>
+Project company is <a href="http://arxone.com">Arx One</a>, a french company editor of backup software solutions.  </p>
+        </section>
+
+        <footer>
+          Mr. Advice is maintained by <a href="https://github.com/ArxOne">ArxOne</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
