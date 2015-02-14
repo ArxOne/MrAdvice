@@ -9,7 +9,6 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System.IO;
     using System.Linq;
-    using IO;
     using Mono.Cecil;
 
     /// <summary>
@@ -17,14 +16,6 @@ namespace ArxOne.MrAdvice.Weaver
     /// </summary>
     internal class TypeResolver
     {
-        /// <summary>
-        /// Gets or sets the logger.
-        /// </summary>
-        /// <value>
-        /// The logger.
-        /// </value>
-        public Logger Logger { get; set; }
-
         /// <summary>
         /// Gets or sets the assembly resolver.
         /// </summary>

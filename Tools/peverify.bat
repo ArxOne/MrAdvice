@@ -11,6 +11,7 @@ goto noverify
 rem 0x801318AA is because of Action(method)
 rem 0x801318BF because an advised ctor can call the base class ctor
 rem 0x80131859 warning of 'this' being unitialized in ctor
-%peverify% /nologo /hresult /ignore=0x801318AA,0x801318BF,0x80131859 %1
+rem 0x80131884 initonly fields outside of cctor
+%peverify% /nologo /hresult /ignore=0x801318AA,0x801318BF,0x80131859,0x80131884 %1
 
 :noverify

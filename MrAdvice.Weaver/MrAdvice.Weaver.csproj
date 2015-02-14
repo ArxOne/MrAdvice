@@ -70,11 +70,20 @@
       <Link>Properties\ProductInfo.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reflection\Groups\AssemblyReflectionNode.cs" />
+    <Compile Include="Reflection\Groups\MethodReflectionNode.cs" />
+    <Compile Include="Reflection\Groups\ModuleReflectionNode.cs" />
+    <Compile Include="Reflection\Groups\ParameterReflectionNode.cs" />
+    <Compile Include="Reflection\Groups\PropertyReflectionNode.cs" />
+    <Compile Include="Reflection\Groups\ReflectionNode.cs" />
+    <Compile Include="Reflection\Groups\TypeReflectionNode.cs" />
     <Compile Include="Reflection\TargetFramework.cs" />
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
     <Compile Include="Utility\ReflectionUtility.cs" />
     <Compile Include="ModuleWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.cs" />
+    <Compile Include="Weaver\AspectWeaver.Names.cs" />
+    <Compile Include="Weaver\AspectWeaver.Weave.cs" />
     <Compile Include="Weaver\Binding.cs" />
     <Compile Include="IO\Logger.cs" />
     <Compile Include="Weaver\TypeResolver.cs" />

@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Utility
     using System;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Mono.Cecil;
 
     /// <summary>
     /// What is extreme laziness? :)
@@ -178,6 +179,28 @@ namespace ArxOne.MrAdvice.Utility
             if (memberInfo is PropertyInfo)
                 return ((PropertyInfo)memberInfo).PropertyType;
             throw new ArgumentException("memberInfo");
+        }
+
+        /// <summary>
+        /// Determines whether the given method is part of a property (getter or setter).
+        /// </summary>
+        /// <param name="methodDefinition">The method definition.</param>
+        /// <returns></returns>
+        internal static bool IsPropertyMethod(this MethodDefinition methodDefinition)
+        {
+            if (!methodDefinition.IsSpecialName)
+                return false;
+            return methodDefinition.Name.StartsWith("get_") || methodDefinition.Name.StartsWith("set_");
+        }
+
+        /// <summary>
+        /// Gets the name of the property.
+        /// </summary>
+        /// <param name="methodName">Name of the method.</param>
+        /// <returns></returns>
+        internal static string GetPropertyName(string methodName)
+        {
+            return methodName.Substring(4);
         }
     }
 }

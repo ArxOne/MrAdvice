@@ -78,9 +78,10 @@ public class ModuleWeaver
     {
         // instances are created here
         // please also note poor man's dependency injection (which is enough for us here)
-        var logger = new Logger { LogInfo = LogInfo, LogWarning = LogWarning };
-        var typeResolver = new TypeResolver { AssemblyResolver = AssemblyResolver, Logger = logger };
-        var aspectWeaver = new AspectWeaver { Logger = logger, TypeResolver = typeResolver };
+        Logger.LogInfo = LogInfo;
+        Logger.LogWarning = LogWarning;
+        var typeResolver = new TypeResolver { AssemblyResolver = AssemblyResolver };
+        var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver };
         aspectWeaver.Weave(ModuleDefinition);
     }
 }

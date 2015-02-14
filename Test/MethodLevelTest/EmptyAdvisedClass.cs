@@ -126,7 +126,18 @@ namespace MethodLevelTest
             TryBlockUsed();
             TryBlockUnused();
         }
-        
+
+        [return: EmptyParameterAdvice]
+        public void ReturnAdvisedMethod()
+        { }
+
+        public void ParameterAdvisedMethod([EmptyParameterAdvice] int a)
+        { }
+
+        public string ReturnAdvisedProperty { [return: EmptyParameterAdvice]get; set; }
+
+        public string this[[EmptyParameterAdvice]string index]
+        { get { return null; } set { } }
 
         ////[EmptyMethodAdvice]
         ////public void MethodWithGenericParameterTest<TValue>(TValue six)

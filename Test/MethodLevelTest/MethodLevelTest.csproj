@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Advices\Async.cs" />
     <Compile Include="Advices\ChangeParameter.cs" />
+    <Compile Include="Advices\EmptyParameterAdvice.cs" />
     <Compile Include="Advices\EmptyPropertyAdvice.cs" />
     <Compile Include="Advices\IntroductionAdvice.cs" />
     <Compile Include="Advices\RecordCall.cs" />
