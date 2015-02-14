@@ -25,9 +25,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        public override ReflectionNode Parent
+        protected override ReflectionNode LoadParent()
         {
-            get { return new ModuleReflectionNode(_typeDefinition.Module); }
+            return new ModuleReflectionNode(_typeDefinition.Module);
         }
 
         /// <summary>
@@ -36,17 +36,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        public override IEnumerable<ReflectionNode> Children
+        protected override IEnumerable<ReflectionNode> LoadChildren()
         {
-            get
-            {
-                foreach (var propertyDefinition in _typeDefinition.Properties.OrderBy(p => p.Name))
-                    yield return new PropertyReflectionNode(propertyDefinition);
-                foreach (var constructorMethodDefinition in _typeDefinition.GetConstructors())
-                    yield return new MethodReflectionNode(constructorMethodDefinition);
-                foreach (var methodDefinition in _typeDefinition.GetMethods().OrderBy(m => m.Name).Where(m => !m.IsSpecialName))
-                    yield return new MethodReflectionNode(methodDefinition);
-            }
+            foreach (var propertyDefinition in _typeDefinition.Properties.OrderBy(p => p.Name))
+                yield return new PropertyReflectionNode(propertyDefinition);
+            foreach (var constructorMethodDefinition in _typeDefinition.GetConstructors())
+                yield return new MethodReflectionNode(constructorMethodDefinition);
+            foreach (var methodDefinition in _typeDefinition.GetMethods().OrderBy(m => m.Name).Where(m => !m.IsSpecialName))
+                yield return new MethodReflectionNode(methodDefinition);
         }
 
         /// <summary>

@@ -23,9 +23,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        public override ReflectionNode Parent
+        protected override ReflectionNode LoadParent()
         {
-            get { return new MethodReflectionNode(_methodDefinition); }
+            return new MethodReflectionNode(_methodDefinition);
         }
 
         private static readonly ReflectionNode[] NoChild = new ReflectionNode[0];
@@ -36,9 +36,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        public override IEnumerable<ReflectionNode> Children
+        protected override IEnumerable<ReflectionNode> LoadChildren()
         {
-            get { return NoChild; }
+            return NoChild;
         }
 
         /// <summary>

@@ -22,9 +22,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        public override ReflectionNode Parent
+        protected override ReflectionNode LoadParent()
         {
-            get { return null; }
+            return null;
         }
 
         /// <summary>
@@ -33,9 +33,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        public override IEnumerable<ReflectionNode> Children
+        protected override IEnumerable<ReflectionNode> LoadChildren()
         {
-            get { return new[] { new ModuleReflectionNode(_assemblyDefinition.MainModule) }; }
+            return new[] { new ModuleReflectionNode(_assemblyDefinition.MainModule) };
         }
 
         /// <summary>

@@ -25,22 +25,19 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        public override ReflectionNode Parent
+        protected override ReflectionNode LoadParent()
         {
-            get
+            if (_propertyDefinition != null)
+                return new PropertyReflectionNode(_propertyDefinition);
+            // a bit tricky here, since a method can belong to a property
+            var declaringType = _methodDefinition.DeclaringType;
+            if (_methodDefinition.IsPropertyMethod())
             {
-                if (_propertyDefinition != null)
-                    return new PropertyReflectionNode(_propertyDefinition);
-                // a bit tricky here, since a method can belong to a property
-                var declaringType = _methodDefinition.DeclaringType;
-                if (_methodDefinition.IsPropertyMethod())
-                {
-                    var propertyName = ReflectionUtility.GetPropertyName(_methodDefinition.Name);
-                    _propertyDefinition = declaringType.Properties.Single(p => p.Name == propertyName);
-                    return new PropertyReflectionNode(_propertyDefinition);
-                }
-                return new TypeReflectionNode(declaringType);
+                var propertyName = ReflectionUtility.GetPropertyName(_methodDefinition.Name);
+                _propertyDefinition = declaringType.Properties.Single(p => p.Name == propertyName);
+                return new PropertyReflectionNode(_propertyDefinition);
             }
+            return new TypeReflectionNode(declaringType);
         }
 
         /// <summary>
@@ -50,9 +47,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// The children.
         /// </value>
         /// <exception cref="System.NotImplementedException"></exception>
-        public override IEnumerable<ReflectionNode> Children
+        protected override IEnumerable<ReflectionNode> LoadChildren()
         {
-            get { return _methodDefinition.Parameters.Select(p => new ParameterReflectionNode(p, _methodDefinition)); }
+            return _methodDefinition.Parameters.Select(p => new ParameterReflectionNode(p, _methodDefinition));
         }
 
         /// <summary>
@@ -63,7 +60,11 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public override IEnumerable<CustomAttribute> CustomAttributes
         {
-            get { return _methodDefinition.CustomAttributes.Concat(_methodDefinition.MethodReturnType.CustomAttributes); }
+            get
+            {
+                return _methodDefinition.CustomAttributes
+                    .Concat(_methodDefinition.MethodReturnType.CustomAttributes); // return type has attributes
+            }
         }
 
         /// <summary>

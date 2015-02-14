@@ -24,9 +24,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        public override ReflectionNode Parent
+        protected override ReflectionNode LoadParent()
         {
-            get { return new TypeReflectionNode(_propertyDefinition.DeclaringType); }
+            return new TypeReflectionNode(_propertyDefinition.DeclaringType);
         }
 
         /// <summary>
@@ -36,15 +36,12 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// The children.
         /// </value>
         /// <exception cref="System.NotImplementedException"></exception>
-        public override IEnumerable<ReflectionNode> Children
+        protected override IEnumerable<ReflectionNode> LoadChildren()
         {
-            get
-            {
-                if (_propertyDefinition.GetMethod != null)
-                    yield return new MethodReflectionNode(_propertyDefinition.GetMethod, _propertyDefinition);
-                if (_propertyDefinition.SetMethod != null)
-                    yield return new MethodReflectionNode(_propertyDefinition.SetMethod, _propertyDefinition);
-            }
+            if (_propertyDefinition.GetMethod != null)
+                yield return new MethodReflectionNode(_propertyDefinition.GetMethod, _propertyDefinition);
+            if (_propertyDefinition.SetMethod != null)
+                yield return new MethodReflectionNode(_propertyDefinition.SetMethod, _propertyDefinition);
         }
 
         /// <summary>

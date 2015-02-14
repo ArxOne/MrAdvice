@@ -16,13 +16,31 @@ namespace ArxOne.MrAdvice.Reflection.Groups
     /// </summary>
     internal abstract class ReflectionNode
     {
+        private ReflectionNode _parent;
+
         /// <summary>
         /// Gets the parent.
         /// </summary>
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        public abstract ReflectionNode Parent { get; }
+        public ReflectionNode Parent
+        {
+            get
+            {
+                if (_parent == null)
+                    _parent = LoadParent();
+                return _parent;
+            }
+        }
+
+        /// <summary>
+        /// Loads the parent.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract ReflectionNode LoadParent();
+
+        private IList<ReflectionNode> _children;
 
         /// <summary>
         /// Gets the children.
@@ -30,7 +48,21 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        public abstract IEnumerable<ReflectionNode> Children { get; }
+        public IEnumerable<ReflectionNode> Children
+        {
+            get
+            {
+                if (_children == null)
+                    _children = LoadChildren().ToArray();
+                return _children;
+            }
+        }
+
+        /// <summary>
+        /// Loads the children.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract IEnumerable<ReflectionNode> LoadChildren();
 
         /// <summary>
         /// Gets the custom attributes at this level.
