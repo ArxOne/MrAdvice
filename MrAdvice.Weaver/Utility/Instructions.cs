@@ -4,9 +4,11 @@
 // https://github.com/ArxOne/MrAdvice
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace ArxOne.MrAdvice.Weaver.Utility
 {
     using System;
+    using System.Reflection;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Collections.Generic;
@@ -18,6 +20,7 @@ namespace ArxOne.MrAdvice.Weaver.Utility
     public class Instructions
     {
         private readonly Collection<Instruction> _instructions;
+        private readonly ModuleDefinition _moduleDefinition;
 
         /// <summary>
         /// Gets or sets the cursor.
@@ -27,9 +30,15 @@ namespace ArxOne.MrAdvice.Weaver.Utility
         /// </value>
         public int Cursor { get; set; }
 
-        public Instructions(Collection<Instruction> instructions)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Instructions"/> class.
+        /// </summary>
+        /// <param name="instructions">The instructions.</param>
+        /// <param name="moduleDefinition">The module definition.</param>
+        public Instructions(Collection<Instruction> instructions, ModuleDefinition moduleDefinition)
         {
             _instructions = instructions;
+            _moduleDefinition = moduleDefinition;
         }
 
         private Instructions Insert(Instruction instruction)
@@ -58,9 +67,19 @@ namespace ArxOne.MrAdvice.Weaver.Utility
             return Insert(Instruction.Create(opCode, value));
         }
 
+        public Instructions Emit(OpCode opCode, Type value)
+        {
+            return Insert(Instruction.Create(opCode, _moduleDefinition.Import(value)));
+        }
+
         public Instructions Emit(OpCode opCode, MethodReference value)
         {
             return Insert(Instruction.Create(opCode, value));
+        }
+
+        public Instructions Emit(OpCode opCode, MethodBase value)
+        {
+            return Insert(Instruction.Create(opCode, _moduleDefinition.Import(value)));
         }
 
         public Instructions Emit(OpCode opCode, string value)

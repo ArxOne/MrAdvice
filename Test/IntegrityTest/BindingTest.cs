@@ -59,5 +59,11 @@ namespace IntegrityTest
             var invocationProcessRuntimeInitializersMethod = ReflectionUtility.GetMethodInfo(() => Invocation.ProcessInfoAdvices((Assembly)null));
             Assert.AreEqual(invocationProcessRuntimeInitializersMethod.Name, Binding.InvocationProcessInfoAdvicesMethodName);
         }
+        [TestMethod]
+        [TestCategory("Integrity")]
+        public void IntroducedFieldAttributeNameTest()
+        {
+            Assert.AreEqual(typeof(IntroducedFieldAttribute).FullName, Binding.IntroducedFieldAttributeName);
+        }
     }
 }
