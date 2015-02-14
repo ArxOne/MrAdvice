@@ -5,13 +5,14 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
-namespace ArxOne.MrAdvice.Weaver.Utility
+namespace ArxOne.MrAdvice.Weaver
 {
     using System;
     using System.Reflection;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Collections.Generic;
+    using Utility;
 
     /// <summary>
     /// Allows to Emit() to Instructions set and keep a cursor

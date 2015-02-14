@@ -10,8 +10,8 @@ namespace IntegrityTest
     using ArxOne.MrAdvice;
     using ArxOne.MrAdvice.Advice;
     using ArxOne.MrAdvice.Introduction;
+    using ArxOne.MrAdvice.Utility;
     using ArxOne.MrAdvice.Weaver;
-    using ArxOne.MrAdvice.Weaver.Utility;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]

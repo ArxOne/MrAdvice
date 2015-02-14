@@ -6,6 +6,7 @@
 #endregion
 
 using System;
+using ArxOne.MrAdvice.IO;
 using ArxOne.MrAdvice.Weaver;
 using Mono.Cecil;
 

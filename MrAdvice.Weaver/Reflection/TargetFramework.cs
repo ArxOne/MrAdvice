@@ -4,7 +4,8 @@
 // https://github.com/ArxOne/MrAdvice
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
-namespace ArxOne.MrAdvice.Weaver.Reflection
+
+namespace ArxOne.MrAdvice.Reflection
 {
     using System;
     using System.Collections.Generic;

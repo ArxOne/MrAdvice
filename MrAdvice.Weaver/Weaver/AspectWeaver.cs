@@ -4,6 +4,7 @@
 // https://github.com/ArxOne/MrAdvice
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
@@ -12,11 +13,12 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Reflection;
     using System.Runtime.Versioning;
     using Introduction;
+    using IO;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
+    using MrAdvice.Utility;
     using Reflection;
-    using Utility;
     using FieldAttributes = Mono.Cecil.FieldAttributes;
     using ICustomAttributeProvider = Mono.Cecil.ICustomAttributeProvider;
     using MethodAttributes = Mono.Cecil.MethodAttributes;

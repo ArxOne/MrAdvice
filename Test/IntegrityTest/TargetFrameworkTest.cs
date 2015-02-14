@@ -7,7 +7,7 @@
 namespace IntegrityTest
 {
     using System;
-    using ArxOne.MrAdvice.Weaver.Reflection;
+    using ArxOne.MrAdvice.Reflection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]

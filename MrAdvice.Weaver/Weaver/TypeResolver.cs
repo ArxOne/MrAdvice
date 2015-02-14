@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System.IO;
     using System.Linq;
+    using IO;
     using Mono.Cecil;
 
     /// <summary>
