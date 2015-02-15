@@ -13,6 +13,16 @@ namespace ArxOne.MrAdvice.Advice
     public abstract class AdviceContext : IAdviceContextTarget
     {
         private readonly AdviceContext _nextAdviceContext;
+
+        /// <summary>
+        /// Advice values are shared between advices.
+        /// They are:
+        /// - parameters
+        /// - return value
+        /// </summary>
+        /// <value>
+        /// The advice values.
+        /// </value>
         internal AdviceValues AdviceValues { get; private set; }
 
         /// <summary>
@@ -46,6 +56,6 @@ namespace ArxOne.MrAdvice.Advice
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
-        public abstract void Invoke();
+        internal abstract void Invoke();
     }
 }

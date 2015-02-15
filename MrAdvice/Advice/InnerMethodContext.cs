@@ -4,6 +4,7 @@
 // https://github.com/ArxOne/MrAdvice
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace ArxOne.MrAdvice.Advice
 {
     using System.Reflection;
@@ -24,7 +25,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
-        public override void Invoke()
+        internal override void Invoke()
         {
             AdviceValues.ReturnValue = _innerMethod.Invoke(AdviceValues.Target, AdviceValues.Parameters);
         }

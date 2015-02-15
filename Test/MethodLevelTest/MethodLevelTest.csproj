@@ -60,6 +60,7 @@
     <Compile Include="Advices\EmptyParameterAdvice.cs" />
     <Compile Include="Advices\EmptyPropertyAdvice.cs" />
     <Compile Include="Advices\IntroductionAdvice.cs" />
+    <Compile Include="Advices\ParameterAdvice.cs" />
     <Compile Include="Advices\RecordCall.cs" />
     <Compile Include="Advices\RecordProperties.cs" />
     <Compile Include="Advices\RecordMethods.cs" />

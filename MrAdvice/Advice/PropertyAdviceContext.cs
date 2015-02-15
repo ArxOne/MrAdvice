@@ -143,7 +143,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
-        public override void Invoke()
+        internal override void Invoke()
         {
             _propertyAdvice.Advise(this);
         }
