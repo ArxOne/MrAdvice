@@ -1,4 +1,5 @@
-﻿#region Mr. Advice
+﻿
+#region Mr. Advice
 // Mr. Advice
 // A simple post build weaving package
 // https://github.com/ArxOne/MrAdvice
@@ -16,4 +17,4 @@ using System.Resources;
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion("0.3.4")]
+[assembly: AssemblyVersion("0.3.6")]
