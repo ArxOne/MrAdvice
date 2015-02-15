@@ -139,10 +139,10 @@ namespace MethodLevelTest
         public string this[[EmptyParameterAdvice]string index]
         { get { return null; } set { } }
 
-        ////[EmptyMethodAdvice]
-        ////public void MethodWithGenericParameterTest<TValue>(TValue six)
-        ////{
-        ////    Assert.AreEqual(6, six);
-        ////}
+        [EmptyMethodAdvice]
+        public void MethodWithGenericParameterTest<TValue>(TValue six)
+        {
+            Assert.AreEqual(6, six);
+        }
     }
 }

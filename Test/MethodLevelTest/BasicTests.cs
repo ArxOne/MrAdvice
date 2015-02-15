@@ -141,11 +141,25 @@ namespace MethodLevelTest
             Invocation.ProcessInfoAdvices(typeof(BasicTests));
         }
 
-        ////[TestMethod]
-        ////[TestCategory("Weaving")]
-        ////public void MethodWithGenericParameterTest()
-        ////{
-        ////    new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
-        ////}
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void MethodFromGenericClassTest()
+        {
+            new GenericEmptyAdvisedClass<int>().DoSomething();
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void MethodFromGenericClassWithParameterTest()
+        {
+            var r = new GenericEmptyAdvisedClass<int>().DoSomethingElse(12);
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void MethodWithGenericParameterTest()
+        {
+            new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
+        }
     }
 }

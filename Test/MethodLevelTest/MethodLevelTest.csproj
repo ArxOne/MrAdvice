@@ -69,6 +69,7 @@
     <Compile Include="BasicTests.cs" />
     <Compile Include="Advices\EmptyMethodAdvice.cs" />
     <Compile Include="EmptyAdvisedClass.cs" />
+    <Compile Include="GenericEmptyAdvisedClass.cs" />
     <Compile Include="IntroducedClass.cs" />
     <Compile Include="IntroductionTest.cs" />
     <Compile Include="ParametersTest.cs" />

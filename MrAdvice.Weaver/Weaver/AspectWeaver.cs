@@ -62,6 +62,11 @@ namespace ArxOne.MrAdvice.Weaver
             var weavableMethods = GetMarkedMethods(new ModuleReflectionNode(moduleDefinition), adviceInterface).ToArray();
             foreach (var method in weavableMethods)
             {
+                if (method.HasGenericParameters)
+                {
+                    Logger.WriteWarning("Method {0} has generic parameters, it can not be weaved", method.FullName);
+                    continue;
+                }
                 WeaveAdvices(method);
                 WeaveIntroductions(method, adviceInterface, moduleDefinition);
             }
@@ -192,7 +197,7 @@ namespace ArxOne.MrAdvice.Weaver
         private IEnumerable<MethodDefinition> GetMarkedMethods(ReflectionNode reflectionNode, TypeDefinition markerInterface)
         {
             return reflectionNode.GetAncestorsToChildren()
-                .Where(n => n.Method != null && !n.IsAnyGeneric() && GetAllMarkers(n, markerInterface).Any())
+                .Where(n => n.Method != null && GetAllMarkers(n, markerInterface).Any())
                 .Select(n => n.Method);
         }
 
