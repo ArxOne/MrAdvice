@@ -133,7 +133,7 @@ namespace ArxOne.MrAdvice.Weaver
                     var parameterType = parameter.ParameterType;
                     if (parameter.ParameterType.IsByReference) // ...if ref, loads it as referenced value
                     {
-                        parameterType = GetReferencedType(moduleDefinition, parameter.ParameterType);
+                        parameterType =  parameter.ParameterType.GetElementType();
                         instructions.EmitLdind(parameterType);
                     }
                     instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
@@ -193,7 +193,7 @@ namespace ArxOne.MrAdvice.Weaver
                     instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
                     instructions.Emit(OpCodes.Ldelem_Ref); // now we have boxed out/ref value
-                    instructions.EmitUnboxOrCastIfNecessary(GetReferencedType(moduleDefinition, parameter.ParameterType));
+                    instructions.EmitUnboxOrCastIfNecessary(parameter.ParameterType.GetElementType());
                     instructions.EmitStind(parameter.ParameterType); // result is stored in ref parameter
                 }
             }

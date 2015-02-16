@@ -174,20 +174,7 @@ namespace ArxOne.MrAdvice.Weaver
             introducedFieldType = TypeResolver.Resolve(moduleDefinition, introducedFieldTypeName);
             return true;
         }
-
-        /// <summary>
-        /// Gets the type of the referenced type.
-        /// (isolates all the crap)
-        /// </summary>
-        /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="referenceType">Type of the reference.</param>
-        /// <returns></returns>
-        private TypeReference GetReferencedType(ModuleDefinition moduleDefinition, TypeReference referenceType)
-        {
-            // not sure this is the best way to do things, but it is a working way anyway
-            return moduleDefinition.Import(TypeResolver.Resolve(moduleDefinition, referenceType.FullName.TrimEnd('&')));
-        }
-
+        
         /// <summary>
         /// Gets the marked methods.
         /// </summary>

@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{77928F8C-A708-4C49-B6E2-772256E75E4D}</ProjectGuid>
+    <ProjectGuid>{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MethodLevelTest</RootNamespace>
-    <AssemblyName>MethodLevelTest</AssemblyName>
+    <RootNamespace>ExternalAdviceTest</RootNamespace>
+    <AssemblyName>ExternalAdviceTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -18,7 +18,7 @@
     <TestProjectType>UnitTest</TestProjectType>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>4f625d9d</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>6cec84da</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,9 +38,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -52,35 +49,16 @@
         <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
       </ItemGroup>
     </When>
-    <Otherwise />
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+      </ItemGroup>
+    </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Advices\Async.cs" />
-    <Compile Include="Advices\ChangeParameter.cs" />
-    <Compile Include="Advices\EmptyParameterAdvice.cs" />
-    <Compile Include="Advices\EmptyPropertyAdvice.cs" />
-    <Compile Include="Advices\IntroductionAdvice.cs" />
-    <Compile Include="Advices\ParameterAdvice.cs" />
-    <Compile Include="Advices\RecordCall.cs" />
-    <Compile Include="Advices\RecordProperties.cs" />
-    <Compile Include="Advices\RecordMethods.cs" />
-    <Compile Include="Advices\StaticIntroductionAdvice.cs" />
-    <Compile Include="AdvisedClass.cs" />
-    <Compile Include="BasicTests.cs" />
-    <Compile Include="Advices\EmptyMethodAdvice.cs" />
-    <Compile Include="EmptyAdvisedClass.cs" />
-    <Compile Include="GenericEmptyAdvisedClass.cs" />
-    <Compile Include="IntroducedClass.cs" />
-    <Compile Include="IntroductionTest.cs" />
-    <Compile Include="ParametersTest.cs" />
+    <Compile Include="EmptyExternalAdvisedClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="InitializeTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="FodyWeavers.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <Compile Include="ExternalTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj">
@@ -91,6 +69,12 @@
       <Project>{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}</Project>
       <Name>ExternalAdvices</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
@@ -121,7 +105,11 @@
     <Error Condition="!Exists('..\..\packages\Fody.1.26.4\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Fody.1.26.4\build\Fody.targets'))" />
   </Target>
   <Import Project="..\..\packages\Fody.1.26.4\build\Fody.targets" Condition="Exists('..\..\packages\Fody.1.26.4\build\Fody.targets')" />
-  <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)\Tools\peverify.bat" $(TargetPath)</PostBuildEvent>
-  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>

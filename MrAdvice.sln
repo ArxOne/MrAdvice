@@ -44,6 +44,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F3046528
 		Tools\peverify.bat = Tools\peverify.bat
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalAdvices", "Test\ExternalAdvices\ExternalAdvices.csproj", "{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalAdviceTest", "Test\ExternalAdviceTest\ExternalAdviceTest.csproj", "{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +77,14 @@ Global
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,5 +94,7 @@ Global
 		{77928F8C-A708-4C49-B6E2-772256E75E4D} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
 		{27F8E96F-59E0-4980-9790-F436C9532BA0} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
 		{C24CF080-EAAE-4F62-9A1B-E6F03421FB0C} = {2585663B-1557-4E4C-A020-19FF5FE94D4F}
+		{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
+		{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9} = {0D80F141-D37F-4354-959F-15C3AF0FF701}
 	EndGlobalSection
 EndGlobal

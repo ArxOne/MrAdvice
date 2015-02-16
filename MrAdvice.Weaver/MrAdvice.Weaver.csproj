@@ -79,6 +79,7 @@
     <Compile Include="Reflection\Groups\TypeReflectionNode.cs" />
     <Compile Include="Reflection\TargetFramework.cs" />
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
+    <Compile Include="Utility\ModuleDefinitionExtensions.cs" />
     <Compile Include="Utility\ReflectionUtility.cs" />
     <Compile Include="ModuleWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.cs" />

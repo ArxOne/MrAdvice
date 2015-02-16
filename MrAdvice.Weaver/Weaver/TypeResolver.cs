@@ -7,9 +7,10 @@
 
 namespace ArxOne.MrAdvice.Weaver
 {
-    using System.IO;
+    using System.Collections.Generic;
     using System.Linq;
     using Mono.Cecil;
+    using Utility;
 
     /// <summary>
     /// Type resolver allows to find a TypeDefinition given a full name
@@ -24,6 +25,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// </value>
         public IAssemblyResolver AssemblyResolver { get; set; }
 
+        private readonly IDictionary<string, TypeDefinition> _resolvedTypes = new Dictionary<string, TypeDefinition>();
+
         /// <summary>
         /// Resolves the full name to a type definiton.
         /// Eventually searches through direct references
@@ -33,54 +36,37 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName)
         {
-            // no need to dig deeper than direct references
-            return ResolveModule(moduleDefinition, fullName)
-                   ?? ResolveReferences(moduleDefinition, fullName);
-        }
-
-        /// <summary>
-        /// Tries to resolve the name in the given module.
-        /// </summary>
-        /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="fullName">The full name.</param>
-        /// <returns></returns>
-        private static TypeDefinition ResolveModule(ModuleDefinition moduleDefinition, string fullName)
-        {
-            return moduleDefinition.GetTypes().FirstOrDefault(t => t.FullName == fullName);
-        }
-
-        /// <summary>
-        /// Tries to resolve the name in the given module references.
-        /// </summary>
-        /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="fullName">The full name.</param>
-        /// <returns></returns>
-        private TypeDefinition ResolveReferences(ModuleDefinition moduleDefinition, string fullName)
-        {
-            var assemblyDefinitions = moduleDefinition.AssemblyReferences.Select(TryResolve).Where(a => a != null).ToArray();
-            return assemblyDefinitions.Select(a => ResolveAssembly(a, fullName)).FirstOrDefault(t => t != null);
-        }
-
-        private AssemblyDefinition TryResolve(AssemblyNameReference assemblyNameReference)
-        {
-            try
+            lock (_resolvedTypes)
             {
-                return AssemblyResolver.Resolve(assemblyNameReference);
+                TypeDefinition typeDefinition;
+                if (_resolvedTypes.TryGetValue(fullName, out typeDefinition))
+                    return typeDefinition;
+
+                // 2 levels, because of level of dependency:
+                // - level 0: the assembly where advices are injected
+                // - level 1: the assembly containing the advice
+                // - level 2: the advices dependencies
+                _resolvedTypes[fullName] = typeDefinition = Resolve(moduleDefinition, fullName, 2);
+                return typeDefinition;
             }
-            catch (FileNotFoundException)
-            { }
-            return null;
         }
 
         /// <summary>
-        /// Tries to resolve the name in all assembly types.
+        /// Resolves the specified type by name in module and referenced (with a maximum depth)
         /// </summary>
-        /// <param name="assemblyDefinition">The assembly definition.</param>
+        /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="fullName">The full name.</param>
+        /// <param name="depth">The depth.</param>
         /// <returns></returns>
-        private static TypeDefinition ResolveAssembly(AssemblyDefinition assemblyDefinition, string fullName)
+        private TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName, int depth)
         {
-            return assemblyDefinition.Modules.Select(m => ResolveModule(m, fullName)).FirstOrDefault(t => t != null);
+            foreach (var referencedModule in moduleDefinition.GetSelfAndReferences(AssemblyResolver, depth))
+            {
+                var foundType = referencedModule.GetTypes().FirstOrDefault(t => t.FullName == fullName);
+                if (foundType != null)
+                    return foundType;
+            }
+            return null;
         }
     }
 }

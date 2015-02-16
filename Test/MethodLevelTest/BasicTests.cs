@@ -155,11 +155,11 @@ namespace MethodLevelTest
             var r = new GenericEmptyAdvisedClass<int>().DoSomethingElse(12);
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
-        public void MethodWithGenericParameterTest()
-        {
-            new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
-        }
+        //[TestMethod]
+        //[TestCategory("Weaving")]
+        //public void MethodWithGenericParameterTest()
+        //{
+        //    new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
+        //}
     }
 }
