@@ -4,6 +4,14 @@ rem if you have any other path, duplicate the lines below and add your own path
 set peverify="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\PEVerify.exe"
 if exist %peverify% goto verify
 
+set peverify="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\NETFX 4.0 Tools\PEVerify.exe"
+if exist %peverify% goto verify
+
+set peverify="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\PEVerify.exe"
+if exist %peverify% goto verify
+
+echo peverify not found, skipping this step
+
 goto noverify
 
 :verify
