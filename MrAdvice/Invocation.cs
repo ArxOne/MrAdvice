@@ -231,7 +231,7 @@ namespace ArxOne.MrAdvice
             if (methodInfo != null)
                 allAdvices = allAdvices.Concat(GetAttributes<TAdvice>(methodInfo.ReturnParameter).Select(a => CreateAdviceIndex(a, -1)));
 
-            var advices = allAdvices.OrderByDescending(Priority.GetLevel).ToArray();
+            var advices = allAdvices.OrderByDescending(a => Priority.GetLevel(a.Advice)).ToArray();
             return advices;
         }
 

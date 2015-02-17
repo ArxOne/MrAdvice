@@ -8,6 +8,7 @@ namespace ArxOne.MrAdvice.Annotation
 {
     using System;
     using System.Linq;
+    using Advice;
 
     /// <summary>
     /// Marks an advice with priority.
@@ -45,7 +46,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// </summary>
         /// <param name="advice">The advice.</param>
         /// <returns></returns>
-        public static int GetLevel(object advice)
+        public static int GetLevel(IAdvice advice)
         {
             var priorityAttribute = advice.GetType().GetCustomAttributes(typeof (Priority), false).Cast<Priority>().SingleOrDefault();
             if (priorityAttribute != null)
