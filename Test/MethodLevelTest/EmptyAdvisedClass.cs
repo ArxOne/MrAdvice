@@ -144,5 +144,12 @@ namespace MethodLevelTest
         {
             Assert.AreEqual(6, six);
         }
+
+        [ChangeParameter(NewParameter = 2)]
+        [RecordCall]
+        public int ReturnParameter(int a)
+        {
+            return a;
+        }
     }
 }

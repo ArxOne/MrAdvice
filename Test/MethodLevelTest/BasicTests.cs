@@ -155,6 +155,17 @@ namespace MethodLevelTest
             var r = new GenericEmptyAdvisedClass<int>().DoSomethingElse(12);
         }
 
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void TwoAspectsTest()
+        {
+            int c = RecordCall.Count;
+            var r = new EmptyAdvisedClass();
+            var z = r.ReturnParameter(10);
+            Assert.AreEqual(2, z);
+            Assert.AreEqual(c + 1, RecordCall.Count);
+        }
+
         //[TestMethod]
         //[TestCategory("Weaving")]
         //public void MethodWithGenericParameterTest()

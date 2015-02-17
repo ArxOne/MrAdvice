@@ -8,7 +8,9 @@ namespace MethodLevelTest.Advices
 {
     using System;
     using ArxOne.MrAdvice.Advice;
+    using ArxOne.MrAdvice.Annotation;
 
+    [Priority(10)]
     public class ChangeParameter : Attribute, IMethodAdvice
     {
         private int? _newParameter;
@@ -16,13 +18,13 @@ namespace MethodLevelTest.Advices
 
         public int NewParameter
         {
-            get { return _newParameter??-1; }
+            get { return _newParameter ?? -1; }
             set { _newParameter = value; }
         }
 
         public int NewReturnValue
         {
-            get { return _newReturnValue??-1; }
+            get { return _newReturnValue ?? -1; }
             set { _newReturnValue = value; }
         }
 
