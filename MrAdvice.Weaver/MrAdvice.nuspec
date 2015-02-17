@@ -10,6 +10,7 @@
     <projectUrl>http://mradvice.arxone.com</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/ArxOne/MrAdvice/master/Icon/MrAdvice.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>.NET build step aspect weaver</summary>
     <description>$description$</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2015</copyright>
