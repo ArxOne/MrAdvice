@@ -38,6 +38,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice", "MrAdvice\MrAdvice.csproj", "{3C764938-4C4A-4128-B20F-97EF2ED4A49B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Weaver", "MrAdvice.Weaver\MrAdvice.Weaver.csproj", "{2CCCBE1D-9CC5-40A9-A816-484F98B10774}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3C764938-4C4A-4128-B20F-97EF2ED4A49B} = {3C764938-4C4A-4128-B20F-97EF2ED4A49B}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F3046528-416E-49F1-8FC5-72E442B64DAE}"
 	ProjectSection(SolutionItems) = preProject
