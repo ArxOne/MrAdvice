@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Runtime.Versioning;
     using Introduction;
@@ -37,56 +38,58 @@ namespace ArxOne.MrAdvice.Weaver
         /// </value>
         public bool InjectAsPrivate { get; set; }
 
-        private readonly IDictionary<Tuple<string, string>, bool> _isInterface = new Dictionary<Tuple<string, string>, bool>();
-
         /// <summary>
         /// Weaves the specified module definition.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         public void Weave(ModuleDefinition moduleDefinition)
         {
-            var start = DateTime.UtcNow;
+            var auditTimer = new AuditTimer();
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             // sanity check
-            var adviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName);
+            auditTimer.NewZone("IAdvice location");
+            var adviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName, true);
             if (adviceInterface == null)
             {
                 Logger.WriteWarning("IAdvice interface not found here, exiting");
                 return;
             }
+
             // runtime check
+            auditTimer.NewZone("Runtime check");
             var targetFramework = GetTargetFramework(moduleDefinition);
             InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
 
+            Logger.WriteDebug("t1: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+
             // weave methods (they can be property-related, too)
+            auditTimer.NewZone("Weavable methods detection");
             var weavableMethods = GetMarkedMethods(new ModuleReflectionNode(moduleDefinition), adviceInterface).ToArray();
-            foreach (var method in weavableMethods)
-            {
-                if (method.HasGenericParameters)
-                {
-                    Logger.WriteWarning("Method {0} has generic parameters, it can not be weaved", method.FullName);
-                    continue;
-                }
-                WeaveAdvices(method);
-                WeaveIntroductions(method, adviceInterface, moduleDefinition);
-            }
+            auditTimer.NewZone("Methods weaving");
+            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface));
+
+            Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
             // and then, the info advices
-            var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName);
-            //if (GetMethods(moduleDefinition, infoAdviceInterface).Any())
-            //    WeaveInfoAdvices(moduleDefinition);
-            foreach (var typeDefinition in moduleDefinition.GetTypes())
-            {
-                if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface).Any())
-                {
-                    Logger.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
-                    WeaveInfoAdvices(typeDefinition, moduleDefinition, false);
-                }
-            }
+            auditTimer.NewZone("Info advices weaving");
+            var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName, true);
+            moduleDefinition.GetTypes().AsParallel().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface));
 
-            var end = DateTime.UtcNow;
+            auditTimer.LastZone();
+
+            Logger.WriteDebug("t3: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+
+            var report = auditTimer.GetReport();
+            var maxLength = report.Keys.Max(k => k.Length);
+            Logger.WriteDebug("--- Timings --------------------------");
+            foreach (var reportPart in report)
+                Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength), (int)reportPart.Value.TotalMilliseconds);
+            Logger.WriteDebug("--------------------------------------");
+
             Logger.Write("MrAdvice weaved module '{0}' (targeting framework {2}) in {1}ms",
-                moduleDefinition.Assembly.FullName, (int)(end - start).TotalMilliseconds, targetFramework);
+                moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework);
         }
 
         /// <summary>
@@ -97,7 +100,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
         private static TargetFramework GetTargetFramework(ModuleDefinition moduleDefinition)
         {
-            var targetFrameworkAttributeType = moduleDefinition.Import(typeof(TargetFrameworkAttribute));
+            var targetFrameworkAttributeType = moduleDefinition.SafeImport(typeof(TargetFrameworkAttribute));
             var targetFrameworkAttribute = moduleDefinition.Assembly.CustomAttributes.SingleOrDefault(a => a.AttributeType.SafeEquivalent(targetFrameworkAttributeType));
             if (targetFrameworkAttribute == null)
             {
@@ -136,14 +139,19 @@ namespace ArxOne.MrAdvice.Weaver
             if (IsIntroduction(moduleDefinition, memberType, out introducedFieldType))
             {
                 var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, memberName);
-                if (advisedType.Fields.All(f => f.Name != introducedFieldName))
+                lock (advisedType.Fields)
                 {
-                    var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
-                    if (isStatic)
-                        fieldAttributes |= FieldAttributes.Static;
-                    var introducedField = new FieldDefinition(introducedFieldName, fieldAttributes, moduleDefinition.Import(introducedFieldType));
-                    introducedField.CustomAttributes.Add(new CustomAttribute(markerAttributeCtor));
-                    advisedType.Fields.Add(introducedField);
+                    if (advisedType.Fields.All(f => f.Name != introducedFieldName))
+                    {
+                        var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
+                        if (isStatic)
+                            fieldAttributes |= FieldAttributes.Static;
+                        Logger.WriteDebug("Introduced file type '{0}'", introducedFieldType.FullName);
+                        var introducedFieldTypeReference = moduleDefinition.SafeImport(introducedFieldType);
+                        var introducedField = new FieldDefinition(introducedFieldName, fieldAttributes, introducedFieldTypeReference);
+                        introducedField.CustomAttributes.Add(new CustomAttribute(markerAttributeCtor));
+                        advisedType.Fields.Add(introducedField);
+                    }
                 }
             }
         }
@@ -171,10 +179,12 @@ namespace ArxOne.MrAdvice.Weaver
             }
 
             var introducedFieldTypeName = adviceMemberTypeReference.FullName.Substring(index + 1, adviceMemberTypeReference.FullName.Length - index - 2);
-            introducedFieldType = TypeResolver.Resolve(moduleDefinition, introducedFieldTypeName);
+            introducedFieldType = TypeResolver.Resolve(moduleDefinition, introducedFieldTypeName, false);
+            if (introducedFieldType == null)
+                Logger.WriteWarning("Type '{0}' not resolved!", introducedFieldTypeName);
             return true;
         }
-        
+
         /// <summary>
         /// Gets the marked methods.
         /// </summary>
@@ -183,7 +193,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private IEnumerable<MethodDefinition> GetMarkedMethods(ReflectionNode reflectionNode, TypeDefinition markerInterface)
         {
-            return reflectionNode.GetAncestorsToChildren()
+            return reflectionNode.GetAncestorsToChildren().AsParallel()
                 .Where(n => n.Method != null && GetAllMarkers(n, markerInterface).Any())
                 .Select(n => n.Method);
         }
@@ -205,6 +215,8 @@ namespace ArxOne.MrAdvice.Weaver
             return markers;
         }
 
+        private readonly IDictionary<Tuple<string, string>, bool> _isInterface = new Dictionary<Tuple<string, string>, bool>();
+
         /// <summary>
         /// Determines whether the specified type reference is aspect.
         /// </summary>
@@ -213,18 +225,21 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private bool IsMarker(TypeReference typeReference, TypeDefinition markerInterface)
         {
-            var key = Tuple.Create(typeReference.FullName, markerInterface.FullName);
-            // there is a cache, because the same attribute may be found several time
-            // and we're in a hurry, the developper is waiting for his program to start!
-            bool isMarker;
-            if (_isInterface.TryGetValue(key, out isMarker))
-                return isMarker;
+            lock (_isInterface)
+            {
+                var key = Tuple.Create(typeReference.FullName, markerInterface.FullName);
+                // there is a cache, because the same attribute may be found several time
+                // and we're in a hurry, the developper is waiting for his program to start!
+                bool isMarker;
+                if (_isInterface.TryGetValue(key, out isMarker))
+                    return isMarker;
 
-            // otherwise look for type or implemented interfaces (recursively)
-            var interfaces = typeReference.Resolve().Interfaces;
-            _isInterface[key] = isMarker = typeReference.SafeEquivalent(markerInterface)
-                || interfaces.Any(i => IsMarker(i, markerInterface));
-            return isMarker;
+                // otherwise look for type or implemented interfaces (recursively)
+                var interfaces = typeReference.Resolve().Interfaces;
+                _isInterface[key] = isMarker = typeReference.SafeEquivalent(markerInterface)
+                                               || interfaces.Any(i => IsMarker(i, markerInterface));
+                return isMarker;
+            }
         }
     }
 }

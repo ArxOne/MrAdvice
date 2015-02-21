@@ -69,6 +69,7 @@
     <Compile Include="..\MrAdvice\Properties\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
     </Compile>
+    <Compile Include="AuditTimer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Groups\AssemblyReflectionNode.cs" />
     <Compile Include="Reflection\Groups\MethodReflectionNode.cs" />

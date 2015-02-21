@@ -70,7 +70,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         public Instructions Emit(OpCode opCode, Type value)
         {
-            return Insert(Instruction.Create(opCode, _moduleDefinition.Import(value)));
+            return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
         }
 
         public Instructions Emit(OpCode opCode, MethodReference value)
@@ -80,7 +80,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         public Instructions Emit(OpCode opCode, MethodBase value)
         {
-            return Insert(Instruction.Create(opCode, _moduleDefinition.Import(value)));
+            return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
         }
 
         public Instructions Emit(OpCode opCode, string value)
@@ -193,7 +193,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             if (targetType.IsValueType)
                 return Emit(OpCodes.Unbox_Any, targetType);
-            if (!targetType.SafeEquivalent(targetType.Module.Import(typeof(object))))
+            if (!targetType.SafeEquivalent(targetType.Module.SafeImport(typeof(object))))
                 return Emit(OpCodes.Castclass, targetType);
             return this;
         }
@@ -217,23 +217,23 @@ namespace ArxOne.MrAdvice.Weaver
         {
             if (type.IsValueType)
             {
-                if (type.SafeEquivalent(type.Module.Import(typeof(Byte))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Byte))))
                     return Emit(OpCodes.Ldind_U1);
-                if (type.SafeEquivalent(type.Module.Import(typeof(SByte))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(SByte))))
                     return Emit(OpCodes.Ldind_I1);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Int16))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int16))))
                     return Emit(OpCodes.Ldind_I2);
-                if (type.SafeEquivalent(type.Module.Import(typeof(UInt16))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(UInt16))))
                     return Emit(OpCodes.Ldind_U2);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Int32))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int32))))
                     return Emit(OpCodes.Ldind_I4);
-                if (type.SafeEquivalent(type.Module.Import(typeof(UInt32))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(UInt32))))
                     return Emit(OpCodes.Ldind_U4);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Int64))) || type.SafeEquivalent(type.Module.Import(typeof(UInt64))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int64))) || type.SafeEquivalent(type.Module.SafeImport(typeof(UInt64))))
                     return Emit(OpCodes.Ldind_I8);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Single))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Single))))
                     return Emit(OpCodes.Ldind_R4);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Double))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Double))))
                     return Emit(OpCodes.Ldind_R8);
                 return Emit(OpCodes.Ldobj, type);
             }
@@ -248,17 +248,17 @@ namespace ArxOne.MrAdvice.Weaver
         {
             if (type.IsValueType)
             {
-                if (type.SafeEquivalent(type.Module.Import(typeof(Byte))) || type.SafeEquivalent(type.Module.Import(typeof(SByte))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Byte))) || type.SafeEquivalent(type.Module.SafeImport(typeof(SByte))))
                     return Emit(OpCodes.Stind_I1);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Int16))) || type.SafeEquivalent(type.Module.Import(typeof(UInt16))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int16))) || type.SafeEquivalent(type.Module.SafeImport(typeof(UInt16))))
                     return Emit(OpCodes.Stind_I2);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Int32))) || type.SafeEquivalent(type.Module.Import(typeof(UInt32))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int32))) || type.SafeEquivalent(type.Module.SafeImport(typeof(UInt32))))
                     return Emit(OpCodes.Stind_I4);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Int64))) || type.SafeEquivalent(type.Module.Import(typeof(UInt64))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int64))) || type.SafeEquivalent(type.Module.SafeImport(typeof(UInt64))))
                     return Emit(OpCodes.Stind_I8);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Single))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Single))))
                     return Emit(OpCodes.Stind_R4);
-                if (type.SafeEquivalent(type.Module.Import(typeof(Double))))
+                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Double))))
                     return Emit(OpCodes.Stind_R8);
                 return Emit(OpCodes.Stobj, type);
             }

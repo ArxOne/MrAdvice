@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System.Collections.Generic;
     using System.Linq;
+    using IO;
     using Mono.Cecil;
     using Utility;
 
@@ -33,8 +34,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="fullName">The full name.</param>
+        /// <param name="ignoreSystem">if set to <c>true</c> [ignore system].</param>
         /// <returns></returns>
-        public TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName)
+        public TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName, bool ignoreSystem)
         {
             lock (_resolvedTypes)
             {
@@ -46,7 +48,7 @@ namespace ArxOne.MrAdvice.Weaver
                 // - level 0: the assembly where advices are injected
                 // - level 1: the assembly containing the advice
                 // - level 2: the advices dependencies
-                _resolvedTypes[fullName] = typeDefinition = Resolve(moduleDefinition, fullName, 2);
+                _resolvedTypes[fullName] = typeDefinition = Resolve(moduleDefinition, fullName, ignoreSystem, 2);
                 return typeDefinition;
             }
         }
@@ -56,17 +58,16 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="fullName">The full name.</param>
+        /// <param name="ignoreSystem">if set to <c>true</c> [ignore system].</param>
         /// <param name="depth">The depth.</param>
         /// <returns></returns>
-        private TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName, int depth)
+        private TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName, bool ignoreSystem, int depth)
         {
-            foreach (var referencedModule in moduleDefinition.GetSelfAndReferences(AssemblyResolver, depth))
-            {
-                var foundType = referencedModule.GetTypes().FirstOrDefault(t => t.FullName == fullName);
-                if (foundType != null)
-                    return foundType;
-            }
-            return null;
+            return moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth)
+                .Select(referencedModule => referencedModule.GetTypes()
+                    .AsParallel()
+                    .FirstOrDefault(t => t.FullName == fullName))
+                .FirstOrDefault(foundType => foundType != null);
         }
     }
 }
