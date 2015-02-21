@@ -1,7 +1,7 @@
 #region Mr. Advice
 // Mr. Advice
 // A simple post build weaving package
-// https://github.com/ArxOne/MrAdvice
+// http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 namespace ArxOne.MrAdvice.Reflection.Groups

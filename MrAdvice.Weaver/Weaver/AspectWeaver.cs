@@ -1,10 +1,9 @@
 ﻿#region Mr. Advice
 // Mr. Advice
 // A simple post build weaving package
-// https://github.com/ArxOne/MrAdvice
+// http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
-
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
@@ -15,10 +14,9 @@ namespace ArxOne.MrAdvice.Weaver
     using Introduction;
     using IO;
     using Mono.Cecil;
-    using Utility;
     using Reflection;
     using Reflection.Groups;
-    using FieldAttributes = Mono.Cecil.FieldAttributes;
+    using Utility;
 
     /// <summary>
     /// Aspect weaver core
