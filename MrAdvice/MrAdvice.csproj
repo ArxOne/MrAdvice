@@ -63,7 +63,9 @@
     <AssemblyOriginatorKeyFile>Properties\MrAdvice.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Aspect\AdviceInfo.cs" />
     <Compile Include="Advice\AdviceContext.cs" />
+    <Compile Include="Advice\AdviceExtensions.cs" />
     <Compile Include="Advice\AdviceInfoContext.cs" />
     <Compile Include="Advice\AdviceValues.cs" />
     <Compile Include="Advice\IAdviceContextTarget.cs" />
@@ -78,6 +80,7 @@
     <Compile Include="Advice\PropertyAdviceContext.cs" />
     <Compile Include="Advice\PropertyInfoAdviceContext.cs" />
     <Compile Include="Annotation\Priority.cs" />
+    <Compile Include="Aspect\AspectInfo.cs" />
     <Compile Include="Collection\ArraySpan.cs" />
     <Compile Include="Advice\IPropertyInfoAdvice.cs" />
     <Compile Include="Introduction\IntroducedField.cs" />
@@ -110,6 +113,7 @@
   <ItemGroup>
     <None Include="Properties\MrAdvice.snk" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

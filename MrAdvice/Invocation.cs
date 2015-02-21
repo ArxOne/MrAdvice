@@ -1,7 +1,7 @@
-﻿#region Mr. Advice
+﻿#region Weavisor
 // Mr. Advice
 // A simple post build weaving package
-// https://github.com/ArxOne/MrAdvice
+// http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
@@ -10,10 +10,10 @@ namespace ArxOne.MrAdvice
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Reflection;
     using Advice;
     using Annotation;
+    using Aspect;
     using Utility;
 
     /// <summary>
@@ -24,38 +24,7 @@ namespace ArxOne.MrAdvice
     // ReSharper disable once UnusedMember.Global
     public static partial class Invocation
     {
-        private class AdviceInfo
-        {
-            public readonly IAdvice Advice;
-            public IMethodAdvice MethodAdvice { get { return Advice as IMethodAdvice; } }
-            public IPropertyAdvice PropertyAdvice { get { return Advice as IPropertyAdvice; } }
-            public IParameterAdvice ParameterAdvice { get { return Advice as IParameterAdvice; } }
-            public readonly int? ParameterIndex;
-            public readonly bool IsInParameter, IsOutParameter;
-
-            public AdviceInfo(IAdvice advice)
-            {
-                Advice = advice;
-            }
-
-            public AdviceInfo(IAdvice advice, int parameterIndex, bool isIn, bool isOut)
-            {
-                Advice = advice;
-                ParameterIndex = parameterIndex;
-                IsInParameter = isIn;
-                IsOutParameter = isOut;
-            }
-        }
-
-        private class AdviceChain
-        {
-            public IList<AdviceInfo> Advices;
-            public MethodInfo InnerMethod;
-            public PropertyInfo PropertyInfo { get; set; }
-            public bool IsSetter { get; set; }
-        }
-
-        private static readonly IDictionary<MethodBase, AdviceChain> AdviceChains = new Dictionary<MethodBase, AdviceChain>();
+        private static readonly IDictionary<MethodBase, Aspect.AspectInfo> AdviceChains = new Dictionary<MethodBase, Aspect.AspectInfo>();
 
         /// <summary>
         /// Runs a method interception.
@@ -72,23 +41,23 @@ namespace ArxOne.MrAdvice
         // ReSharper disable once UnusedMethodReturnValue.Global
         public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodInfo innerMethod)
         {
-            AdviceChain adviceChain;
+            Aspect.AspectInfo aspectInfo;
             lock (AdviceChains)
             {
-                if (!AdviceChains.TryGetValue(methodBase, out adviceChain))
-                    AdviceChains[methodBase] = adviceChain = CreateCallContext(methodBase, innerMethod);
+                if (!AdviceChains.TryGetValue(methodBase, out aspectInfo))
+                    AdviceChains[methodBase] = aspectInfo = CreateCallContext(methodBase, innerMethod);
             }
 
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
             var adviceValues = new AdviceValues(target, parameters);
             // at least there is one context
-            AdviceContext adviceContext = new InnerMethodContext(adviceValues, adviceChain.InnerMethod);
-            foreach (var advice in adviceChain.Advices.Reverse())
+            AdviceContext adviceContext = new InnerMethodContext(adviceValues, aspectInfo.PointcutMethod);
+            foreach (var advice in aspectInfo.Advices.Reverse())
             {
                 if (advice.MethodAdvice != null)
                     adviceContext = new MethodAdviceContext(advice.MethodAdvice, methodBase, adviceValues, adviceContext);
                 if (advice.PropertyAdvice != null)
-                    adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, adviceChain.PropertyInfo, adviceChain.IsSetter, adviceValues, adviceContext);
+                    adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
                 if (advice.ParameterAdvice != null)
                 {
                     var parameterIndex = advice.ParameterIndex.Value;
@@ -181,18 +150,18 @@ namespace ArxOne.MrAdvice
         /// <param name="methodBase">The method information.</param>
         /// <param name="innerMethod">Name of the inner method.</param>
         /// <returns></returns>
-        private static AdviceChain CreateCallContext(MethodBase methodBase, MethodInfo innerMethod)
+        private static Aspect.AspectInfo CreateCallContext(MethodBase methodBase, MethodInfo innerMethod)
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
             var advices = GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
             foreach (var advice in advices.Distinct())
                 InjectIntroducedFields(advice.Advice, methodBase.DeclaringType);
-            return new AdviceChain
+            return new Aspect.AspectInfo
             {
                 Advices = advices,
-                InnerMethod = innerMethod,
-                PropertyInfo = relatedPropertyInfo != null ? relatedPropertyInfo.Item1 : null,
-                IsSetter = relatedPropertyInfo != null ? relatedPropertyInfo.Item2 : false
+                PointcutMethod = innerMethod,
+                PointcutProperty = relatedPropertyInfo != null ? relatedPropertyInfo.Item1 : null,
+                IsPointcutPropertySetter = relatedPropertyInfo != null ? relatedPropertyInfo.Item2 : false
             };
         }
 
@@ -210,7 +179,7 @@ namespace ArxOne.MrAdvice
             var assemblyAndParents = typeAndParents.Select(t => t.Assembly).Distinct();
 
             // advices down to method
-            var allAdvices = assemblyAndParents.SelectMany(GetAttributes<TAdvice>).Union(typeAndParents.SelectMany(GetAttributes<TAdvice>))
+            var allAdvices = Enumerable.Union<TAdvice>(assemblyAndParents.SelectMany(GetAttributes<TAdvice>), typeAndParents.SelectMany(GetAttributes<TAdvice>))
                 .Union(GetAttributes<TAdvice>(targetMethod)).Select(CreateAdvice);
 
             // optional from property
@@ -244,7 +213,7 @@ namespace ArxOne.MrAdvice
         private static AdviceInfo CreateAdviceIndex<TAdvice>(TAdvice advice, int index)
             where TAdvice : class, IAdvice
         {
-            return new AdviceInfo(advice, index, false, false);
+            return new AdviceInfo(advice, index);
         }
 
         /// <summary>

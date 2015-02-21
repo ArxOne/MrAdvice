@@ -62,7 +62,7 @@ namespace ArxOne.MrAdvice.Weaver
             var targetFramework = GetTargetFramework(moduleDefinition);
             InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
 
-            Logger.WriteDebug("t1: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+            //Logger.WriteDebug("t1: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
@@ -70,7 +70,7 @@ namespace ArxOne.MrAdvice.Weaver
             auditTimer.NewZone("Methods weaving");
             weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface));
 
-            Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+            //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
             // and then, the info advices
             auditTimer.NewZone("Info advices weaving");
@@ -79,7 +79,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             auditTimer.LastZone();
 
-            Logger.WriteDebug("t3: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+            //Logger.WriteDebug("t3: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
             var report = auditTimer.GetReport();
             var maxLength = report.Keys.Max(k => k.Length);
