@@ -15,7 +15,8 @@ MrAdvice can weave assemblies for:
 
 ## How it works
 
-It is available as a NuGet package (https://www.nuget.org/packages/MrAdvice.Fody)
+It is available as a NuGet package (https://www.nuget.org/packages/MrAdvice.Fody). There is also an automatic build with tests at appveyor. The current status is [![Build status](https://ci.appveyor.com/api/projects/status/96i8xbxf954x79vw?svg=true)](https://ci.appveyor.com/project/picrap/mradvice)
+
 
 ## Philosophy
 
