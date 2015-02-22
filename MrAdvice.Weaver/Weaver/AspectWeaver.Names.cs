@@ -29,6 +29,16 @@ namespace ArxOne.MrAdvice.Weaver
         }
 
         /// <summary>
+        /// Gets the name of the implementation type.
+        /// </summary>
+        /// <param name="interfaceName">Name of the interface.</param>
+        /// <returns></returns>
+        private static string GetImplementationTypeName(string interfaceName)
+        {
+            return string.Format("{0}\u200B", interfaceName);
+        }
+
+        /// <summary>
         /// Gets the name of the property inner setter.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>

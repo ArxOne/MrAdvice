@@ -6,6 +6,8 @@
 #endregion
 namespace ArxOne.MrAdvice.Weaver
 {
+    using System.ComponentModel;
+
     /// <summary>
     /// Bindings ArxOne.MrAdvice assembly.
     /// Since Fody forbids referencing other assemblies, we had to hardcode the names
@@ -22,6 +24,17 @@ namespace ArxOne.MrAdvice.Weaver
         /// This is used to identify attributes that advice at load-time (in type .cctor).
         /// </summary>
         public const string InfoAdviceInterfaceName = "ArxOne.MrAdvice.Advice.IInfoAdvice";
+
+        /// <summary>
+        /// Full name of AdviceExtensions interface
+        /// </summary>
+        public const string AdviceExtensionsTypeName = "ArxOne.MrAdvice.Advice.AdviceExtensions";
+        /// <summary>
+        /// The advice handle method name
+        /// </summary>
+        public const string AdviceHandleMethodName = "Handle";
+
+        public const string AdviceImplementationAttributeName = "ArxOne.MrAdvice.Annotation.AdviceImplementationAttribute";
 
         /// <summary>
         /// The introduced field type name.

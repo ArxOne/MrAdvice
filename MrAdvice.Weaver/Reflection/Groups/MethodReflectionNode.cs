@@ -109,5 +109,17 @@ namespace ArxOne.MrAdvice.Reflection.Groups
             _methodDefinition = methodDefinition;
             _propertyDefinition = propertyDefinition;
         }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="MethodDefinition"/> to <see cref="MethodReflectionNode"/>.
+        /// </summary>
+        /// <param name="methodDefinition">The method definition.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
+        public static implicit operator MethodReflectionNode(MethodDefinition methodDefinition)
+        {
+            return new MethodReflectionNode(methodDefinition);
+        }
     }
 }

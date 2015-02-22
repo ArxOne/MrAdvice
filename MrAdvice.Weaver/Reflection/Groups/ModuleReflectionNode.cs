@@ -71,5 +71,17 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         {
             _moduleDefinition = moduleDefinition;
         }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="ModuleDefinition"/> to <see cref="ModuleReflectionNode"/>.
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
+        public static implicit operator ModuleReflectionNode(ModuleDefinition moduleDefinition)
+        {
+            return new ModuleReflectionNode(moduleDefinition);
+        }
     }
 }

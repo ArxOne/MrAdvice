@@ -9,6 +9,7 @@ namespace IntegrityTest
     using System.Reflection;
     using ArxOne.MrAdvice;
     using ArxOne.MrAdvice.Advice;
+    using ArxOne.MrAdvice.Annotation;
     using ArxOne.MrAdvice.Introduction;
     using ArxOne.MrAdvice.Utility;
     using ArxOne.MrAdvice.Weaver;
@@ -64,6 +65,25 @@ namespace IntegrityTest
         public void IntroducedFieldAttributeNameTest()
         {
             Assert.AreEqual(typeof(IntroducedFieldAttribute).FullName, Binding.IntroducedFieldAttributeName);
+        }
+        [TestMethod]
+        [TestCategory("Integrity")]
+        public void AdviceExtensionsNameTest()
+        {
+            Assert.AreEqual(typeof(AdviceExtensions).FullName, Binding.AdviceExtensionsTypeName);
+        }
+        [TestMethod]
+        [TestCategory("Integrity")]
+        public void AdviceHandleMethodNameTest()
+        {
+            var method = typeof(AdviceExtensions).GetMethod(Binding.AdviceHandleMethodName);
+            Assert.IsNotNull(method);
+        }
+        [TestMethod]
+        [TestCategory("Integrity")]
+        public void AdviceImplementationAttributeTest()
+        {
+            Assert.AreEqual(typeof(AdviceImplementationAttribute).FullName, Binding.AdviceImplementationAttributeName);
         }
     }
 }

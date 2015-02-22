@@ -6,6 +6,7 @@
 #endregion
 namespace ArxOne.MrAdvice.Reflection.Groups
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Mono.Cecil;
@@ -124,6 +125,30 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         public bool IsAnyGeneric()
         {
             return GetSelfAndAncestors().Any(n => n.IsGeneric);
+        }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="ModuleDefinition"/> to <see cref="ReflectionNode"/>.
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
+        public static implicit operator ReflectionNode(ModuleDefinition moduleDefinition)
+        {
+            return new ModuleReflectionNode(moduleDefinition);
+        }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="MethodDefinition"/> to <see cref="ReflectionNode"/>.
+        /// </summary>
+        /// <param name="methodDefinition">The method definition.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
+        public static implicit operator ReflectionNode(MethodDefinition methodDefinition)
+        {
+            return new MethodReflectionNode(methodDefinition);
         }
     }
 }

@@ -9,13 +9,16 @@ namespace ArxOne.MrAdvice.Weaver
     using System;
     using System.Linq;
     using System.Reflection;
+    using Introduction;
     using IO;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
     using Reflection.Groups;
     using Utility;
+    using FieldAttributes = Mono.Cecil.FieldAttributes;
     using MethodAttributes = Mono.Cecil.MethodAttributes;
+    using TypeAttributes = Mono.Cecil.TypeAttributes;
 
     partial class AspectWeaver
     {
@@ -78,8 +81,6 @@ namespace ArxOne.MrAdvice.Weaver
         {
             Logger.WriteDebug("Weaving method '{0}'", method.FullName);
 
-            var moduleDefinition = method.DeclaringType.Module;
-
             // create inner method
             const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PInvokeImpl |
                                                       MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
@@ -101,6 +102,22 @@ namespace ArxOne.MrAdvice.Weaver
             innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
             innerMethod.Body.Variables.AddRange(method.Body.Variables);
             innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
+
+            WritePointcutBody(method, innerMethod);
+            lock (method.DeclaringType)
+                method.DeclaringType.Methods.Add(innerMethod);
+        }
+
+        /// <summary>
+        /// Writes the pointcut body.
+        /// </summary>
+        /// <param name="method">The method.</param>
+        /// <param name="innerMethod">The inner method.</param>
+        /// <exception cref="System.InvalidOperationException">
+        /// </exception>
+        private void WritePointcutBody(MethodDefinition method, MethodDefinition innerMethod)
+        {
+            var moduleDefinition = method.Module;
 
             // now empty the old one and make it call the inner method...
             method.Body.InitLocals = true;
@@ -146,32 +163,40 @@ namespace ArxOne.MrAdvice.Weaver
             instructions.EmitLdloc(parametersVariable);
 
             // methods...
-            // ...target
+            // ... target
             // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
             instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod())));
 
-            // ...inner
-            var actionType = moduleDefinition.SafeImport(typeof(Action));
-            var actionCtor = moduleDefinition.SafeImport(actionType.Resolve().GetConstructors().Single());
+            // ... inner... If provided
+            if (innerMethod != null)
+            {
+                var actionType = moduleDefinition.SafeImport(typeof(Action));
+                var actionCtor = moduleDefinition.SafeImport(actionType.Resolve().GetConstructors().Single());
 
-            var delegateType = moduleDefinition.SafeImport(typeof(Delegate));
-            var getMethod = moduleDefinition.SafeImport(delegateType.Resolve().Methods.Single(m => m.Name == "get_Method"));
+                var delegateType = moduleDefinition.SafeImport(typeof(Delegate));
+                var getMethod = moduleDefinition.SafeImport(delegateType.Resolve().Methods.Single(m => m.Name == "get_Method"));
 
-            // ...inner
-            instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
-            if (method.IsConstructor)
-                instructions.Emit(OpCodes.Castclass, typeof(object));
-            instructions.Emit(OpCodes.Ldftn, innerMethod);
-            instructions.Emit(OpCodes.Newobj, actionCtor);
-            instructions.Emit(OpCodes.Call, getMethod);
+                instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
+                if (method.IsConstructor)
+                    instructions.Emit(OpCodes.Castclass, typeof(object));
+                instructions.Emit(OpCodes.Ldftn, innerMethod);
+                instructions.Emit(OpCodes.Newobj, actionCtor);
+                instructions.Emit(OpCodes.Call, getMethod);
+            }
+            // otherwise, this is null
+            else
+            {
+                instructions.Emit(OpCodes.Ldnull);
+            }
 
             // invoke the method
             var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName, true);
             if (invocationType == null)
-                return;
-            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedAdviceMethodName);
+                throw new InvalidOperationException();
+            var proceedMethodReference =
+                invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedAdviceMethodName);
             if (proceedMethodReference == null)
-                return;
+                throw new InvalidOperationException();
             var proceedMethod = moduleDefinition.SafeImport(proceedMethodReference);
 
             instructions.Emit(OpCodes.Call, proceedMethod);
@@ -199,9 +224,6 @@ namespace ArxOne.MrAdvice.Weaver
 
             // and return
             instructions.Emit(OpCodes.Ret);
-
-            lock (method.DeclaringType)
-                method.DeclaringType.Methods.Add(innerMethod);
         }
 
         /// <summary>
@@ -257,6 +279,80 @@ namespace ArxOne.MrAdvice.Weaver
             }
             WeaveAdvices(method);
             WeaveIntroductions(method, adviceInterface, moduleDefinition);
+        }
+
+        /// <summary>
+        /// Weaves the interface.
+        /// What we do here is:
+        /// - creating a class (wich is named after the interface name)
+        /// - this class implements all interface members
+        /// - all members invoke Invocation.ProcessInterfaceMethod
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="interfaceType">Type of the interface.</param>
+        private void WeaveInterface(ModuleDefinition moduleDefinition, TypeReference interfaceType)
+        {
+            var interfaceTypeDefinition = interfaceType.Resolve();
+            var typeAttributes = (InjectAsPrivate ? TypeAttributes.NotPublic : TypeAttributes.Public) | TypeAttributes.Class | TypeAttributes.BeforeFieldInit;
+            var implementationType = new TypeDefinition(interfaceType.Namespace, GetImplementationTypeName(interfaceType.Name), typeAttributes, moduleDefinition.SafeImport(typeof(object)));
+
+            var adviceImplementationAttributeReference = TypeResolver.Resolve(moduleDefinition, Binding.AdviceImplementationAttributeName, true);
+            var adviceImplementationAttribute = moduleDefinition.SafeImport(adviceImplementationAttributeReference);
+            var adviceImplementationAttributeCtor = adviceImplementationAttribute.Resolve().GetConstructors().Single();
+            implementationType.CustomAttributes.Add(new CustomAttribute(moduleDefinition.SafeImport(adviceImplementationAttributeCtor)));
+
+            lock (moduleDefinition)
+                moduleDefinition.Types.Add(implementationType);
+
+            implementationType.Interfaces.Add(interfaceType);
+
+            foreach (var interfaceMethod in interfaceTypeDefinition.GetMethods())
+            {
+                const MethodAttributes methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual;
+                var implementationMethod = new MethodDefinition(interfaceMethod.Name, methodAttributes, interfaceMethod.ReturnType);
+                implementationType.Methods.Add(implementationMethod);
+                implementationMethod.HasThis = interfaceMethod.HasThis;
+                implementationMethod.ExplicitThis = interfaceMethod.ExplicitThis;
+                implementationMethod.CallingConvention = interfaceMethod.CallingConvention;
+                implementationMethod.Parameters.AddRange(interfaceMethod.Parameters);
+                implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
+                implementationMethod.Overrides.Add(interfaceMethod);
+                WritePointcutBody(implementationMethod, null);
+            }
+        }
+
+        /// <summary>
+        /// Introduces the member.
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="memberName">Name of the member.</param>
+        /// <param name="memberType">Type of the member.</param>
+        /// <param name="isStatic">if set to <c>true</c> [is static].</param>
+        /// <param name="adviceType">The advice.</param>
+        /// <param name="advisedType">The type definition.</param>
+        /// <param name="markerAttributeCtor">The marker attribute ctor.</param>
+        private void IntroduceMember(ModuleDefinition moduleDefinition, string memberName, TypeReference memberType, bool isStatic,
+            TypeReference adviceType, TypeDefinition advisedType, MethodReference markerAttributeCtor)
+        {
+            TypeReference introducedFieldType;
+            if (IsIntroduction(memberType, out introducedFieldType))
+            {
+                var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, memberName);
+                lock (advisedType.Fields)
+                {
+                    if (advisedType.Fields.All(f => f.Name != introducedFieldName))
+                    {
+                        var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
+                        if (isStatic)
+                            fieldAttributes |= FieldAttributes.Static;
+                        Logger.WriteDebug("Introduced file type '{0}'", introducedFieldType.FullName);
+                        var introducedFieldTypeReference = moduleDefinition.SafeImport(introducedFieldType);
+                        var introducedField = new FieldDefinition(introducedFieldName, fieldAttributes, introducedFieldTypeReference);
+                        introducedField.CustomAttributes.Add(new CustomAttribute(markerAttributeCtor));
+                        advisedType.Fields.Add(introducedField);
+                    }
+                }
+            }
         }
     }
 }

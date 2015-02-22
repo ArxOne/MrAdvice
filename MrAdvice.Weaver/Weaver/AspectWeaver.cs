@@ -14,6 +14,8 @@ namespace ArxOne.MrAdvice.Weaver
     using Introduction;
     using IO;
     using Mono.Cecil;
+    using Mono.Cecil.Cil;
+    using Mono.Cecil.Rocks;
     using Reflection;
     using Reflection.Groups;
     using Utility;
@@ -64,9 +66,14 @@ namespace ArxOne.MrAdvice.Weaver
 
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
-            var weavableMethods = GetMarkedMethods(new ModuleReflectionNode(moduleDefinition), adviceInterface).ToArray();
+            var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface).ToArray();
             auditTimer.NewZone("Methods weaving");
             weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface));
+
+            auditTimer.NewZone("Weavable interfaces detection");
+            var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
+            auditTimer.NewZone("Interface methods weaving");
+            weavableInterfaces.AsParallel().ForAll(i => WeaveInterface(moduleDefinition, i));
 
             //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
@@ -121,66 +128,65 @@ namespace ArxOne.MrAdvice.Weaver
         }
 
         /// <summary>
-        /// Introduces the member.
-        /// </summary>
-        /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="memberName">Name of the member.</param>
-        /// <param name="memberType">Type of the member.</param>
-        /// <param name="isStatic">if set to <c>true</c> [is static].</param>
-        /// <param name="adviceType">The advice.</param>
-        /// <param name="advisedType">The type definition.</param>
-        /// <param name="markerAttributeCtor">The marker attribute ctor.</param>
-        private void IntroduceMember(ModuleDefinition moduleDefinition, string memberName, TypeReference memberType, bool isStatic,
-            TypeReference adviceType, TypeDefinition advisedType, MethodReference markerAttributeCtor)
-        {
-            TypeReference introducedFieldType;
-            if (IsIntroduction(moduleDefinition, memberType, out introducedFieldType))
-            {
-                var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, memberName);
-                lock (advisedType.Fields)
-                {
-                    if (advisedType.Fields.All(f => f.Name != introducedFieldName))
-                    {
-                        var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
-                        if (isStatic)
-                            fieldAttributes |= FieldAttributes.Static;
-                        Logger.WriteDebug("Introduced file type '{0}'", introducedFieldType.FullName);
-                        var introducedFieldTypeReference = moduleDefinition.SafeImport(introducedFieldType);
-                        var introducedField = new FieldDefinition(introducedFieldName, fieldAttributes, introducedFieldTypeReference);
-                        introducedField.CustomAttributes.Add(new CustomAttribute(markerAttributeCtor));
-                        advisedType.Fields.Add(introducedField);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Determines whether the advice member is introduction, based on its type.
         /// </summary>
-        /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="adviceMemberTypeReference">The type reference.</param>
         /// <param name="introducedFieldType">Type of the introduced field.</param>
         /// <returns></returns>
-        private bool IsIntroduction(ModuleDefinition moduleDefinition, TypeReference adviceMemberTypeReference, out TypeReference introducedFieldType)
+        private static bool IsIntroduction(TypeReference adviceMemberTypeReference, out TypeReference introducedFieldType)
         {
             if (!adviceMemberTypeReference.IsGenericInstance)
             {
                 introducedFieldType = null;
                 return false;
             }
-            var index = adviceMemberTypeReference.FullName.IndexOf('<');
-            var genericTypeName = adviceMemberTypeReference.FullName.Substring(0, index);
-            if (genericTypeName != Binding.IntroducedFieldTypeName)
+
+            var genericAdviceMemberTypeReference = (GenericInstanceType)adviceMemberTypeReference;
+            if (genericAdviceMemberTypeReference.GetElementType().FullName != Binding.IntroducedFieldTypeName)
             {
                 introducedFieldType = null;
                 return false;
             }
 
-            var introducedFieldTypeName = adviceMemberTypeReference.FullName.Substring(index + 1, adviceMemberTypeReference.FullName.Length - index - 2);
-            introducedFieldType = TypeResolver.Resolve(moduleDefinition, introducedFieldTypeName, false);
-            if (introducedFieldType == null)
-                Logger.WriteWarning("Type '{0}' not resolved!", introducedFieldTypeName);
+            introducedFieldType = genericAdviceMemberTypeReference.GenericArguments[0];
             return true;
+        }
+
+        /// <summary>
+        /// Gets the advice handled interfaces.
+        /// This is done by analyzing calls in all methods from module
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <returns></returns>
+        private static IEnumerable<TypeReference> GetAdviceHandledInterfaces(ModuleDefinition moduleDefinition)
+        {
+            return moduleDefinition.GetTypes().SelectMany(t => t.GetMethods().Where(m => m.HasBody)
+                .AsParallel().SelectMany(GetAdviceHandledInterfaces));
+        }
+
+        /// <summary>
+        /// Gets the advice handled interfaces.
+        /// This is done by analyzing method body
+        /// </summary>
+        /// <param name="methodDefinition">The method definition.</param>
+        /// <returns></returns>
+        private static IEnumerable<TypeReference> GetAdviceHandledInterfaces(MethodDefinition methodDefinition)
+        {
+            foreach (var instruction in methodDefinition.Body.Instructions)
+            {
+                if (instruction.OpCode == OpCodes.Call)
+                {
+                    var invokedMethodReference = (MethodReference)instruction.Operand;
+                    if (invokedMethodReference.DeclaringType.FullName == Binding.AdviceExtensionsTypeName
+                        && invokedMethodReference.Name == Binding.AdviceHandleMethodName
+                        && invokedMethodReference.IsGenericInstance)
+                    {
+                        var advisedInterface = ((GenericInstanceMethod)invokedMethodReference).GenericArguments[0];
+                        Logger.WriteDebug("Found Advice to '{0}'", advisedInterface);
+                        yield return advisedInterface;
+                    }
+                }
+            }
         }
 
         /// <summary>
