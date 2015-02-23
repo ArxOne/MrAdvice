@@ -83,7 +83,7 @@ namespace IntegrityTest
         [TestCategory("Integrity")]
         public void AdviceImplementationAttributeTest()
         {
-            Assert.AreEqual(typeof(AdviceImplementationAttribute).FullName, Binding.AdviceImplementationAttributeName);
+            Assert.AreEqual(typeof(AdvisedInterface).FullName, Binding.AdvisedInterfaceTypeName);
         }
     }
 }

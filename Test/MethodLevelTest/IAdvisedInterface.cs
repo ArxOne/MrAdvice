@@ -7,16 +7,16 @@
 
 namespace MethodLevelTest
 {
+    using System;
+
     public interface IAdvisedInterface
     {
-        int Add(int a, int b);
-    }
+        event EventHandler SomeEvent;
 
-    internal class AdvisedInterface : IAdvisedInterface
-    {
-        public int Add(int a, int b)
-        {
-            throw new System.NotImplementedException();
-        }
+        int SomeProperty { get; set; }
+
+        int DoSomething(int a, int b);
+        void DoSomethingWithRef(ref int a);
+        void DoSomethingWithOut(out int a);
     }
 }

@@ -6,6 +6,7 @@
 #endregion
 namespace ArxOne.MrAdvice.Advice
 {
+    using System;
     using System.Reflection;
 
     /// <summary>
@@ -15,7 +16,7 @@ namespace ArxOne.MrAdvice.Advice
     {
         private readonly MethodInfo _innerMethod;
 
-        public InnerMethodContext(AdviceValues adviceValues,  MethodInfo innerMethod)
+        public InnerMethodContext(AdviceValues adviceValues, MethodInfo innerMethod)
             : base(adviceValues, null)
         {
             _innerMethod = innerMethod;
@@ -23,9 +24,15 @@ namespace ArxOne.MrAdvice.Advice
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).
+        /// Here, the inner method is called
         /// </summary>
         internal override void Invoke()
         {
+            // _innerMethod is null for advised interfaces (because there is no implementation)
+            // the advises should not call the final method
+            if (_innerMethod == null)
+                throw new InvalidOperationException("context.Proceed() must not be call on advised interfaces (think about it, it does not make sense).");
+
             AdviceValues.ReturnValue = _innerMethod.Invoke(AdviceValues.Target, AdviceValues.Parameters);
         }
     }

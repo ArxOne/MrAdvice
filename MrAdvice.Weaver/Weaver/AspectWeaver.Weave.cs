@@ -16,8 +16,10 @@ namespace ArxOne.MrAdvice.Weaver
     using Mono.Cecil.Rocks;
     using Reflection.Groups;
     using Utility;
+    using EventAttributes = Mono.Cecil.EventAttributes;
     using FieldAttributes = Mono.Cecil.FieldAttributes;
     using MethodAttributes = Mono.Cecil.MethodAttributes;
+    using PropertyAttributes = Mono.Cecil.PropertyAttributes;
     using TypeAttributes = Mono.Cecil.TypeAttributes;
 
     partial class AspectWeaver
@@ -217,8 +219,9 @@ namespace ArxOne.MrAdvice.Weaver
                     instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
                     instructions.Emit(OpCodes.Ldelem_Ref); // now we have boxed out/ref value
-                    instructions.EmitUnboxOrCastIfNecessary(parameter.ParameterType.GetElementType());
-                    instructions.EmitStind(parameter.ParameterType); // result is stored in ref parameter
+                    var parameterElementType = parameter.ParameterType.GetElementType();
+                    instructions.EmitUnboxOrCastIfNecessary(parameterElementType);
+                    instructions.EmitStind(parameterElementType); // result is stored in ref parameter
                 }
             }
 
@@ -292,33 +295,87 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="interfaceType">Type of the interface.</param>
         private void WeaveInterface(ModuleDefinition moduleDefinition, TypeReference interfaceType)
         {
-            var interfaceTypeDefinition = interfaceType.Resolve();
-            var typeAttributes = (InjectAsPrivate ? TypeAttributes.NotPublic : TypeAttributes.Public) | TypeAttributes.Class | TypeAttributes.BeforeFieldInit;
-            var implementationType = new TypeDefinition(interfaceType.Namespace, GetImplementationTypeName(interfaceType.Name), typeAttributes, moduleDefinition.SafeImport(typeof(object)));
-
-            var adviceImplementationAttributeReference = TypeResolver.Resolve(moduleDefinition, Binding.AdviceImplementationAttributeName, true);
-            var adviceImplementationAttribute = moduleDefinition.SafeImport(adviceImplementationAttributeReference);
-            var adviceImplementationAttributeCtor = adviceImplementationAttribute.Resolve().GetConstructors().Single();
-            implementationType.CustomAttributes.Add(new CustomAttribute(moduleDefinition.SafeImport(adviceImplementationAttributeCtor)));
-
+            TypeDefinition implementationType;
+            TypeDefinition advisedInterfaceType;
+            TypeDefinition interfaceTypeDefinition;
             lock (moduleDefinition)
-                moduleDefinition.Types.Add(implementationType);
+            {
+                // ensure we're creating the interface only once
+                var implementationTypeName = GetImplementationTypeName(interfaceType.Name);
+                var implementationTypeNamespace = interfaceType.Namespace;
+                if (moduleDefinition.GetTypes().Any(t => t.Namespace == implementationTypeNamespace && t.Name == implementationTypeName))
+                    return;
+
+                // now, create the implementation type
+                interfaceTypeDefinition = interfaceType.Resolve();
+                var typeAttributes = (InjectAsPrivate ? TypeAttributes.NotPublic : TypeAttributes.Public) | TypeAttributes.Class | TypeAttributes.BeforeFieldInit;
+                advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, Binding.AdvisedInterfaceTypeName, true);
+                var advisedInterfaceTypeReference = moduleDefinition.SafeImport(advisedInterfaceType);
+                implementationType = new TypeDefinition(implementationTypeNamespace, implementationTypeName, typeAttributes, advisedInterfaceTypeReference);
+
+                lock (moduleDefinition)
+                    moduleDefinition.Types.Add(implementationType);
+            }
 
             implementationType.Interfaces.Add(interfaceType);
 
-            foreach (var interfaceMethod in interfaceTypeDefinition.GetMethods())
+            // create empty .ctor. This .NET mofo wants it!
+            var baseEmptyConstructor = moduleDefinition.SafeImport(advisedInterfaceType.Resolve().GetConstructors().Single());
+            const MethodAttributes ctorAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
+            var method = new MethodDefinition(".ctor", ctorAttributes, moduleDefinition.TypeSystem.Void);
+            method.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            method.Body.Instructions.Add(Instruction.Create(OpCodes.Call, baseEmptyConstructor));
+            method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            implementationType.Methods.Add(method);
+
+            // create implementation methods
+            foreach (var interfaceMethod in interfaceTypeDefinition.GetMethods().Where(m => !m.IsSpecialName))
+                WeaveInterfaceMethod(interfaceMethod, implementationType, true);
+
+            // create implementation properties
+            foreach (var interfaceProperty in interfaceTypeDefinition.Properties)
             {
-                const MethodAttributes methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual;
-                var implementationMethod = new MethodDefinition(interfaceMethod.Name, methodAttributes, interfaceMethod.ReturnType);
-                implementationType.Methods.Add(implementationMethod);
-                implementationMethod.HasThis = interfaceMethod.HasThis;
-                implementationMethod.ExplicitThis = interfaceMethod.ExplicitThis;
-                implementationMethod.CallingConvention = interfaceMethod.CallingConvention;
-                implementationMethod.Parameters.AddRange(interfaceMethod.Parameters);
-                implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
-                implementationMethod.Overrides.Add(interfaceMethod);
-                WritePointcutBody(implementationMethod, null);
+                var implementationProperty = new PropertyDefinition(interfaceProperty.Name, PropertyAttributes.None, interfaceProperty.PropertyType);
+                implementationType.Properties.Add(implementationProperty);
+                if (interfaceProperty.GetMethod != null)
+                    implementationProperty.GetMethod = WeaveInterfaceMethod(interfaceProperty.GetMethod, implementationType, InjectAsPrivate);
+                if (interfaceProperty.SetMethod != null)
+                    implementationProperty.SetMethod = WeaveInterfaceMethod(interfaceProperty.SetMethod, implementationType, InjectAsPrivate);
             }
+
+            // create implementation events
+            foreach (var interfaceEvent in interfaceTypeDefinition.Events)
+            {
+                var implementationEvent = new EventDefinition(interfaceEvent.Name, EventAttributes.None, moduleDefinition.SafeImport(interfaceEvent.EventType));
+                implementationType.Events.Add(implementationEvent);
+                if (interfaceEvent.AddMethod != null)
+                    implementationEvent.AddMethod = WeaveInterfaceMethod(interfaceEvent.AddMethod, implementationType, InjectAsPrivate);
+                if (interfaceEvent.RemoveMethod != null)
+                    implementationEvent.RemoveMethod = WeaveInterfaceMethod(interfaceEvent.RemoveMethod, implementationType, InjectAsPrivate);
+            }
+        }
+
+        /// <summary>
+        /// Creates the advice wrapper and adds it to implementation.
+        /// </summary>
+        /// <param name="interfaceMethod">The interface method.</param>
+        /// <param name="implementationType">Type of the implementation.</param>
+        /// <param name="injectAsPrivate">if set to <c>true</c> [inject as private].</param>
+        /// <returns></returns>
+        private MethodDefinition WeaveInterfaceMethod(MethodDefinition interfaceMethod, TypeDefinition implementationType, bool injectAsPrivate)
+        {
+            var methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual | (injectAsPrivate ? MethodAttributes.Public : MethodAttributes.Private);
+            var implementationMethod = new MethodDefinition(interfaceMethod.Name, methodAttributes, interfaceMethod.ReturnType);
+            implementationType.Methods.Add(implementationMethod);
+            implementationMethod.HasThis = interfaceMethod.HasThis;
+            implementationMethod.ExplicitThis = interfaceMethod.ExplicitThis;
+            implementationMethod.CallingConvention = interfaceMethod.CallingConvention;
+            implementationMethod.IsSpecialName = interfaceMethod.IsSpecialName;
+            implementationMethod.Parameters.AddRange(interfaceMethod.Parameters);
+            implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
+            implementationMethod.Overrides.Add(interfaceMethod);
+            WritePointcutBody(implementationMethod, null);
+            return implementationMethod;
         }
 
         /// <summary>
@@ -345,7 +402,7 @@ namespace ArxOne.MrAdvice.Weaver
                         var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
                         if (isStatic)
                             fieldAttributes |= FieldAttributes.Static;
-                        Logger.WriteDebug("Introduced file type '{0}'", introducedFieldType.FullName);
+                        Logger.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);
                         var introducedFieldTypeReference = moduleDefinition.SafeImport(introducedFieldType);
                         var introducedField = new FieldDefinition(introducedFieldName, fieldAttributes, introducedFieldTypeReference);
                         introducedField.CustomAttributes.Add(new CustomAttribute(markerAttributeCtor));

@@ -16,6 +16,7 @@ goto noverify
 
 :verify
 
+rem muted errors as follow (not sure muting them is good, but they are no valid errors)
 rem 0x801318AA is because of Action(method)
 rem 0x801318BF because an advised ctor can call the base class ctor
 rem 0x80131859 warning of 'this' being unitialized in ctor

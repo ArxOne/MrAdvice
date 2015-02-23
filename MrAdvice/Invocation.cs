@@ -11,7 +11,6 @@ namespace ArxOne.MrAdvice
     using System.Linq;
     using System.Reflection;
     using Advice;
-    using Annotation;
     using Aspect;
     using Utility;
 
@@ -23,7 +22,7 @@ namespace ArxOne.MrAdvice
     // ReSharper disable once UnusedMember.Global
     public static partial class Invocation
     {
-        private static readonly IDictionary<MethodBase, Aspect.AspectInfo> AdviceChains = new Dictionary<MethodBase, Aspect.AspectInfo>();
+        private static readonly IDictionary<MethodBase, AspectInfo> AspectInfos = new Dictionary<MethodBase, AspectInfo>();
 
         /// <summary>
         /// Runs a method interception.
@@ -40,12 +39,20 @@ namespace ArxOne.MrAdvice
         // ReSharper disable once UnusedMethodReturnValue.Global
         public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodInfo innerMethod)
         {
-            Aspect.AspectInfo aspectInfo;
-            lock (AdviceChains)
+            AspectInfo aspectInfo;
+            lock (AspectInfos)
             {
-                if (!AdviceChains.TryGetValue(methodBase, out aspectInfo))
-                    AdviceChains[methodBase] = aspectInfo = CreateCallContext(methodBase, innerMethod);
+                if (!AspectInfos.TryGetValue(methodBase, out aspectInfo))
+                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, innerMethod);
             }
+
+            // this is the case with auto implemented interface
+            var advisedInterface = target as AdvisedInterface;
+            if (advisedInterface != null)
+                aspectInfo = aspectInfo.AddAdvice(new AdviceInfo(advisedInterface.Advice));
+
+            foreach (var advice in aspectInfo.Advices.Distinct())
+                InjectIntroducedFields(advice.Advice, methodBase.DeclaringType);
 
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
             var adviceValues = new AdviceValues(target, parameters);
@@ -53,16 +60,20 @@ namespace ArxOne.MrAdvice
             AdviceContext adviceContext = new InnerMethodContext(adviceValues, aspectInfo.PointcutMethod);
             foreach (var advice in aspectInfo.Advices.Reverse())
             {
-                if (advice.MethodAdvice != null)
-                    adviceContext = new MethodAdviceContext(advice.MethodAdvice, methodBase, adviceValues, adviceContext);
-                if (advice.PropertyAdvice != null)
-                    adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
-                if (advice.ParameterAdvice != null)
+                // aspects are processed from highest to lowest level, so they are linked here in the opposite order
+                // 3. as parameter
+                if (advice.ParameterAdvice != null && advice.ParameterIndex.HasValue)
                 {
                     var parameterIndex = advice.ParameterIndex.Value;
                     var parameterInfo = GetParameterInfo(methodBase, parameterIndex);
                     adviceContext = new ParameterAdviceContext(advice.ParameterAdvice, parameterInfo, parameterIndex, adviceValues, adviceContext);
                 }
+                // 2. as method
+                if (advice.MethodAdvice != null)
+                    adviceContext = new MethodAdviceContext(advice.MethodAdvice, methodBase, adviceValues, adviceContext);
+                // 1. as property
+                if (advice.PropertyAdvice != null && aspectInfo.PointcutProperty != null)
+                    adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
             }
 
             adviceContext.Invoke();
@@ -149,19 +160,13 @@ namespace ArxOne.MrAdvice
         /// <param name="methodBase">The method information.</param>
         /// <param name="innerMethod">Name of the inner method.</param>
         /// <returns></returns>
-        private static Aspect.AspectInfo CreateCallContext(MethodBase methodBase, MethodInfo innerMethod)
+        private static AspectInfo CreateAspectInfo(MethodBase methodBase, MethodInfo innerMethod)
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
             var advices = GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
-            foreach (var advice in advices.Distinct())
-                InjectIntroducedFields(advice.Advice, methodBase.DeclaringType);
-            return new Aspect.AspectInfo
-            {
-                Advices = advices,
-                PointcutMethod = innerMethod,
-                PointcutProperty = relatedPropertyInfo != null ? relatedPropertyInfo.Item1 : null,
-                IsPointcutPropertySetter = relatedPropertyInfo != null ? relatedPropertyInfo.Item2 : false
-            };
+            if (relatedPropertyInfo == null)
+                return new AspectInfo(advices, innerMethod);
+            return new AspectInfo(advices, innerMethod, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
         }
 
         /// <summary>
@@ -171,14 +176,14 @@ namespace ArxOne.MrAdvice
         /// <param name="targetMethod">The target method.</param>
         /// <param name="relatedPropertyInfo">The related property information.</param>
         /// <returns></returns>
-        private static IList<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
+        private static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
             where TAdvice : class, IAdvice
         {
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndParents().ToArray();
             var assemblyAndParents = typeAndParents.Select(t => t.Assembly).Distinct();
 
             // advices down to method
-            var allAdvices = Enumerable.Union<TAdvice>(assemblyAndParents.SelectMany(GetAttributes<TAdvice>), typeAndParents.SelectMany(GetAttributes<TAdvice>))
+            var allAdvices = assemblyAndParents.SelectMany(GetAttributes<TAdvice>).Union(typeAndParents.SelectMany(GetAttributes<TAdvice>))
                 .Union(GetAttributes<TAdvice>(targetMethod)).Select(CreateAdvice);
 
             // optional from property
@@ -199,8 +204,7 @@ namespace ArxOne.MrAdvice
             if (methodInfo != null)
                 allAdvices = allAdvices.Concat(GetAttributes<TAdvice>(methodInfo.ReturnParameter).Select(a => CreateAdviceIndex(a, -1)));
 
-            var advices = allAdvices.OrderByDescending(a => Priority.GetLevel(a.Advice)).ToArray();
-            return advices;
+            return allAdvices;
         }
 
         private static AdviceInfo CreateAdvice<TAdvice>(TAdvice advice)
@@ -274,7 +278,7 @@ namespace ArxOne.MrAdvice
             // hard-coded, because the property name generates two methods: "get_xxx" and "set_xxx" where xxx is the property name
             var propertyName = methodInfo.Name.Substring(4);
             // now try to find the property
-            var propertyInfo = methodInfo.DeclaringType.GetProperty(propertyName);
+            var propertyInfo = methodInfo.DeclaringType.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             if (propertyInfo == null)
                 return null; // this should never happen
 

@@ -34,7 +34,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         public const string AdviceHandleMethodName = "Handle";
 
-        public const string AdviceImplementationAttributeName = "ArxOne.MrAdvice.Annotation.AdviceImplementationAttribute";
+        public const string AdvisedInterfaceTypeName = "ArxOne.MrAdvice.Advice.AdvisedInterface";
 
         /// <summary>
         /// The introduced field type name.
