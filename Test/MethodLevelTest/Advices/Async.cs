@@ -4,7 +4,7 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
-namespace BlueDwarf.Utility
+namespace MethodLevelTest.Advices
 {
     using System;
     using System.Threading;

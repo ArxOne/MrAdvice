@@ -8,7 +8,7 @@ namespace MethodLevelTest
 {
     using System;
     using System.Threading;
-    using BlueDwarf.Utility;
+    using Advices;
 
     public class AdvisedClass
     {
