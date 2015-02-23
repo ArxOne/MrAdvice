@@ -6,6 +6,8 @@
 #endregion
 namespace ArxOne.MrAdvice.Advice
 {
+    using System;
+
     /// <summary>
     /// Target part with advice context
     /// Used by introduced fields
@@ -19,5 +21,13 @@ namespace ArxOne.MrAdvice.Advice
         /// The target.
         /// </value>
         object Target { get; }
+
+        /// <summary>
+        /// Gets the type of the target.
+        /// </summary>
+        /// <value>
+        /// The type of the target.
+        /// </value>
+        Type TargetType { get; }
     }
 }

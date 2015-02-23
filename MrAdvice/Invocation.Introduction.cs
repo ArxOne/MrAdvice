@@ -40,14 +40,11 @@ namespace ArxOne.MrAdvice
             if (advice == null)
                 return;
             const BindingFlags adviceMembersBindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-            const BindingFlags introducedFieldsBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-            Type introducedFieldType = null;
-            foreach (var memberInfo in advice.GetType().GetFieldsAndProperties(adviceMembersBindingFlags)
-                .Where(f => IsIntroduction(f.GetMemberType(), out introducedFieldType)))
+            foreach (var memberInfo in advice.GetType().GetFieldsAndProperties(adviceMembersBindingFlags).Where(IsIntroduction))
             {
                 var memberValue = memberInfo.GetValue(advice);
                 if (memberValue == null)
-                    InjectIntroducedField(advice, memberInfo, advisedType, introducedFieldType, introducedFieldsBindingFlags);
+                    InjectIntroducedField(advice, memberInfo, advisedType);
             }
         }
 
@@ -57,49 +54,58 @@ namespace ArxOne.MrAdvice
         /// <param name="advice">The advice.</param>
         /// <param name="adviceMemberInfo">The member information.</param>
         /// <param name="advisedType">Type of the advised.</param>
-        /// <param name="introducedFieldType">Type of the introduced field.</param>
-        /// <param name="bindingFlags">The binding flags.</param>
-        private static void InjectIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType, Type introducedFieldType,
-            BindingFlags bindingFlags)
+        /// <exception cref="System.InvalidOperationException">Internal error, can not find matching introduced field</exception>
+        private static void InjectIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType)
         {
+            adviceMemberInfo.SetValue(advice, Activator.CreateInstance(adviceMemberInfo.GetMemberType(), advice, adviceMemberInfo));
+        }
+
+        /// <summary>
+        /// Finds the introduced field.
+        /// </summary>
+        /// <param name="advice">The advice.</param>
+        /// <param name="adviceMemberInfo">The advice member information.</param>
+        /// <param name="advisedType">Type of the advised.</param>
+        /// <returns></returns>
+        /// <exception cref="System.InvalidOperationException">Internal error, can not find matching introduced field</exception>
+        internal static FieldInfo FindIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType)
+        {
+            var introducedFieldType = GetIntroducedType(adviceMemberInfo);
             var adviceType = advice.GetType();
             var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, adviceMemberInfo.Name);
             var linkID = string.Format("{0}:{1}", adviceType.AssemblyQualifiedName, adviceMemberInfo.Name);
+            const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             var introducedField = FindIntroducedFieldByName(advisedType, introducedFieldName, linkID, bindingFlags)
-                                  ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), bindingFlags, linkID);
+                     ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), null, bindingFlags)
+                     ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), linkID, bindingFlags);
             if (introducedField == null)
                 throw new InvalidOperationException("Internal error, can not find matching introduced field");
             var introducedFieldAttribute = introducedField.GetCustomAttribute<IntroducedFieldAttribute>();
             introducedFieldAttribute.LinkID = linkID;
-            adviceMemberInfo.SetValue(advice, Activator.CreateInstance(adviceMemberInfo.GetMemberType(), introducedField));
+            return introducedField;
         }
 
         /// <summary>
         /// Determines whether the specified member type is introduction.
         /// </summary>
-        /// <param name="memberType">Type of the member.</param>
-        /// <param name="introducedType">Type of the introduced.</param>
+        /// <param name="memberInfo">The member information.</param>
         /// <returns></returns>
-        private static bool IsIntroduction(Type memberType, out Type introducedType)
+        private static bool IsIntroduction(MemberInfo memberInfo)
         {
+            return GetIntroducedType(memberInfo) != null;
+        }
+
+        /// <summary>
+        /// Determines whether the specified member type is introduction.
+        /// </summary>
+        /// <param name="memberInfo">The member information.</param>
+        /// <returns></returns>
+        private static Type GetIntroducedType(MemberInfo memberInfo)
+        {
+            var memberType = memberInfo.GetMemberType();
             if (!memberType.IsGenericType || memberType.GetGenericTypeDefinition() != typeof(IntroducedField<>))
-            {
-                introducedType = null;
-                return false;
-            }
-            introducedType = memberType.GetGenericArguments()[0];
-            return true;
-        }
-
-        /// <summary>
-        /// Determines whether the specified member type is introduction.
-        /// </summary>
-        /// <param name="memberType">Type of the member.</param>
-        /// <returns></returns>
-        private static bool IsIntroduction(Type memberType)
-        {
-            Type introducedType;
-            return IsIntroduction(memberType, out introducedType);
+                return null;
+            return memberType.GetGenericArguments()[0];
         }
 
         /// <summary>
@@ -128,18 +134,18 @@ namespace ArxOne.MrAdvice
         /// <param name="advisedType">Type of the advised.</param>
         /// <param name="fieldType">Type of the field.</param>
         /// <param name="isStatic">if set to <c>true</c> [is static].</param>
-        /// <param name="bindingFlags">The binding flags.</param>
         /// <param name="linkID">The link identifier.</param>
+        /// <param name="bindingFlags">The binding flags.</param>
         /// <returns></returns>
-        private static FieldInfo FindIntroducedFieldByTypeAndAvailability(Type advisedType, Type fieldType, bool isStatic, BindingFlags bindingFlags, string linkID)
+        private static FieldInfo FindIntroducedFieldByTypeAndAvailability(Type advisedType, Type fieldType, bool isStatic, string linkID, BindingFlags bindingFlags)
         {
             return (from fieldInfo in advisedType.GetFields(bindingFlags)
-                where fieldInfo.FieldType == fieldType
-                      && fieldInfo.IsStatic == isStatic
-                let introducedFieldAttribute = fieldInfo.GetCustomAttribute<IntroducedFieldAttribute>()
-                where introducedFieldAttribute != null
-                      && introducedFieldAttribute.LinkID == null
-                select fieldInfo).FirstOrDefault();
+                    where fieldInfo.FieldType == fieldType
+                          && fieldInfo.IsStatic == isStatic
+                    let introducedFieldAttribute = fieldInfo.GetCustomAttribute<IntroducedFieldAttribute>()
+                    where introducedFieldAttribute != null
+                          && introducedFieldAttribute.LinkID == linkID
+                    select fieldInfo).FirstOrDefault();
         }
     }
 }

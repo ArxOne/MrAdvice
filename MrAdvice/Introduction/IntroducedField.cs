@@ -6,6 +6,8 @@
 #endregion
 namespace ArxOne.MrAdvice.Introduction
 {
+    using System;
+    using System.Collections.Generic;
     using System.Reflection;
     using Advice;
 
@@ -17,9 +19,30 @@ namespace ArxOne.MrAdvice.Introduction
     /// <typeparam name="TFieldType">The type of the field type.</typeparam>
     public class IntroducedField<TFieldType>
     {
-        private readonly FieldInfo _introducedField;
-        private bool IsStatic { get { return _introducedField.IsStatic; } }
+        private readonly IAdvice _ownerAdvice;
+        private readonly MemberInfo _ownerMemberInfo;
 
+        private readonly IDictionary<Type, FieldInfo> _fieldInfos = new Dictionary<Type, FieldInfo>();
+
+        /// <summary>
+        /// Gets the introduced field.
+        /// Since the attribute may be at assembly level, the advised type is given as parameter
+        /// A cache is kept, by target type.
+        /// </summary>
+        /// <param name="targetType">Type of the target.</param>
+        /// <returns></returns>
+        private FieldInfo GetIntroducedField(Type targetType)
+        {
+            lock (_fieldInfos)
+            {
+                FieldInfo introducedField;
+                if (_fieldInfos.TryGetValue(targetType, out introducedField))
+                    return introducedField;
+
+                _fieldInfos[targetType] = introducedField = Invocation.FindIntroducedField(_ownerAdvice, _ownerMemberInfo, targetType);
+                return introducedField;
+            }
+        }
         /// <summary>
         /// Gets or sets the <see typeparamref="TFieldType"/> with the specified context.
         /// </summary>
@@ -30,17 +53,28 @@ namespace ArxOne.MrAdvice.Introduction
         /// <returns></returns>
         public TFieldType this[IAdviceContextTarget context]
         {
-            get { return (TFieldType)_introducedField.GetValue(IsStatic ? null : context.Target); }
-            set { _introducedField.SetValue(IsStatic ? null : context.Target, value); }
+            get
+            {
+                var introducedField = GetIntroducedField(context.TargetType);
+                return (TFieldType)introducedField.GetValue(context.Target);
+            }
+            set
+            {
+                var introducedField = GetIntroducedField(context.TargetType);
+                introducedField.SetValue(context.Target, value);
+            }
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IntroducedField{TFieldType}"/> class.
+        /// Initializes a new instance of the <see cref="IntroducedField{TFieldType}" /> class.
         /// </summary>
-        /// <param name="introducedField">The introduced field.</param>
-        public IntroducedField(FieldInfo introducedField)
+        /// <param name="ownerAdvice">The owner advice.</param>
+        /// <param name="ownerMemberInfo">The owner member information.</param>
+        [Obsolete("Let Mr. Advice use it, don't bother instantiating it by yourself.")]
+        public IntroducedField(IAdvice ownerAdvice, MemberInfo ownerMemberInfo)
         {
-            _introducedField = introducedField;
+            _ownerAdvice = ownerAdvice;
+            _ownerMemberInfo = ownerMemberInfo;
         }
     }
 }

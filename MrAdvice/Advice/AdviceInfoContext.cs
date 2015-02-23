@@ -6,6 +6,8 @@
 #endregion
 namespace ArxOne.MrAdvice.Advice
 {
+    using System;
+
     /// <summary>
     /// Base class for advice information context
     /// </summary>
@@ -17,9 +19,14 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The target.
         /// </value>
-        public object Target
-        {
-            get { return null; }
-        }
+        public object Target { get { return null; } }
+
+        /// <summary>
+        /// Gets the type of the target.
+        /// </summary>
+        /// <value>
+        /// The type of the target.
+        /// </value>
+        public Type TargetType { get { return null; } }
     }
 }

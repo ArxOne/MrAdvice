@@ -55,7 +55,7 @@ namespace ArxOne.MrAdvice
                 InjectIntroducedFields(advice.Advice, methodBase.DeclaringType);
 
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
-            var adviceValues = new AdviceValues(target, parameters);
+            var adviceValues = new AdviceValues(target, methodBase.DeclaringType, parameters);
             // at least there is one context
             AdviceContext adviceContext = new InnerMethodContext(adviceValues, aspectInfo.PointcutMethod);
             foreach (var advice in aspectInfo.Advices.Reverse())
