@@ -295,6 +295,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="interfaceType">Type of the interface.</param>
         private void WeaveInterface(ModuleDefinition moduleDefinition, TypeReference interfaceType)
         {
+            Logger.WriteDebug("Weaving interface '{0}'", interfaceType.FullName);
             TypeDefinition implementationType;
             TypeDefinition advisedInterfaceType;
             TypeDefinition interfaceTypeDefinition;

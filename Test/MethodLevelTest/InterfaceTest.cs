@@ -7,6 +7,7 @@
 
 namespace MethodLevelTest
 {
+    using System;
     using Advices;
     using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -71,6 +72,22 @@ namespace MethodLevelTest
             var i = a.Handle<IAdvisedInterface>();
             var v = i.SomeProperty;
             Assert.AreEqual(67, v);
+        }
+
+        private TInterface Handle<TAdvice, TInterface>(TAdvice advice)
+            where TAdvice : IAdvice
+        {
+            return advice.Handle<TInterface>();
+        }
+
+        [TestMethod]
+        [TestCategory("Interface")]
+        public void IndirectWeavingTest()
+        {
+            var a = new InterfaceMethodAdvice { NewReturnValue = 87 };
+            var i = Handle<IAdvice, IIndirectAdvisedInterface>(a);
+            var r = i.DoSomething(4, 3);
+            Assert.AreEqual(87, r);
         }
     }
 }

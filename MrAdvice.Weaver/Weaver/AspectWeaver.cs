@@ -158,10 +158,60 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <returns></returns>
-        private static IEnumerable<TypeReference> GetAdviceHandledInterfaces(ModuleDefinition moduleDefinition)
+        private IEnumerable<TypeReference> GetAdviceHandledInterfaces(ModuleDefinition moduleDefinition)
+        {
+            // the first method to look for in the final AdviceExtensions.Handle<>() method
+            var adviceExtensionsType = TypeResolver.Resolve(moduleDefinition, Binding.AdviceExtensionsTypeName, true);
+            var adviceHandleMethod = adviceExtensionsType.GetMethods().Single(m => m.IsPublic && m.HasGenericParameters && m.Name == Binding.AdviceHandleMethodName);
+            var methodsSearched = new HashSet<MethodReference>(new MethodReferenceComparer()) { adviceHandleMethod };
+            var foundHandledInterfaces = new HashSet<TypeReference>(new TypeReferenceComparer());
+            var methodsToSearch = new List<Tuple<MethodDefinition, int>> { Tuple.Create(adviceHandleMethod, 0) };
+            while (methodsToSearch.Count > 0)
+            {
+                var methodToSearch = methodsToSearch[0];
+                methodsToSearch.RemoveAt(0);
+                foreach (var t in GetAdviceHandledInterfaces(moduleDefinition, methodToSearch.Item1, methodToSearch.Item2))
+                {
+                    // if the supposed interface type itself is a generic parameter
+                    // this means that the calling method (Item2) is itself a generic parameter
+                    // and we have to lookup for calls to this method
+                    if (t.Item1.IsGenericParameter)
+                    {
+                        if (!methodsSearched.Contains(t.Item2))
+                        {
+                            var parameterIndex = t.Item2.GenericParameters.IndexOf(p => p.Name == t.Item1.Name);
+                            methodsSearched.Add(t.Item2);
+                            methodsToSearch.Add(Tuple.Create(t.Item2, parameterIndex));
+                            Logger.WriteDebug("Now looking for references to '{0} [{1}]'", methodToSearch, parameterIndex);
+                        }
+                    }
+                    // only interfaces are processed by now
+                    else if (t.Item1.Resolve().IsInterface)
+                    {
+                        // otherwise, this is a direct call, keep the injected interface name
+                        if (!foundHandledInterfaces.Contains(t.Item1))
+                        {
+                            foundHandledInterfaces.Add(t.Item1);
+                            yield return t.Item1;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the advice handled interfaces.
+        /// This is done by analyzing calls in all methods from module
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="invokedMethod">The invoked method.</param>
+        /// <param name="genericParameterIndex">Index of the generic parameter.</param>
+        /// <returns></returns>
+        private static IEnumerable<Tuple<TypeReference, MethodDefinition>> GetAdviceHandledInterfaces(ModuleDefinition moduleDefinition,
+            MethodReference invokedMethod, int genericParameterIndex)
         {
             return moduleDefinition.GetTypes().SelectMany(t => t.GetMethods().Where(m => m.HasBody)
-                .AsParallel().SelectMany(GetAdviceHandledInterfaces));
+                .AsParallel().SelectMany(definition => GetAdviceHandledInterfaces(definition, invokedMethod, genericParameterIndex)));
         }
 
         /// <summary>
@@ -169,21 +219,22 @@ namespace ArxOne.MrAdvice.Weaver
         /// This is done by analyzing method body
         /// </summary>
         /// <param name="methodDefinition">The method definition.</param>
+        /// <param name="invokedMethod">The invoked method.</param>
+        /// <param name="genericParameterIndex">Index of the generic parameter.</param>
         /// <returns></returns>
-        private static IEnumerable<TypeReference> GetAdviceHandledInterfaces(MethodDefinition methodDefinition)
+        private static IEnumerable<Tuple<TypeReference, MethodDefinition>> GetAdviceHandledInterfaces(MethodDefinition methodDefinition,
+            MethodReference invokedMethod, int genericParameterIndex)
         {
             foreach (var instruction in methodDefinition.Body.Instructions)
             {
-                if (instruction.OpCode == OpCodes.Call)
+                if (instruction.OpCode == OpCodes.Call || instruction.OpCode == OpCodes.Calli || instruction.OpCode == OpCodes.Callvirt)
                 {
                     var invokedMethodReference = (MethodReference)instruction.Operand;
-                    if (invokedMethodReference.DeclaringType.FullName == Binding.AdviceExtensionsTypeName
-                        && invokedMethodReference.Name == Binding.AdviceHandleMethodName
-                        && invokedMethodReference.IsGenericInstance)
+                    if (invokedMethodReference.IsGenericInstance && invokedMethodReference.SafeEquivalent(invokedMethod))
                     {
-                        var advisedInterface = ((GenericInstanceMethod)invokedMethodReference).GenericArguments[0];
-                        Logger.WriteDebug("Found Advice to '{0}'", advisedInterface);
-                        yield return advisedInterface;
+                        var advisedInterface = ((GenericInstanceMethod)invokedMethodReference).GenericArguments[genericParameterIndex];
+                        //Logger.WriteDebug("Found Advice to '{0}'", advisedInterface);
+                        yield return Tuple.Create(advisedInterface, methodDefinition);
                     }
                 }
             }

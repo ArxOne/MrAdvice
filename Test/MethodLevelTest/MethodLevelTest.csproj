@@ -76,6 +76,7 @@
     <Compile Include="EmptyAdvisedClass.cs" />
     <Compile Include="GenericEmptyAdvisedClass.cs" />
     <Compile Include="IAdvisedInterface.cs" />
+    <Compile Include="IIndirectAdvisedInterface.cs" />
     <Compile Include="InterfaceTest.cs" />
     <Compile Include="IntroducedClass.cs" />
     <Compile Include="IntroductionTest.cs" />
