@@ -82,6 +82,7 @@
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
     <Compile Include="Utility\EnumerableExtensions.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />
+    <Compile Include="Utility\PropertyDefinitionExtensions.cs" />
     <Compile Include="Utility\TypeReferenceComparer.cs" />
     <Compile Include="Utility\ModuleDefinitionExtensions.cs" />
     <Compile Include="Utility\ReflectionUtility.cs" />

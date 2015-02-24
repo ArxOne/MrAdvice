@@ -245,9 +245,9 @@ namespace ArxOne.MrAdvice.Weaver
             foreach (var advice in advices)
             {
                 var adviceDefinition = advice.Resolve();
-                foreach (var field in adviceDefinition.Fields)
+                foreach (var field in adviceDefinition.Fields.Where(f=>f.IsPublic))
                     IntroduceMember(method.Module, field.Name, field.FieldType, field.IsStatic, advice, typeDefinition, markerAttributeCtor);
-                foreach (var property in adviceDefinition.Properties)
+                foreach (var property in adviceDefinition.Properties.Where(p => p.HasAnyPublic()))
                     IntroduceMember(method.Module, property.Name, property.PropertyType, !property.HasThis, advice, typeDefinition, markerAttributeCtor);
             }
         }
