@@ -166,6 +166,15 @@ namespace MethodLevelTest
             Assert.AreEqual(c + 1, RecordCall.Count);
         }
 
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void PriorityTest()
+        {
+            var c = new AdvisedClass();
+            var r = c.GetString("...");
+            Assert.AreEqual("...ABCDE", r);
+        }
+
         //[TestMethod]
         //[TestCategory("Weaving")]
         //public void MethodWithGenericParameterTest()

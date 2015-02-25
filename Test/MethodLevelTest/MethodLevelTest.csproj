@@ -58,6 +58,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Advices\AddA.cs" />
     <Compile Include="Advices\Async.cs" />
     <Compile Include="Advices\ChangeParameter.cs" />
     <Compile Include="Advices\EmptyParameterAdvice.cs" />
