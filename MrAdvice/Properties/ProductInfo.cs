@@ -17,4 +17,4 @@ using System.Resources;
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion("0.3.11")]
+[assembly: AssemblyVersion("0.3.12")]
