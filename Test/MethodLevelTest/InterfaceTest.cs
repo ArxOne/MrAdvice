@@ -89,5 +89,14 @@ namespace MethodLevelTest
             var r = i.DoSomething(4, 3);
             Assert.AreEqual(87, r);
         }
+
+        [TestMethod]
+        [TestCategory("Interface")]
+        public void InterfaceTypeTest()
+        {
+            var a = new InterfaceCheckAdvice();
+            var i = a.Handle<IAdvisedInterface>();
+            i.DoNothing();
+        }
     }
 }

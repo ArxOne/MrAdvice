@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.Versioning;
     using Introduction;
     using IO;
@@ -93,8 +94,8 @@ namespace ArxOne.MrAdvice.Weaver
                 Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength), (int)reportPart.Value.TotalMilliseconds);
             Logger.WriteDebug("--------------------------------------");
 
-            Logger.Write("MrAdvice weaved module '{0}' (targeting framework {2}) in {1}ms",
-                moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework);
+            Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
+                moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
         }
 
         /// <summary>
@@ -126,7 +127,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             return new TargetFramework((string)targetFrameworkAttribute.ConstructorArguments[0].Value);
         }
-
+        
         /// <summary>
         /// Determines whether the advice member is introduction, based on its type.
         /// </summary>

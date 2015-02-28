@@ -58,10 +58,12 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Advices\AddA.cs" />
     <Compile Include="Advices\Async.cs" />
     <Compile Include="Advices\ChangeParameter.cs" />
     <Compile Include="Advices\EmptyParameterAdvice.cs" />
     <Compile Include="Advices\EmptyPropertyAdvice.cs" />
+    <Compile Include="Advices\InterfaceCheckAdvice.cs" />
     <Compile Include="Advices\InterfaceMethodAdvice.cs" />
     <Compile Include="Advices\InterfacePropertyAdvice.cs" />
     <Compile Include="Advices\IntroductionAdvice.cs" />

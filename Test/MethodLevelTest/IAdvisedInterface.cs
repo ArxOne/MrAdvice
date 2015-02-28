@@ -15,6 +15,7 @@ namespace MethodLevelTest
 
         int SomeProperty { get; set; }
 
+        void DoNothing();
         int DoSomething(int a, int b);
         void DoSomethingWithRef(ref int a);
         void DoSomethingWithOut(out int a);

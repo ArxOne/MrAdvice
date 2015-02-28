@@ -17,4 +17,11 @@ using System.Resources;
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion("0.3.10")]
+[assembly: AssemblyVersion(Product.Version)]
+
+// ReSharper disable once CheckNamespace
+internal static class Product
+{
+    public const string Version = "0.3.12";
+}
+

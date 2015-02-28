@@ -28,5 +28,11 @@ namespace MethodLevelTest
                 return;
             end.Set();
         }
+
+        [AddC, AddD, AddB, AddA, AddE]
+        public string GetString(string s)
+        {
+            return s;
+        }
     }
 }

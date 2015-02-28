@@ -55,7 +55,7 @@ namespace ArxOne.MrAdvice
                 InjectIntroducedFields(advice.Advice, methodBase.DeclaringType);
 
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
-            var adviceValues = new AdviceValues(target, methodBase.DeclaringType, parameters);
+            var adviceValues = new AdviceValues(target, aspectInfo.AdvisedMethod.DeclaringType, parameters);
             // at least there is one context
             AdviceContext adviceContext = new InnerMethodContext(adviceValues, aspectInfo.PointcutMethod);
             foreach (var advice in aspectInfo.Advices.Reverse())
@@ -65,12 +65,12 @@ namespace ArxOne.MrAdvice
                 if (advice.ParameterAdvice != null && advice.ParameterIndex.HasValue)
                 {
                     var parameterIndex = advice.ParameterIndex.Value;
-                    var parameterInfo = GetParameterInfo(methodBase, parameterIndex);
+                    var parameterInfo = GetParameterInfo(aspectInfo.AdvisedMethod, parameterIndex);
                     adviceContext = new ParameterAdviceContext(advice.ParameterAdvice, parameterInfo, parameterIndex, adviceValues, adviceContext);
                 }
                 // 2. as method
                 if (advice.MethodAdvice != null)
-                    adviceContext = new MethodAdviceContext(advice.MethodAdvice, methodBase, adviceValues, adviceContext);
+                    adviceContext = new MethodAdviceContext(advice.MethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
                 // 1. as property
                 if (advice.PropertyAdvice != null && aspectInfo.PointcutProperty != null)
                     adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
@@ -163,10 +163,26 @@ namespace ArxOne.MrAdvice
         private static AspectInfo CreateAspectInfo(MethodBase methodBase, MethodInfo innerMethod)
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
+            if (innerMethod == null)
+                methodBase = FindInterfaceMethod(methodBase);
             var advices = GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
             if (relatedPropertyInfo == null)
-                return new AspectInfo(advices, innerMethod);
-            return new AspectInfo(advices, innerMethod, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
+                return new AspectInfo(advices, innerMethod, methodBase);
+            return new AspectInfo(advices, innerMethod, methodBase, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
+        }
+
+        /// <summary>
+        /// Finds the interface method implemented.
+        /// </summary>
+        /// <param name="implementationMethodBase">The method base.</param>
+        /// <returns></returns>
+        private static MethodBase FindInterfaceMethod(MethodBase implementationMethodBase)
+        {
+            // GetInterfaceMap is unfortunately unavailable in PCL :'(
+            var i = implementationMethodBase.DeclaringType.GetInterfaces().Single();
+            var parameterInfos = implementationMethodBase.GetParameters();
+            var m = i.GetMethod(implementationMethodBase.Name, parameterInfos.Select(p => p.ParameterType).ToArray());
+            return m;
         }
 
         /// <summary>

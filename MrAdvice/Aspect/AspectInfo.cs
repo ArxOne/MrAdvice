@@ -23,6 +23,14 @@ namespace ArxOne.MrAdvice.Aspect
         /// The advices.
         /// </value>
         public IList<AdviceInfo> Advices { get; private set; }
+
+        /// <summary>
+        /// Gets the advised method.
+        /// </summary>
+        /// <value>
+        /// The advised method.
+        /// </value>
+        public MethodBase AdvisedMethod { get; private set; }
         /// <summary>
         /// Gets the pointcut method.
         /// </summary>
@@ -46,28 +54,31 @@ namespace ArxOne.MrAdvice.Aspect
         public bool IsPointcutPropertySetter { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AspectInfo"/> class.
+        /// Initializes a new instance of the <see cref="AspectInfo" /> class.
         /// </summary>
         /// <param name="advices">The advices.</param>
         /// <param name="pointcutMethod">The pointcut method.</param>
+        /// <param name="advisedMethod">The advised method.</param>
         /// <param name="pointcutProperty">The pointcut property.</param>
         /// <param name="isPointcutPropertySetter">if set to <c>true</c> [is pointcut property setter].</param>
-        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, PropertyInfo pointcutProperty, bool isPointcutPropertySetter)
-            : this(advices, pointcutMethod)
+        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, MethodBase advisedMethod, PropertyInfo pointcutProperty, bool isPointcutPropertySetter)
+            : this(advices, pointcutMethod, advisedMethod)
         {
             PointcutProperty = pointcutProperty;
             IsPointcutPropertySetter = isPointcutPropertySetter;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AspectInfo"/> class.
+        /// Initializes a new instance of the <see cref="AspectInfo" /> class.
         /// </summary>
         /// <param name="advices">The advices.</param>
         /// <param name="pointcutMethod">The pointcut method.</param>
-        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod)
+        /// <param name="advisedMethod">The advised method.</param>
+        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, MethodBase advisedMethod)
         {
-            Advices = advices.OrderBy(a => Priority.GetLevel(a.Advice)).ToArray();
+            Advices = advices.OrderByDescending(a => Priority.GetLevel(a.Advice)).ToArray();
             PointcutMethod = pointcutMethod;
+            AdvisedMethod = advisedMethod;
         }
 
         /// <summary>
@@ -77,7 +88,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// <returns></returns>
         public AspectInfo AddAdvice(AdviceInfo adviceInfo)
         {
-            return new AspectInfo(Advices.Concat(new[] { adviceInfo }), PointcutMethod, PointcutProperty, IsPointcutPropertySetter);
+            return new AspectInfo(Advices.Concat(new[] { adviceInfo }), PointcutMethod, AdvisedMethod, PointcutProperty, IsPointcutPropertySetter);
         }
     }
 }
