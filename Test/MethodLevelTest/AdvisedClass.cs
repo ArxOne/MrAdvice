@@ -34,5 +34,11 @@ namespace MethodLevelTest
         {
             return s;
         }
+
+        [EmptyMethodAdvice]
+        public void ThrowInvalidOperationException()
+        {
+            throw new InvalidOperationException();
+        }
     }
 }

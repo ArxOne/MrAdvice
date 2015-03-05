@@ -7,6 +7,9 @@
 namespace ArxOne.MrAdvice.Advice
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
 
     /// <summary>
@@ -33,7 +36,22 @@ namespace ArxOne.MrAdvice.Advice
             if (_innerMethod == null)
                 throw new InvalidOperationException("context.Proceed() must not be call on advised interfaces (think about it, it does not make sense).");
 
-            AdviceValues.ReturnValue = _innerMethod.Invoke(AdviceValues.Target, AdviceValues.Parameters);
+            try
+            {
+                //var delegateType = Expression.GetDelegateType(
+                //    _innerMethod.GetParameters().Select(p => p.ParameterType).Concat(new[] { _innerMethod.ReturnType }).ToArray());
+                //var d = Delegate.CreateDelegate(delegateType, AdviceValues.Target, _innerMethod);
+                //AdviceValues.ReturnValue = d.DynamicInvoke(AdviceValues.Parameters);
+                AdviceValues.ReturnValue = _innerMethod.Invoke(AdviceValues.Target, AdviceValues.Parameters);
+            }
+            catch (TargetInvocationException tie)
+            {
+                var ie = tie.InnerException;
+                var p = typeof(Exception).GetMethod("PrepForRemoting", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (p != null)
+                    p.Invoke(ie, new object[0]);
+                throw ie;
+            }
         }
     }
 }

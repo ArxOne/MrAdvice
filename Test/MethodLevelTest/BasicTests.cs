@@ -175,6 +175,38 @@ namespace MethodLevelTest
             Assert.AreEqual("...ABCDE", r);
         }
 
+        [TestMethod]
+        [TestCategory("Exception")]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void ExceptionTest()
+        {
+            try
+            {
+                var c = new AdvisedClass();
+                c.ThrowInvalidOperationException();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Exception")]
+        public void ExceptionWithStackTraceTest()
+        {
+            try
+            {
+                var c = new AdvisedClass();
+                c.ThrowInvalidOperationException();
+            }
+            catch (InvalidOperationException ioe)
+            {
+                var topTrace = ioe.StackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[1];
+                Assert.IsTrue(topTrace.Contains("ThrowInvalidOperationException"));
+            }
+        }
+
         //[TestMethod]
         //[TestCategory("Weaving")]
         //public void MethodWithGenericParameterTest()
