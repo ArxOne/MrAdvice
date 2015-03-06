@@ -99,7 +99,7 @@ function MoveAssemblyFromToolsToPackageRoot($toolsPath, $installPath)
 	}
 }
 
-MoveAssemblyFromToolsToPackageRoot $toolsPath $installPath
+#MoveAssemblyFromToolsToPackageRoot $toolsPath $installPath
 
 UnlockWeaversXml($project)
 
