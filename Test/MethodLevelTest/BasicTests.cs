@@ -183,6 +183,15 @@ namespace MethodLevelTest
         }
 
         [TestMethod]
+        [TestCategory("Weaving")]
+        public void InheritedPriorityTest()
+        {
+            var c = new AdvisedClass();
+            var r = c.GetString2(":)");
+            Assert.AreEqual(":)ABCDE", r);
+        }
+
+        [TestMethod]
         [TestCategory("Exception")]
         [ExpectedException(typeof(InvalidOperationException))]
         public void ExceptionTest()

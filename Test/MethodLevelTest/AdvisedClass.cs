@@ -35,6 +35,12 @@ namespace MethodLevelTest
             return s;
         }
 
+        [AddC2, AddD2, AddB2, AddA2, AddE2]
+        public string GetString2(string s)
+        {
+            return s;
+        }
+
         [EmptyMethodAdvice]
         public void ThrowInvalidOperationException()
         {

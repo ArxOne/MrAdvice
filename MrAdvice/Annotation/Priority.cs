@@ -48,7 +48,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// <returns></returns>
         public static int GetLevel(IAdvice advice)
         {
-            var priorityAttribute = advice.GetType().GetCustomAttributes(typeof (Priority), false).Cast<Priority>().SingleOrDefault();
+            var priorityAttribute = advice.GetType().GetCustomAttributes(typeof (Priority), true).Cast<Priority>().SingleOrDefault();
             if (priorityAttribute != null)
                 return priorityAttribute.Level;
             return DefaultLevel;

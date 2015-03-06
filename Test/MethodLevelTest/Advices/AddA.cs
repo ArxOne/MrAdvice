@@ -12,52 +12,67 @@ namespace MethodLevelTest.Advices
     using ArxOne.MrAdvice.Annotation;
 
     [Priority(10)]
-    public class AddA: Attribute, IMethodAdvice
+    public class AddA : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string) context.Parameters[0] + "A";
+            context.Parameters[0] = (string)context.Parameters[0] + "A";
             context.Proceed();
         }
     }
+
+    public class AddA2 : AddA
+    { }
 
     [Priority(9)]
-    public class AddB: Attribute, IMethodAdvice
+    public class AddB : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string) context.Parameters[0] + "B";
+            context.Parameters[0] = (string)context.Parameters[0] + "B";
             context.Proceed();
         }
     }
+
+    public class AddB2 : AddB
+    { }
 
     [Priority(8)]
-    public class AddC: Attribute, IMethodAdvice
+    public class AddC : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string) context.Parameters[0] + "C";
+            context.Parameters[0] = (string)context.Parameters[0] + "C";
             context.Proceed();
         }
     }
+
+    public class AddC2 : AddC
+    { }
 
     [Priority(7)]
-    public class AddD: Attribute, IMethodAdvice
+    public class AddD : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string) context.Parameters[0] + "D";
+            context.Parameters[0] = (string)context.Parameters[0] + "D";
             context.Proceed();
         }
     }
 
+    public class AddD2 : AddD
+    { }
+
     [Priority(6)]
-    public class AddE: Attribute, IMethodAdvice
+    public class AddE : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string) context.Parameters[0] + "E";
+            context.Parameters[0] = (string)context.Parameters[0] + "E";
             context.Proceed();
         }
     }
+
+    public class AddE2 : AddE
+    { }
 }
