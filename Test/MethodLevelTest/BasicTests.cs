@@ -31,6 +31,13 @@ namespace MethodLevelTest
 
         [TestMethod]
         [TestCategory("Weaving")]
+        public void IndirectMethodTest()
+        {
+            new EmptyAdvisedClass().IndirectMethodTest();
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
         public void StaticMethodTest()
         {
             EmptyAdvisedClass.StaticMethodTest();

@@ -83,6 +83,7 @@
     <Compile Include="Utility\EnumerableExtensions.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />
     <Compile Include="Utility\PropertyDefinitionExtensions.cs" />
+    <Compile Include="Utility\TypeDefinitionExtensions.cs" />
     <Compile Include="Utility\TypeReferenceComparer.cs" />
     <Compile Include="Utility\ModuleDefinitionExtensions.cs" />
     <Compile Include="Utility\ReflectionUtility.cs" />

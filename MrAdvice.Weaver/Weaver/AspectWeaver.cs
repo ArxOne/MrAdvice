@@ -10,9 +10,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using System.Reflection;
     using System.Runtime.Versioning;
-    using Introduction;
     using IO;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
@@ -127,7 +125,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             return new TargetFramework((string)targetFrameworkAttribute.ConstructorArguments[0].Value);
         }
-        
+
         /// <summary>
         /// Determines whether the advice member is introduction, based on its type.
         /// </summary>
@@ -263,7 +261,7 @@ namespace ArxOne.MrAdvice.Weaver
         private IEnumerable<TypeReference> GetAllMarkers(ReflectionNode reflectionNode, TypeDefinition markerInterface)
         {
             var markers = reflectionNode.GetAncestorsToChildren()
-                .SelectMany(n => n.CustomAttributes.Select(a => a.AttributeType).Where(t => IsMarker(t, markerInterface)))
+                .SelectMany(n => n.CustomAttributes.SelectMany(a => a.AttributeType.Resolve().GetSelfAndParents()).Where(t => IsMarker(t, markerInterface)))
                 .Distinct();
 #if DEBUG
             //            Logger.WriteDebug(string.Format("{0} --> {1}", reflectionNode.ToString(), markers.Count()));

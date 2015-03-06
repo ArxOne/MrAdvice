@@ -16,4 +16,8 @@ namespace MethodLevelTest.Advices
             context.Proceed();
         }
     }
+
+    public class EmptyMethodAdvice2 : EmptyMethodAdvice
+    {
+    }
 }

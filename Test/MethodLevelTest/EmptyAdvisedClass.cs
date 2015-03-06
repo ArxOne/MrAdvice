@@ -19,6 +19,13 @@ namespace MethodLevelTest
             Assert.AreNotEqual("MethodTest", thisMethod.Name);
         }
 
+        [EmptyMethodAdvice2]
+        public void IndirectMethodTest()
+        {
+            var thisMethod = MethodBase.GetCurrentMethod();
+            Assert.AreNotEqual("IndirectMethodTest", thisMethod.Name);
+        }
+
         [EmptyMethodAdvice]
         public static void StaticMethodTest()
         {
