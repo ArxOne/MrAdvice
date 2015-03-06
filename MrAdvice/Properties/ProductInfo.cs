@@ -22,6 +22,6 @@ using System.Resources;
 // ReSharper disable once CheckNamespace
 internal static class Product
 {
-    public const string Version = "0.3.13";
+    public const string Version = "0.3.14";
 }
 
