@@ -14,7 +14,7 @@ namespace ArxOne.MrAdvice.Utility
     /// <summary>
     /// Extensions to type
     /// </summary>
-    public static class TypeExtensions
+    internal static class TypeExtensions
     {
         /// <summary>
         /// Enumerates from type to topmost parent
