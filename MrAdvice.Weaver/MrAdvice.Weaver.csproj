@@ -137,7 +137,7 @@ rem --- NuGet pack and push ----------------------------------------------------
 
 if not "$(ConfigurationName)"=="Release" goto :noRelease
 
-"$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectDir)\MrAdvice.nuspec" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Properties ConfigurationName=$(ConfigurationName);SolutionDir=$(SolutionDir) -Tool
+"$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectDir)\MrAdvice.nuspec" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Tool -Properties ConfigurationName=$(ConfigurationName)
 
 :noRelease
 </PostBuildEvent>

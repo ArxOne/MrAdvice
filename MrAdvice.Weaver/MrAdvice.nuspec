@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>MrAdvice.Fody</id>
-    <version>0.3.15</version>
+    <version>0.9</version>
     <title>MrAdvice</title>
     <authors>Arx One</authors>
     <owners>Arx One</owners>
@@ -23,8 +23,8 @@ Write your own aspects in the form of attributes and apply them to target method
   </metadata>
   <files>
     <file src="NuGet\**\*" target="."/>
-    <file src="$SolutionDir$MrAdvice\bin\$ConfigurationName$\MrAdvice.dll" target="lib\portable-net40+sl5+wp8"/>
-    <file src="$SolutionDir$MrAdvice\bin\$ConfigurationName$\MrAdvice.xml" target="lib\portable-net40+sl5+wp8"/>
-    <file src="$SolutionDir$MrAdvice.Weaver\bin\$ConfigurationName$\MrAdvice.Weaver.Fody.dll" target="."/>
+    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.dll" target="lib\portable-net40+sl5+wp8"/>
+    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.xml" target="lib\portable-net40+sl5+wp8"/>
+    <file src="bin\$ConfigurationName$\MrAdvice.Weaver.Fody.dll" target="."/>
   </files>
 </package>

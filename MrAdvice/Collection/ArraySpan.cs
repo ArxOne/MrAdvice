@@ -22,6 +22,9 @@ namespace ArxOne.MrAdvice.Collection
         private readonly int _length;
         private readonly IEqualityComparer<TItem> _comparer;
 
+        /// <summary>
+        /// Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.
+        /// </summary>
         public int Count
         {
             get { return _length; }
