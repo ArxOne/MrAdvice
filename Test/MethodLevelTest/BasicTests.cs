@@ -223,7 +223,7 @@ namespace MethodLevelTest
             }
         }
 
-        [TestMethod]
+        //[TestMethod]
         [TestCategory("Weaving")]
         public void MethodWithGenericParameterTest()
         {

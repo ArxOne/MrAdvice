@@ -38,13 +38,16 @@ namespace ArxOne.MrAdvice
         /// <exception cref="System.NotImplementedException"></exception>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodInfo innerMethod, Type[] genericParameters)
+        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, Type[] genericParameters)
         {
             AspectInfo aspectInfo;
             lock (AspectInfos)
             {
                 if (!AspectInfos.TryGetValue(methodBase, out aspectInfo))
-                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, innerMethod);
+                {
+                    // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
+                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, (MethodInfo) innerMethod);
+                }
             }
 
             // this is the case with auto implemented interface

@@ -82,6 +82,16 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
         }
 
+        public Instructions Emit(OpCode opCode, FieldReference value)
+        {
+            return Insert(Instruction.Create(opCode, value));
+        }
+
+        public Instructions Emit(OpCode opCode, FieldInfo value)
+        {
+            return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
+        }
+
         public Instructions Emit(OpCode opCode, string value)
         {
             return Insert(Instruction.Create(opCode, value));

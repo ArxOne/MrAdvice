@@ -136,6 +136,12 @@ namespace ArxOne.MrAdvice.Utility
                 return moduleDefinition.Import(methodBase);
         }
 
+        public static FieldReference SafeImport(this ModuleDefinition moduleDefinition, FieldInfo fieldInfo)
+        {
+            lock (moduleDefinition)
+                return moduleDefinition.Import(fieldInfo);
+        }
+
         public static TypeReference SafeImport(this ModuleDefinition moduleDefinition, TypeReference typeReference)
         {
             lock (moduleDefinition)

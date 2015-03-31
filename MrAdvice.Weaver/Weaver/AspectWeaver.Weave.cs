@@ -177,6 +177,7 @@ namespace ArxOne.MrAdvice.Weaver
                     instructions.EmitLdloc(genericParametersVariable); // array
                     instructions.EmitLdc(genericParameterIndex); // array index
                     instructions.Emit(OpCodes.Ldtoken, method.GenericParameters[genericParameterIndex]);
+                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                     instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()))));
                     instructions.Emit(OpCodes.Stelem_Ref);
                 }
@@ -194,26 +195,28 @@ namespace ArxOne.MrAdvice.Weaver
             instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod())));
 
             // ... inner... If provided
-            if (innerMethod != null && !innerMethod.HasGenericParameters)
+            if (innerMethod != null)
             {
-                var actionType = moduleDefinition.SafeImport(typeof(Action));
-                var actionCtor = moduleDefinition.SafeImport(actionType.Resolve().GetConstructors().Single());
-
-                var delegateType = moduleDefinition.SafeImport(typeof(Delegate));
-                var getMethod = moduleDefinition.SafeImport(delegateType.Resolve().Methods.Single(m => m.Name == "get_Method"));
-
-                instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
-                if (method.IsConstructor)
-                    instructions.Emit(OpCodes.Castclass, typeof(object));
-                instructions.Emit(OpCodes.Ldftn, innerMethod);
-                instructions.Emit(OpCodes.Newobj, actionCtor);
-                instructions.Emit(OpCodes.Call, getMethod);
+                // if type is generic, this is a bit more complex, because we need to pass the type
+                if (method.DeclaringType.HasGenericParameters && !isStatic)
+                {
+                    instructions.Emit(OpCodes.Ldtoken, innerMethod);
+                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                    instructions.Emit(OpCodes.Ldarg_0);
+                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => GetType())));
+                    instructions.Emit(OpCodes.Callvirt, moduleDefinition.SafeImport(typeof(Type).GetMethod("get_TypeHandle")));
+                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle(), new RuntimeTypeHandle()))));
+                }
+                else
+                {
+                    instructions.Emit(OpCodes.Ldtoken, innerMethod);
+                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle()))));
+                }
             }
-            // otherwise, this is null
             else
-            {
                 instructions.Emit(OpCodes.Ldnull);
-            }
 
             if (genericParametersVariable != null)
                 instructions.EmitLdloc(genericParametersVariable);
