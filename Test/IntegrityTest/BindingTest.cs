@@ -50,7 +50,7 @@ namespace IntegrityTest
         [TestCategory("Integrity")]
         public void InvocationProceedMethodMethodNameTest()
         {
-            var invocationProceedMethodMethod = ReflectionUtility.GetMethodInfo(() => Invocation.ProceedAdvice(null, null, null, null));
+            var invocationProceedMethodMethod = ReflectionUtility.GetMethodInfo(() => Invocation.ProceedAdvice(null, null, null, null, null));
             Assert.AreEqual(invocationProceedMethodMethod.Name, Binding.InvocationProceedAdviceMethodName);
         }
         [TestMethod]

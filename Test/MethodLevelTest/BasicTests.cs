@@ -223,11 +223,11 @@ namespace MethodLevelTest
             }
         }
 
-        //[TestMethod]
-        //[TestCategory("Weaving")]
-        //public void MethodWithGenericParameterTest()
-        //{
-        //    new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
-        //}
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void MethodWithGenericParameterTest()
+        {
+            new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
+        }
     }
 }

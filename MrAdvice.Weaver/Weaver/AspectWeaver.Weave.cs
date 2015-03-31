@@ -158,6 +158,30 @@ namespace ArxOne.MrAdvice.Weaver
                     instructions.Emit(OpCodes.Stelem_Ref);
                 }
             }
+
+            // if method has generic parameters, we also pass them to Proceed method
+            VariableDefinition genericParametersVariable = null;
+            if (method.HasGenericParameters)
+            {
+                //IL_0001: ldtoken !!T
+                //IL_0006: call class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
+                genericParametersVariable = new VariableDefinition("genericParameters", moduleDefinition.SafeImport(typeof(Type[])));
+                method.Body.Variables.Add(genericParametersVariable);
+
+                instructions.EmitLdc(method.GenericParameters.Count);
+                instructions.Emit(OpCodes.Newarr, moduleDefinition.SafeImport(typeof(Type)));
+                instructions.EmitStloc(genericParametersVariable);
+
+                for (int genericParameterIndex = 0; genericParameterIndex < method.GenericParameters.Count; genericParameterIndex++)
+                {
+                    instructions.EmitLdloc(genericParametersVariable); // array
+                    instructions.EmitLdc(genericParameterIndex); // array index
+                    instructions.Emit(OpCodes.Ldtoken, method.GenericParameters[genericParameterIndex]);
+                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()))));
+                    instructions.Emit(OpCodes.Stelem_Ref);
+                }
+            }
+
             // null or instance
             instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
 
@@ -170,7 +194,7 @@ namespace ArxOne.MrAdvice.Weaver
             instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod())));
 
             // ... inner... If provided
-            if (innerMethod != null)
+            if (innerMethod != null && !innerMethod.HasGenericParameters)
             {
                 var actionType = moduleDefinition.SafeImport(typeof(Action));
                 var actionCtor = moduleDefinition.SafeImport(actionType.Resolve().GetConstructors().Single());
@@ -190,6 +214,11 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 instructions.Emit(OpCodes.Ldnull);
             }
+
+            if (genericParametersVariable != null)
+                instructions.EmitLdloc(genericParametersVariable);
+            else
+                instructions.Emit(OpCodes.Ldnull);
 
             // invoke the method
             var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName, true);
@@ -245,7 +274,7 @@ namespace ArxOne.MrAdvice.Weaver
             foreach (var advice in advices)
             {
                 var adviceDefinition = advice.Resolve();
-                foreach (var field in adviceDefinition.Fields.Where(f=>f.IsPublic))
+                foreach (var field in adviceDefinition.Fields.Where(f => f.IsPublic))
                     IntroduceMember(method.Module, field.Name, field.FieldType, field.IsStatic, advice, typeDefinition, markerAttributeCtor);
                 foreach (var property in adviceDefinition.Properties.Where(p => p.HasAnyPublic()))
                     IntroduceMember(method.Module, property.Name, property.PropertyType, !property.HasThis, advice, typeDefinition, markerAttributeCtor);
@@ -275,11 +304,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="adviceInterface">The advice interface.</param>
         private void WeaveMethod(ModuleDefinition moduleDefinition, MethodDefinition method, TypeDefinition adviceInterface)
         {
-            if (method.HasGenericParameters)
-            {
-                Logger.WriteWarning("Method {0} has generic parameters, it can not be weaved", method.FullName);
-                return;
-            }
+            //if (method.HasGenericParameters)
+            //{
+            //    Logger.WriteWarning("Method {0} has generic parameters, it can not be weaved", method.FullName);
+            //    return;
+            //}
             WeaveAdvices(method);
             WeaveIntroductions(method, adviceInterface, moduleDefinition);
         }

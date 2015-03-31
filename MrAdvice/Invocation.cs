@@ -33,11 +33,12 @@ namespace ArxOne.MrAdvice
         /// <param name="parameters">The parameters.</param>
         /// <param name="methodBase">The raw method base.</param>
         /// <param name="innerMethod">The inner method.</param>
+        /// <param name="genericParameters">The generic parameters.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodInfo innerMethod)
+        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodInfo innerMethod, Type[] genericParameters)
         {
             AspectInfo aspectInfo;
             lock (AspectInfos)
