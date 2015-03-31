@@ -44,7 +44,7 @@ namespace ArxOne.MrAdvice.Weaver
                                                        select m).SingleOrDefault();
             if (proceedRuntimeInitializersReference == null)
             {
-                Logger.WriteWarning("Info advice method not foud");
+                Logger.WriteWarning("Info advice method not found");
                 return;
             }
 
