@@ -127,6 +127,7 @@ namespace ArxOne.MrAdvice.Aspect
 
             // first, the type
             var declaringType = methodInfo.DeclaringType;
+            // ReSharper disable once PossibleNullReferenceException
             if (declaringType.IsGenericTypeDefinition)
             {
                 var typeGenericArguments = genericArguments.Take(typeGenericParametersCount = declaringType.GetGenericArguments().Length).ToArray();

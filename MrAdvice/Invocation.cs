@@ -40,17 +40,7 @@ namespace ArxOne.MrAdvice
         // ReSharper disable once UnusedMethodReturnValue.Global
         public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, Type[] genericArguments)
         {
-            AspectInfo aspectInfo;
-            lock (AspectInfos)
-            {
-                if (!AspectInfos.TryGetValue(methodBase, out aspectInfo))
-                {
-                    // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, (MethodInfo)innerMethod);
-                }
-            }
-
-            aspectInfo = aspectInfo.ApplyGenericParameters(genericArguments);
+            var aspectInfo = GetAspectInfo(methodBase, innerMethod, genericArguments);
 
             // this is the case with auto implemented interface
             var advisedInterface = target as AdvisedInterface;
@@ -84,6 +74,29 @@ namespace ArxOne.MrAdvice
 
             adviceContext.Invoke();
             return adviceValues.ReturnValue;
+        }
+
+        /// <summary>
+        /// Gets the aspect information.
+        /// </summary>
+        /// <param name="methodBase">The method base.</param>
+        /// <param name="innerMethod">The inner method.</param>
+        /// <param name="genericArguments">The generic arguments.</param>
+        /// <returns></returns>
+        private static AspectInfo GetAspectInfo(MethodBase methodBase, MethodBase innerMethod, Type[] genericArguments)
+        {
+            AspectInfo aspectInfo;
+            lock (AspectInfos)
+            {
+                if (!AspectInfos.TryGetValue(methodBase, out aspectInfo))
+                {
+                    // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
+                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, (MethodInfo) innerMethod);
+                }
+            }
+
+            aspectInfo = aspectInfo.ApplyGenericParameters(genericArguments);
+            return aspectInfo;
         }
 
         /// <summary>
@@ -185,6 +198,7 @@ namespace ArxOne.MrAdvice
         private static MethodBase FindInterfaceMethod(MethodBase implementationMethodBase)
         {
             // GetInterfaceMap is unfortunately unavailable in PCL :'(
+            // ReSharper disable once PossibleNullReferenceException
             var i = implementationMethodBase.DeclaringType.GetInterfaces().Single();
             var parameterInfos = implementationMethodBase.GetParameters();
             var m = i.GetMethod(implementationMethodBase.Name, parameterInfos.Select(p => p.ParameterType).ToArray());
@@ -300,6 +314,7 @@ namespace ArxOne.MrAdvice
             // hard-coded, because the property name generates two methods: "get_xxx" and "set_xxx" where xxx is the property name
             var propertyName = methodInfo.Name.Substring(4);
             // now try to find the property
+            // ReSharper disable once PossibleNullReferenceException
             var propertyInfo = methodInfo.DeclaringType.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             if (propertyInfo == null)
                 return null; // this should never happen
