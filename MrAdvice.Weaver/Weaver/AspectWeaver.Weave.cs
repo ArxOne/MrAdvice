@@ -322,11 +322,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="adviceInterface">The advice interface.</param>
         private void WeaveMethod(ModuleDefinition moduleDefinition, MethodDefinition method, TypeDefinition adviceInterface)
         {
-            //if (method.HasGenericParameters)
-            //{
-            //    Logger.WriteWarning("Method {0} has generic parameters, it can not be weaved", method.FullName);
-            //    return;
-            //}
             WeaveAdvices(method);
             WeaveIntroductions(method, adviceInterface, moduleDefinition);
         }
