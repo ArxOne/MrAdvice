@@ -119,14 +119,23 @@ namespace ArxOne.MrAdvice.Aspect
         /// <returns></returns>
         private static MethodInfo MakeGenericMethod(MethodInfo methodInfo, Type[] genericArguments)
         {
-            var declaringType = methodInfo.DeclaringType;
+            // two steps in this method.
+            // 1. make generic type
+            // 2. make generic method
+            // genericArguments are given for type and method (each one taking what it needs)
             int typeGenericParametersCount = 0;
+
+            // first, the type
+            var declaringType = methodInfo.DeclaringType;
             if (declaringType.IsGenericTypeDefinition)
             {
                 var typeGenericArguments = genericArguments.Take(typeGenericParametersCount = declaringType.GetGenericArguments().Length).ToArray();
                 declaringType = declaringType.MakeGenericType(typeGenericArguments);
+                // method needs to be discovered again.
+                // Fortunately, it can be found by its handle.
                 methodInfo = (MethodInfo)MethodBase.GetMethodFromHandle(methodInfo.MethodHandle, declaringType.TypeHandle);
             }
+            // then, the method
             if (methodInfo.IsGenericMethodDefinition)
             {
                 var methodGenericArguments = genericArguments.Skip(typeGenericParametersCount).ToArray();
