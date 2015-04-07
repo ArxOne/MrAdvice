@@ -7,6 +7,7 @@
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using Introduction;
@@ -161,22 +162,30 @@ namespace ArxOne.MrAdvice.Weaver
 
             // if method has generic parameters, we also pass them to Proceed method
             VariableDefinition genericParametersVariable = null;
-            if (method.HasGenericParameters)
+            // on static methods from genetic type, we also record the generic parameters type
+            //var typeGenericParametersCount = isStatic ? method.DeclaringType.GenericParameters.Count : 0;
+            var typeGenericParametersCount = method.DeclaringType.GenericParameters.Count;
+            if (typeGenericParametersCount > 0 || method.HasGenericParameters)
             {
                 //IL_0001: ldtoken !!T
                 //IL_0006: call class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
                 genericParametersVariable = new VariableDefinition("genericParameters", moduleDefinition.SafeImport(typeof(Type[])));
                 method.Body.Variables.Add(genericParametersVariable);
 
-                instructions.EmitLdc(method.GenericParameters.Count);
+                instructions.EmitLdc(typeGenericParametersCount + method.GenericParameters.Count);
                 instructions.Emit(OpCodes.Newarr, moduleDefinition.SafeImport(typeof(Type)));
                 instructions.EmitStloc(genericParametersVariable);
 
-                for (int genericParameterIndex = 0; genericParameterIndex < method.GenericParameters.Count; genericParameterIndex++)
+                var genericParameters = new List<GenericParameter>();
+                for (int typeGenericParameterIndex = 0; typeGenericParameterIndex < typeGenericParametersCount; typeGenericParameterIndex++)
+                    genericParameters.Add(method.DeclaringType.GenericParameters[typeGenericParameterIndex]);
+                genericParameters.AddRange(method.GenericParameters);
+
+                for (int genericParameterIndex = 0; genericParameterIndex < genericParameters.Count; genericParameterIndex++)
                 {
                     instructions.EmitLdloc(genericParametersVariable); // array
                     instructions.EmitLdc(genericParameterIndex); // array index
-                    instructions.Emit(OpCodes.Ldtoken, method.GenericParameters[genericParameterIndex]);
+                    instructions.Emit(OpCodes.Ldtoken, genericParameters[genericParameterIndex]);
                     // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                     instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()))));
                     instructions.Emit(OpCodes.Stelem_Ref);
@@ -198,12 +207,18 @@ namespace ArxOne.MrAdvice.Weaver
             if (innerMethod != null)
             {
                 // if type is generic, this is a bit more complex, because we need to pass the type
-                if (method.DeclaringType.HasGenericParameters && !isStatic)
+                if (method.DeclaringType.HasGenericParameters)
                 {
+                    // we want to reuse the MethodBase.GetCurrentMethod() result
+                    // so it is stored into a variable, whose property DeclaringType is invoked later
+                    var currentMethodVariable = new VariableDefinition("currentMethod", moduleDefinition.SafeImport(typeof(MethodBase)));
+                    method.Body.Variables.Add(currentMethodVariable);
+                    instructions.EmitStloc(currentMethodVariable);
+                    instructions.EmitLdloc(currentMethodVariable);
+
                     instructions.Emit(OpCodes.Ldtoken, innerMethod);
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Ldarg_0);
-                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => GetType())));
+                    instructions.EmitLdloc(currentMethodVariable);
+                    instructions.Emit(OpCodes.Callvirt, moduleDefinition.SafeImport(typeof(Type).GetMethod("get_DeclaringType")));
                     instructions.Emit(OpCodes.Callvirt, moduleDefinition.SafeImport(typeof(Type).GetMethod("get_TypeHandle")));
                     // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                     instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle(), new RuntimeTypeHandle()))));
@@ -227,8 +242,7 @@ namespace ArxOne.MrAdvice.Weaver
             var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName, true);
             if (invocationType == null)
                 throw new InvalidOperationException();
-            var proceedMethodReference =
-                invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedAdviceMethodName);
+            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedAdviceMethodName);
             if (proceedMethodReference == null)
                 throw new InvalidOperationException();
             var proceedMethod = moduleDefinition.SafeImport(proceedMethodReference);

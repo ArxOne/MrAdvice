@@ -6,6 +6,7 @@
 #endregion
 namespace ArxOne.MrAdvice.Aspect
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -23,7 +24,6 @@ namespace ArxOne.MrAdvice.Aspect
         /// The advices.
         /// </value>
         public IList<AdviceInfo> Advices { get; private set; }
-
         /// <summary>
         /// Gets the advised method.
         /// </summary>
@@ -89,6 +89,50 @@ namespace ArxOne.MrAdvice.Aspect
         public AspectInfo AddAdvice(AdviceInfo adviceInfo)
         {
             return new AspectInfo(Advices.Concat(new[] { adviceInfo }), PointcutMethod, AdvisedMethod, PointcutProperty, IsPointcutPropertySetter);
+        }
+
+        /// <summary>
+        /// Applies the generic parameters.
+        /// </summary>
+        /// <param name="genericArguments">The generic parameters.</param>
+        /// <returns></returns>
+        public AspectInfo ApplyGenericParameters(Type[] genericArguments)
+        {
+            if (genericArguments == null)
+                return this;
+
+            // cast here is safe, because we have generic parameters, meaning we're not in a ctor
+            return new AspectInfo(Advices,
+                MakeGenericMethod(PointcutMethod, genericArguments),
+                MakeGenericMethod((MethodInfo)AdvisedMethod, genericArguments))
+            {
+                PointcutProperty = PointcutProperty,
+                IsPointcutPropertySetter = IsPointcutPropertySetter
+            };
+        }
+
+        /// <summary>
+        /// Makes a method from generic definition (type and method).
+        /// </summary>
+        /// <param name="methodInfo">The method information.</param>
+        /// <param name="genericArguments">The generic arguments.</param>
+        /// <returns></returns>
+        private static MethodInfo MakeGenericMethod(MethodInfo methodInfo, Type[] genericArguments)
+        {
+            var declaringType = methodInfo.DeclaringType;
+            int typeGenericParametersCount = 0;
+            if (declaringType.IsGenericTypeDefinition)
+            {
+                var typeGenericArguments = genericArguments.Take(typeGenericParametersCount = declaringType.GetGenericArguments().Length).ToArray();
+                declaringType = declaringType.MakeGenericType(typeGenericArguments);
+                methodInfo = (MethodInfo)MethodBase.GetMethodFromHandle(methodInfo.MethodHandle, declaringType.TypeHandle);
+            }
+            if (methodInfo.IsGenericMethodDefinition)
+            {
+                var methodGenericArguments = genericArguments.Skip(typeGenericParametersCount).ToArray();
+                methodInfo = methodInfo.MakeGenericMethod(methodGenericArguments);
+            }
+            return methodInfo;
         }
     }
 }

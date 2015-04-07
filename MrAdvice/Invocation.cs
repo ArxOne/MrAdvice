@@ -33,12 +33,12 @@ namespace ArxOne.MrAdvice
         /// <param name="parameters">The parameters.</param>
         /// <param name="methodBase">The raw method base.</param>
         /// <param name="innerMethod">The inner method.</param>
-        /// <param name="genericParameters">The generic parameters.</param>
+        /// <param name="genericArguments">The generic arguments (to static type and/or method) in a single array.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, Type[] genericParameters)
+        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, Type[] genericArguments)
         {
             AspectInfo aspectInfo;
             lock (AspectInfos)
@@ -46,9 +46,11 @@ namespace ArxOne.MrAdvice
                 if (!AspectInfos.TryGetValue(methodBase, out aspectInfo))
                 {
                     // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, (MethodInfo) innerMethod);
+                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, (MethodInfo)innerMethod);
                 }
             }
+
+            aspectInfo = aspectInfo.ApplyGenericParameters(genericArguments);
 
             // this is the case with auto implemented interface
             var advisedInterface = target as AdvisedInterface;

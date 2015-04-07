@@ -159,7 +159,8 @@ namespace MethodLevelTest
         [TestCategory("Weaving")]
         public void MethodFromGenericClassWithParameterTest()
         {
-            var r = new GenericEmptyAdvisedClass<int>().DoSomethingElse(12);
+            var r = new GenericEmptyAdvisedClass<int>().ReturnValue(12);
+            Assert.AreEqual(12, r);
         }
 
         [TestMethod]
@@ -223,11 +224,20 @@ namespace MethodLevelTest
             }
         }
 
-        //[TestMethod]
+        [TestMethod]
         [TestCategory("Weaving")]
         public void MethodWithGenericParameterTest()
         {
             new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void StaticMethodWithGenericParameterTest()
+        {
+            var t = GenericEmptyAdvisedClass<int>.StaticMethod<string>("hop");
+            Assert.AreEqual(typeof(int), t[0]);
+            Assert.AreEqual(typeof(string), t[1]);
         }
     }
 }

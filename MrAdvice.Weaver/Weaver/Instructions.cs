@@ -200,6 +200,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="targetType">Type of the target.</param>
         public Instructions EmitUnboxOrCastIfNecessary(TypeReference targetType)
         {
+            // for generics and some unknown reason, an unbox_any is needed
+            if (targetType.IsGenericParameter)
+                return Emit(OpCodes.Unbox_Any, targetType);
             if (targetType.IsValueType)
                 return Emit(OpCodes.Unbox_Any, targetType);
             if (!targetType.SafeEquivalent(targetType.Module.SafeImport(typeof(object))))
