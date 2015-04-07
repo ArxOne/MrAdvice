@@ -69,6 +69,7 @@ namespace ArxOne.MrAdvice.Weaver
             else
             {
                 instructions.Emit(OpCodes.Ldtoken, moduleDefinition.SafeImport(infoAdvisedType));
+                // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                 var getTypeFromHandleMethodInfo = ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()));
                 instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(getTypeFromHandleMethodInfo));
             }
@@ -187,7 +188,7 @@ namespace ArxOne.MrAdvice.Weaver
                     instructions.EmitLdc(genericParameterIndex); // array index
                     instructions.Emit(OpCodes.Ldtoken, genericParameters[genericParameterIndex]);
                     // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()))));
+                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle())));
                     instructions.Emit(OpCodes.Stelem_Ref);
                 }
             }
@@ -201,7 +202,7 @@ namespace ArxOne.MrAdvice.Weaver
             // methods...
             // ... target
             // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-            instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod())));
+            instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod()));
 
             // ... inner... If provided
             if (innerMethod != null)
@@ -218,16 +219,16 @@ namespace ArxOne.MrAdvice.Weaver
 
                     instructions.Emit(OpCodes.Ldtoken, innerMethod);
                     instructions.EmitLdloc(currentMethodVariable);
-                    instructions.Emit(OpCodes.Callvirt, moduleDefinition.SafeImport(typeof(Type).GetMethod("get_DeclaringType")));
-                    instructions.Emit(OpCodes.Callvirt, moduleDefinition.SafeImport(typeof(Type).GetMethod("get_TypeHandle")));
+                    instructions.Emit(OpCodes.Callvirt, ReflectionUtility.GetMethodInfo((Type t) => t.DeclaringType));
+                    instructions.Emit(OpCodes.Callvirt, ReflectionUtility.GetMethodInfo((Type t) => t.TypeHandle));
                     // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle(), new RuntimeTypeHandle()))));
+                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle(), new RuntimeTypeHandle())));
                 }
                 else
                 {
                     instructions.Emit(OpCodes.Ldtoken, innerMethod);
                     // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle()))));
+                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle())));
                 }
             }
             else
