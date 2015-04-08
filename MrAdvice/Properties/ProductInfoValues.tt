@@ -1,7 +1,7 @@
 ﻿<#@ template debug="false" hostspecific="true" language="C#" #>
 <#
 // all common data between assembly information and nuspec package are stored here
-var Version = "0.9.2";
+var Version = "0.9.3";
 var Title = "MrAdvice";
 var Company = "Arx One";
 var LicenseUrl = "http://opensource.org/licenses/mit-license.php";
