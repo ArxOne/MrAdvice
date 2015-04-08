@@ -85,13 +85,13 @@
     <Compile Include="BasicTest.vb" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="FodyWeavers.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj">
       <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
       <Name>MrAdvice</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -103,12 +103,12 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\..\packages\Fody.1.27.1\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Fody.1.27.1\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Fody.1.28.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Fody.1.28.3\build\Fody.targets'))" />
   </Target>
   <PropertyGroup>
     <PostBuildEvent>"$(SolutionDir)\Tools\peverify.bat" "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\..\packages\Fody.1.27.1\build\Fody.targets" Condition="Exists('..\..\packages\Fody.1.27.1\build\Fody.targets')" />
+  <Import Project="..\..\packages\Fody.1.28.3\build\Fody.targets" Condition="Exists('..\..\packages\Fody.1.28.3\build\Fody.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

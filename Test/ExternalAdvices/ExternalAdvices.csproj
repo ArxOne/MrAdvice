@@ -36,6 +36,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyAdvice.cs" />
     <Compile Include="ExternalEmptyAdvice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
