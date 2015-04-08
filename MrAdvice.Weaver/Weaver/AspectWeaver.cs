@@ -15,6 +15,7 @@ namespace ArxOne.MrAdvice.Weaver
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
+    using Properties;
     using Reflection;
     using Reflection.Groups;
     using Utility;
