@@ -21,7 +21,7 @@ It is available as a NuGet package (https://www.nuget.org/packages/MrAdvice.Fody
 ## Philosophy
 
 Currently, MrAdvice won't bring you any aspect out-of-the-box.
-This means you'll have to write your own aspects.  
+This means you'll have to write your own aspects (however you can see below other packages using Mr. Advice).  
 So it brings us to the next chapter, which is...
 
 ## How to implement your own aspects
@@ -56,6 +56,16 @@ Your aspects can be injected at assembly, type or method level, simply by settin
 * When an aspect is injected at asembly level, all methods of all types are weaved.
 * When the aspect is injected at type level, all of its methods are weaved.
 * And of course, if the aspect is injected on a method, only the method is weaved.
+
+## Other projects using Mr. Advice
+
+### NuGet packages
+
+ * [MrAdvice.MVVM](https://github.com/ArxOne/MrAdvice.MVVM) and its [NuGet package](https://www.nuget.org/packages/MrAdvice.MVVM/), an MVVM implementation using aspects.
+
+### Miscellaneous projects
+
+ * [The Blue Dwarf](https://github.com/picrap/BlueDwarf), a tunneling anti-censorship local proxy.
 
 ## Some disclaimer 
 (almost hidden at the almost end of this almost interesting readme)
