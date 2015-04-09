@@ -1,8 +1,8 @@
-﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+﻿<?xml version="1.0"?>
+<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ output extension=".nuspec" #>
 <#@ import namespace="System.Reflection" #>
 <#@ include file="..\MrAdvice\Properties\ProductInfoValues.tt" #>
-<?xml version="1.0"?>
 <package>
   <metadata>
     <id>MrAdvice.Fody</id>
