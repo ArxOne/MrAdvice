@@ -1,0 +1,10 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#
+// all common data between assembly information and nuspec package are stored here
+var Version = "0.9.3";
+var Title = "MrAdvice";
+var Company = "Arx One";
+var LicenseUrl = "http://opensource.org/licenses/mit-license.php";
+var Description = "MrAdvice allows to weave aspects at build-time (just like PostSharp, but free as in free beer). "
++ "Write your own aspects in the form of attributes and apply them to target methods or properties.";
+#>
