@@ -1,5 +1,21 @@
+branches:
+  except:
+    - gh-pages
+
+install:
+  .nuget\nuget.exe restore MrAdvice.sln
+
+configuration: Release
+platform: Any CPU
+
+build:
+  project: MrAdvice.sln
+  publish_nuget: true
+  publish_nuget_symbols: true
+
 deploy:
   provider: NuGet
   api_key:
     secure: rEYnR9JThbc6x8DdCo1K8+fgsGKzjNKzTZsldXFLYMm/tFPC7JWWvuKpVTrDBd+g
   skip_symbols: false
+
