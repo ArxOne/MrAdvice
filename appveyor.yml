@@ -16,7 +16,7 @@ build:
   verbosity: minimal
 
 artifacts:
-  - path: '*.nupkg'
+  - path: 'MrAdvice.Weaver\bin\$(configuration)\*.nupkg'
 
 deploy:
   provider: NuGet
