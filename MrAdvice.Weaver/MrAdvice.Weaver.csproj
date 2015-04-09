@@ -152,6 +152,11 @@ if not "$(ConfigurationName)"=="Release" goto :noRelease
 
 rem "$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectDir)\MrAdvice.nuspec" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Tool -Properties ConfigurationName=$(ConfigurationName)
 
+echo -------
+type "$(ProjectDir)\MrAdvice.nuspec"
+echo -------
+
+
 :noRelease
 </PostBuildEvent>
   </PropertyGroup>
