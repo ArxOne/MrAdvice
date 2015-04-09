@@ -2,8 +2,8 @@ branches:
   except:
     - gh-pages
 
-install:
-  .nuget\nuget.exe restore MrAdvice.sln
+before_build:
+  nuget restore MrAdvice.sln
 
 configuration: Release
 platform: Any CPU
@@ -12,7 +12,8 @@ build:
   parallel: true   
   project: MrAdvice.sln
   publish_nuget: true
-  publish_nuget_symbols: true
+#  publish_nuget_symbols: true
+  verbosity: minimal
 
 deploy:
   provider: NuGet
@@ -20,3 +21,5 @@ deploy:
     secure: rEYnR9JThbc6x8DdCo1K8+fgsGKzjNKzTZsldXFLYMm/tFPC7JWWvuKpVTrDBd+g
   skip_symbols: false
 
+after_test:
+  appveyor PushArtifact *.nupkg
