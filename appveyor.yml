@@ -1,6 +1,6 @@
 # Mr. Advice appveyor.yml script
 
-version: {branch}-{build}
+version: '{branch}-{build}'
 
 branches:
   except:
@@ -30,3 +30,4 @@ deploy:
 
 after_test:
   ps: Get-ChildItem .\*.nupkg | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+
