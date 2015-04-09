@@ -59,11 +59,10 @@ Your aspects can be injected at assembly, type or method level, simply by settin
 
 ## Other projects using Mr. Advice
 
-### NuGet packages
-
+NuGet packages:
  * [MrAdvice.MVVM](https://github.com/ArxOne/MrAdvice.MVVM) and its [NuGet package](https://www.nuget.org/packages/MrAdvice.MVVM/), an MVVM implementation using aspects.
 
-### Miscellaneous projects
+Miscellaneous projects:
 
  * [The Blue Dwarf](https://github.com/picrap/BlueDwarf), a tunneling anti-censorship local proxy.
 
