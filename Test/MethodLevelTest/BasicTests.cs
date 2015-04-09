@@ -239,5 +239,11 @@ namespace MethodLevelTest
             Assert.AreEqual(typeof(int), t[0]);
             Assert.AreEqual(typeof(string), t[1]);
         }
+
+        [TestMethod]
+        public void FailingTest()
+        {
+            Assert.Fail("Because I'm testing something with appveyor");
+        }
     }
 }
