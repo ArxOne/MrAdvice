@@ -40,7 +40,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Weaver", "MrAdvice
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F3046528-416E-49F1-8FC5-72E442B64DAE}"
 	ProjectSection(SolutionItems) = preProject
-		ci-build.bat = ci-build.bat
+		Tools\ci-build.bat = Tools\ci-build.bat
 		Tools\peverify.bat = Tools\peverify.bat
 	EndProjectSection
 EndProject
