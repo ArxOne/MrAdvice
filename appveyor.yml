@@ -1,3 +1,7 @@
+# Mr. Advice appveyor.yml script
+
+version: {branch}-{build}
+
 branches:
   except:
     - gh-pages
