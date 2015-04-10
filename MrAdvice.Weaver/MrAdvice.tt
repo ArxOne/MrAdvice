@@ -28,6 +28,8 @@
     <file src="NuGet\**\*" target="."/>
     <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.dll" target="lib\portable-net40+sl5+wp8"/>
     <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.xml" target="lib\portable-net40+sl5+wp8"/>
+    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\portable-net40+sl5+wp8"/>
     <file src="bin\$ConfigurationName$\MrAdvice.Weaver.Fody.dll" target="."/>
+    <file src="..\MrAdvice\**\*.cs" target="src"/>
   </files>
 </package>
