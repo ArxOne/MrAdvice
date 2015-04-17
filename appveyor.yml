@@ -3,8 +3,8 @@
 version: '{branch}-{build}'
 
 branches:
-  except:
-    - gh-pages
+  only:
+    - master
 
 before_build:
   nuget restore MrAdvice.sln
