@@ -195,6 +195,9 @@ namespace ArxOne.MrAdvice.Weaver
 
             // null or instance
             instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
+            // to fix peverify 0x80131854
+            if (!isStatic && method.IsConstructor)
+                instructions.Emit(OpCodes.Castclass, typeof (object));
 
             // parameters
             instructions.EmitLdloc(parametersVariable);
