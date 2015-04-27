@@ -43,6 +43,14 @@ public class ModuleWeaver
     /// </value>
     // ReSharper disable once MemberCanBePrivate.Global
     public Action<string> LogWarning { get; set; }
+    /// <summary>
+    /// Gets or sets the log at error level (injected by Fody).
+    /// </summary>
+    /// <value>
+    /// The log warning.
+    /// </value>
+    // ReSharper disable once MemberCanBePrivate.Global
+    public Action<string> LogError { get; set; }
 
     /// <summary>
     /// Gets or sets the assembly resolver (injected by Fody).
@@ -80,6 +88,7 @@ public class ModuleWeaver
         // please also note poor man's dependency injection (which is enough for us here)
         Logger.LogInfo = LogInfo;
         Logger.LogWarning = LogWarning;
+        Logger.LogError = LogError;
         var typeResolver = new TypeResolver { AssemblyResolver = AssemblyResolver };
         var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver };
         aspectWeaver.Weave(ModuleDefinition);

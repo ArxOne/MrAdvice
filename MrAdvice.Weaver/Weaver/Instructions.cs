@@ -8,6 +8,7 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System;
     using System.Reflection;
+    using IO;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Collections.Generic;
@@ -50,6 +51,16 @@ namespace ArxOne.MrAdvice.Weaver
         public Instructions Emit(OpCode opCode)
         {
             return Insert(Instruction.Create(opCode));
+        }
+
+        public Instructions Emit(OpCode opCode, byte value)
+        {
+            return Insert(Instruction.Create(opCode, value));
+        }
+
+        public Instructions Emit(OpCode opCode, ushort value)
+        {
+            return Insert(Instruction.Create(opCode, value));
         }
 
         public Instructions Emit(OpCode opCode, short value)
@@ -97,13 +108,22 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, value));
         }
 
+        public Instructions Emit(OpCode opCode, ParameterDefinition value)
+        {
+            return Insert(Instruction.Create(opCode, value));
+        }
+
         /// <summary>
         /// Emits a ldarg instruction
         /// </summary>
-        /// <param name="index">argument index</param>
+        /// <param name="parameter">The parameter.</param>
         /// <returns></returns>
-        public Instructions EmitLdarg(int index)
+        public Instructions EmitLdarg(ParameterDefinition parameter)
         {
+            var index = parameter.Index;
+            // when the method is non static, the parameter index must have +1 (because 0 is "this" and first parameter is indexed 0 anyway)
+            if (parameter.Method.HasThis)
+                index++;
             switch (index)
             {
                 case 0:
@@ -115,7 +135,7 @@ namespace ArxOne.MrAdvice.Weaver
                 case 3:
                     return Emit(OpCodes.Ldarg_3);
                 default:
-                    return Emit(OpCodes.Ldarg_S, (short)index);
+                    return Emit(OpCodes.Ldarg_S, parameter);
             }
         }
 

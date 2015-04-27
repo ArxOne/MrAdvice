@@ -15,6 +15,7 @@ namespace ArxOne.MrAdvice.IO
     {
         public static Action<string> LogInfo { get; set; }
         public static Action<string> LogWarning { get; set; }
+        public static Action<string> LogError { get; set; }
 
         /// <summary>
         /// Writes to debug (does not write in release).
@@ -46,6 +47,16 @@ namespace ArxOne.MrAdvice.IO
         public static void WriteWarning(string format, params object[] args)
         {
             LogWarning(string.Format(format, args));
+        }
+
+        /// <summary>
+        /// Writes a warning.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="args">The arguments.</param>
+        public static void WriteError(string format, params object[] args)
+        {
+            LogError(string.Format(format, args));
         }
     }
 }

@@ -131,7 +131,6 @@ namespace ArxOne.MrAdvice.Weaver
             var instructions = new Instructions(method.Body.Instructions, method.Module);
 
             var isStatic = method.Attributes.HasFlag(MethodAttributes.Static);
-            var firstParameter = isStatic ? 0 : 1;
 
             // parameters
             var parametersVariable = new VariableDefinition("parameters", moduleDefinition.SafeImport(typeof(object[])));
@@ -149,7 +148,7 @@ namespace ArxOne.MrAdvice.Weaver
                 {
                     instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
-                    instructions.EmitLdarg(parameterIndex + firstParameter); // loads given parameter...
+                    instructions.EmitLdarg(parameter); // loads given parameter...
                     var parameterType = parameter.ParameterType;
                     if (parameter.ParameterType.IsByReference) // ...if ref, loads it as referenced value
                     {
@@ -197,7 +196,7 @@ namespace ArxOne.MrAdvice.Weaver
             instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
             // to fix peverify 0x80131854
             if (!isStatic && method.IsConstructor)
-                instructions.Emit(OpCodes.Castclass, typeof (object));
+                instructions.Emit(OpCodes.Castclass, typeof(object));
 
             // parameters
             instructions.EmitLdloc(parametersVariable);
@@ -265,7 +264,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var parameter = method.Parameters[parameterIndex];
                 if (parameter.ParameterType.IsByReference)
                 {
-                    instructions.EmitLdarg(parameterIndex + firstParameter); // loads given parameter (it is a ref)
+                    instructions.EmitLdarg(parameter); // loads given parameter (it is a ref)
                     instructions.EmitLdloc(parametersVariable); // array
                     instructions.EmitLdc(parameterIndex); // array index
                     instructions.Emit(OpCodes.Ldelem_Ref); // now we have boxed out/ref value
@@ -325,8 +324,15 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="adviceInterface">The advice interface.</param>
         private void WeaveMethod(ModuleDefinition moduleDefinition, MethodDefinition method, TypeDefinition adviceInterface)
         {
-            WeaveAdvices(method);
-            WeaveIntroductions(method, adviceInterface, moduleDefinition);
+            try
+            {
+                WeaveAdvices(method);
+                WeaveIntroductions(method, adviceInterface, moduleDefinition);
+            }
+            catch (Exception e)
+            {
+                Logger.WriteError("Error while weaving method '{0}': {1}", method.FullName, e);
+            }
         }
 
         /// <summary>

@@ -33,5 +33,17 @@ namespace ArxOne.MrAdvice.Utility
             }
             return -1;
         }
+
+        /// <summary>
+        /// Applies an action to given collection.
+        /// </summary>
+        /// <typeparam name="TItem">The type of the item.</typeparam>
+        /// <param name="enumerable">The enumerable.</param>
+        /// <param name="action">The action.</param>
+        public static void ForAll<TItem>(this IEnumerable<TItem> enumerable, Action<TItem> action)
+        {
+            foreach (var item in enumerable)
+                action(item);
+        }
     }
 }

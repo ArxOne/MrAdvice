@@ -239,5 +239,13 @@ namespace MethodLevelTest
             Assert.AreEqual(typeof(int), t[0]);
             Assert.AreEqual(typeof(string), t[1]);
         }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void ManyParametersTest()
+        {
+            var r = new EmptyAdvisedClass().Add(1, 2, 3, 4, 5);
+            Assert.AreEqual(r, 1 + 2 + 3 + 4 + 5);
+        }
     }
 }
