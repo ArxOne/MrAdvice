@@ -22,7 +22,7 @@
     <dependencies>
       <dependency id="Fody" />
     </dependencies>
-    <developmentDependency>true</developmentDependency>
+    <developmentDependency>false</developmentDependency>
   </metadata>
   <files>
     <file src="NuGet\**\*" target="."/>
