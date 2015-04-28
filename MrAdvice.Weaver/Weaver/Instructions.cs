@@ -8,7 +8,6 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System;
     using System.Reflection;
-    using IO;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Collections.Generic;
@@ -113,6 +112,11 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, value));
         }
 
+        public Instructions Emit(OpCode opCode, VariableDefinition value)
+        {
+            return Insert(Instruction.Create(opCode, value));
+        }
+
         /// <summary>
         /// Emits a ldarg instruction
         /// </summary>
@@ -156,7 +160,7 @@ namespace ArxOne.MrAdvice.Weaver
                 case 3:
                     return Emit(OpCodes.Ldloc_3);
                 default:
-                    return Emit(OpCodes.Ldloc_S, (short)variableDefinition.Index);
+                    return Emit(OpCodes.Ldloc_S, variableDefinition);
             }
         }
 
@@ -177,7 +181,7 @@ namespace ArxOne.MrAdvice.Weaver
                 case 3:
                     return Emit(OpCodes.Stloc_3);
                 default:
-                    return Emit(OpCodes.Stloc_S, (short)variableDefinition.Index);
+                    return Emit(OpCodes.Stloc_S, variableDefinition);
             }
         }
 
