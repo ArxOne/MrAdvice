@@ -1,7 +1,7 @@
 ﻿<#
 // all common data between assembly information and nuspec package are stored here
-var Version = "0.9.5";
-var Title = "MrAdvice";
+var Version = "0.9.6";
+var Title = "Mr. Advice";
 var Company = "Arx One";
 var LicenseUrl = "http://opensource.org/licenses/mit-license.php";
 var Description = "MrAdvice allows to weave aspects at build-time (just like PostSharp, but free as in free beer). "
