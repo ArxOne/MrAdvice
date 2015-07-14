@@ -57,6 +57,11 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, value));
         }
 
+        public Instructions Emit(OpCode opCode, sbyte value)
+        {
+            return Insert(Instruction.Create(opCode, value));
+        }
+
         public Instructions Emit(OpCode opCode, ushort value)
         {
             return Insert(Instruction.Create(opCode, value));
@@ -212,9 +217,8 @@ namespace ArxOne.MrAdvice.Weaver
                 case 8:
                     return Emit(OpCodes.Ldc_I4_8);
                 default:
-                    // I couldn't find the right type, and Cecil documentation... Huh what documentation?
-                    //if (value < 128)
-                    //    return Emit(OpCodes.Ldc_I4_S, (byte)value);
+                    if (value < 128)
+                        return Emit(OpCodes.Ldc_I4_S, (sbyte)value);
                     return Emit(OpCodes.Ldc_I4, value);
             }
         }
