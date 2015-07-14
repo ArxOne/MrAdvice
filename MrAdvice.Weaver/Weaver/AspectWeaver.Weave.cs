@@ -83,33 +83,43 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="method">The method.</param>
         private void WeaveAdvices(MethodDefinition method)
         {
-            Logger.WriteDebug("Weaving method '{0}'", method.FullName);
-
-            // create inner method
-            const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PInvokeImpl |
-                                                      MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
-                                                      MethodAttributes.RequireSecObject;
-            var innerMethodAttributes = method.Attributes & attributesToKeep | (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public);
-            string innerMethodName;
-            if (method.IsGetter)
-                innerMethodName = GetPropertyInnerGetterName(GetPropertyName(method.Name));
-            else if (method.IsSetter)
-                innerMethodName = GetPropertyInnerSetterName(GetPropertyName(method.Name));
+            if (method.IsAbstract)
+            {
+                method.Attributes = (method.Attributes & ~MethodAttributes.Abstract) | MethodAttributes.Virtual;
+                Logger.WriteDebug("Weaving abstract method '{0}'", method.FullName);
+                WritePointcutBody(method, null);
+            }
             else
-                innerMethodName = GetInnerMethodName(method.Name);
-            var innerMethod = new MethodDefinition(innerMethodName, innerMethodAttributes, method.ReturnType);
-            innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
-            innerMethod.ImplAttributes = method.ImplAttributes;
-            innerMethod.SemanticsAttributes = method.SemanticsAttributes;
-            innerMethod.Body.InitLocals = method.Body.InitLocals;
-            innerMethod.Parameters.AddRange(method.Parameters);
-            innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
-            innerMethod.Body.Variables.AddRange(method.Body.Variables);
-            innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
+            {
+                Logger.WriteDebug("Weaving method '{0}'", method.FullName);
 
-            WritePointcutBody(method, innerMethod);
-            lock (method.DeclaringType)
-                method.DeclaringType.Methods.Add(innerMethod);
+                // create inner method
+                const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PInvokeImpl |
+                                                          MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
+                                                          MethodAttributes.RequireSecObject;
+                var innerMethodAttributes = method.Attributes & attributesToKeep |
+                                            (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public);
+                string innerMethodName;
+                if (method.IsGetter)
+                    innerMethodName = GetPropertyInnerGetterName(GetPropertyName(method.Name));
+                else if (method.IsSetter)
+                    innerMethodName = GetPropertyInnerSetterName(GetPropertyName(method.Name));
+                else
+                    innerMethodName = GetInnerMethodName(method.Name);
+                var innerMethod = new MethodDefinition(innerMethodName, innerMethodAttributes, method.ReturnType);
+                innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
+                innerMethod.ImplAttributes = method.ImplAttributes;
+                innerMethod.SemanticsAttributes = method.SemanticsAttributes;
+                innerMethod.Body.InitLocals = method.Body.InitLocals;
+                innerMethod.Parameters.AddRange(method.Parameters);
+                innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
+                innerMethod.Body.Variables.AddRange(method.Body.Variables);
+                innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
+
+                WritePointcutBody(method, innerMethod);
+                lock (method.DeclaringType)
+                    method.DeclaringType.Methods.Add(innerMethod);
+            }
         }
 
         /// <summary>
@@ -309,7 +319,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="infoAdviceInterface">The information advice interface.</param>
         private void WeaveInfoAdvices(ModuleDefinition moduleDefinition, TypeDefinition typeDefinition, TypeDefinition infoAdviceInterface)
         {
-            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface).Any())
+            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface).Where(IsWeavable).Any())
             {
                 Logger.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
                 WeaveInfoAdvices(typeDefinition, moduleDefinition, false);

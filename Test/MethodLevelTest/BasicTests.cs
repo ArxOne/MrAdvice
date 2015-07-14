@@ -247,5 +247,42 @@ namespace MethodLevelTest
             var r = new EmptyAdvisedClass().Add(1, 2, 3, 4, 5);
             Assert.AreEqual(r, 1 + 2 + 3 + 4 + 5);
         }
+
+        public class CtorClass
+        {
+            [EmptyMethodAdvice]
+            public CtorClass(int a, int b, int c, int d, int e, int f, int g, int h)
+            { }
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void CtorWith8ArgumentsTest()
+        {
+            var r = new CtorClass(1, 2, 3, 4, 5, 6, 7, 8);
+        }
+
+        public abstract class AbstractClass
+        {
+            [ChangeParameter(NewParameter = 10)]
+            public abstract int Add(int a, int b);
+        }
+
+        private class ConcreteClass : AbstractClass
+        {
+            public override int Add(int a, int b)
+            {
+                return a + b;
+            }
+        }
+
+        //[TestMethod]
+        //[TestCategory("Weaving")]
+        //public void AbstractTestTest()
+        //{
+        //    var c = new ConcreteClass();
+        //    var r = c.Add(1, 2);
+        //    Assert.AreEqual(12, r);
+        //}
     }
 }

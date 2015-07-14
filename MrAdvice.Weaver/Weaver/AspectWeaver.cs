@@ -66,7 +66,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
-            var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface).ToArray();
+            var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface).Where(IsWeavable).ToArray();
             auditTimer.NewZone("Methods weaving");
             weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface));
 
@@ -239,6 +239,16 @@ namespace ArxOne.MrAdvice.Weaver
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Determines whether the specified method is weavable.
+        /// </summary>
+        /// <param name="methodDefinition">The method definition.</param>
+        /// <returns></returns>
+        private static bool IsWeavable(MethodDefinition methodDefinition)
+        {
+            return !methodDefinition.IsAbstract;
         }
 
         /// <summary>
