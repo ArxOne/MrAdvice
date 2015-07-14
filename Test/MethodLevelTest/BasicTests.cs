@@ -251,7 +251,7 @@ namespace MethodLevelTest
         public class CtorClass
         {
             [EmptyMethodAdvice]
-            public CtorClass(int a, int b, int c, int d, int e, int f, int g, int h)
+            public CtorClass(int a, int b, int c, int d, int e, int f, int g, int h, int i)
             { }
         }
 
@@ -259,7 +259,7 @@ namespace MethodLevelTest
         [TestCategory("Weaving")]
         public void CtorWith8ArgumentsTest()
         {
-            var r = new CtorClass(1, 2, 3, 4, 5, 6, 7, 8);
+            var r = new CtorClass(1, 2, 3, 4, 5, 6, 7, 8, 9);
         }
 
         public abstract class AbstractClass

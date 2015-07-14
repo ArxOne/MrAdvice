@@ -212,8 +212,9 @@ namespace ArxOne.MrAdvice.Weaver
                 case 8:
                     return Emit(OpCodes.Ldc_I4_8);
                 default:
-                    if (value < 128)
-                        return Emit(OpCodes.Ldc_I4_S, (byte)value);
+                    // I couldn't find the right type, and Cecil documentation... Huh what documentation?
+                    //if (value < 128)
+                    //    return Emit(OpCodes.Ldc_I4_S, (byte)value);
                     return Emit(OpCodes.Ldc_I4, value);
             }
         }
