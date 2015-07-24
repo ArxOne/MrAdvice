@@ -5,7 +5,7 @@
 <#@ include file="..\MrAdvice\Properties\ProductInfoValues.tt" #>
 <package>
   <metadata>
-    <id>MrAdvice</id>
+    <id>MrAdvice.Fody</id>
     <version><#=Version#></version>
     <title><#=Title#></title>
     <authors><#=Company#></authors>
