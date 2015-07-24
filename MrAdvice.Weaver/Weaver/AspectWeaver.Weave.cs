@@ -49,6 +49,9 @@ namespace ArxOne.MrAdvice.Weaver
                 return;
             }
 
+            // the cctor needs to be called after all initialization (in case some info advices collect data)
+            infoAdvisedType.Attributes &= ~TypeAttributes.BeforeFieldInit;
+
             const string cctorMethodName = ".cctor";
             var staticCtor = infoAdvisedType.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
             if (staticCtor == null)
