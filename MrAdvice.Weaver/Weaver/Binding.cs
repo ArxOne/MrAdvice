@@ -6,8 +6,6 @@
 #endregion
 namespace ArxOne.MrAdvice.Weaver
 {
-    using System.ComponentModel;
-
     /// <summary>
     /// Bindings ArxOne.MrAdvice assembly.
     /// Since Fody forbids referencing other assemblies, we had to hardcode the names
