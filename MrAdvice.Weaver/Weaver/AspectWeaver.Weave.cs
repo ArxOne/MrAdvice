@@ -146,30 +146,34 @@ namespace ArxOne.MrAdvice.Weaver
             var isStatic = method.Attributes.HasFlag(MethodAttributes.Static);
 
             // parameters
-            var parametersVariable = new VariableDefinition("parameters", moduleDefinition.SafeImport(typeof(object[])));
-            method.Body.Variables.Add(parametersVariable);
-
-            instructions.EmitLdc(method.Parameters.Count);
-            instructions.Emit(OpCodes.Newarr, moduleDefinition.SafeImport(typeof(object)));
-            instructions.EmitStloc(parametersVariable);
-            // setups parameters array
-            for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; parameterIndex++)
+            VariableDefinition parametersVariable = null;
+            if (method.Parameters.Count > 0)
             {
-                var parameter = method.Parameters[parameterIndex];
-                // we don't care about output parameters
-                if (!parameter.IsOut)
+                parametersVariable = new VariableDefinition("parameters", moduleDefinition.SafeImport(typeof(object[])));
+                method.Body.Variables.Add(parametersVariable);
+
+                instructions.EmitLdc(method.Parameters.Count);
+                instructions.Emit(OpCodes.Newarr, moduleDefinition.SafeImport(typeof(object)));
+                instructions.EmitStloc(parametersVariable);
+                // setups parameters array
+                for (int parameterIndex = 0; parameterIndex < method.Parameters.Count; parameterIndex++)
                 {
-                    instructions.EmitLdloc(parametersVariable); // array
-                    instructions.EmitLdc(parameterIndex); // array index
-                    instructions.EmitLdarg(parameter); // loads given parameter...
-                    var parameterType = parameter.ParameterType;
-                    if (parameter.ParameterType.IsByReference) // ...if ref, loads it as referenced value
+                    var parameter = method.Parameters[parameterIndex];
+                    // we don't care about output parameters
+                    if (!parameter.IsOut)
                     {
-                        parameterType = parameter.ParameterType.GetElementType();
-                        instructions.EmitLdind(parameterType);
+                        instructions.EmitLdloc(parametersVariable); // array
+                        instructions.EmitLdc(parameterIndex); // array index
+                        instructions.EmitLdarg(parameter); // loads given parameter...
+                        var parameterType = parameter.ParameterType;
+                        if (parameter.ParameterType.IsByReference) // ...if ref, loads it as referenced value
+                        {
+                            parameterType = parameter.ParameterType.GetElementType();
+                            instructions.EmitLdind(parameterType);
+                        }
+                        instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
+                        instructions.Emit(OpCodes.Stelem_Ref);
                     }
-                    instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
-                    instructions.Emit(OpCodes.Stelem_Ref);
                 }
             }
 
@@ -212,7 +216,10 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Castclass, typeof(object));
 
             // parameters
-            instructions.EmitLdloc(parametersVariable);
+            if (parametersVariable != null)
+                instructions.EmitLdloc(parametersVariable);
+            else
+                instructions.Emit(OpCodes.Ldnull);
 
             // methods...
             // ... target

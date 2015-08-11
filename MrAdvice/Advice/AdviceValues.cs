@@ -54,7 +54,8 @@ namespace ArxOne.MrAdvice.Advice
         {
             Target = target;
             TargetType = targetType;
-            Parameters = parameters;
+            // null means empty, so actually empty fits better here
+            Parameters = parameters ?? new object[0];
         }
     }
 }
