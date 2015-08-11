@@ -69,9 +69,9 @@ namespace ArxOne.MrAdvice.Weaver
 
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
-            var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface).Where(IsWeavable).ToArray();
+            var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface, priorityType).Where(IsWeavable).ToArray();
             auditTimer.NewZone("Methods weaving");
-            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface));
+            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, priorityType));
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
@@ -83,7 +83,7 @@ namespace ArxOne.MrAdvice.Weaver
             // and then, the info advices
             auditTimer.NewZone("Info advices weaving");
             var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName, true);
-            moduleDefinition.GetTypes().AsParallel().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface));
+            moduleDefinition.GetTypes().AsParallel().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, priorityType));
 
             auditTimer.LastZone();
 
@@ -259,11 +259,12 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="reflectionNode">The reflection node.</param>
         /// <param name="markerInterface">The marker interface.</param>
+        /// <param name="priorityType">Type of the priority.</param>
         /// <returns></returns>
-        private IEnumerable<MethodDefinition> GetMarkedMethods(ReflectionNode reflectionNode, TypeDefinition markerInterface)
+        private IEnumerable<MethodDefinition> GetMarkedMethods(ReflectionNode reflectionNode, TypeDefinition markerInterface, TypeReference priorityType)
         {
             return reflectionNode.GetAncestorsToChildren().AsParallel()
-                .Where(n => n.Method != null && GetAllMarkers(n, markerInterface).Any())
+                .Where(n => n.Method != null && GetAllMarkers(n, markerInterface, priorityType).Any())
                 .Select(n => n.Method);
         }
 
@@ -272,25 +273,50 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="reflectionNode">The reflection node.</param>
         /// <param name="markerInterface">The advice interface.</param>
+        /// <param name="priorityType">Type of the priority.</param>
         /// <returns></returns>
-        private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, TypeDefinition markerInterface)
+        private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, TypeDefinition markerInterface, TypeReference priorityType)
         {
             var markers = reflectionNode.GetAncestorsToChildren()
                 .SelectMany(n => n.CustomAttributes.SelectMany(a => a.AttributeType.Resolve().GetSelfAndParents()).Where(t => IsMarker(t, markerInterface)))
                 .Distinct()
-                .Select(CreateMarkerDefinition);
+                .Select(t => GetMarkerDefinition(t, priorityType));
 #if DEBUG
             //            Logger.WriteDebug(string.Format("{0} --> {1}", reflectionNode.ToString(), markers.Count()));
 #endif
             return markers;
         }
 
-        private MarkerDefinition CreateMarkerDefinition(TypeDefinition typeDefinition)
+        private readonly IDictionary<TypeDefinition, MarkerDefinition> _markerDefinitions
+            = new Dictionary<TypeDefinition, MarkerDefinition>();
+
+        private MarkerDefinition GetMarkerDefinition(TypeDefinition typeDefinition, TypeReference priorityType)
         {
-            return new MarkerDefinition {Type = typeDefinition};
+            lock (_markerDefinitions)
+            {
+                MarkerDefinition markerDefinition;
+                if (_markerDefinitions.TryGetValue(typeDefinition, out markerDefinition))
+                    return markerDefinition;
+
+                var priorityAttributes = typeDefinition.CustomAttributes.Where(a => a.AttributeType.SafeEquivalent(priorityType)).ToList();
+                if (priorityAttributes.Count > 1)
+                    Logger.WriteWarning("Advice {0} has more than one priority. Using the first found", typeDefinition.FullName);
+
+                int priority = 0;
+                if (priorityAttributes.Count > 0)
+                {
+                    var b = priorityAttributes[0].GetBlob();
+                    priority = (b[5] << 24) | (b[4] << 16) | (b[3] << 8) | b[2];
+                    Logger.Write("Advice {0}: priority={1}", typeDefinition.FullName, priority);
+                }
+
+                markerDefinition = new MarkerDefinition {Type = typeDefinition, Priority = priority};
+                _markerDefinitions[typeDefinition] = markerDefinition;
+                return markerDefinition;
+            }
         }
 
-        private readonly IDictionary<Tuple<string, string>, bool> _isInterface = new Dictionary<Tuple<string, string>, bool>();
+        private readonly IDictionary<Tuple<string, string>, bool> _isMarker = new Dictionary<Tuple<string, string>, bool>();
 
         /// <summary>
         /// Determines whether the specified type reference is aspect.
@@ -300,18 +326,18 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private bool IsMarker(TypeReference typeReference, TypeDefinition markerInterface)
         {
-            lock (_isInterface)
+            lock (_isMarker)
             {
                 var key = Tuple.Create(typeReference.FullName, markerInterface.FullName);
                 // there is a cache, because the same attribute may be found several time
                 // and we're in a hurry, the developper is waiting for his program to start!
                 bool isMarker;
-                if (_isInterface.TryGetValue(key, out isMarker))
+                if (_isMarker.TryGetValue(key, out isMarker))
                     return isMarker;
 
                 // otherwise look for type or implemented interfaces (recursively)
                 var interfaces = typeReference.Resolve().Interfaces;
-                _isInterface[key] = isMarker = typeReference.SafeEquivalent(markerInterface)
+                _isMarker[key] = isMarker = typeReference.SafeEquivalent(markerInterface)
                                                || interfaces.Any(i => IsMarker(i, markerInterface));
                 return isMarker;
             }

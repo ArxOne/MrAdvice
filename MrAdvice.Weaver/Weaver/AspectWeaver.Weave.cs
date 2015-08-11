@@ -305,10 +305,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="method">The method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="moduleDefinition">The module definition.</param>
-        private void WeaveIntroductions(MethodDefinition method, TypeDefinition adviceInterface, ModuleDefinition moduleDefinition)
+        private void WeaveIntroductions(MethodDefinition method, TypeDefinition adviceInterface, ModuleDefinition moduleDefinition, TypeReference priorityType)
         {
             var typeDefinition = method.DeclaringType;
-            var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface);
+            var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface, priorityType);
             var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, Binding.IntroducedFieldAttributeName, true)
                 .GetConstructors().Single());
             foreach (var advice in advices)
@@ -327,9 +327,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="infoAdviceInterface">The information advice interface.</param>
-        private void WeaveInfoAdvices(ModuleDefinition moduleDefinition, TypeDefinition typeDefinition, TypeDefinition infoAdviceInterface)
+        private void WeaveInfoAdvices(ModuleDefinition moduleDefinition, TypeDefinition typeDefinition, TypeDefinition infoAdviceInterface, TypeReference priorityType)
         {
-            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface).Where(IsWeavable).Any())
+            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface, priorityType).Where(IsWeavable).Any())
             {
                 Logger.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
                 WeaveInfoAdvices(typeDefinition, moduleDefinition, false);
@@ -342,12 +342,13 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="method">The method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
-        private void WeaveMethod(ModuleDefinition moduleDefinition, MethodDefinition method, TypeDefinition adviceInterface)
+        /// <param name="priorityType">Type of the priority.</param>
+        private void WeaveMethod(ModuleDefinition moduleDefinition, MethodDefinition method, TypeDefinition adviceInterface, TypeReference priorityType)
         {
             try
             {
                 WeaveAdvices(method);
-                WeaveIntroductions(method, adviceInterface, moduleDefinition);
+                WeaveIntroductions(method, adviceInterface, moduleDefinition, priorityType);
             }
             catch (Exception e)
             {
