@@ -66,6 +66,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Advice\AdvisedInterface.cs" />
+    <Compile Include="Annotation\PriorityValue.cs" />
     <Compile Include="Aspect\AdviceInfo.cs" />
     <Compile Include="Advice\AdviceContext.cs" />
     <Compile Include="Advice\AdviceExtensions.cs" />

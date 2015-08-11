@@ -69,6 +69,7 @@
     <Compile Include="Advices\InterfacePropertyAdvice.cs" />
     <Compile Include="Advices\IntroductionAdvice.cs" />
     <Compile Include="Advices\ParameterAdvice.cs" />
+    <Compile Include="Advices\DeferredStorage.cs" />
     <Compile Include="Advices\RecordCall.cs" />
     <Compile Include="Advices\RecordProperties.cs" />
     <Compile Include="Advices\RecordMethods.cs" />

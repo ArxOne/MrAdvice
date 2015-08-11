@@ -24,6 +24,12 @@ namespace ArxOne.MrAdvice.Annotation
         public const int DefaultLevel = 0;
 
         /// <summary>
+        /// Marks a property as abstract:
+        /// removes backing field and actual get/set
+        /// </summary>
+        public const int Abstract = PriorityValue.Abstract;
+
+        /// <summary>
         /// Gets or sets the level.
         /// </summary>
         /// <value>
@@ -48,7 +54,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// <returns></returns>
         public static int GetLevel(IAdvice advice)
         {
-            var priorityAttribute = advice.GetType().GetCustomAttributes(typeof (Priority), true).Cast<Priority>().SingleOrDefault();
+            var priorityAttribute = advice.GetType().GetCustomAttributes(typeof(Priority), true).Cast<Priority>().SingleOrDefault();
             if (priorityAttribute != null)
                 return priorityAttribute.Level;
             return DefaultLevel;

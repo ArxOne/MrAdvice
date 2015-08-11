@@ -12,6 +12,11 @@ namespace MethodLevelTest
 
     public class AdvisedClass
     {
+        public bool UnadvisedAutoProperty { get; set; }
+
+        [DeferredStorage]
+        public int DeferredInt { get; set; }
+
         public bool LaunchAsyncMethod()
         {
             var start = new ManualResetEvent(false);

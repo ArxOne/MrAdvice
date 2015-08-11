@@ -11,6 +11,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Diagnostics;
     using System.Linq;
     using System.Runtime.Versioning;
+    using Annotation;
     using IO;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
@@ -56,6 +57,8 @@ namespace ArxOne.MrAdvice.Weaver
                 Logger.WriteWarning("IAdvice interface not found here, exiting");
                 return;
             }
+
+            var priorityType = TypeResolver.Resolve(moduleDefinition, Binding.PriorityTypeName, true);
 
             // runtime check
             auditTimer.NewZone("Runtime check");
@@ -270,15 +273,21 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="reflectionNode">The reflection node.</param>
         /// <param name="markerInterface">The advice interface.</param>
         /// <returns></returns>
-        private IEnumerable<TypeReference> GetAllMarkers(ReflectionNode reflectionNode, TypeDefinition markerInterface)
+        private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, TypeDefinition markerInterface)
         {
             var markers = reflectionNode.GetAncestorsToChildren()
                 .SelectMany(n => n.CustomAttributes.SelectMany(a => a.AttributeType.Resolve().GetSelfAndParents()).Where(t => IsMarker(t, markerInterface)))
-                .Distinct();
+                .Distinct()
+                .Select(CreateMarkerDefinition);
 #if DEBUG
             //            Logger.WriteDebug(string.Format("{0} --> {1}", reflectionNode.ToString(), markers.Count()));
 #endif
             return markers;
+        }
+
+        private MarkerDefinition CreateMarkerDefinition(TypeDefinition typeDefinition)
+        {
+            return new MarkerDefinition {Type = typeDefinition};
         }
 
         private readonly IDictionary<Tuple<string, string>, bool> _isInterface = new Dictionary<Tuple<string, string>, bool>();

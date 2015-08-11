@@ -313,11 +313,11 @@ namespace ArxOne.MrAdvice.Weaver
                 .GetConstructors().Single());
             foreach (var advice in advices)
             {
-                var adviceDefinition = advice.Resolve();
+                var adviceDefinition = advice.Type.Resolve();
                 foreach (var field in adviceDefinition.Fields.Where(f => f.IsPublic))
-                    IntroduceMember(method.Module, field.Name, field.FieldType, field.IsStatic, advice, typeDefinition, markerAttributeCtor);
+                    IntroduceMember(method.Module, field.Name, field.FieldType, field.IsStatic, advice.Type, typeDefinition, markerAttributeCtor);
                 foreach (var property in adviceDefinition.Properties.Where(p => p.HasAnyPublic()))
-                    IntroduceMember(method.Module, property.Name, property.PropertyType, !property.HasThis, advice, typeDefinition, markerAttributeCtor);
+                    IntroduceMember(method.Module, property.Name, property.PropertyType, !property.HasThis, advice.Type, typeDefinition, markerAttributeCtor);
             }
         }
 

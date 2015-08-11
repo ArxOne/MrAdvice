@@ -60,5 +60,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// This methods is called by info advice stubs
         /// </summary>
         public const string InvocationProcessInfoAdvicesMethodName = "ProcessInfoAdvices";
+
+        /// <summary>
+        /// The priority type name
+        /// </summary>
+        public const string PriorityTypeName = "ArxOne.MrAdvice.Annotation.Priority";
     }
 }

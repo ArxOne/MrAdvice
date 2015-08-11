@@ -85,5 +85,11 @@ namespace IntegrityTest
         {
             Assert.AreEqual(typeof(AdvisedInterface).FullName, Binding.AdvisedInterfaceTypeName);
         }
+        [TestMethod]
+        [TestCategory("Integrity")]
+        public void PriorityTypeNameTest()
+        {
+            Assert.AreEqual(typeof(Priority).FullName, Binding.PriorityTypeName);
+        }
     }
 }
