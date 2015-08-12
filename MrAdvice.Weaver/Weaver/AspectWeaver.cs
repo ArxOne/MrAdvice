@@ -58,7 +58,11 @@ namespace ArxOne.MrAdvice.Weaver
                 return;
             }
 
-            var priorityType = TypeResolver.Resolve(moduleDefinition, Binding.PriorityTypeName, true);
+            var types = new Types
+            {
+                PriorityAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.PriorityAttributeTypeName, true),
+                AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.AbstractTargetAttributeTypeName, true)
+            };
 
             // runtime check
             auditTimer.NewZone("Runtime check");
@@ -69,9 +73,9 @@ namespace ArxOne.MrAdvice.Weaver
 
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
-            var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface, priorityType).Where(IsWeavable).ToArray();
+            var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface, types).Where(IsWeavable).ToArray();
             auditTimer.NewZone("Methods weaving");
-            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, priorityType));
+            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
@@ -83,7 +87,7 @@ namespace ArxOne.MrAdvice.Weaver
             // and then, the info advices
             auditTimer.NewZone("Info advices weaving");
             var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName, true);
-            moduleDefinition.GetTypes().AsParallel().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, priorityType));
+            moduleDefinition.GetTypes().AsParallel().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
 
             auditTimer.LastZone();
 
@@ -247,11 +251,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// <summary>
         /// Determines whether the specified method is weavable.
         /// </summary>
-        /// <param name="methodDefinition">The method definition.</param>
+        /// <param name="markedMethod">The marked method.</param>
         /// <returns></returns>
-        private static bool IsWeavable(MethodDefinition methodDefinition)
+        private static bool IsWeavable(MarkedNode markedMethod)
         {
-            return !methodDefinition.IsAbstract;
+            return !markedMethod.Node.Method.IsAbstract;
         }
 
         /// <summary>
@@ -259,13 +263,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="reflectionNode">The reflection node.</param>
         /// <param name="markerInterface">The marker interface.</param>
-        /// <param name="priorityType">Type of the priority.</param>
+        /// <param name="types">The types.</param>
         /// <returns></returns>
-        private IEnumerable<MethodDefinition> GetMarkedMethods(ReflectionNode reflectionNode, TypeDefinition markerInterface, TypeReference priorityType)
+        private IEnumerable<MarkedNode> GetMarkedMethods(ReflectionNode reflectionNode, TypeDefinition markerInterface, Types types)
         {
             return reflectionNode.GetAncestorsToChildren().AsParallel()
-                .Where(n => n.Method != null && GetAllMarkers(n, markerInterface, priorityType).Any())
-                .Select(n => n.Method);
+                .Where(n => n.Method != null)
+                .Select(n => new MarkedNode { Node = n, Definitions = GetAllMarkers(n, markerInterface, types).ToArray() })
+                .Where(m => m.Definitions.Length > 0);
         }
 
         /// <summary>
@@ -273,14 +278,15 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="reflectionNode">The reflection node.</param>
         /// <param name="markerInterface">The advice interface.</param>
-        /// <param name="priorityType">Type of the priority.</param>
+        /// <param name="types">The types.</param>
         /// <returns></returns>
-        private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, TypeDefinition markerInterface, TypeReference priorityType)
+        private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, TypeDefinition markerInterface, Types types)
         {
             var markers = reflectionNode.GetAncestorsToChildren()
-                .SelectMany(n => n.CustomAttributes.SelectMany(a => a.AttributeType.Resolve().GetSelfAndParents()).Where(t => IsMarker(t, markerInterface)))
+                .SelectMany(n => n.CustomAttributes.SelectMany(a => a.AttributeType.Resolve().GetSelfAndParents())
+                    .Where(t => IsMarker(t, markerInterface)))
                 .Distinct()
-                .Select(t => GetMarkerDefinition(t, priorityType));
+                .Select(t => GetMarkerDefinition(t, types));
 #if DEBUG
             //            Logger.WriteDebug(string.Format("{0} --> {1}", reflectionNode.ToString(), markers.Count()));
 #endif
@@ -290,7 +296,13 @@ namespace ArxOne.MrAdvice.Weaver
         private readonly IDictionary<TypeDefinition, MarkerDefinition> _markerDefinitions
             = new Dictionary<TypeDefinition, MarkerDefinition>();
 
-        private MarkerDefinition GetMarkerDefinition(TypeDefinition typeDefinition, TypeReference priorityType)
+        /// <summary>
+        /// Gets the marker definition.
+        /// </summary>
+        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="types">The types.</param>
+        /// <returns></returns>
+        private MarkerDefinition GetMarkerDefinition(TypeDefinition typeDefinition, Types types)
         {
             lock (_markerDefinitions)
             {
@@ -298,22 +310,37 @@ namespace ArxOne.MrAdvice.Weaver
                 if (_markerDefinitions.TryGetValue(typeDefinition, out markerDefinition))
                     return markerDefinition;
 
-                var priorityAttributes = typeDefinition.CustomAttributes.Where(a => a.AttributeType.SafeEquivalent(priorityType)).ToList();
-                if (priorityAttributes.Count > 1)
-                    Logger.WriteWarning("Advice {0} has more than one priority. Using the first found", typeDefinition.FullName);
-
-                int priority = 0;
-                if (priorityAttributes.Count > 0)
-                {
-                    var b = priorityAttributes[0].GetBlob();
-                    priority = (b[5] << 24) | (b[4] << 16) | (b[3] << 8) | b[2];
-                    Logger.Write("Advice {0}: priority={1}", typeDefinition.FullName, priority);
-                }
-
-                markerDefinition = new MarkerDefinition {Type = typeDefinition, Priority = priority};
+                markerDefinition = CreateMarkerDefinition(typeDefinition, types);
                 _markerDefinitions[typeDefinition] = markerDefinition;
                 return markerDefinition;
             }
+        }
+
+        /// <summary>
+        /// Creates the marker definition.
+        /// </summary>
+        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="types">The types.</param>
+        /// <returns></returns>
+        private static MarkerDefinition CreateMarkerDefinition(TypeDefinition typeDefinition, Types types)
+        {
+            var priorityAttributes = typeDefinition.CustomAttributes.Where(a => a.AttributeType.SafeEquivalent(types.PriorityAttributeType)).ToList();
+            if (priorityAttributes.Count > 1)
+                Logger.WriteWarning("Advice {0} has more than one priority. Using the first found", typeDefinition.FullName);
+
+            int priority = 0;
+            if (priorityAttributes.Count > 0)
+            {
+                var b = priorityAttributes[0].GetBlob();
+                priority = (b[5] << 24) | (b[4] << 16) | (b[3] << 8) | b[2];
+                Logger.Write("Advice {0} has priority {1}", typeDefinition.FullName, priority);
+            }
+
+            var abstractTarget = typeDefinition.CustomAttributes.Any(a => a.AttributeType.SafeEquivalent(types.AbstractTargetAttributeType));
+            if (abstractTarget)
+                Logger.Write("Advice {0} abstracts target", typeDefinition.FullName, priority);
+            var markerDefinition = new MarkerDefinition { Type = typeDefinition, Priority = priority, AbstractTarget = abstractTarget };
+            return markerDefinition;
         }
 
         private readonly IDictionary<Tuple<string, string>, bool> _isMarker = new Dictionary<Tuple<string, string>, bool>();

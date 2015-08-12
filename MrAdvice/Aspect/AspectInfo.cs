@@ -76,7 +76,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// <param name="advisedMethod">The advised method.</param>
         public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, MethodBase advisedMethod)
         {
-            Advices = advices.OrderByDescending(a => Priority.GetLevel(a.Advice)).ToArray();
+            Advices = advices.OrderByDescending(a => PriorityAttribute.GetLevel(a.Advice)).ToArray();
             PointcutMethod = pointcutMethod;
             AdvisedMethod = advisedMethod;
         }

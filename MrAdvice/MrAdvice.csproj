@@ -66,7 +66,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Advice\AdvisedInterface.cs" />
-    <Compile Include="Annotation\PriorityValue.cs" />
+    <Compile Include="Annotation\AbstractTargetAttribute.cs" />
     <Compile Include="Aspect\AdviceInfo.cs" />
     <Compile Include="Advice\AdviceContext.cs" />
     <Compile Include="Advice\AdviceExtensions.cs" />
@@ -83,7 +83,7 @@
     <Compile Include="Advice\ParameterAdviceContext.cs" />
     <Compile Include="Advice\PropertyAdviceContext.cs" />
     <Compile Include="Advice\PropertyInfoAdviceContext.cs" />
-    <Compile Include="Annotation\Priority.cs" />
+    <Compile Include="Annotation\PriorityAttribute.cs" />
     <Compile Include="Aspect\AspectInfo.cs" />
     <Compile Include="Collection\ArraySpan.cs" />
     <Compile Include="Advice\IPropertyInfoAdvice.cs" />

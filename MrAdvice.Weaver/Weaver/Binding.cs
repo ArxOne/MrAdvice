@@ -64,6 +64,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// <summary>
         /// The priority type name
         /// </summary>
-        public const string PriorityTypeName = "ArxOne.MrAdvice.Annotation.Priority";
+        public const string PriorityAttributeTypeName = "ArxOne.MrAdvice.Annotation.PriorityAttribute";
+        /// <summary>
+        /// The abstract target attribute type name
+        /// </summary>
+        public const string AbstractTargetAttributeTypeName = "ArxOne.MrAdvice.Annotation.AbstractTargetAttribute";
     }
 }

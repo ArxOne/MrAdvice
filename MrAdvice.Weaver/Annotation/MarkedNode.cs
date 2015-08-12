@@ -7,14 +7,13 @@
 
 namespace ArxOne.MrAdvice.Annotation
 {
-    using Mono.Cecil;
+    using System.Linq;
+    using Reflection.Groups;
 
-    internal class MarkerDefinition
+    internal class MarkedNode
     {
-        public TypeReference Type;
-
-        public int Priority;
-
-        public bool AbstractTarget;
+        public ReflectionNode Node;
+        public MarkerDefinition[] Definitions;
+        public bool AbstractTarget => Definitions.Any(d => d.AbstractTarget);
     }
 }

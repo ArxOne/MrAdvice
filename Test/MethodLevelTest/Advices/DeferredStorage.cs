@@ -11,7 +11,7 @@ namespace MethodLevelTest.Advices
     using ArxOne.MrAdvice.Advice;
     using ArxOne.MrAdvice.Annotation;
 
-    [Priority(Priority.Abstract)]
+    [AbstractTarget]
     public class DeferredStorage : Attribute, IPropertyAdvice
     {
         private object _value;

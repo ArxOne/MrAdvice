@@ -5,10 +5,13 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
-namespace ArxOne.MrAdvice.Annotation
+namespace ArxOne.MrAdvice.Weaver
 {
-    internal class PriorityValue
+    using Mono.Cecil;
+
+    internal class Types
     {
-        public const int Abstract = -1;
+        public TypeDefinition PriorityAttributeType;
+        public TypeDefinition AbstractTargetAttributeType;
     }
 }

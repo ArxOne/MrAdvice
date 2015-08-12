@@ -63,15 +63,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\MrAdvice\Annotation\PriorityValue.cs">
-      <Link>Annotation\PriorityValue.cs</Link>
-    </Compile>
     <Compile Include="..\MrAdvice\Introduction\IntroductionRules.cs">
       <Link>Introduction\IntroductionRules.cs</Link>
     </Compile>
     <Compile Include="..\MrAdvice\Properties\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
     </Compile>
+    <Compile Include="Annotation\MarkedNode.cs" />
     <Compile Include="Annotation\MarkerDefinition.cs" />
     <Compile Include="AuditTimer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -102,6 +100,7 @@
     <Compile Include="Utility\GenericParameterExtensions.cs" />
     <Compile Include="Weaver\Instructions.cs" />
     <Compile Include="Utility\TypeReferenceExtensions.cs" />
+    <Compile Include="Weaver\Types.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">

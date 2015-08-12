@@ -14,6 +14,7 @@ namespace IntegrityTest
     using ArxOne.MrAdvice.Utility;
     using ArxOne.MrAdvice.Weaver;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using PriorityAttribute = ArxOne.MrAdvice.Annotation.PriorityAttribute;
 
     [TestClass]
     public class BindingTest
@@ -87,9 +88,15 @@ namespace IntegrityTest
         }
         [TestMethod]
         [TestCategory("Integrity")]
-        public void PriorityTypeNameTest()
+        public void PriorityAttributeTypeNameTest()
         {
-            Assert.AreEqual(typeof(Priority).FullName, Binding.PriorityTypeName);
+            Assert.AreEqual(typeof(PriorityAttribute).FullName, Binding.PriorityAttributeTypeName);
+        }
+        [TestMethod]
+        [TestCategory("Integrity")]
+        public void AbstractTargetAttributeTypeNameTest()
+        {
+            Assert.AreEqual(typeof(AbstractTargetAttribute).FullName, Binding.AbstractTargetAttributeTypeName);
         }
     }
 }
