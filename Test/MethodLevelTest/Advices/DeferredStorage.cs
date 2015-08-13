@@ -14,7 +14,7 @@ namespace MethodLevelTest.Advices
     [AbstractTarget]
     public class DeferredStorage : Attribute, IPropertyAdvice
     {
-        private object _value;
+        private static object _value;
 
         public void Advise(PropertyAdviceContext context)
         {

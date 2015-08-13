@@ -11,6 +11,8 @@ namespace ArxOne.MrAdvice.Weaver
 
     internal class Types
     {
+        public TypeReference CompilerGeneratedAttributeType;
+
         public TypeDefinition PriorityAttributeType;
         public TypeDefinition AbstractTargetAttributeType;
     }

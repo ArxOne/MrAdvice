@@ -92,12 +92,12 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 method.Attributes = (method.Attributes & ~MethodAttributes.Abstract) | MethodAttributes.Virtual;
                 Logger.WriteDebug("Weaving abstract method '{0}'", method.FullName);
-                WritePointcutBody(method, null);
+                WritePointcutBody(method, null, false);
             }
             else if (markedMethod.AbstractTarget)
             {
                 Logger.WriteDebug("Weaving and abstracting method '{0}'", method.FullName);
-                WritePointcutBody(method, null);
+                WritePointcutBody(method, null, true);
             }
             else
             {
@@ -126,7 +126,7 @@ namespace ArxOne.MrAdvice.Weaver
                 innerMethod.Body.Variables.AddRange(method.Body.Variables);
                 innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
 
-                WritePointcutBody(method, innerMethod);
+                WritePointcutBody(method, innerMethod, false);
                 lock (method.DeclaringType)
                     method.DeclaringType.Methods.Add(innerMethod);
             }
@@ -137,9 +137,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="method">The method.</param>
         /// <param name="innerMethod">The inner method.</param>
+        /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <exception cref="System.InvalidOperationException">
         /// </exception>
-        private void WritePointcutBody(MethodDefinition method, MethodDefinition innerMethod)
+        private void WritePointcutBody(MethodDefinition method, MethodDefinition innerMethod, bool abstractedTarget)
         {
             var moduleDefinition = method.Module;
 
@@ -262,6 +263,9 @@ namespace ArxOne.MrAdvice.Weaver
             }
             else
                 instructions.Emit(OpCodes.Ldnull);
+
+            // abstracted target
+            instructions.Emit(abstractedTarget ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
 
             if (genericParametersVariable != null)
                 instructions.EmitLdloc(genericParametersVariable);
@@ -457,7 +461,7 @@ namespace ArxOne.MrAdvice.Weaver
             implementationMethod.Parameters.AddRange(interfaceMethod.Parameters);
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
             implementationMethod.Overrides.Add(interfaceMethod);
-            WritePointcutBody(implementationMethod, null);
+            WritePointcutBody(implementationMethod, null, false);
             return implementationMethod;
         }
 

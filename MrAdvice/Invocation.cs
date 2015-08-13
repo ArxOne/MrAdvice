@@ -33,14 +33,16 @@ namespace ArxOne.MrAdvice
         /// <param name="parameters">The parameters.</param>
         /// <param name="methodBase">The raw method base.</param>
         /// <param name="innerMethod">The inner method.</param>
+        /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="genericArguments">The generic arguments (to static type and/or method) in a single array.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, Type[] genericArguments)
+        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, 
+            bool abstractedTarget, Type[] genericArguments)
         {
-            var aspectInfo = GetAspectInfo(methodBase, innerMethod, genericArguments);
+            var aspectInfo = GetAspectInfo(methodBase, innerMethod, abstractedTarget, genericArguments);
 
             // this is the case with auto implemented interface
             var advisedInterface = target as AdvisedInterface;
@@ -81,9 +83,10 @@ namespace ArxOne.MrAdvice
         /// </summary>
         /// <param name="methodBase">The method base.</param>
         /// <param name="innerMethod">The inner method.</param>
+        /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="genericArguments">The generic arguments.</param>
         /// <returns></returns>
-        private static AspectInfo GetAspectInfo(MethodBase methodBase, MethodBase innerMethod, Type[] genericArguments)
+        private static AspectInfo GetAspectInfo(MethodBase methodBase, MethodBase innerMethod, bool abstractedTarget, Type[] genericArguments)
         {
             AspectInfo aspectInfo;
             lock (AspectInfos)
@@ -91,7 +94,7 @@ namespace ArxOne.MrAdvice
                 if (!AspectInfos.TryGetValue(methodBase, out aspectInfo))
                 {
                     // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, (MethodInfo) innerMethod);
+                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, (MethodInfo)innerMethod, abstractedTarget);
                 }
             }
 
@@ -178,11 +181,12 @@ namespace ArxOne.MrAdvice
         /// </summary>
         /// <param name="methodBase">The method information.</param>
         /// <param name="innerMethod">Name of the inner method.</param>
+        /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <returns></returns>
-        private static AspectInfo CreateAspectInfo(MethodBase methodBase, MethodInfo innerMethod)
+        private static AspectInfo CreateAspectInfo(MethodBase methodBase, MethodInfo innerMethod, bool abstractedTarget)
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
-            if (innerMethod == null)
+            if (innerMethod == null && !abstractedTarget)
                 methodBase = FindInterfaceMethod(methodBase);
             var advices = GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
             if (relatedPropertyInfo == null)
@@ -199,7 +203,7 @@ namespace ArxOne.MrAdvice
         {
             // GetInterfaceMap is unfortunately unavailable in PCL :'(
             // ReSharper disable once PossibleNullReferenceException
-            var i = implementationMethodBase.DeclaringType.GetInterfaces().Single();
+            var i = implementationMethodBase.DeclaringType.GetInterfaces().SingleOrDefault();
             var parameterInfos = implementationMethodBase.GetParameters();
             var m = i.GetMethod(implementationMethodBase.Name, parameterInfos.Select(p => p.ParameterType).ToArray());
             return m;

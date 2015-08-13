@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Runtime.Versioning;
     using Annotation;
     using IO;
@@ -60,6 +61,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             var types = new Types
             {
+                CompilerGeneratedAttributeType = moduleDefinition.Import(typeof(CompilerGeneratedAttribute)),
                 PriorityAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.PriorityAttributeTypeName, true),
                 AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.AbstractTargetAttributeTypeName, true)
             };
@@ -74,6 +76,15 @@ namespace ArxOne.MrAdvice.Weaver
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
             var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface, types).Where(IsWeavable).ToArray();
+            auditTimer.NewZone("Abstract targets");
+            var generatedFieldsToBeRemoved = new List<FieldReference>();
+            var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
+            if (methodsWithAbstractTarget.Length > 0)
+            {
+                generatedFieldsToBeRemoved.AddRange(GetRemovableFields(methodsWithAbstractTarget, types));
+                foreach (var fieldReference in generatedFieldsToBeRemoved)
+                    Logger.WriteDebug("Field {0} to be removed", fieldReference.FullName);
+            }
             auditTimer.NewZone("Methods weaving");
             weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
 
@@ -89,6 +100,10 @@ namespace ArxOne.MrAdvice.Weaver
             var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName, true);
             moduleDefinition.GetTypes().AsParallel().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
 
+            auditTimer.NewZone("Abstract targets cleanup");
+            foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
+                generatedFieldToBeRemoved.DeclaringType.Resolve().Fields.Remove(generatedFieldToBeRemoved.Resolve());
+
             auditTimer.LastZone();
 
             //Logger.WriteDebug("t3: {0}ms", (int)stopwatch.ElapsedMilliseconds);
@@ -102,6 +117,37 @@ namespace ArxOne.MrAdvice.Weaver
 
             Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
                 moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
+        }
+
+        private IEnumerable<FieldDefinition> GetRemovableFields(IList<MarkedNode> nodes, Types types)
+        {
+            var type = nodes.First().Node.Method.DeclaringType;
+            // get all types
+            var allRemovableFields = GetRemovableFields(type.Methods, types);
+            // then all referenced fields that will be dereferenced
+            var toBeRemovedFields = GetRemovableFields(nodes.Select(n => n.Node.Method), types);
+            // and remove only where count are equals
+            var removableFields = from t in toBeRemovedFields
+                                  where allRemovableFields.Contains(t)
+                                  select t.Item1;
+            return removableFields;
+        }
+
+        private IEnumerable<Tuple<FieldDefinition, int>> GetRemovableFields(IEnumerable<MethodDefinition> methods, Types types)
+        {
+            var allFields = methods.SelectMany(m => GetRemovableFields(m, types));
+            var fieldsCount = allFields.GroupBy(f => f);
+            return fieldsCount.Select(f => Tuple.Create(f.Key, f.Count()));
+        }
+
+        private IEnumerable<FieldDefinition> GetRemovableFields(MethodDefinition method, Types types)
+        {
+            return from instruction in method.Body.Instructions
+                   let fieldReference = instruction.Operand as FieldReference
+                   where fieldReference != null && fieldReference.DeclaringType.SafeEquivalent(method.DeclaringType)
+                   let fieldDefinition = fieldReference.Resolve()
+                   where fieldDefinition.CustomAttributes.Any(a => a.AttributeType.SafeEquivalent(types.CompilerGeneratedAttributeType))
+                   select fieldReference.Resolve();
         }
 
         /// <summary>
@@ -333,12 +379,12 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 var b = priorityAttributes[0].GetBlob();
                 priority = (b[5] << 24) | (b[4] << 16) | (b[3] << 8) | b[2];
-                Logger.Write("Advice {0} has priority {1}", typeDefinition.FullName, priority);
+                Logger.WriteDebug("Advice {0} has priority {1}", typeDefinition.FullName, priority);
             }
 
             var abstractTarget = typeDefinition.CustomAttributes.Any(a => a.AttributeType.SafeEquivalent(types.AbstractTargetAttributeType));
             if (abstractTarget)
-                Logger.Write("Advice {0} abstracts target", typeDefinition.FullName, priority);
+                Logger.WriteDebug("Advice {0} abstracts target", typeDefinition.FullName, priority);
             var markerDefinition = new MarkerDefinition { Type = typeDefinition, Priority = priority, AbstractTarget = abstractTarget };
             return markerDefinition;
         }
