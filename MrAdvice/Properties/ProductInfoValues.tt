@@ -1,6 +1,6 @@
 ﻿<#
 // all common data between assembly information and nuspec package are stored here
-var Version = "0.9.9.3";
+var Version = "0.10";
 var Title = "Mr. Advice";
 var Company = "Arx One";
 var LicenseUrl = "http://opensource.org/licenses/mit-license.php";
