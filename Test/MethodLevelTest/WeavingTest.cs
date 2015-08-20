@@ -7,6 +7,7 @@
 namespace MethodLevelTest
 {
     using System;
+    using System.Runtime.InteropServices;
     using ArxOne.MrAdvice.Advice;
 
     // https://github.com/ArxOne/MrAdvice/issues/32
@@ -76,5 +77,12 @@ namespace MethodLevelTest
             context.Proceed(); // this calls the original method
             // do other things here
         }
+    }
+
+    [MyProudAdvice]
+    class Foo
+    {
+        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int memcmp(byte[] b1, byte[] b2, UIntPtr count);
     }
 }
