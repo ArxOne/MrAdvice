@@ -85,6 +85,7 @@
     <Compile Include="InterfaceTest.cs" />
     <Compile Include="IntroducedClass.cs" />
     <Compile Include="IntroductionTest.cs" />
+    <Compile Include="OverloadedIndexerAdvisedClass.cs" />
     <Compile Include="ParametersTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="InitializeTest.cs" />
