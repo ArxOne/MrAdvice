@@ -21,10 +21,10 @@ namespace MethodLevelTest
             set { }
         }
 
-        //[ChangeParameter(NewReturnValue = 20)]
-        //public int this[int v]
-        //{
-        //    get { return 2; }
-        //}
+        [ChangeParameter(NewReturnValue = 20)]
+        public int this[int v]
+        {
+            get { return 2; }
+        }
     }
 }

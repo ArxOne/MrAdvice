@@ -284,5 +284,13 @@ namespace MethodLevelTest
         //    var r = c.Add(1, 2);
         //    Assert.AreEqual(12, r);
         //}
+
+        [TestMethod]
+        public void OverloadedIndexerTest()
+        {
+            var o = new OverloadedIndexerAdvisedClass();
+            Assert.AreEqual(10, o["dude"]);
+            Assert.AreEqual(20, o[1234]);
+        }
     }
 }

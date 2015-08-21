@@ -39,7 +39,7 @@ namespace ArxOne.MrAdvice
         /// <exception cref="System.NotImplementedException"></exception>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, 
+        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod,
             bool abstractedTarget, Type[] genericArguments)
         {
             var aspectInfo = GetAspectInfo(methodBase, innerMethod, abstractedTarget, genericArguments);
@@ -315,11 +315,10 @@ namespace ArxOne.MrAdvice
             if (!isGetter && !isSetter)
                 return null;
 
-            // hard-coded, because the property name generates two methods: "get_xxx" and "set_xxx" where xxx is the property name
-            var propertyName = methodInfo.Name.Substring(4);
             // now try to find the property
             // ReSharper disable once PossibleNullReferenceException
-            var propertyInfo = methodInfo.DeclaringType.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            var propertyInfo = methodInfo.DeclaringType.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                .SingleOrDefault(p => p.GetGetMethod() == methodInfo || p.GetSetMethod() == methodInfo);
             if (propertyInfo == null)
                 return null; // this should never happen
 
