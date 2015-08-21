@@ -78,11 +78,4 @@ namespace MethodLevelTest
             // do other things here
         }
     }
-
-    [MyProudAdvice]
-    class Foo
-    {
-        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int memcmp(byte[] b1, byte[] b2, UIntPtr count);
-    }
 }

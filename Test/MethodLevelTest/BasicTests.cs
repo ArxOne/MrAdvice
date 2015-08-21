@@ -7,8 +7,10 @@
 namespace MethodLevelTest
 {
     using System;
+    using System.Runtime.InteropServices;
     using Advices;
     using ArxOne.MrAdvice;
+    using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     public class MethodAdvisedCtorClass
@@ -16,6 +18,22 @@ namespace MethodLevelTest
         [RecordCall]
         public MethodAdvisedCtorClass()
         {
+        }
+    }
+
+    [PInvokerAdvice]
+    public class PInvoker
+    {
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetCurrentProcess();
+    }
+
+    public class PInvokerAdvice : Attribute, IMethodAdvice
+    {
+        public void Advise(MethodAdviceContext context)
+        {
+            context.Proceed();
+            context.ReturnValue = new IntPtr(1234);
         }
     }
 
@@ -286,11 +304,20 @@ namespace MethodLevelTest
         //}
 
         [TestMethod]
+        [TestCategory("Weaving")]
         public void OverloadedIndexerTest()
         {
             var o = new OverloadedIndexerAdvisedClass();
             Assert.AreEqual(10, o["dude"]);
             Assert.AreEqual(20, o[1234]);
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void PInvokeTest()
+        {
+            var p = PInvoker.GetCurrentProcess();
+            Assert.AreEqual(1234, p.ToInt32());
         }
     }
 }

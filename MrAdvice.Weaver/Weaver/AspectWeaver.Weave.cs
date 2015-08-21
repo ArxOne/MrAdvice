@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.InteropServices;
     using Annotation;
     using Introduction;
     using IO;
@@ -21,6 +22,7 @@ namespace ArxOne.MrAdvice.Weaver
     using EventAttributes = Mono.Cecil.EventAttributes;
     using FieldAttributes = Mono.Cecil.FieldAttributes;
     using MethodAttributes = Mono.Cecil.MethodAttributes;
+    using MethodBody = Mono.Cecil.Cil.MethodBody;
     using PropertyAttributes = Mono.Cecil.PropertyAttributes;
     using TypeAttributes = Mono.Cecil.TypeAttributes;
 
@@ -120,11 +122,22 @@ namespace ArxOne.MrAdvice.Weaver
                 innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
                 innerMethod.ImplAttributes = method.ImplAttributes;
                 innerMethod.SemanticsAttributes = method.SemanticsAttributes;
-                innerMethod.Body.InitLocals = method.Body.InitLocals;
                 innerMethod.Parameters.AddRange(method.Parameters);
-                innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
-                innerMethod.Body.Variables.AddRange(method.Body.Variables);
-                innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
+                if (method.IsPInvokeImpl)
+                {
+                    innerMethod.PInvokeInfo = method.PInvokeInfo;
+                    // must be removed before attributes are updated (otherwise Cecil gets angry)
+                    method.PInvokeInfo = null;
+                    method.IsPreserveSig = false;
+                    method.IsPInvokeImpl = false;
+                }
+                else
+                {
+                    innerMethod.Body.InitLocals = method.Body.InitLocals;
+                    innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
+                    innerMethod.Body.Variables.AddRange(method.Body.Variables);
+                    innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
+                }
 
                 WritePointcutBody(method, innerMethod, false);
                 lock (method.DeclaringType)
@@ -145,6 +158,8 @@ namespace ArxOne.MrAdvice.Weaver
             var moduleDefinition = method.Module;
 
             // now empty the old one and make it call the inner method...
+            if (method.Body == null)
+                method.Body = new MethodBody(method);
             method.Body.InitLocals = true;
             method.Body.Instructions.Clear();
             method.Body.Variables.Clear();
