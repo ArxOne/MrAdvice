@@ -7,7 +7,7 @@ branches:
     - master
 
 before_build:
-  appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe
+  appveyor DownloadFile https://www.nuget.org/nuget.exe
   nuget restore MrAdvice.sln
 
 configuration: Release
