@@ -24,7 +24,7 @@ namespace MethodLevelTest
     [PInvokerAdvice]
     public class PInvoker
     {
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32")]
         public static extern IntPtr GetCurrentProcess();
     }
 
