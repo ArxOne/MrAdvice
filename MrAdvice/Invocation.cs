@@ -229,7 +229,10 @@ namespace ArxOne.MrAdvice
             // optional from property
             relatedPropertyInfo = GetPropertyInfo(targetMethod);
             if (relatedPropertyInfo != null)
-                allAdvices = allAdvices.Union(GetAttributes<TAdvice>(relatedPropertyInfo.Item1).Select(CreateAdvice));
+                allAdvices = allAdvices.Union(GetAttributes<TAdvice>(relatedPropertyInfo.Item1).Select(CreateAdvice)).ToArray();
+            // now separate parameters
+            var parameterAdvices = allAdvices.Where(a => a.Advice is IParameterAdvice).ToArray();
+            allAdvices = allAdvices.Where(a => !(a.Advice is IParameterAdvice)).ToArray();
 
             // and parameters (not union but concat, because same attribute may be applied at different levels)
             // ... indexed parameters
@@ -237,12 +240,18 @@ namespace ArxOne.MrAdvice
             for (int parameterIndex = 0; parameterIndex < parameters.Length; parameterIndex++)
             {
                 var index = parameterIndex;
-                allAdvices = allAdvices.Concat(GetAttributes<TAdvice>(parameters[parameterIndex]).Select(a => CreateAdviceIndex(a, index)));
+                allAdvices = allAdvices.Concat(parameterAdvices.Select(p => CreateAdviceIndex(p.Advice, parameterIndex)))
+                    .Concat(GetAttributes<TAdvice>(parameters[parameterIndex]).Select(a => CreateAdviceIndex(a, index)));
+                // evaluate now
+                allAdvices = allAdvices.ToArray();
             }
             // ... return value
             var methodInfo = targetMethod as MethodInfo;
             if (methodInfo != null)
-                allAdvices = allAdvices.Concat(GetAttributes<TAdvice>(methodInfo.ReturnParameter).Select(a => CreateAdviceIndex(a, -1)));
+            {
+                allAdvices = allAdvices.Concat(parameterAdvices.Select(p => CreateAdviceIndex(p.Advice, -1)))
+                    .Concat(GetAttributes<TAdvice>(methodInfo.ReturnParameter).Select(a => CreateAdviceIndex(a, -1)));
+            }
 
             return allAdvices;
         }

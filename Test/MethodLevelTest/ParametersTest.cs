@@ -134,7 +134,7 @@ namespace MethodLevelTest
         public void AllParametersAtMethodLevel()
         {
             var r = Add2B(5, 8);
-            Assert.AreEqual(5 + 1 + 8 + 1 + 1, r);
+            Assert.AreEqual((5 + 1 + 8 + 1) * 2, r);
         }
     }
 }

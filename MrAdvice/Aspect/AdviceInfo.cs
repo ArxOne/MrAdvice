@@ -6,9 +6,10 @@
 #endregion
 namespace ArxOne.MrAdvice.Aspect
 {
+    using System;
     using Advice;
 
-    internal class AdviceInfo
+    internal class AdviceInfo : IEquatable<AdviceInfo>
     {
         /// <summary>
         /// Gets the advice (always non-null).
@@ -16,35 +17,38 @@ namespace ArxOne.MrAdvice.Aspect
         /// <value>
         /// The advice.
         /// </value>
-        public IAdvice Advice { get; private set; }
+        public IAdvice Advice { get; }
         /// <summary>
         /// Gets the method advice or null if none.
         /// </summary>
         /// <value>
         /// The method advice.
         /// </value>
-        public IMethodAdvice MethodAdvice { get { return Advice as IMethodAdvice; } }
+        public IMethodAdvice MethodAdvice => Advice as IMethodAdvice;
+
         /// <summary>
         /// Gets the property advice or null if none.
         /// </summary>
         /// <value>
         /// The property advice.
         /// </value>
-        public IPropertyAdvice PropertyAdvice { get { return Advice as IPropertyAdvice; } }
+        public IPropertyAdvice PropertyAdvice => Advice as IPropertyAdvice;
+
         /// <summary>
         /// Gets the parameter advice, or null if none.
         /// </summary>
         /// <value>
         /// The parameter advice.
         /// </value>
-        public IParameterAdvice ParameterAdvice { get { return Advice as IParameterAdvice; } }
+        public IParameterAdvice ParameterAdvice => Advice as IParameterAdvice;
+
         /// <summary>
         /// Gets the index of the parameter, if any (-1 stands for return value).
         /// </summary>
         /// <value>
         /// The index of the parameter.
         /// </value>
-        public int? ParameterIndex { get; private set; }
+        public int? ParameterIndex { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdviceInfo"/> class.
@@ -64,6 +68,16 @@ namespace ArxOne.MrAdvice.Aspect
         {
             Advice = advice;
             ParameterIndex = parameterIndex;
+        }
+
+        /// <summary>
+        /// Equalses the specified other.
+        /// </summary>
+        /// <param name="other">The other.</param>
+        /// <returns></returns>
+        public bool Equals(AdviceInfo other)
+        {
+            return ReferenceEquals(Advice, other.Advice) && ParameterIndex == other.ParameterIndex;
         }
     }
 }
