@@ -49,8 +49,8 @@ namespace ArxOne.MrAdvice
             if (advisedInterface != null)
                 aspectInfo = aspectInfo.AddAdvice(new AdviceInfo(advisedInterface.Advice));
 
-            foreach (var advice in aspectInfo.Advices.Distinct())
-                InjectIntroducedFields(advice.Advice, methodBase.DeclaringType);
+            foreach (var advice in aspectInfo.Advices.Select(a => a.Advice).Distinct())
+                InjectIntroducedFields(advice, methodBase.DeclaringType);
 
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
             var adviceValues = new AdviceValues(target, aspectInfo.AdvisedMethod.DeclaringType, parameters);

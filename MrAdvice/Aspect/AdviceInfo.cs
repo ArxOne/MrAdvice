@@ -9,7 +9,7 @@ namespace ArxOne.MrAdvice.Aspect
     using System;
     using Advice;
 
-    internal class AdviceInfo : IEquatable<AdviceInfo>
+    internal class AdviceInfo
     {
         /// <summary>
         /// Gets the advice (always non-null).
@@ -68,16 +68,6 @@ namespace ArxOne.MrAdvice.Aspect
         {
             Advice = advice;
             ParameterIndex = parameterIndex;
-        }
-
-        /// <summary>
-        /// Equalses the specified other.
-        /// </summary>
-        /// <param name="other">The other.</param>
-        /// <returns></returns>
-        public bool Equals(AdviceInfo other)
-        {
-            return ReferenceEquals(Advice, other.Advice) && ParameterIndex == other.ParameterIndex;
         }
     }
 }
