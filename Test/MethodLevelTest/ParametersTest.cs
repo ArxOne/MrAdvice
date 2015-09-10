@@ -72,6 +72,12 @@ namespace MethodLevelTest
             return a = b;
         }
 
+        [ParameterAdvice]
+        public int Add2B(int a, int b)
+        {
+            return a + b;
+        }
+
         [TestMethod]
         [TestCategory("Parameters")]
         public void ChangeValueParameterParameter()
@@ -121,6 +127,14 @@ namespace MethodLevelTest
             int a;
             AddO1(out a, 12);
             Assert.AreEqual(24, a);
+        }
+
+        [TestMethod]
+        [TestCategory("Parameters")]
+        public void AllParametersAtMethodLevel()
+        {
+            var r = Add2B(5, 8);
+            Assert.AreEqual(5 + 1 + 8 + 1 + 1, r);
         }
     }
 }
