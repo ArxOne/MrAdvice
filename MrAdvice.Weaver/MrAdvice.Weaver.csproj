@@ -63,6 +63,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\MrAdvice\Advice\IMethodWeavingAdvice.cs">
+      <Link>Advice\IMethodWeavingAdvice.cs</Link>
+    </Compile>
+    <Compile Include="..\MrAdvice\Advice\IWeavingAdvice.cs">
+      <Link>Advice\IWeavingAdvice.cs</Link>
+    </Compile>
+    <Compile Include="..\MrAdvice\Advice\Weaving\IMethodWeaverContext.cs">
+      <Link>Advice\Weaving\IMethodWeaverContext.cs</Link>
+    </Compile>
     <Compile Include="..\MrAdvice\Introduction\IntroductionRules.cs">
       <Link>Introduction\IntroductionRules.cs</Link>
     </Compile>
@@ -93,8 +102,10 @@
     <Compile Include="Weaver\AspectWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.Names.cs" />
     <Compile Include="Weaver\AspectWeaver.Weave.cs" />
+    <Compile Include="Weaver\AssemblyProvider.cs" />
     <Compile Include="Weaver\Binding.cs" />
     <Compile Include="IO\Logger.cs" />
+    <Compile Include="Weaver\LoadedAssembly.cs" />
     <Compile Include="Weaver\TypeResolver.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="Utility\GenericParameterExtensions.cs" />

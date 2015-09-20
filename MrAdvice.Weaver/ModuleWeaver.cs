@@ -89,8 +89,9 @@ public class ModuleWeaver
         Logger.LogInfo = LogInfo;
         Logger.LogWarning = LogWarning;
         Logger.LogError = LogError;
+        var assemblyProvider = new AssemblyProvider();
         var typeResolver = new TypeResolver { AssemblyResolver = AssemblyResolver };
-        var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver };
+        var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, AssemblyProvider = assemblyProvider };
         aspectWeaver.Weave(ModuleDefinition);
     }
 }
