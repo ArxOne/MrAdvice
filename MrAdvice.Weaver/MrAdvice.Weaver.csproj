@@ -78,7 +78,6 @@
     <Compile Include="..\MrAdvice\Properties\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
     </Compile>
-    <Compile Include="Advice\WeavingAdvice.cs" />
     <Compile Include="Annotation\MarkedNode.cs" />
     <Compile Include="Annotation\MarkerDefinition.cs" />
     <Compile Include="AuditTimer.cs" />
@@ -103,10 +102,8 @@
     <Compile Include="Weaver\AspectWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.Names.cs" />
     <Compile Include="Weaver\AspectWeaver.Weave.cs" />
-    <Compile Include="Weaver\WorkerAppDomainProvider.cs" />
     <Compile Include="Weaver\Binding.cs" />
     <Compile Include="IO\Logger.cs" />
-    <Compile Include="Weaver\WorkerAppDomain.cs" />
     <Compile Include="Weaver\TypeResolver.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="Utility\GenericParameterExtensions.cs" />

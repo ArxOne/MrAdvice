@@ -64,15 +64,6 @@ public class ModuleWeaver
     // ReSharper disable once MemberCanBePrivate.Global
     public IAssemblyResolver AssemblyResolver { get; set; }
 
-    /// <summary>
-    /// Gets or sets the assembly path.
-    /// For some unkown reason, Fody won't weave on some platforms (Vista + VS2010) if this property is missing
-    /// </summary>
-    /// <value>
-    /// The assembly path.
-    /// </value>
-    // ReSharper disable once UnusedMember.Global
-    public string AddinDirectoryPath { get; set; }
     public string AssemblyFilePath { get; set; }
     public string References { get; set; }
 
@@ -94,20 +85,17 @@ public class ModuleWeaver
         Logger.LogInfo = LogInfo;
         Logger.LogWarning = LogWarning;
         Logger.LogError = LogError;
-        var releaseWeaverPath = Path.Combine(AddinDirectoryPath, GetType().Assembly.GetName().Name + ".dll");
-        var weaverPath = File.Exists(releaseWeaverPath)
-            ? releaseWeaverPath
-            : Path.Combine(AddinDirectoryPath, "Weavers.dll");
-        Logger.Write("Assembly: {0}", AssemblyFilePath);
-        Logger.Write("References: {0}", References);
-        LoadAssemblies();
-        var workerAppDomainProvider = new WorkerAppDomainProvider { AssemblyResolver = AssemblyResolver, WeaverPath = weaverPath };
         var typeResolver = new TypeResolver { AssemblyResolver = AssemblyResolver };
-        var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, WorkerAppDomainProvider = workerAppDomainProvider };
-        aspectWeaver.Weave(ModuleDefinition);
+        var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver };
+        var weavedAssembly = LoadWeavedAssembly();
+        aspectWeaver.Weave(ModuleDefinition, weavedAssembly);
     }
 
-    private void LoadAssemblies()
+    /// <summary>
+    /// Loads the weaved assembly.
+    /// </summary>
+    /// <returns></returns>
+    private Assembly LoadWeavedAssembly()
     {
         foreach (var referencePath in References.Split(';'))
         {
@@ -122,6 +110,6 @@ public class ModuleWeaver
             }
         }
         var bytes = File.ReadAllBytes(AssemblyFilePath);
-        Assembly.Load(bytes);
+        return Assembly.Load(bytes);
     }
 }

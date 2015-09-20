@@ -9,11 +9,10 @@ namespace ArxOne.MrAdvice.Weaver
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Runtime.Versioning;
-    using Advice;
     using Annotation;
     using IO;
     using Mono.Cecil;
@@ -32,7 +31,6 @@ namespace ArxOne.MrAdvice.Weaver
     internal partial class AspectWeaver
     {
         public TypeResolver TypeResolver { get; set; }
-        public WorkerAppDomainProvider WorkerAppDomainProvider { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether all additional methods and fields are injected as prived.
@@ -47,7 +45,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified module definition.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        public void Weave(ModuleDefinition moduleDefinition)
+        /// <param name="assembly">The assembly being weaved.</param>
+        public void Weave(ModuleDefinition moduleDefinition, Assembly assembly)
         {
             var auditTimer = new AuditTimer();
             var stopwatch = new Stopwatch();
@@ -62,93 +61,71 @@ namespace ArxOne.MrAdvice.Weaver
                 return;
             }
 
-            // see if there are weaving advices, and if yes, keep them
-            //using (var loadedAssembly = UseWeavingAssembly(moduleDefinition))
+            // context
+            var types = new Types
             {
-                // context
-                var types = new Types
-                {
-                    CompilerGeneratedAttributeType = moduleDefinition.Import(typeof(CompilerGeneratedAttribute)),
-                    PriorityAttributeType =
-                        TypeResolver.Resolve(moduleDefinition, Binding.PriorityAttributeTypeName, true),
-                    AbstractTargetAttributeType =
-                        TypeResolver.Resolve(moduleDefinition, Binding.AbstractTargetAttributeTypeName, true)
-                };
+                CompilerGeneratedAttributeType = moduleDefinition.Import(typeof(CompilerGeneratedAttribute)),
+                PriorityAttributeType =
+                    TypeResolver.Resolve(moduleDefinition, Binding.PriorityAttributeTypeName, true),
+                AbstractTargetAttributeType =
+                    TypeResolver.Resolve(moduleDefinition, Binding.AbstractTargetAttributeTypeName, true)
+            };
 
-                // runtime check
-                auditTimer.NewZone("Runtime check");
-                var targetFramework = GetTargetFramework(moduleDefinition);
-                InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
+            // runtime check
+            auditTimer.NewZone("Runtime check");
+            var targetFramework = GetTargetFramework(moduleDefinition);
+            InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
 
-                //Logger.WriteDebug("t1: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+            //Logger.WriteDebug("t1: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
-                // weave methods (they can be property-related, too)
-                auditTimer.NewZone("Weavable methods detection");
-                var weavableMethods =
-                    GetMarkedMethods(moduleDefinition, adviceInterface, types).Where(IsWeavable).ToArray();
-                auditTimer.NewZone("Abstract targets");
-                var generatedFieldsToBeRemoved = new List<FieldReference>();
-                var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
-                if (methodsWithAbstractTarget.Length > 0)
-                {
-                    generatedFieldsToBeRemoved.AddRange(GetRemovableFields(methodsWithAbstractTarget, types));
-                    foreach (var fieldReference in generatedFieldsToBeRemoved)
-                        Logger.WriteDebug("Field {0} to be removed", fieldReference.FullName);
-                }
-                auditTimer.NewZone("Methods weaving");
-                weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
-
-                auditTimer.NewZone("Weavable interfaces detection");
-                var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
-                auditTimer.NewZone("Interface methods weaving");
-                weavableInterfaces.AsParallel().ForAll(i => WeaveInterface(moduleDefinition, i));
-
-                //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
-
-                // and then, the info advices
-                auditTimer.NewZone("Info advices weaving");
-                var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName, true);
-                moduleDefinition.GetTypes()
-                    .AsParallel()
-                    .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
-
-                auditTimer.NewZone("Abstract targets cleanup");
-                foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
-                    generatedFieldToBeRemoved.DeclaringType.Resolve().Fields.Remove(generatedFieldToBeRemoved.Resolve());
-
-                auditTimer.LastZone();
-
-                //Logger.WriteDebug("t3: {0}ms", (int)stopwatch.ElapsedMilliseconds);
-
-                var report = auditTimer.GetReport();
-                var maxLength = report.Keys.Max(k => k.Length);
-                Logger.WriteDebug("--- Timings --------------------------");
-                foreach (var reportPart in report)
-                    Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength),
-                        (int)reportPart.Value.TotalMilliseconds);
-                Logger.WriteDebug("--------------------------------------");
-
-                Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
-                    moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
-            }
-        }
-
-        private WorkerAppDomain<WeavingAdvice> UseWeavingAssembly(ModuleDefinition moduleDefinition)
-        {
-            var weavingAdvice = TypeResolver.Resolve(moduleDefinition, typeof(IWeavingAdvice).FullName, true);
-            if (weavingAdvice == null)
+            // weave methods (they can be property-related, too)
+            auditTimer.NewZone("Weavable methods detection");
+            var weavableMethods =
+                GetMarkedMethods(moduleDefinition, adviceInterface, types).Where(IsWeavable).ToArray();
+            auditTimer.NewZone("Abstract targets");
+            var generatedFieldsToBeRemoved = new List<FieldReference>();
+            var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
+            if (methodsWithAbstractTarget.Length > 0)
             {
-                Logger.Write("No weaving advice found, assembly not loaded as weaving advice provider");
-                return null;
+                generatedFieldsToBeRemoved.AddRange(GetRemovableFields(methodsWithAbstractTarget, types));
+                foreach (var fieldReference in generatedFieldsToBeRemoved)
+                    Logger.WriteDebug("Field {0} to be removed", fieldReference.FullName);
             }
+            auditTimer.NewZone("Methods weaving");
+            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
 
-            var workerAppDomain = WorkerAppDomainProvider.Load<WeavingAdvice>(moduleDefinition.Assembly);
-            if (workerAppDomain == null)
-                Logger.WriteError("Can't load assembly");
-            else
-                Logger.WriteWarning("Loaded assembly");
+            auditTimer.NewZone("Weavable interfaces detection");
+            var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
+            auditTimer.NewZone("Interface methods weaving");
+            weavableInterfaces.AsParallel().ForAll(i => WeaveInterface(moduleDefinition, i));
 
-            return workerAppDomain;
+            //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+
+            // and then, the info advices
+            auditTimer.NewZone("Info advices weaving");
+            var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName, true);
+            moduleDefinition.GetTypes()
+                .AsParallel()
+                .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
+
+            auditTimer.NewZone("Abstract targets cleanup");
+            foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
+                generatedFieldToBeRemoved.DeclaringType.Resolve().Fields.Remove(generatedFieldToBeRemoved.Resolve());
+
+            auditTimer.LastZone();
+
+            //Logger.WriteDebug("t3: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+
+            var report = auditTimer.GetReport();
+            var maxLength = report.Keys.Max(k => k.Length);
+            Logger.WriteDebug("--- Timings --------------------------");
+            foreach (var reportPart in report)
+                Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength),
+                    (int)reportPart.Value.TotalMilliseconds);
+            Logger.WriteDebug("--------------------------------------");
+
+            Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
+                moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
         }
 
         private IEnumerable<FieldDefinition> GetRemovableFields(IList<MarkedNode> nodes, Types types)
