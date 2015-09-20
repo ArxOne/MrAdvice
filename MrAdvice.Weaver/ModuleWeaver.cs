@@ -6,6 +6,8 @@
 #endregion
 
 using System;
+using System.IO;
+using System.Reflection;
 using ArxOne.MrAdvice.IO;
 using ArxOne.MrAdvice.Weaver;
 using Mono.Cecil;
@@ -70,7 +72,10 @@ public class ModuleWeaver
     /// The assembly path.
     /// </value>
     // ReSharper disable once UnusedMember.Global
-    public string AssemblyPath { get; set; }
+    public string AddinDirectoryPath { get; set; }
+    public string AssemblyFilePath { get; set; }
+    public string References { get; set; }
+
 
     public ModuleWeaver()
     {
@@ -89,9 +94,34 @@ public class ModuleWeaver
         Logger.LogInfo = LogInfo;
         Logger.LogWarning = LogWarning;
         Logger.LogError = LogError;
-        var assemblyProvider = new AssemblyProvider();
+        var releaseWeaverPath = Path.Combine(AddinDirectoryPath, GetType().Assembly.GetName().Name + ".dll");
+        var weaverPath = File.Exists(releaseWeaverPath)
+            ? releaseWeaverPath
+            : Path.Combine(AddinDirectoryPath, "Weavers.dll");
+        Logger.Write("Assembly: {0}", AssemblyFilePath);
+        Logger.Write("References: {0}", References);
+        LoadAssemblies();
+        var workerAppDomainProvider = new WorkerAppDomainProvider { AssemblyResolver = AssemblyResolver, WeaverPath = weaverPath };
         var typeResolver = new TypeResolver { AssemblyResolver = AssemblyResolver };
-        var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, AssemblyProvider = assemblyProvider };
+        var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, WorkerAppDomainProvider = workerAppDomainProvider };
         aspectWeaver.Weave(ModuleDefinition);
+    }
+
+    private void LoadAssemblies()
+    {
+        foreach (var referencePath in References.Split(';'))
+        {
+            try
+            {
+                var referenceBytes = File.ReadAllBytes(referencePath);
+                Assembly.Load(referenceBytes);
+            }
+            catch (Exception e)
+            {
+                Logger.WriteWarning("Error while loading {0}: {1}", referencePath, e.GetType().Name);
+            }
+        }
+        var bytes = File.ReadAllBytes(AssemblyFilePath);
+        Assembly.Load(bytes);
     }
 }

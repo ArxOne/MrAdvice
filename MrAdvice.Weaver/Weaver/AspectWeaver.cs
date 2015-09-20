@@ -32,7 +32,7 @@ namespace ArxOne.MrAdvice.Weaver
     internal partial class AspectWeaver
     {
         public TypeResolver TypeResolver { get; set; }
-        public AssemblyProvider AssemblyProvider { get; set; }
+        public WorkerAppDomainProvider WorkerAppDomainProvider { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether all additional methods and fields are injected as prived.
@@ -63,7 +63,7 @@ namespace ArxOne.MrAdvice.Weaver
             }
 
             // see if there are weaving advices, and if yes, keep them
-            using (var loadedAssembly = UseWeavingAssembly(moduleDefinition))
+            //using (var loadedAssembly = UseWeavingAssembly(moduleDefinition))
             {
                 // context
                 var types = new Types
@@ -133,23 +133,22 @@ namespace ArxOne.MrAdvice.Weaver
             }
         }
 
-        private LoadedAssembly UseWeavingAssembly(ModuleDefinition moduleDefinition)
+        private WorkerAppDomain<WeavingAdvice> UseWeavingAssembly(ModuleDefinition moduleDefinition)
         {
-            var weavingAdvice = TypeResolver.Resolve(moduleDefinition, typeof (IWeavingAdvice).FullName, true);
+            var weavingAdvice = TypeResolver.Resolve(moduleDefinition, typeof(IWeavingAdvice).FullName, true);
             if (weavingAdvice == null)
             {
                 Logger.Write("No weaving advice found, assembly not loaded as weaving advice provider");
                 return null;
             }
-            return null;
 
-            var a = AssemblyProvider.Load(moduleDefinition.Assembly);
-            if (a == null)
+            var workerAppDomain = WorkerAppDomainProvider.Load<WeavingAdvice>(moduleDefinition.Assembly);
+            if (workerAppDomain == null)
                 Logger.WriteError("Can't load assembly");
             else
-                Logger.WriteWarning("Loaded assembly {0}", a.FullName);
+                Logger.WriteWarning("Loaded assembly");
 
-            return null;
+            return workerAppDomain;
         }
 
         private IEnumerable<FieldDefinition> GetRemovableFields(IList<MarkedNode> nodes, Types types)
