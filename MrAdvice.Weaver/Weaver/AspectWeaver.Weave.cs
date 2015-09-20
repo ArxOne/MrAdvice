@@ -89,7 +89,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="types">The types.</param>
-        private void WeaveAdvices(MarkedNode markedMethod, Types types)
+        /// <param name="targetAssembly">The target assembly.</param>
+        private void WeaveAdvices(MarkedNode markedMethod, Types types, Assembly targetAssembly)
         {
             var method = markedMethod.Node.Method;
             if (method.IsAbstract)
@@ -107,10 +108,21 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 Logger.WriteDebug("Weaving method '{0}'", method.FullName);
 
-                var weavingAdvices = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
-                if (weavingAdvices.Any())
+                var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
+                if (weavingAdvicesMarkers.Any())
                 {
-                    Logger.WriteDebug("{0} weaving advice(s) {1}", weavingAdvices.Length, types.WeavingAdviceAttributeType.FullName);
+                    foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
+                    {
+                        var weavingAdviceType = targetAssembly.GetType(weavingAdviceMarker.Type);
+                        var weavingAdvice = (IWeavingAdvice)Activator.CreateInstance(weavingAdviceType);
+                        var methodWeavingAdvice = weavingAdvice as IMethodWeavingAdvice;
+                        if (methodWeavingAdvice != null)
+                        {
+                            var typeDefinition = markedMethod.Node.Method.DeclaringType;
+                            var initialType = targetAssembly.GetType(typeDefinition);
+                            methodWeavingAdvice.Advise(new WeaverMethodWeavingContext(typeDefinition, initialType));
+                        }
+                    }
                 }
 
                 // create inner method
@@ -379,12 +391,13 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="types">The types.</param>
-        private void WeaveMethod(ModuleDefinition moduleDefinition, MarkedNode markedMethod, TypeDefinition adviceInterface, Types types)
+        /// <param name="targetAssembly">The target assembly.</param>
+        private void WeaveMethod(ModuleDefinition moduleDefinition, MarkedNode markedMethod, TypeDefinition adviceInterface, Types types, Assembly targetAssembly)
         {
             var method = markedMethod.Node.Method;
             try
             {
-                WeaveAdvices(markedMethod, types);
+                WeaveAdvices(markedMethod, types, targetAssembly);
                 WeaveIntroductions(method, adviceInterface, moduleDefinition, types);
             }
             catch (Exception e)

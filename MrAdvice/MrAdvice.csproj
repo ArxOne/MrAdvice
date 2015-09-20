@@ -68,7 +68,8 @@
     <Compile Include="Advice\AdvisedInterface.cs" />
     <Compile Include="Advice\IMethodWeavingAdvice.cs" />
     <Compile Include="Advice\IWeavingAdvice.cs" />
-    <Compile Include="Advice\Weaving\IMethodWeaverContext.cs" />
+    <Compile Include="Advice\MethodWeavingContext.cs" />
+    <Compile Include="Advice\WeavingContext.cs" />
     <Compile Include="Annotation\AbstractTargetAttribute.cs" />
     <Compile Include="Aspect\AdviceInfo.cs" />
     <Compile Include="Advice\AdviceContext.cs" />

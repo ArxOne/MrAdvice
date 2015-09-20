@@ -87,6 +87,7 @@
     <Compile Include="Reflection\Groups\TypeReflectionNode.cs" />
     <Compile Include="Reflection\TargetFramework.cs" />
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
+    <Compile Include="Utility\AssemblyExtensions.cs" />
     <Compile Include="Utility\EnumerableExtensions.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />
     <Compile Include="Utility\PropertyDefinitionExtensions.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Weaver\Instructions.cs" />
     <Compile Include="Utility\TypeReferenceExtensions.cs" />
     <Compile Include="Weaver\Types.cs" />
+    <Compile Include="Weaver\WeaverMethodWeavingContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
@@ -140,8 +142,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MrAdvice\MrAdvice.csproj">
-      <Project>{3c764938-4c4a-4128-b20f-97ef2ed4a49b}</Project>
+      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
       <Name>MrAdvice</Name>
+      <Private>True</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -174,4 +178,9 @@ if not "$(ConfigurationName)"=="Release" goto :noRelease
   </PropertyGroup>
   <Import Project="..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets" Condition="Exists('..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets')" />
   <Import Project="..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets')" />
+  <PropertyGroup>
+    <PreBuildEvent>set weaversDir="$(SolutionDir)\Weavers\bin\$(ConfigurationName)"
+if exist %25weaversDir%25 del %25weaversDir%25\Weavers.dll /S
+</PreBuildEvent>
+  </PropertyGroup>
 </Project>

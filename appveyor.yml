@@ -5,7 +5,6 @@ version: '{branch}-{build}'
 branches:
   only:
     - master
-    - weaving-advice
 
 before_build:
   nuget restore MrAdvice.sln

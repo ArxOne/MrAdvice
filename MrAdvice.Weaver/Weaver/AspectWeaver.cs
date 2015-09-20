@@ -47,8 +47,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified module definition.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="assembly">The assembly being weaved.</param>
-        public void Weave(ModuleDefinition moduleDefinition, Assembly assembly)
+        /// <param name="targetAssembly">The target assembly.</param>
+        public void Weave(ModuleDefinition moduleDefinition, Assembly targetAssembly)
         {
             var auditTimer = new AuditTimer();
             var stopwatch = new Stopwatch();
@@ -92,7 +92,7 @@ namespace ArxOne.MrAdvice.Weaver
                     Logger.WriteDebug("Field {0} to be removed", fieldReference.FullName);
             }
             auditTimer.NewZone("Methods weaving");
-            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
+            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types, targetAssembly));
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();

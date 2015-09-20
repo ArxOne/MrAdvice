@@ -9,7 +9,6 @@ namespace MethodLevelTest
 {
     using System;
     using ArxOne.MrAdvice.Advice;
-    using ArxOne.MrAdvice.Advice.Weaving;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -17,8 +16,9 @@ namespace MethodLevelTest
     {
         public class MethodWeavingAdvice : Attribute, IMethodWeavingAdvice
         {
-            public void Advise(IMethodWeaverContext context)
+            public void Advise(MethodWeavingContext context)
             {
+                throw new NotImplementedException();
             }
         }
 

@@ -7,8 +7,6 @@
 
 namespace ArxOne.MrAdvice.Advice
 {
-    using Weaving;
-
     /// <summary>
     /// Advice when weaving method
     /// </summary>
@@ -18,6 +16,6 @@ namespace ArxOne.MrAdvice.Advice
         /// Advises the specified context.
         /// </summary>
         /// <param name="context">The context.</param>
-        void Advise(IMethodWeaverContext context);
+        void Advise(MethodWeavingContext context);
     }
 }
