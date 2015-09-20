@@ -6,6 +6,7 @@
 #endregion
 namespace ArxOne.MrAdvice.Weaver
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Mono.Cecil;
@@ -32,9 +33,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="fullName">The full name.</param>
-        /// <param name="ignoreSystem">if set to <c>true</c> [ignore system].</param>
         /// <returns></returns>
-        public TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName, bool ignoreSystem)
+        public TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName)
         {
             lock (_resolvedTypes)
             {
@@ -46,7 +46,7 @@ namespace ArxOne.MrAdvice.Weaver
                 // - level 0: the assembly where advices are injected
                 // - level 1: the assembly containing the advice
                 // - level 2: the advices dependencies
-                _resolvedTypes[fullName] = typeDefinition = Resolve(moduleDefinition, fullName, ignoreSystem, 2);
+                _resolvedTypes[fullName] = typeDefinition = Resolve(moduleDefinition, fullName, true, 2);
                 return typeDefinition;
             }
         }
@@ -66,6 +66,17 @@ namespace ArxOne.MrAdvice.Weaver
                     .AsParallel()
                     .FirstOrDefault(t => t.FullName == fullName))
                 .FirstOrDefault(foundType => foundType != null);
+        }
+
+        /// <summary>
+        /// Resolves the specified type to Cecil.
+        /// </summary>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        public TypeDefinition Resolve(ModuleDefinition moduleDefinition, Type type)
+        {
+            return Resolve(moduleDefinition, type.FullName);
         }
     }
 }

@@ -15,6 +15,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Runtime.Versioning;
     using Advice;
     using Annotation;
+    using Introduction;
     using IO;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
@@ -55,7 +56,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // sanity check
             auditTimer.NewZone("IAdvice location");
-            var adviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IAdvice).FullName, true);
+            var adviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IAdvice));
             if (adviceInterface == null)
             {
                 Logger.WriteWarning("IAdvice interface not found here (not referenced means not used), exiting");
@@ -66,9 +67,9 @@ namespace ArxOne.MrAdvice.Weaver
             var types = new Types
             {
                 CompilerGeneratedAttributeType = moduleDefinition.Import(typeof(CompilerGeneratedAttribute)),
-                PriorityAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.PriorityAttributeTypeName, true),
-                AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.AbstractTargetAttributeTypeName, true),
-                WeavingAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.WeavingAdviceInterfaceName, true)
+                PriorityAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(PriorityAttribute)),
+                AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(AbstractTargetAttribute)),
+                WeavingAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(IWeavingAdvice))
             };
 
             // runtime check
@@ -102,7 +103,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // and then, the info advices
             auditTimer.NewZone("Info advices weaving");
-            var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName, true);
+            var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IInfoAdvice));
             moduleDefinition.GetTypes()
                 .AsParallel()
                 .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
@@ -203,7 +204,7 @@ namespace ArxOne.MrAdvice.Weaver
             }
 
             var genericAdviceMemberTypeReference = (GenericInstanceType)adviceMemberTypeReference;
-            if (genericAdviceMemberTypeReference.GetElementType().FullName != Binding.IntroducedFieldTypeName)
+            if (genericAdviceMemberTypeReference.GetElementType().FullName != typeof(IntroducedField<>).FullName)
             {
                 introducedFieldType = null;
                 return false;
@@ -222,8 +223,8 @@ namespace ArxOne.MrAdvice.Weaver
         private IEnumerable<TypeReference> GetAdviceHandledInterfaces(ModuleDefinition moduleDefinition)
         {
             // the first method to look for in the final AdviceExtensions.Handle<>() method
-            var adviceExtensionsType = TypeResolver.Resolve(moduleDefinition, Binding.AdviceExtensionsTypeName, true);
-            var adviceHandleMethod = adviceExtensionsType.GetMethods().Single(m => m.IsPublic && m.HasGenericParameters && m.Name == Binding.AdviceHandleMethodName);
+            var adviceExtensionsType = TypeResolver.Resolve(moduleDefinition, typeof(AdviceExtensions));
+            var adviceHandleMethod = adviceExtensionsType.GetMethods().Single(m => m.IsPublic && m.HasGenericParameters && m.Name == nameof(AdviceExtensions.Handle));
             var methodsSearched = new HashSet<MethodReference>(new MethodReferenceComparer()) { adviceHandleMethod };
             var foundHandledInterfaces = new HashSet<TypeReference>(new TypeReferenceComparer());
             var methodsToSearch = new List<Tuple<MethodDefinition, int>> { Tuple.Create(adviceHandleMethod, 0) };

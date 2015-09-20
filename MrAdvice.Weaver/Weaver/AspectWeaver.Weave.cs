@@ -11,6 +11,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Linq;
     using System.Reflection;
     using System.Runtime.InteropServices;
+    using Advice;
     using Annotation;
     using Introduction;
     using IO;
@@ -36,11 +37,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="useWholeAssembly">if set to <c>true</c> [use whole assembly].</param>
         private void WeaveInfoAdvices(TypeDefinition infoAdvisedType, ModuleDefinition moduleDefinition, bool useWholeAssembly)
         {
-            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName, true);
+            var invocationType = TypeResolver.Resolve(moduleDefinition, typeof(Invocation));
             if (invocationType == null)
                 return;
             var proceedRuntimeInitializersReference = (from m in invocationType.GetMethods()
-                                                       where m.IsStatic && m.Name == Binding.InvocationProcessInfoAdvicesMethodName
+                                                       where m.IsStatic && m.Name == nameof(Invocation.ProcessInfoAdvices)
                                                        let parameters = m.Parameters
                                                        where parameters.Count == 1
                                                              && parameters[0].ParameterType.SafeEquivalent(
@@ -109,7 +110,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var weavingAdvices = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
                 if (weavingAdvices.Any())
                 {
-                    Logger.WriteDebug("{0} weaving advice(s) {1}", weavingAdvices.Length,types.WeavingAdviceAttributeType.FullName);
+                    Logger.WriteDebug("{0} weaving advice(s) {1}", weavingAdvices.Length, types.WeavingAdviceAttributeType.FullName);
                 }
 
                 // create inner method
@@ -295,10 +296,10 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Ldnull);
 
             // invoke the method
-            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName, true);
+            var invocationType = TypeResolver.Resolve(moduleDefinition, typeof(Invocation));
             if (invocationType == null)
                 throw new InvalidOperationException();
-            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedAdviceMethodName);
+            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
             if (proceedMethodReference == null)
                 throw new InvalidOperationException();
             var proceedMethod = moduleDefinition.SafeImport(proceedMethodReference);
@@ -343,7 +344,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var typeDefinition = method.DeclaringType;
             var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface, types);
-            var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, Binding.IntroducedFieldAttributeName, true)
+            var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, typeof(IntroducedFieldAttribute))
                 .GetConstructors().Single());
             foreach (var advice in advices)
             {
@@ -418,7 +419,7 @@ namespace ArxOne.MrAdvice.Weaver
                 // now, create the implementation type
                 interfaceTypeDefinition = interfaceType.Resolve();
                 var typeAttributes = (InjectAsPrivate ? TypeAttributes.NotPublic : TypeAttributes.Public) | TypeAttributes.Class | TypeAttributes.BeforeFieldInit;
-                advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, Binding.AdvisedInterfaceTypeName, true);
+                advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(AdvisedInterface));
                 var advisedInterfaceTypeReference = moduleDefinition.SafeImport(advisedInterfaceType);
                 implementationType = new TypeDefinition(implementationTypeNamespace, implementationTypeName, typeAttributes, advisedInterfaceTypeReference);
 
