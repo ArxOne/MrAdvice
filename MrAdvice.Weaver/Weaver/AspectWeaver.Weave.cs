@@ -109,7 +109,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var weavingAdvices = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
                 if (weavingAdvices.Any())
                 {
-                    Logger.Write("{0} weaving advice(s) {1}", weavingAdvices.Length,types.WeavingAdviceAttributeType.FullName);
+                    Logger.WriteDebug("{0} weaving advice(s) {1}", weavingAdvices.Length,types.WeavingAdviceAttributeType.FullName);
                 }
 
                 // create inner method

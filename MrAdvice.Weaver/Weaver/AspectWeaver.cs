@@ -13,6 +13,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Runtime.Versioning;
+    using Advice;
     using Annotation;
     using IO;
     using Mono.Cecil;
@@ -54,7 +55,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // sanity check
             auditTimer.NewZone("IAdvice location");
-            var adviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName, true);
+            var adviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IAdvice).FullName, true);
             if (adviceInterface == null)
             {
                 Logger.WriteWarning("IAdvice interface not found here (not referenced means not used), exiting");
