@@ -22,6 +22,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// This is used to identify attributes that advice at load-time (in type .cctor).
         /// </summary>
         public const string InfoAdviceInterfaceName = "ArxOne.MrAdvice.Advice.IInfoAdvice";
+        /// <summary>
+        /// The weaving advice interface name.
+        /// This is used to dynamically weave interfaces
+        /// </summary>
+        public const string WeavingAdviceInterfaceName = "ArxOne.MrAdvice.Advice.IWeavingAdvice";
 
         /// <summary>
         /// Full name of AdviceExtensions interface

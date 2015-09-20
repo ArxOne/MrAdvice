@@ -35,6 +35,13 @@ namespace IntegrityTest
         }
         [TestMethod]
         [TestCategory("Integrity")]
+        public void WeavingAdviceInterfaceNameTest()
+        {
+            var weavingAdviceType = typeof(IWeavingAdvice);
+            Assert.AreEqual(weavingAdviceType.FullName, Binding.WeavingAdviceInterfaceName);
+        }
+        [TestMethod]
+        [TestCategory("Integrity")]
         public void IntroducedFieldTypeNameTest()
         {
             var introducedFieldType = typeof(IntroducedField<>);

@@ -87,7 +87,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified method.
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
-        private void WeaveAdvices(MarkedNode markedMethod)
+        /// <param name="types">The types.</param>
+        private void WeaveAdvices(MarkedNode markedMethod, Types types)
         {
             var method = markedMethod.Node.Method;
             if (method.IsAbstract)
@@ -104,6 +105,12 @@ namespace ArxOne.MrAdvice.Weaver
             else
             {
                 Logger.WriteDebug("Weaving method '{0}'", method.FullName);
+
+                var weavingAdvices = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
+                if (weavingAdvices.Any())
+                {
+                    Logger.Write("{0} weaving advice(s) {1}", weavingAdvices.Length,types.WeavingAdviceAttributeType.FullName);
+                }
 
                 // create inner method
                 const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PInvokeImpl |
@@ -376,7 +383,7 @@ namespace ArxOne.MrAdvice.Weaver
             var method = markedMethod.Node.Method;
             try
             {
-                WeaveAdvices(markedMethod);
+                WeaveAdvices(markedMethod, types);
                 WeaveIntroductions(method, adviceInterface, moduleDefinition, types);
             }
             catch (Exception e)

@@ -63,15 +63,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\MrAdvice\Advice\IMethodWeavingAdvice.cs">
-      <Link>Advice\IMethodWeavingAdvice.cs</Link>
-    </Compile>
-    <Compile Include="..\MrAdvice\Advice\IWeavingAdvice.cs">
-      <Link>Advice\IWeavingAdvice.cs</Link>
-    </Compile>
-    <Compile Include="..\MrAdvice\Advice\Weaving\IMethodWeaverContext.cs">
-      <Link>Advice\Weaving\IMethodWeaverContext.cs</Link>
-    </Compile>
     <Compile Include="..\MrAdvice\Introduction\IntroductionRules.cs">
       <Link>Introduction\IntroductionRules.cs</Link>
     </Compile>

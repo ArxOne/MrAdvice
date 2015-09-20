@@ -12,7 +12,7 @@ namespace ArxOne.MrAdvice.Advice
     /// <summary>
     /// Advice when weaving method
     /// </summary>
-    public interface IMethodWeavingAdvice
+    public interface IMethodWeavingAdvice: IWeavingAdvice
     {
         /// <summary>
         /// Advises the specified context.

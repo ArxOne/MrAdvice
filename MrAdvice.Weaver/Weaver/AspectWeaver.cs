@@ -65,10 +65,9 @@ namespace ArxOne.MrAdvice.Weaver
             var types = new Types
             {
                 CompilerGeneratedAttributeType = moduleDefinition.Import(typeof(CompilerGeneratedAttribute)),
-                PriorityAttributeType =
-                    TypeResolver.Resolve(moduleDefinition, Binding.PriorityAttributeTypeName, true),
-                AbstractTargetAttributeType =
-                    TypeResolver.Resolve(moduleDefinition, Binding.AbstractTargetAttributeTypeName, true)
+                PriorityAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.PriorityAttributeTypeName, true),
+                AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.AbstractTargetAttributeTypeName, true),
+                WeavingAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.WeavingAdviceInterfaceName, true)
             };
 
             // runtime check
@@ -80,8 +79,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
-            var weavableMethods =
-                GetMarkedMethods(moduleDefinition, adviceInterface, types).Where(IsWeavable).ToArray();
+            var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface, types).Where(IsWeavable).ToArray();
             auditTimer.NewZone("Abstract targets");
             var generatedFieldsToBeRemoved = new List<FieldReference>();
             var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();

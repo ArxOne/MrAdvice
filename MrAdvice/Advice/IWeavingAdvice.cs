@@ -10,7 +10,7 @@ namespace ArxOne.MrAdvice.Advice
     /// <summary>
     /// Advice to weaver
     /// </summary>
-    public interface IWeavingAdvice
+    public interface IWeavingAdvice: IAdvice
     {
     }
 }
