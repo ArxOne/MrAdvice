@@ -108,21 +108,27 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 Logger.WriteDebug("Weaving method '{0}'", method.FullName);
 
+                var methodName = method.Name;
+
+                // our special recipe, with weaving advices
                 var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
                 if (weavingAdvicesMarkers.Any())
                 {
+                    var typeDefinition = markedMethod.Node.Method.DeclaringType;
+                    var initialType = targetAssembly.GetType(typeDefinition);
+                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, types);
                     foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
                     {
                         var weavingAdviceType = targetAssembly.GetType(weavingAdviceMarker.Type);
                         var weavingAdvice = (IWeavingAdvice)Activator.CreateInstance(weavingAdviceType);
                         var methodWeavingAdvice = weavingAdvice as IMethodWeavingAdvice;
-                        if (methodWeavingAdvice != null)
+                        if (methodWeavingAdvice != null && !method.IsGetter && !method.IsSetter)
                         {
-                            var typeDefinition = markedMethod.Node.Method.DeclaringType;
-                            var initialType = targetAssembly.GetType(typeDefinition);
-                            methodWeavingAdvice.Advise(new WeaverMethodWeavingContext(typeDefinition, initialType));
+                            methodWeavingAdvice.Advise(weaverMethodWeavingContext);
                         }
                     }
+                    if (weaverMethodWeavingContext.TargetMethodName != methodName)
+                        methodName = method.Name = weaverMethodWeavingContext.TargetMethodName;
                 }
 
                 // create inner method
@@ -133,11 +139,11 @@ namespace ArxOne.MrAdvice.Weaver
                                             (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public);
                 string innerMethodName;
                 if (method.IsGetter)
-                    innerMethodName = GetPropertyInnerGetterName(GetPropertyName(method.Name));
+                    innerMethodName = GetPropertyInnerGetterName(GetPropertyName(methodName));
                 else if (method.IsSetter)
-                    innerMethodName = GetPropertyInnerSetterName(GetPropertyName(method.Name));
+                    innerMethodName = GetPropertyInnerSetterName(GetPropertyName(methodName));
                 else
-                    innerMethodName = GetInnerMethodName(method.Name);
+                    innerMethodName = GetInnerMethodName(methodName);
                 var innerMethod = new MethodDefinition(innerMethodName, innerMethodAttributes, method.ReturnType);
                 innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
                 innerMethod.ImplAttributes = method.ImplAttributes;

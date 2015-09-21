@@ -23,11 +23,14 @@ namespace ArxOne.MrAdvice.Advice
         public string TargetMethodName { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MethodWeavingContext"/> class.
+        /// Initializes a new instance of the <see cref="MethodWeavingContext" /> class.
         /// </summary>
         /// <param name="type">The type.</param>
-        protected MethodWeavingContext(Type type)
+        /// <param name="targetMethodName">Name of the target method.</param>
+        protected MethodWeavingContext(Type type, string targetMethodName)
             : base(type)
-        { }
+        {
+            TargetMethodName = targetMethodName;
+        }
     }
 }

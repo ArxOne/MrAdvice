@@ -18,11 +18,15 @@ namespace MethodLevelTest
         {
             public void Advise(MethodWeavingContext context)
             {
+                context.AddPublicAutoProperty(context.TargetMethodName + "_Friend", typeof(string));
+                context.TargetMethodName += "_Renamed";
             }
         }
 
         public class WeavingAdvisedClass
         {
+            public string CompilerAutoProperty { get; set; }
+
             [MethodWeavingAdvice]
             public void WeavingAdvisedMethod()
             {
@@ -33,7 +37,8 @@ namespace MethodLevelTest
         [TestCategory("Weaving")]
         public void SimpleWeavingAdviceTest()
         {
-            var c=new WeavingAdvisedClass();
+            var c = new WeavingAdvisedClass();
+            c.WeavingAdvisedMethod();
         }
     }
 }

@@ -35,7 +35,8 @@ namespace ArxOne.MrAdvice.Advice
         /// Adds the public automatic property.
         /// </summary>
         /// <param name="name">The name.</param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public abstract bool AddPublicAutoProperty(string name);
+        public abstract bool AddPublicAutoProperty(string name, Type type);
     }
 }
