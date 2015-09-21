@@ -115,15 +115,11 @@
     <None Include="..\MrAdvice\Properties\ProductInfoValues.tt">
       <Link>Properties\ProductInfoValues.tt</Link>
     </None>
-    <None Include="NuGet\tools\install.ps1" />
-    <None Include="NuGet\tools\uninstall.ps1" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NuGet\content\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
