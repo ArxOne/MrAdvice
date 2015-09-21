@@ -7,6 +7,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using ArxOne.MrAdvice.IO;
 using ArxOne.MrAdvice.Weaver;
@@ -64,9 +65,21 @@ public class ModuleWeaver
     // ReSharper disable once MemberCanBePrivate.Global
     public IAssemblyResolver AssemblyResolver { get; set; }
 
+    /// <summary>
+    /// Gets or sets the assembly file path (injected by Fody).
+    /// </summary>
+    /// <value>
+    /// The assembly file path.
+    /// </value>
     public string AssemblyFilePath { get; set; }
-    public string References { get; set; }
 
+    /// <summary>
+    /// Gets or sets the references (injected by Fody).
+    /// </summary>
+    /// <value>
+    /// The references.
+    /// </value>
+    public string References { get; set; }
 
     public ModuleWeaver()
     {
@@ -101,6 +114,10 @@ public class ModuleWeaver
         {
             try
             {
+                var fileName = Path.GetFileName(referencePath);
+                // right, this is dirty!
+                if (fileName == "MrAdvice.dll" && AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "MrAdvice"))
+                    continue;
                 var referenceBytes = File.ReadAllBytes(referencePath);
                 Assembly.Load(referenceBytes);
             }

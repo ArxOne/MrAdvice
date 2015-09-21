@@ -13,15 +13,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A667E5
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrityTest", "Test\IntegrityTest\IntegrityTest.csproj", "{492263E1-7372-47C4-BD57-14A70BB028F0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B300CC88-B778-4543-AE8B-86D456BE88D7} = {B300CC88-B778-4543-AE8B-86D456BE88D7}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodLevelTest", "Test\MethodLevelTest\MethodLevelTest.csproj", "{77928F8C-A708-4C49-B6E2-772256E75E4D}"
 	ProjectSection(ProjectDependencies) = postProject
-		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
+		{B300CC88-B778-4543-AE8B-86D456BE88D7} = {B300CC88-B778-4543-AE8B-86D456BE88D7}
 	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VBMethodLevelTest", "Test\VBMethodLevelTest\VBMethodLevelTest.vbproj", "{27F8E96F-59E0-4980-9790-F436C9532BA0}"
 	ProjectSection(ProjectDependencies) = postProject
-		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
+		{B300CC88-B778-4543-AE8B-86D456BE88D7} = {B300CC88-B778-4543-AE8B-86D456BE88D7}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{2585663B-1557-4E4C-A020-19FF5FE94D4F}"
@@ -46,13 +49,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F3046528
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalAdvices", "Test\ExternalAdvices\ExternalAdvices.csproj", "{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B300CC88-B778-4543-AE8B-86D456BE88D7} = {B300CC88-B778-4543-AE8B-86D456BE88D7}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalAdviceTest", "Test\ExternalAdviceTest\ExternalAdviceTest.csproj", "{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9}"
 	ProjectSection(ProjectDependencies) = postProject
-		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
+		{B300CC88-B778-4543-AE8B-86D456BE88D7} = {B300CC88-B778-4543-AE8B-86D456BE88D7}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblyLevelTest", "Test\AssemblyLevelTest\AssemblyLevelTest.csproj", "{8B8EB6C4-78BC-442D-86B1-3E8E09DCF21F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B300CC88-B778-4543-AE8B-86D456BE88D7} = {B300CC88-B778-4543-AE8B-86D456BE88D7}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Fody", "MrAdvice.Fody\MrAdvice.Fody.csproj", "{B300CC88-B778-4543-AE8B-86D456BE88D7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
+		{3C764938-4C4A-4128-B20F-97EF2ED4A49B} = {3C764938-4C4A-4128-B20F-97EF2ED4A49B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -194,6 +209,22 @@ Global
 		{8B8EB6C4-78BC-442D-86B1-3E8E09DCF21F}.Release|x64.Build.0 = Release|Any CPU
 		{8B8EB6C4-78BC-442D-86B1-3E8E09DCF21F}.Release|x86.ActiveCfg = Release|Any CPU
 		{8B8EB6C4-78BC-442D-86B1-3E8E09DCF21F}.Release|x86.Build.0 = Release|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Debug|ARM.Build.0 = Debug|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Release|ARM.ActiveCfg = Release|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Release|ARM.Build.0 = Release|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Release|x64.Build.0 = Release|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{B300CC88-B778-4543-AE8B-86D456BE88D7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

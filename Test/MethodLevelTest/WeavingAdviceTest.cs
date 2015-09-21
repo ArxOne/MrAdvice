@@ -18,7 +18,6 @@ namespace MethodLevelTest
         {
             public void Advise(MethodWeavingContext context)
             {
-                throw new NotImplementedException();
             }
         }
 
