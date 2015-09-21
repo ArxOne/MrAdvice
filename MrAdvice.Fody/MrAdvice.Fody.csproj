@@ -96,7 +96,8 @@
     <Error Condition="!Exists('..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>copy "$(SolutionDir)\MrAdvice\bin\$(ConfigurationName)\MrAdvice.dll" "$(ProjectDir)\References"
+    <PreBuildEvent>if not exist "$(ProjectDir)\References" mkdir "$(ProjectDir)\References"
+copy "$(SolutionDir)\MrAdvice\bin\$(ConfigurationName)\MrAdvice.dll" "$(ProjectDir)\References"
 copy "$(SolutionDir)\MrAdvice.Weaver\bin\$(ConfigurationName)\MrAdvice.Weaver.dll" "$(ProjectDir)\References"
 </PreBuildEvent>
   </PropertyGroup>
