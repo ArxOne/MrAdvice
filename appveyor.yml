@@ -20,7 +20,7 @@ build:
   verbosity: minimal
 
 artifacts:
-  - path: 'MrAdvice.Weaver\bin\$(configuration)\*.nupkg'
+  - path: 'MrAdvice.Fody\bin\$(configuration)\*.nupkg'
 
 deploy:
   provider: NuGet

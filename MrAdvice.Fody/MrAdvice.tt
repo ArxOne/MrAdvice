@@ -1,0 +1,35 @@
+﻿<?xml version="1.0"?>
+<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".nuspec" #>
+<#@ import namespace="System.Reflection" #>
+<#@ include file="..\MrAdvice\Properties\ProductInfoValues.tt" #>
+<package>
+  <metadata>
+    <id>MrAdvice.Fody</id>
+    <version><#=Version#></version>
+    <title><#=Title#></title>
+    <authors><#=Company#></authors>
+    <owners><#=Company#></owners>
+    <licenseUrl><#=LicenseUrl#></licenseUrl>
+    <projectUrl>http://mradvice.arxone.com</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/ArxOne/MrAdvice/master/Icon/MrAdvice.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>.NET build step aspect weaver</summary>
+    <description><#=Description#></description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>weaver aspect advice pointcut .net attributes injection pcl portable windows silverlight phone sl5 wp8</tags>
+    <dependencies>
+      <dependency id="Fody" />
+    </dependencies>
+    <developmentDependency>false</developmentDependency>
+  </metadata>
+  <files>
+    <file src="NuGet\**\*" target="."/>
+    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.dll" target="lib\portable-net40+sl5+wp8+uap10.0"/>
+    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.xml" target="lib\portable-net40+sl5+wp8+uap10.0"/>
+    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\portable-net40+sl5+wp8+uap10.0"/>
+    <file src="bin\$ConfigurationName$\MrAdvice.Fody.dll" target="."/>
+    <file src="..\MrAdvice\**\*.cs" target="src"/>
+  </files>
+</package>

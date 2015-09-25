@@ -89,6 +89,7 @@
     <Compile Include="ParametersTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="InitializeTest.cs" />
+    <Compile Include="WeavingAdviceTest.cs" />
     <Compile Include="WeavingTest.cs" />
   </ItemGroup>
   <ItemGroup>

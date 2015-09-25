@@ -6,6 +6,9 @@
 #endregion
 
 using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using ArxOne.MrAdvice.IO;
 using ArxOne.MrAdvice.Weaver;
 using Mono.Cecil;
@@ -63,14 +66,20 @@ public class ModuleWeaver
     public IAssemblyResolver AssemblyResolver { get; set; }
 
     /// <summary>
-    /// Gets or sets the assembly path.
-    /// For some unkown reason, Fody won't weave on some platforms (Vista + VS2010) if this property is missing
+    /// Gets or sets the assembly file path (injected by Fody).
     /// </summary>
     /// <value>
-    /// The assembly path.
+    /// The assembly file path.
     /// </value>
-    // ReSharper disable once UnusedMember.Global
-    public string AssemblyPath { get; set; }
+    public string AssemblyFilePath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the references (injected by Fody).
+    /// </summary>
+    /// <value>
+    /// The references.
+    /// </value>
+    public string References { get; set; }
 
     public ModuleWeaver()
     {
@@ -91,6 +100,33 @@ public class ModuleWeaver
         Logger.LogError = LogError;
         var typeResolver = new TypeResolver { AssemblyResolver = AssemblyResolver };
         var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver };
-        aspectWeaver.Weave(ModuleDefinition);
+        var weavedAssembly = LoadWeavedAssembly();
+        aspectWeaver.Weave(ModuleDefinition, weavedAssembly);
+    }
+
+    /// <summary>
+    /// Loads the weaved assembly.
+    /// </summary>
+    /// <returns></returns>
+    private Assembly LoadWeavedAssembly()
+    {
+        foreach (var referencePath in References.Split(';'))
+        {
+            try
+            {
+                var fileName = Path.GetFileName(referencePath);
+                // right, this is dirty!
+                if (fileName == "MrAdvice.dll" && AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "MrAdvice"))
+                    continue;
+                var referenceBytes = File.ReadAllBytes(referencePath);
+                Assembly.Load(referenceBytes);
+            }
+            catch (Exception e)
+            {
+                Logger.WriteWarning("Error while loading {0}: {1}", referencePath, e.GetType().Name);
+            }
+        }
+        var bytes = File.ReadAllBytes(AssemblyFilePath);
+        return Assembly.Load(bytes);
     }
 }

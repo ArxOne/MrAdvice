@@ -48,7 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BindingTest.cs" />
     <Compile Include="TargetFrameworkTest.cs" />
   </ItemGroup>
   <ItemGroup>

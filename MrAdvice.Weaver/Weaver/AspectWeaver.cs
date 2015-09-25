@@ -10,9 +10,12 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Runtime.Versioning;
+    using Advice;
     using Annotation;
+    using Introduction;
     using IO;
     using Mono.Cecil;
     using Mono.Cecil.Cil;
@@ -44,7 +47,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified module definition.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        public void Weave(ModuleDefinition moduleDefinition)
+        /// <param name="targetAssembly">The target assembly.</param>
+        public void Weave(ModuleDefinition moduleDefinition, Assembly targetAssembly)
         {
             var auditTimer = new AuditTimer();
             var stopwatch = new Stopwatch();
@@ -52,18 +56,20 @@ namespace ArxOne.MrAdvice.Weaver
 
             // sanity check
             auditTimer.NewZone("IAdvice location");
-            var adviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.AdviceInterfaceName, true);
+            var adviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IAdvice));
             if (adviceInterface == null)
             {
-                Logger.WriteWarning("IAdvice interface not found here, exiting");
+                Logger.WriteWarning("IAdvice interface not found here (not referenced means not used), exiting");
                 return;
             }
 
+            // context
             var types = new Types
             {
                 CompilerGeneratedAttributeType = moduleDefinition.Import(typeof(CompilerGeneratedAttribute)),
-                PriorityAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.PriorityAttributeTypeName, true),
-                AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, Binding.AbstractTargetAttributeTypeName, true)
+                PriorityAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(PriorityAttribute)),
+                AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(AbstractTargetAttribute)),
+                WeavingAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(IWeavingAdvice))
             };
 
             // runtime check
@@ -86,7 +92,7 @@ namespace ArxOne.MrAdvice.Weaver
                     Logger.WriteDebug("Field {0} to be removed", fieldReference.FullName);
             }
             auditTimer.NewZone("Methods weaving");
-            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
+            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types, targetAssembly));
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
@@ -97,8 +103,10 @@ namespace ArxOne.MrAdvice.Weaver
 
             // and then, the info advices
             auditTimer.NewZone("Info advices weaving");
-            var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, Binding.InfoAdviceInterfaceName, true);
-            moduleDefinition.GetTypes().AsParallel().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
+            var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IInfoAdvice));
+            moduleDefinition.GetTypes()
+                .AsParallel()
+                .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
 
             auditTimer.NewZone("Abstract targets cleanup");
             foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
@@ -112,7 +120,8 @@ namespace ArxOne.MrAdvice.Weaver
             var maxLength = report.Keys.Max(k => k.Length);
             Logger.WriteDebug("--- Timings --------------------------");
             foreach (var reportPart in report)
-                Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength), (int)reportPart.Value.TotalMilliseconds);
+                Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength),
+                    (int)reportPart.Value.TotalMilliseconds);
             Logger.WriteDebug("--------------------------------------");
 
             Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
@@ -195,7 +204,7 @@ namespace ArxOne.MrAdvice.Weaver
             }
 
             var genericAdviceMemberTypeReference = (GenericInstanceType)adviceMemberTypeReference;
-            if (genericAdviceMemberTypeReference.GetElementType().FullName != Binding.IntroducedFieldTypeName)
+            if (genericAdviceMemberTypeReference.GetElementType().FullName != typeof(IntroducedField<>).FullName)
             {
                 introducedFieldType = null;
                 return false;
@@ -214,8 +223,8 @@ namespace ArxOne.MrAdvice.Weaver
         private IEnumerable<TypeReference> GetAdviceHandledInterfaces(ModuleDefinition moduleDefinition)
         {
             // the first method to look for in the final AdviceExtensions.Handle<>() method
-            var adviceExtensionsType = TypeResolver.Resolve(moduleDefinition, Binding.AdviceExtensionsTypeName, true);
-            var adviceHandleMethod = adviceExtensionsType.GetMethods().Single(m => m.IsPublic && m.HasGenericParameters && m.Name == Binding.AdviceHandleMethodName);
+            var adviceExtensionsType = TypeResolver.Resolve(moduleDefinition, typeof(AdviceExtensions));
+            var adviceHandleMethod = adviceExtensionsType.GetMethods().Single(m => m.IsPublic && m.HasGenericParameters && m.Name == nameof(AdviceExtensions.Handle));
             var methodsSearched = new HashSet<MethodReference>(new MethodReferenceComparer()) { adviceHandleMethod };
             var foundHandledInterfaces = new HashSet<TypeReference>(new TypeReferenceComparer());
             var methodsToSearch = new List<Tuple<MethodDefinition, int>> { Tuple.Create(adviceHandleMethod, 0) };

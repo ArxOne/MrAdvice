@@ -11,6 +11,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Linq;
     using System.Reflection;
     using System.Runtime.InteropServices;
+    using Advice;
     using Annotation;
     using Introduction;
     using IO;
@@ -36,11 +37,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="useWholeAssembly">if set to <c>true</c> [use whole assembly].</param>
         private void WeaveInfoAdvices(TypeDefinition infoAdvisedType, ModuleDefinition moduleDefinition, bool useWholeAssembly)
         {
-            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName, true);
+            var invocationType = TypeResolver.Resolve(moduleDefinition, typeof(Invocation));
             if (invocationType == null)
                 return;
             var proceedRuntimeInitializersReference = (from m in invocationType.GetMethods()
-                                                       where m.IsStatic && m.Name == Binding.InvocationProcessInfoAdvicesMethodName
+                                                       where m.IsStatic && m.Name == nameof(Invocation.ProcessInfoAdvices)
                                                        let parameters = m.Parameters
                                                        where parameters.Count == 1
                                                              && parameters[0].ParameterType.SafeEquivalent(
@@ -87,7 +88,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified method.
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
-        private void WeaveAdvices(MarkedNode markedMethod)
+        /// <param name="types">The types.</param>
+        /// <param name="targetAssembly">The target assembly.</param>
+        private void WeaveAdvices(MarkedNode markedMethod, Types types, Assembly targetAssembly)
         {
             var method = markedMethod.Node.Method;
             if (method.IsAbstract)
@@ -105,6 +108,29 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 Logger.WriteDebug("Weaving method '{0}'", method.FullName);
 
+                var methodName = method.Name;
+
+                // our special recipe, with weaving advices
+                var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
+                if (weavingAdvicesMarkers.Any())
+                {
+                    var typeDefinition = markedMethod.Node.Method.DeclaringType;
+                    var initialType = targetAssembly.GetType(typeDefinition);
+                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, types);
+                    foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
+                    {
+                        var weavingAdviceType = targetAssembly.GetType(weavingAdviceMarker.Type);
+                        var weavingAdvice = (IWeavingAdvice)Activator.CreateInstance(weavingAdviceType);
+                        var methodWeavingAdvice = weavingAdvice as IMethodWeavingAdvice;
+                        if (methodWeavingAdvice != null && !method.IsGetter && !method.IsSetter)
+                        {
+                            methodWeavingAdvice.Advise(weaverMethodWeavingContext);
+                        }
+                    }
+                    if (weaverMethodWeavingContext.TargetMethodName != methodName)
+                        methodName = method.Name = weaverMethodWeavingContext.TargetMethodName;
+                }
+
                 // create inner method
                 const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PInvokeImpl |
                                                           MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
@@ -113,11 +139,11 @@ namespace ArxOne.MrAdvice.Weaver
                                             (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public);
                 string innerMethodName;
                 if (method.IsGetter)
-                    innerMethodName = GetPropertyInnerGetterName(GetPropertyName(method.Name));
+                    innerMethodName = GetPropertyInnerGetterName(GetPropertyName(methodName));
                 else if (method.IsSetter)
-                    innerMethodName = GetPropertyInnerSetterName(GetPropertyName(method.Name));
+                    innerMethodName = GetPropertyInnerSetterName(GetPropertyName(methodName));
                 else
-                    innerMethodName = GetInnerMethodName(method.Name);
+                    innerMethodName = GetInnerMethodName(methodName);
                 var innerMethod = new MethodDefinition(innerMethodName, innerMethodAttributes, method.ReturnType);
                 innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
                 innerMethod.ImplAttributes = method.ImplAttributes;
@@ -288,10 +314,10 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Ldnull);
 
             // invoke the method
-            var invocationType = TypeResolver.Resolve(moduleDefinition, Binding.InvocationTypeName, true);
+            var invocationType = TypeResolver.Resolve(moduleDefinition, typeof(Invocation));
             if (invocationType == null)
                 throw new InvalidOperationException();
-            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == Binding.InvocationProceedAdviceMethodName);
+            var proceedMethodReference = invocationType.GetMethods().SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
             if (proceedMethodReference == null)
                 throw new InvalidOperationException();
             var proceedMethod = moduleDefinition.SafeImport(proceedMethodReference);
@@ -336,7 +362,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var typeDefinition = method.DeclaringType;
             var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface, types);
-            var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, Binding.IntroducedFieldAttributeName, true)
+            var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, typeof(IntroducedFieldAttribute))
                 .GetConstructors().Single());
             foreach (var advice in advices)
             {
@@ -371,12 +397,13 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="types">The types.</param>
-        private void WeaveMethod(ModuleDefinition moduleDefinition, MarkedNode markedMethod, TypeDefinition adviceInterface, Types types)
+        /// <param name="targetAssembly">The target assembly.</param>
+        private void WeaveMethod(ModuleDefinition moduleDefinition, MarkedNode markedMethod, TypeDefinition adviceInterface, Types types, Assembly targetAssembly)
         {
             var method = markedMethod.Node.Method;
             try
             {
-                WeaveAdvices(markedMethod);
+                WeaveAdvices(markedMethod, types, targetAssembly);
                 WeaveIntroductions(method, adviceInterface, moduleDefinition, types);
             }
             catch (Exception e)
@@ -411,7 +438,7 @@ namespace ArxOne.MrAdvice.Weaver
                 // now, create the implementation type
                 interfaceTypeDefinition = interfaceType.Resolve();
                 var typeAttributes = (InjectAsPrivate ? TypeAttributes.NotPublic : TypeAttributes.Public) | TypeAttributes.Class | TypeAttributes.BeforeFieldInit;
-                advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, Binding.AdvisedInterfaceTypeName, true);
+                advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(AdvisedInterface));
                 var advisedInterfaceTypeReference = moduleDefinition.SafeImport(advisedInterfaceType);
                 implementationType = new TypeDefinition(implementationTypeNamespace, implementationTypeName, typeAttributes, advisedInterfaceTypeReference);
 

@@ -9,11 +9,12 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ArxOne.MrAdvice</RootNamespace>
-    <AssemblyName>MrAdvice.Weaver.Fody</AssemblyName>
+    <AssemblyName>MrAdvice.Weaver</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <NuGetPackageImportStamp>73cd9cba</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -43,18 +44,22 @@
   <ItemGroup>
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net40\Mono.Cecil.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Mdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Rocks, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -82,6 +87,7 @@
     <Compile Include="Reflection\Groups\TypeReflectionNode.cs" />
     <Compile Include="Reflection\TargetFramework.cs" />
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
+    <Compile Include="Utility\AssemblyExtensions.cs" />
     <Compile Include="Utility\EnumerableExtensions.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />
     <Compile Include="Utility\PropertyDefinitionExtensions.cs" />
@@ -93,7 +99,6 @@
     <Compile Include="Weaver\AspectWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.Names.cs" />
     <Compile Include="Weaver\AspectWeaver.Weave.cs" />
-    <Compile Include="Weaver\Binding.cs" />
     <Compile Include="IO\Logger.cs" />
     <Compile Include="Weaver\TypeResolver.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
@@ -101,6 +106,7 @@
     <Compile Include="Weaver\Instructions.cs" />
     <Compile Include="Utility\TypeReferenceExtensions.cs" />
     <Compile Include="Weaver\Types.cs" />
+    <Compile Include="Weaver\WeaverMethodWeavingContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
@@ -109,27 +115,21 @@
     <None Include="..\MrAdvice\Properties\ProductInfoValues.tt">
       <Link>Properties\ProductInfoValues.tt</Link>
     </None>
-    <None Include="MrAdvice.nuspec">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MrAdvice.tt</DependentUpon>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="MrAdvice.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>MrAdvice.nuspec</LastGenOutput>
-    </None>
-    <None Include="NuGet\tools\install.ps1" />
-    <None Include="NuGet\tools\uninstall.ps1" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NuGet\content\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MrAdvice\MrAdvice.csproj">
+      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
+      <Name>MrAdvice</Name>
+      <Private>True</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
@@ -141,22 +141,15 @@
     <Error Condition="!Exists('..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>rem --- in solution weaving -------------------------------------------------------------------------------
-rem      this requires the assembly to be named "Weavers.dll" and placed in ".\Weavers\bin\&lt;conf&gt;\
+    <PostBuildEvent>rem --- ILMerge
 
-set weaversDir="$(SolutionDir)\Weavers\bin\$(ConfigurationName)"
-if not exist %25weaversDir%25 mkdir %25weaversDir%25
+rem "$(SolutionDir)Tools\ILMerge.exe" /out:"$(TargetPath)" "$(ProjectDir)\obj\$(ConfigurationName)\$(TargetFileName)" "$(SolutionDir)\MrAdvice\obj\$(ConfigurationName)\MrAdvice.dll" /keyfile:"$(SolutionDir)\MrAdvice\Properties\MrAdvice.snk" /v4
 
-copy "$(TargetPath)" %25weaversDir%25\Weavers.dll
-
-rem --- NuGet pack and push ------------------------------------------------------------------------------
-
-if not "$(ConfigurationName)"=="Release" goto :noRelease
-
-"$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectDir)\MrAdvice.nuspec" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Tool -Properties ConfigurationName=$(ConfigurationName) -Symbols 
-
-:noRelease
 </PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets" Condition="Exists('..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets')" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>
