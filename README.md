@@ -1,17 +1,24 @@
-# MrAdvice
+# Mr. Advice
 
 ## Summary
 
-MrAdvice is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net).  
+Mr. Advice is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net).  
 It intends to inject aspects at build-time. Advices are written in the form of attributes, and marking methods with them makes the pointcut, resulting in a nice and easy aspect injection.  
 More information about what is an aspect at [Wikipedia](http://en.wikipedia.org/wiki/Aspect-oriented_programming).  
 
-MrAdvice can weave assemblies for:
+Mr. Advice can weave assemblies for:
 
 * .NET framework (4 and above)
 * Mono
 * Silverlight (4 & 5)
 * Windows Phone (8 and above)
+* Universal Windows Platform 
+
+Mr. Advice allows you to:
+* Advise methods or parameters, at assembly, type, method or parameter level
+* Advice types (at assembly startup)
+* Introduce fields
+* Advise Mr. Advice (and this is **BIG**) at weaving-time (during build step), so you can rename methods as they are advised, add properties, etc.
 
 ## How it works
 
@@ -66,13 +73,7 @@ Miscellaneous projects:
 
  * [The Blue Dwarf](https://github.com/picrap/BlueDwarf), a tunneling anti-censorship local proxy.
 
-## Some disclaimer 
-(almost hidden at the almost end of this almost interesting readme)
-
-MrAdvice exposes an API (such as `IAdvice`, `IMethodAdvice`, etc.), which is subject to change until we reach the version 1.0.  
-Of course, there shouldn't be any structural change, but methods might be renamed, or parameters changed if we need it to improve the product.
-
 ## Contact and links
 
 Project owner is [picrap](https://github.com/picrap), feel free to drop a mail :email:.  
-Project company is [Arx One](http://arxone.com), a french company editor of backup software solutions.  
+Project company is [Arx One](http://arx.one), a french company editor of backup software solutions.  
