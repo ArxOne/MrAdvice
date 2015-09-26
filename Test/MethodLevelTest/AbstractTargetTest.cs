@@ -32,7 +32,7 @@ namespace MethodLevelTest
         public void AbstractedTargetTest()
         {
             var fields = typeof(Abstracted).GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.AreEqual(0, fields.Count());
+            Assert.AreEqual(0, fields.Length);
             var a = new Abstracted();
             a.Value = 12;
             Assert.AreEqual(12, a.Value);

@@ -8,6 +8,7 @@
 namespace MethodLevelTest
 {
     using System;
+    using System.Reflection;
     using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -25,16 +26,20 @@ namespace MethodLevelTest
 
         public class WeavingAdvisedClass
         {
-            public string CompilerAutoProperty { get; set; }
+            //public string CompilerAutoProperty { get; set; }
 
             [MethodWeavingAdvice]
             public void WeavingAdvisedMethod()
             {
+                var newProperty = GetType().GetProperty("WeavingAdvisedMethod_Friend");
+                Assert.IsNotNull(newProperty);
+                var thisMethod = MethodBase.GetCurrentMethod();
+                Assert.IsTrue(thisMethod.Name.StartsWith("WeavingAdvisedMethod_Renamed"));
             }
         }
 
         [TestMethod]
-        [TestCategory("Weaving")]
+        [TestCategory("Weaving advice")]
         public void SimpleWeavingAdviceTest()
         {
             var c = new WeavingAdvisedClass();

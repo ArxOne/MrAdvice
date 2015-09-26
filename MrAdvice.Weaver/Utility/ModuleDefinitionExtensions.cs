@@ -13,6 +13,7 @@ namespace ArxOne.MrAdvice.Utility
     using System.Reflection;
     using IO;
     using Mono.Cecil;
+    using Mono.Cecil.Rocks;
 
     /// <summary>
     /// Extensions to IAssemblyResolver
@@ -152,6 +153,12 @@ namespace ArxOne.MrAdvice.Utility
         {
             lock (moduleDefinition)
                 return moduleDefinition.Import(type);
+        }
+
+        public static CustomAttribute CreateCustomAttribute(this ModuleDefinition moduleDefinition, TypeReference customAttributeType)
+        {
+            var constructor = customAttributeType.Resolve().GetConstructors().Single();
+            return new CustomAttribute(moduleDefinition.SafeImport(constructor), new byte[] { 1, 0, 0, 0 });
         }
     }
 }

@@ -28,12 +28,9 @@ namespace ArxOne.MrAdvice.Utility
             if (methodCallExpression != null)
                 return methodCallExpression.Method;
             var memberExpression = lambdaExpression.Body as MemberExpression;
-            if (memberExpression != null)
-            {
-                var propertyInfo = memberExpression.Member as PropertyInfo;
-                if (propertyInfo != null)
-                    return propertyInfo.GetGetMethod();
-            }
+            var propertyInfo = memberExpression?.Member as PropertyInfo;
+            if (propertyInfo != null)
+                return propertyInfo.GetGetMethod();
             throw new ArgumentException("Lambda expression is not correctly formated for MethodInfo extraction");
         }
 
