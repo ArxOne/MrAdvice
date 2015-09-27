@@ -32,6 +32,12 @@ namespace ArxOne.MrAdvice.Utility
             }
         }
 
+        /// <summary>
+        /// Adds a public automatic property.
+        /// </summary>
+        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="name">The name.</param>
+        /// <param name="type">The type.</param>
         public static void AddPublicAutoProperty(this TypeDefinition typeDefinition, string name, TypeReference type)
         {
             var moduleDefinition = typeDefinition.Module;
@@ -65,6 +71,12 @@ namespace ArxOne.MrAdvice.Utility
             getterIntructions.Emit(OpCodes.Ret);
         }
 
+        /// <summary>
+        /// Creates a property method (getter or setter).
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
         private static MethodDefinition CreatePropertyMethod(string name, TypeReference type)
         {
             const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig;
@@ -72,5 +84,7 @@ namespace ArxOne.MrAdvice.Utility
             methodDefinition.Body = new MethodBody(methodDefinition) { InitLocals = true };
             return methodDefinition;
         }
+
+
     }
 }
