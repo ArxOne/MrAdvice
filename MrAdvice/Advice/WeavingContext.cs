@@ -38,5 +38,11 @@ namespace ArxOne.MrAdvice.Advice
         /// <param name="propertyType"></param>
         /// <returns></returns>
         public abstract void AddPublicAutoProperty(string propertyName, Type propertyType);
+
+        /// <summary>
+        /// Adds an initializer to all ctors (at the end of them).
+        /// </summary>
+        /// <param name="initializer">The initializer, which receives the instance as parameter.</param>
+        public abstract void AddInitializer(Action<object> initializer);
     }
 }

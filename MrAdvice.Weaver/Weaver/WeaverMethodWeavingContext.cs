@@ -10,8 +10,14 @@ namespace ArxOne.MrAdvice.Weaver
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
+    using System.Threading;
+    using System.Xml.Schema;
     using Advice;
+    using IO;
     using Mono.Cecil;
+    using Mono.Cecil.Cil;
+    using Mono.Cecil.Rocks;
     using Utility;
 
     internal class WeaverMethodWeavingContext : MethodWeavingContext
@@ -53,6 +59,37 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var moduleDefinition = _typeDefinition.Module;
             _typeDefinition.AddPublicAutoProperty(propertyName, moduleDefinition.Import(propertyType));
+        }
+
+        /// <summary>
+        /// Adds the initializer.
+        /// </summary>
+        /// <param name="initializer">The initializer.</param>
+        public override void AddInitializer(Action<object> initializer)
+        {
+            bool error = false;
+            var methodInfo = initializer.Method;
+            if (!methodInfo.IsStatic)
+            {
+                Logger.WriteError("The method {0}.{1} must be static", methodInfo.DeclaringType.FullName, methodInfo.Name);
+                error = true;
+            }
+            if (methodInfo.IsPrivate || methodInfo.IsFamily)
+            {
+                Logger.WriteError("The method {0}.{1} must be public or internal (when used from same assembly)", methodInfo.DeclaringType.FullName, methodInfo.Name);
+                error = true;
+            }
+            if (error)
+                return;
+
+            foreach (var ctor in _typeDefinition.GetConstructors())
+            {
+                var instructions = new Instructions(ctor.Body.Instructions, _typeDefinition.Module);
+                // last instruction is a RET, so move just before it
+                instructions.Cursor = instructions.Count - 1;
+                instructions.Emit(OpCodes.Ldarg_0);
+                instructions.Emit(OpCodes.Call, methodInfo);
+            }
         }
     }
 }

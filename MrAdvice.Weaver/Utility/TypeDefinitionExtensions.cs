@@ -84,7 +84,5 @@ namespace ArxOne.MrAdvice.Utility
             methodDefinition.Body = new MethodBody(methodDefinition) { InitLocals = true };
             return methodDefinition;
         }
-
-
     }
 }

@@ -31,6 +31,14 @@ namespace ArxOne.MrAdvice.Weaver
         public int Cursor { get; set; }
 
         /// <summary>
+        /// Gets the count.
+        /// </summary>
+        /// <value>
+        /// The count.
+        /// </value>
+        public int Count => _instructions.Count;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Instructions"/> class.
         /// </summary>
         /// <param name="instructions">The instructions.</param>

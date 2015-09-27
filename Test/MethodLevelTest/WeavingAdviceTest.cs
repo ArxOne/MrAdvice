@@ -21,6 +21,13 @@ namespace MethodLevelTest
             {
                 context.AddPublicAutoProperty(context.TargetMethodName + "_Friend", typeof(string));
                 context.TargetMethodName += "_Renamed";
+                context.AddInitializer(Initializer);
+            }
+
+            public static void Initializer(object target)
+            {
+                var property = target.GetType().GetProperty("WeavingAdvisedMethod_Friend");
+                property.SetValue(target, "Hello", new object[0]);
             }
         }
 
@@ -31,10 +38,12 @@ namespace MethodLevelTest
             [MethodWeavingAdvice]
             public void WeavingAdvisedMethod()
             {
-                var newProperty = GetType().GetProperty("WeavingAdvisedMethod_Friend");
-                Assert.IsNotNull(newProperty);
                 var thisMethod = MethodBase.GetCurrentMethod();
                 Assert.IsTrue(thisMethod.Name.StartsWith("WeavingAdvisedMethod_Renamed"));
+                var newProperty = GetType().GetProperty("WeavingAdvisedMethod_Friend");
+                Assert.IsNotNull(newProperty);
+                var newPropertyValue = (string)newProperty.GetValue(this, new object[0]);
+                Assert.AreEqual("Hello", newPropertyValue);
             }
         }
 
