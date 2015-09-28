@@ -67,6 +67,20 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="initializer">The initializer.</param>
         public override void AddInitializer(Action<object> initializer)
         {
+            AddInitializer(initializer, false);
+        }
+
+        /// <summary>
+        /// Adds an initializer once to all ctors (even if the method is called several times).
+        /// </summary>
+        /// <param name="initializer">The initializer.</param>
+        public override void AddInitializerOnce(Action<object> initializer)
+        {
+            AddInitializer(initializer, true);
+        }
+
+        public void AddInitializer(Action<object> initializer, bool once)
+        {
             bool error = false;
             var methodInfo = initializer.Method;
             if (!methodInfo.IsStatic)
@@ -82,13 +96,17 @@ namespace ArxOne.MrAdvice.Weaver
             if (error)
                 return;
 
+            var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
             foreach (var ctor in _typeDefinition.GetConstructors())
             {
+                if (once && ctor.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as MethodReference, true)))
+                    continue;
+
                 var instructions = new Instructions(ctor.Body.Instructions, _typeDefinition.Module);
                 // last instruction is a RET, so move just before it
                 instructions.Cursor = instructions.Count - 1;
                 instructions.Emit(OpCodes.Ldarg_0);
-                instructions.Emit(OpCodes.Call, methodInfo);
+                instructions.Emit(OpCodes.Call, methodReference);
             }
         }
     }

@@ -21,13 +21,15 @@ namespace MethodLevelTest
             {
                 context.AddPublicAutoProperty(context.TargetMethodName + "_Friend", typeof(string));
                 context.TargetMethodName += "_Renamed";
-                context.AddInitializer(Initializer);
+                context.AddInitializerOnce(Initializer);
+                context.AddInitializerOnce(Initializer);
             }
 
             public static void Initializer(object target)
             {
                 var property = target.GetType().GetProperty("WeavingAdvisedMethod_Friend");
-                property.SetValue(target, "Hello", new object[0]);
+                var currentValue = (string)property.GetValue(target, new object[0]) ?? "";
+                property.SetValue(target, currentValue + "Hello", new object[0]);
             }
         }
 

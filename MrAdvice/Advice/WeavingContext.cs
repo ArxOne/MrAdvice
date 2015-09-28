@@ -44,5 +44,11 @@ namespace ArxOne.MrAdvice.Advice
         /// </summary>
         /// <param name="initializer">The initializer, which receives the instance as parameter.</param>
         public abstract void AddInitializer(Action<object> initializer);
+      
+        /// <summary>
+        /// Adds an initializer once to all ctors (even if the method is called several times).
+        /// </summary>
+        /// <param name="initializer">The initializer.</param>
+        public abstract void AddInitializerOnce(Action<object> initializer);
     }
 }
