@@ -105,7 +105,7 @@ UnlockWeaversXml($project)
 
 RemoveForceProjectLevelHack $project
 
-Update-FodyConfig "MrAdvice.Fody" $project
+Update-FodyConfig $package.Id.Replace(".Fody", "") $project
 
 #Write-Host "installPath=$installPath"
 #Write-Host "toolsPath=$toolsPath"

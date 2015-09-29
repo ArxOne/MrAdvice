@@ -112,9 +112,6 @@
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
       <Link>Properties\MrAdvice.snk</Link>
     </None>
-    <None Include="..\MrAdvice\Properties\ProductInfoValues.tt">
-      <Link>Properties\ProductInfoValues.tt</Link>
-    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
