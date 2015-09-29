@@ -11,6 +11,8 @@ using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
 
+// ReSharper disable once CheckNamespace
+// ReSharper disable once UnusedMember.Global
 public class ModuleWeaver
 {
     /// <summary>
