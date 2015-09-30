@@ -18,6 +18,7 @@ namespace ArxOne.MrAdvice.Weaver
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
+    using Reflection;
     using Reflection.Groups;
     using Utility;
     using EventAttributes = Mono.Cecil.EventAttributes;
@@ -90,7 +91,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="types">The types.</param>
         /// <param name="targetAssembly">The target assembly.</param>
-        private void WeaveAdvices(MarkedNode markedMethod, Types types, Assembly targetAssembly)
+        private void WeaveAdvices(MarkedNode markedMethod, Types types, AssemblyHolder targetAssembly)
         {
             var method = markedMethod.Node.Method;
             if (method.IsAbstract)
@@ -115,11 +116,11 @@ namespace ArxOne.MrAdvice.Weaver
                 if (weavingAdvicesMarkers.Any())
                 {
                     var typeDefinition = markedMethod.Node.Method.DeclaringType;
-                    var initialType = targetAssembly.GetType(typeDefinition);
+                    var initialType = targetAssembly.Assembly.GetType(typeDefinition);
                     var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, types);
                     foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
                     {
-                        var weavingAdviceType = targetAssembly.GetType(weavingAdviceMarker.Type);
+                        var weavingAdviceType = targetAssembly.Assembly.GetType(weavingAdviceMarker.Type);
                         var weavingAdvice = (IWeavingAdvice)Activator.CreateInstance(weavingAdviceType);
                         var methodWeavingAdvice = weavingAdvice as IMethodWeavingAdvice;
                         if (methodWeavingAdvice != null && !method.IsGetter && !method.IsSetter)
@@ -398,7 +399,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="types">The types.</param>
         /// <param name="targetAssembly">The target assembly.</param>
-        private void WeaveMethod(ModuleDefinition moduleDefinition, MarkedNode markedMethod, TypeDefinition adviceInterface, Types types, Assembly targetAssembly)
+        private void WeaveMethod(ModuleDefinition moduleDefinition, MarkedNode markedMethod, TypeDefinition adviceInterface, Types types, 
+            AssemblyHolder targetAssembly)
         {
             var method = markedMethod.Node.Method;
             try

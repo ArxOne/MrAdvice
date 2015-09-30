@@ -48,7 +48,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="targetAssembly">The target assembly.</param>
-        public void Weave(ModuleDefinition moduleDefinition, Assembly targetAssembly)
+        public void Weave(ModuleDefinition moduleDefinition, AssemblyHolder targetAssembly)
         {
             var auditTimer = new AuditTimer();
             var stopwatch = new Stopwatch();

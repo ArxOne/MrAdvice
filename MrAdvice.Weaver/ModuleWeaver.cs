@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using ArxOne.MrAdvice.IO;
+using ArxOne.MrAdvice.Reflection;
 using ArxOne.MrAdvice.Weaver;
 using Mono.Cecil;
 
@@ -100,8 +101,7 @@ public class ModuleWeaver
         Logger.LogError = LogError;
         var typeResolver = new TypeResolver { AssemblyResolver = AssemblyResolver };
         var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver };
-        var weavedAssembly = LoadWeavedAssembly();
-        aspectWeaver.Weave(ModuleDefinition, weavedAssembly);
+        aspectWeaver.Weave(ModuleDefinition, new AssemblyHolder(LoadWeavedAssembly));
     }
 
     /// <summary>
