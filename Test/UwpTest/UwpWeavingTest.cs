@@ -22,8 +22,8 @@ namespace UwpTest
         }
 
         [TestMethod]
-        [TestCategory("Weaving")]
-        public void SimpleAdviceTest()
+        [TestCategory("UWP")]
+        public void SimpleAdviceUwpTest()
         {
             var c = new AdvisedClass();
             var r = c.Add(3, 5);
