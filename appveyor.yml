@@ -21,8 +21,8 @@ build:
 
 test:
   assemblies:
-    - *Test.dll
-    - *Test.exe
+    - '**\*Test.dll'
+    - '**\*Test.exe'
 
 artifacts:
   - path: 'MrAdvice.Fody\bin\$(configuration)\*.nupkg'
