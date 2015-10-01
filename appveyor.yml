@@ -19,6 +19,11 @@ build:
   publish_nuget_symbols: false
   verbosity: minimal
 
+test:
+  assemblies:
+    - *Test.dll
+    - *Test.exe
+
 artifacts:
   - path: 'MrAdvice.Fody\bin\$(configuration)\*.nupkg'
 
