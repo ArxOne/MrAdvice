@@ -24,9 +24,19 @@ namespace AssemblyLevelTest
         }
 
         [TestMethod]
+        [TestCategory("Weaving")]
         public void AssemblyAdviceTest()
         {
             Advised();
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void AnonymousClassCtorTest()
+        {
+            var a = new { A = 1, B = "b" };
+            Assert.AreEqual(1, a.A);
+            Assert.AreEqual("b", a.B);
         }
     }
 }

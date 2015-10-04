@@ -103,8 +103,8 @@ namespace ArxOne.MrAdvice.Aspect
 
             // cast here is safe, because we have generic parameters, meaning we're not in a ctor
             return new AspectInfo(Advices,
-                MakeGenericMethod(PointcutMethod, genericArguments),
-                MakeGenericMethod((MethodInfo)AdvisedMethod, genericArguments))
+                (MethodInfo)MakeGenericMethod(PointcutMethod, genericArguments),
+                MakeGenericMethod(AdvisedMethod, genericArguments))
             {
                 PointcutProperty = PointcutProperty,
                 IsPointcutPropertySetter = IsPointcutPropertySetter
@@ -114,10 +114,10 @@ namespace ArxOne.MrAdvice.Aspect
         /// <summary>
         /// Makes a method from generic definition (type and method).
         /// </summary>
-        /// <param name="methodInfo">The method information.</param>
+        /// <param name="methodBase">The method information.</param>
         /// <param name="genericArguments">The generic arguments.</param>
         /// <returns></returns>
-        private static MethodInfo MakeGenericMethod(MethodInfo methodInfo, Type[] genericArguments)
+        private static MethodBase MakeGenericMethod(MethodBase methodBase, Type[] genericArguments)
         {
             // two steps in this method.
             // 1. make generic type
@@ -126,7 +126,7 @@ namespace ArxOne.MrAdvice.Aspect
             int typeGenericParametersCount = 0;
 
             // first, the type
-            var declaringType = methodInfo.DeclaringType;
+            var declaringType = methodBase.DeclaringType;
             // ReSharper disable once PossibleNullReferenceException
             if (declaringType.IsGenericTypeDefinition)
             {
@@ -134,15 +134,17 @@ namespace ArxOne.MrAdvice.Aspect
                 declaringType = declaringType.MakeGenericType(typeGenericArguments);
                 // method needs to be discovered again.
                 // Fortunately, it can be found by its handle.
-                methodInfo = (MethodInfo)MethodBase.GetMethodFromHandle(methodInfo.MethodHandle, declaringType.TypeHandle);
+                methodBase = MethodBase.GetMethodFromHandle(methodBase.MethodHandle, declaringType.TypeHandle);
             }
             // then, the method
-            if (methodInfo.IsGenericMethodDefinition)
-            {
-                var methodGenericArguments = genericArguments.Skip(typeGenericParametersCount).ToArray();
-                methodInfo = methodInfo.MakeGenericMethod(methodGenericArguments);
-            }
-            return methodInfo;
+            if (!methodBase.IsGenericMethodDefinition)
+                return methodBase;
+            // on generic parameters
+            var methodGenericArguments = genericArguments.Skip(typeGenericParametersCount).ToArray();
+            var methodInfo = methodBase as MethodInfo;
+            if (methodInfo != null)
+                return methodInfo.MakeGenericMethod(methodGenericArguments);
+            return methodBase;
         }
     }
 }
