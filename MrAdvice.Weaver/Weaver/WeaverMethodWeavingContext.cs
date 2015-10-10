@@ -88,9 +88,9 @@ namespace ArxOne.MrAdvice.Weaver
                 Logger.WriteError("The method {0}.{1} must be static", methodInfo.DeclaringType.FullName, methodInfo.Name);
                 error = true;
             }
-            if (methodInfo.IsPrivate || methodInfo.IsFamily)
+            if (!methodInfo.IsPublic)
             {
-                Logger.WriteError("The method {0}.{1} must be public or internal (when used from same assembly)", methodInfo.DeclaringType.FullName, methodInfo.Name);
+                Logger.WriteError("The method {0}.{1} must be public", methodInfo.DeclaringType.FullName, methodInfo.Name);
                 error = true;
             }
             if (error)
