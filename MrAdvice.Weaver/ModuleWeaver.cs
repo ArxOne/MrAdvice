@@ -123,7 +123,7 @@ public class ModuleWeaver
             }
             catch (Exception e)
             {
-                Logger.WriteWarning("Error while loading {0}: {1}", referencePath, e.GetType().Name);
+                Logger.WriteWarning("Can't load {0}: {1}", referencePath, e.GetType().Name);
             }
         }
         var bytes = File.ReadAllBytes(AssemblyFilePath);
