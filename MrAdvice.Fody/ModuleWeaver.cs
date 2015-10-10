@@ -67,6 +67,7 @@ public class ModuleWeaver
     /// The assembly file path.
     /// </value>
     public string AssemblyFilePath { get; set; }
+
     /// <summary>
     /// Gets or sets the references (injected by Fody).
     /// </summary>
@@ -74,7 +75,6 @@ public class ModuleWeaver
     /// The references.
     /// </value>
     public string References { get; set; }
-
 
     public void Execute()
     {
@@ -103,14 +103,6 @@ public class ModuleWeaver
         if (loadedAssembly == null)
             LogError($"{args.Name} not resolved");
         return loadedAssembly;
-    }
-
-    private void ListAssemblies()
-    {
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            LogInfo($"Assembly: {assembly.GetName()}");
-        }
     }
 
     private static bool ReferencesAssembly(AssemblyName a, AssemblyName b)
