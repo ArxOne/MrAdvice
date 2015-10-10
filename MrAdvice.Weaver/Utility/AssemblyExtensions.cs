@@ -8,6 +8,7 @@
 namespace ArxOne.MrAdvice.Utility
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using IO;
@@ -26,19 +27,27 @@ namespace ArxOne.MrAdvice.Utility
             try
             {
                 var fullName = typeReference.FullName.Replace('/', '+');
-                var assemblyTypes = assembly.GetTypes();
-                var type = assemblyTypes.FirstOrDefault(t => t.FullName == fullName)
-                    ?? assemblyTypes.FirstOrDefault(t => t.FullName == typeReference.FullName);
 
-                if (type == null)
+                foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    Logger.WriteError("Can't find type {0}", typeReference.FullName);
-                    Logger.Write("Available types:");
-                    foreach (var assemblyType in assemblyTypes)
-                        Logger.Write("- {0}", assemblyType.FullName);
+var type=                    a.GetType(fullName);
+                    if (type != null)
+                        return type;
                 }
 
-                return type;
+                //var type = assemblyTypes.FirstOrDefault(t => t.FullName == fullName)
+                //    ?? assemblyTypes.FirstOrDefault(t => t.FullName == typeReference.FullName);
+
+                //if (type == null)
+                //{
+                Logger.WriteError("Can't find type {0}", typeReference.FullName);
+                //    Logger.Write("Available types:");
+                //    foreach (var assemblyType in assemblyTypes)
+                //        Logger.Write("- {0}", assemblyType.FullName);
+                //}
+
+                //return type;
+                return null;
             }
             catch (ReflectionTypeLoadException e)
             {

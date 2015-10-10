@@ -17,5 +17,11 @@ namespace ExternalAdviceTest
         {
             new EmptyExternalAdvisedClass().MethodTest();
         }
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void ExternalWeavingAdviceTest()
+        {
+            new EmptyExternalAdvisedClass().WeavingAdvisedMethodTest();
+        }
     }
 }

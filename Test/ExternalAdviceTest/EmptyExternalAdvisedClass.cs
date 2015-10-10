@@ -18,5 +18,12 @@ namespace ExternalAdviceTest
             var thisMethod = MethodBase.GetCurrentMethod();
             Assert.AreNotEqual("MethodTest", thisMethod.Name);
         }
+
+        [AddProperty]
+        public void WeavingAdvisedMethodTest()
+        {
+            var property = GetType().GetProperty("WeavingAdvisedMethodTest_Property");
+            Assert.IsNotNull(property);
+        }
     }
 }

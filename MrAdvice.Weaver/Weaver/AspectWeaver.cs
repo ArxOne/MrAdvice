@@ -10,7 +10,6 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Runtime.Versioning;
     using Advice;
@@ -33,6 +32,7 @@ namespace ArxOne.MrAdvice.Weaver
     internal partial class AspectWeaver
     {
         public TypeResolver TypeResolver { get; set; }
+        public TypeLoader TypeLoader { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether all additional methods and fields are injected as prived.
@@ -47,8 +47,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified module definition.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="targetAssembly">The target assembly.</param>
-        public void Weave(ModuleDefinition moduleDefinition, AssemblyHolder targetAssembly)
+        public void Weave(ModuleDefinition moduleDefinition)
         {
             var auditTimer = new AuditTimer();
             var stopwatch = new Stopwatch();
@@ -92,7 +91,7 @@ namespace ArxOne.MrAdvice.Weaver
                     Logger.WriteDebug("Field {0} to be removed", fieldReference.FullName);
             }
             auditTimer.NewZone("Methods weaving");
-            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types, targetAssembly));
+            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();

@@ -78,7 +78,6 @@
     <Compile Include="Annotation\MarkerDefinition.cs" />
     <Compile Include="AuditTimer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reflection\AssemblyHolder.cs" />
     <Compile Include="Reflection\Groups\AssemblyReflectionNode.cs" />
     <Compile Include="Reflection\Groups\MethodReflectionNode.cs" />
     <Compile Include="Reflection\Groups\ModuleReflectionNode.cs" />
@@ -88,6 +87,7 @@
     <Compile Include="Reflection\Groups\TypeReflectionNode.cs" />
     <Compile Include="Reflection\TargetFramework.cs" />
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
+    <Compile Include="Reflection\TypeLoader.cs" />
     <Compile Include="Utility\AssemblyExtensions.cs" />
     <Compile Include="Utility\EnumerableExtensions.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />
