@@ -36,7 +36,6 @@ namespace ArxOne.MrAdvice
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="genericArguments">The generic arguments (to static type and/or method) in a single array.</param>
         /// <returns></returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
         public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod,

@@ -8,6 +8,9 @@
 namespace MethodLevelTest
 {
     using System;
+    using System.Linq;
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -39,10 +42,20 @@ namespace MethodLevelTest
             }
         }
 
+        public void F1()
+        { }
+
+        public async void F2()
+        { }
+
         [TestMethod]
         [TestCategory("Async")]
         public void SimpleAsyncTest()
         {
+            var f1 = GetType().GetMethod("F1");
+            var a1 = f1.GetCustomAttributes<AsyncStateMachineAttribute>().ToArray();
+            var f2 = GetType().GetMethod("F2");
+            var a2 = f2.GetCustomAttributes<AsyncStateMachineAttribute>().ToArray();
             Task.Run(AwaitSteps).Wait();
         }
     }
