@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Advice
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Method advice context, passed to method advisors
@@ -24,7 +25,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The parameters.
         /// </value>
-        public IList<object> Parameters { get { return AdviceValues.Parameters; } }
+        public IList<object> Parameters => AdviceValues.Parameters;
 
         /// <summary>
         /// Gets a value indicating whether the advised method has a return value.
@@ -71,7 +72,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The target method.
         /// </value>
-        public MethodBase TargetMethod { get; private set; }
+        public MethodBase TargetMethod { get; }
 
         private readonly IMethodAdvice _methodAdvice;
 
@@ -92,9 +93,10 @@ namespace ArxOne.MrAdvice.Advice
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
-        internal override void Invoke()
+        internal override Task Invoke()
         {
             _methodAdvice.Advise(this);
+            return null;
         }
     }
 }

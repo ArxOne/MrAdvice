@@ -8,6 +8,8 @@ namespace ArxOne.MrAdvice.Advice
 {
     using System;
     using System.Reflection;
+    using System.Threading.Tasks;
+    using Threading;
 
     /// <summary>
     /// Special terminal advice, which calls the final method
@@ -26,27 +28,26 @@ namespace ArxOne.MrAdvice.Advice
         /// Invokes the current aspect (related to this instance).
         /// Here, the inner method is called
         /// </summary>
-        internal override void Invoke()
+        /// <exception cref="InvalidOperationException">context.Proceed() must not be called on advised interfaces (think about it, it does not make sense).</exception>
+        internal override Task Invoke()
         {
             // _innerMethod is null for advised interfaces (because there is no implementation)
             // the advises should not call the final method
             if (_innerMethod == null)
-                throw new InvalidOperationException("context.Proceed() must not be call on advised interfaces (think about it, it does not make sense).");
+                throw new InvalidOperationException("context.Proceed() must not be called on advised interfaces (think about it, it does not make sense).");
 
             try
             {
-                //var delegateType = Expression.GetDelegateType(
-                //    _innerMethod.GetParameters().Select(p => p.ParameterType).Concat(new[] { _innerMethod.ReturnType }).ToArray());
-                //var d = Delegate.CreateDelegate(delegateType, AdviceValues.Target, _innerMethod);
-                //AdviceValues.ReturnValue = d.DynamicInvoke(AdviceValues.Parameters);
                 AdviceValues.ReturnValue = _innerMethod.Invoke(AdviceValues.Target, AdviceValues.Parameters);
+                if (typeof(Task).IsAssignableFrom(_innerMethod.ReturnType))
+                    return (Task)AdviceValues.ReturnValue;
+                return Tasks.Void();
             }
             catch (TargetInvocationException tie)
             {
                 var ie = tie.InnerException;
                 var p = typeof(Exception).GetMethod("PrepForRemoting", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (p != null)
-                    p.Invoke(ie, new object[0]);
+                p?.Invoke(ie, new object[0]);
                 throw ie;
             }
         }

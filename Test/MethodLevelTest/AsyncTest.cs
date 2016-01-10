@@ -15,12 +15,30 @@ namespace MethodLevelTest
     using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    public class AsyncAdvice : Attribute, IMethodAdvice
+    public class CheckSyncAdvice : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
         {
             var target = (AsyncTest)context.Target;
             context.Proceed();
+            Assert.AreEqual(AsyncTest.FinalStep, target.AwaitStep);
+        }
+    }
+    
+    public class SyncAdvice : Attribute, IMethodAdvice
+    {
+        public void Advise(MethodAdviceContext context)
+        {
+            context.Proceed();
+        }
+    }
+
+    public class CheckAsyncAdvice : Attribute, IAsyncMethodAdvice
+    {
+        public async Task Advise(AsyncMethodAdviceContext context)
+        {
+            var target = (AsyncTest)context.Target;
+            await context.ProceedAsync();
             Assert.AreEqual(AsyncTest.FinalStep, target.AwaitStep);
         }
     }
@@ -32,14 +50,36 @@ namespace MethodLevelTest
 
         public const int FinalStep = 4;
 
-        [AsyncAdvice]
+        [CheckSyncAdvice]
         public async Task AwaitSteps()
         {
-            for (int step = 1; step < FinalStep; step++)
+            for (int step = 1; step <= FinalStep; step++)
             {
                 AwaitStep = step;
                 await Task.Delay(TimeSpan.FromSeconds(2));
             }
+        }
+
+        [CheckAsyncAdvice]
+        public async Task AwaitSteps2()
+        {
+            for (int step = 1; step <= FinalStep; step++)
+            {
+                AwaitStep = step;
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            }
+        }
+
+        [SyncAdvice]
+        public async Task<int> SumTo(int total)
+        {
+            var s = 0;
+            for (int step = 1; step <= total; step++)
+            {
+                s += step;
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+            return s;
         }
 
         public void F1()
@@ -50,13 +90,29 @@ namespace MethodLevelTest
 
         [TestMethod]
         [TestCategory("Async")]
-        public void SimpleAsyncTest()
+        public void VoidSyncTest()
         {
             var f1 = GetType().GetMethod("F1");
             var a1 = f1.GetCustomAttributes<AsyncStateMachineAttribute>().ToArray();
             var f2 = GetType().GetMethod("F2");
             var a2 = f2.GetCustomAttributes<AsyncStateMachineAttribute>().ToArray();
             Task.Run(AwaitSteps).Wait();
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        public void VoidAsyncTest()
+        {
+            Task.Run(AwaitSteps2).Wait();
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        public void IntSyncTest()
+        {
+            var t = Task.Run(() => SumTo(3));
+            t.Wait();
+            Assert.AreEqual(1 + 2 + 3, t.Result);
         }
     }
 }

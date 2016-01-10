@@ -7,6 +7,8 @@
 namespace ArxOne.MrAdvice.Advice
 {
     using System;
+    using System.Threading.Tasks;
+    using Threading;
 
     /// <summary>
     /// Advice context base class
@@ -24,7 +26,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The advice values.
         /// </value>
-        internal AdviceValues AdviceValues { get; private set; }
+        internal AdviceValues AdviceValues { get; }
 
         /// <summary>
         /// Gets or sets the target (the instance to which the advice applies).
@@ -41,7 +43,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The type of the target.
         /// </value>
-        public Type TargetType { get { return AdviceValues.TargetType; } }
+        public Type TargetType => AdviceValues.TargetType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdviceContext" /> class.
@@ -59,12 +61,19 @@ namespace ArxOne.MrAdvice.Advice
         /// </summary>
         public void Proceed()
         {
-            _nextAdviceContext.Invoke();
+            var task = _nextAdviceContext.Invoke();
+            // if there is a task, we wait for it
+            task?.Wait();
         }
+
+        /// <summary>
+        /// Proceeds to the next advice, asynchronously
+        /// </summary>
+        public Task ProceedAsync() => _nextAdviceContext.Invoke() ?? Tasks.Void();
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
-        internal abstract void Invoke();
+        internal abstract Task Invoke();
     }
 }

@@ -37,7 +37,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-	<OutputPath>.</OutputPath>
+    <OutputPath>.</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -67,6 +67,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Advice\AdvisedInterface.cs" />
+    <Compile Include="Advice\AsyncMethodAdviceContext.cs" />
+    <Compile Include="Advice\IAsyncMethodAdvice.cs" />
     <Compile Include="Advice\IMethodWeavingAdvice.cs" />
     <Compile Include="Advice\IWeavingAdvice.cs" />
     <Compile Include="Advice\MethodWeavingContext.cs" />
@@ -105,6 +107,7 @@
       <DependentUpon>ProductInfo.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Threading\Tasks.cs" />
     <Compile Include="Utility\MemberInfoExtensions.cs" />
     <Compile Include="Utility\TypeExtensions.cs" />
   </ItemGroup>

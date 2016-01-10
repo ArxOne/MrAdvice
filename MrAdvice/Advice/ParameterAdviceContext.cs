@@ -9,6 +9,8 @@ namespace ArxOne.MrAdvice.Advice
     using System;
     using System.Diagnostics;
     using System.Reflection;
+    using System.Threading.Tasks;
+    using Threading;
 
     /// <summary>
     /// Parameter advice context, passed to parameter advisors
@@ -25,7 +27,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The parameter information.
         /// </value>
-        public ParameterInfo TargetParameter { get; private set; }
+        public ParameterInfo TargetParameter { get; }
 
         /// <summary>
         /// Gets the raw type (stripped from ref if any).
@@ -33,7 +35,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The type.
         /// </value>
-        public Type ParameterType { get; private set; }
+        public Type ParameterType { get; }
 
         /// <summary>
         /// Gets a value indicating whether this parameter is input.
@@ -41,14 +43,14 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         ///   <c>true</c> if this instance is in; otherwise, <c>false</c>.
         /// </value>
-        public bool IsIn { get; private set; }
+        public bool IsIn { get; }
         /// <summary>
         /// Gets a value indicating whether this instance is output.
         /// </summary>
         /// <value>
         ///   <c>true</c> if this instance is out; otherwise, <c>false</c>.
         /// </value>
-        public bool IsOut { get; private set; }
+        public bool IsOut { get; }
 
         /// <summary>
         /// Gets or sets the parameter value.
@@ -118,10 +120,10 @@ namespace ArxOne.MrAdvice.Advice
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
-        /// <exception cref="System.NotImplementedException"></exception>
-        internal override void Invoke()
+        internal override Task Invoke()
         {
             _parameterAdvice.Advise(this);
+            return null;
         }
     }
 }

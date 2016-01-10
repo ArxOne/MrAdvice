@@ -68,6 +68,9 @@ namespace ArxOne.MrAdvice
                 // 2. as method
                 if (advice.MethodAdvice != null)
                     adviceContext = new MethodAdviceContext(advice.MethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
+                // 2b. as async method
+                if (advice.AsyncMethodAdvice != null)
+                    adviceContext = new AsyncMethodAdviceContext(advice.AsyncMethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
                 // 1. as property
                 if (advice.PropertyAdvice != null && aspectInfo.PointcutProperty != null)
                     adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);

@@ -6,7 +6,6 @@
 #endregion
 namespace ArxOne.MrAdvice.Aspect
 {
-    using System;
     using Advice;
 
     internal class AdviceInfo
@@ -18,6 +17,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// The advice.
         /// </value>
         public IAdvice Advice { get; }
+        
         /// <summary>
         /// Gets the method advice or null if none.
         /// </summary>
@@ -25,6 +25,14 @@ namespace ArxOne.MrAdvice.Aspect
         /// The method advice.
         /// </value>
         public IMethodAdvice MethodAdvice => Advice as IMethodAdvice;
+
+        /// <summary>
+        /// Gets the method advice or null if none.
+        /// </summary>
+        /// <value>
+        /// The method advice.
+        /// </value>
+        public IAsyncMethodAdvice AsyncMethodAdvice => Advice as IAsyncMethodAdvice;
 
         /// <summary>
         /// Gets the property advice or null if none.

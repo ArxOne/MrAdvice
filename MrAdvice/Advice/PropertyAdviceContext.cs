@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Advice
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Reflection;
+    using System.Threading.Tasks;
     using Collection;
 
     /// <summary>
@@ -24,7 +25,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The index.
         /// </value>
-        public IList<object> Index { get; private set; }
+        public IList<object> Index { get; }
 
         /// <summary>
         /// Gets a value indicating whether the property call has a value (is a setter, actually).
@@ -32,7 +33,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         ///   <c>true</c> if this instance has value; otherwise, <c>false</c>.
         /// </value>
-        public bool HasValue { get { return IsSetter; } }
+        public bool HasValue => IsSetter;
 
         /// <summary>
         /// Gets or sets the property value (for setters only).
@@ -67,7 +68,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// <c>true</c> if this instance has return value; otherwise, <c>false</c>.
         /// </value>
-        public bool HasReturnValue { get { return IsGetter; } }
+        public bool HasReturnValue => IsGetter;
 
         /// <summary>
         /// Gets or sets the return value (after Proceed()).
@@ -75,6 +76,8 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The return value.
         /// </value>
+        /// <exception cref="InvalidOperationException" accessor="get">Method has no ReturnValue</exception>
+        /// <exception cref="InvalidOperationException" accessor="set">Method has no ReturnValue</exception>
         public object ReturnValue
         {
             get
@@ -97,7 +100,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         ///   <c>true</c> if this instance is getter; otherwise, <c>false</c>.
         /// </value>
-        public bool IsGetter { get { return !IsSetter; } }
+        public bool IsGetter => !IsSetter;
 
         /// <summary>
         /// Gets a value indicating whether this context is a setter.
@@ -105,9 +108,9 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         ///   <c>true</c> if this instance is setter; otherwise, <c>false</c>.
         /// </value>
-        public bool IsSetter { get; private set; }
+        public bool IsSetter { get; }
 
-        private string DebuggerGetSet{get { return IsGetter ? "Getter" : "Setter"; }}
+        private string DebuggerGetSet => IsGetter ? "Getter" : "Setter";
 
         /// <summary>
         /// Gets the target property.
@@ -115,7 +118,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The target property.
         /// </value>
-        public PropertyInfo TargetProperty { get; private set; }
+        public PropertyInfo TargetProperty { get; }
 
         private readonly IPropertyAdvice _propertyAdvice;
 
@@ -127,7 +130,6 @@ namespace ArxOne.MrAdvice.Advice
         /// <param name="isSetter">if set to <c>true</c> [is setter].</param>
         /// <param name="adviceValues">The advice values.</param>
         /// <param name="nextAdviceContext">The next advice context.</param>
-        /// <exception cref="System.InvalidOperationException">Only properties can be advised with this interface</exception>
         internal PropertyAdviceContext(IPropertyAdvice propertyAdvice, PropertyInfo propertyInfo, bool isSetter, AdviceValues adviceValues, AdviceContext nextAdviceContext)
             : base(adviceValues, nextAdviceContext)
         {
@@ -143,9 +145,10 @@ namespace ArxOne.MrAdvice.Advice
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
-        internal override void Invoke()
+        internal override Task Invoke()
         {
             _propertyAdvice.Advise(this);
+            return null;
         }
     }
 }
