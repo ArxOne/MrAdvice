@@ -24,7 +24,7 @@ namespace MethodLevelTest
             Assert.AreEqual(AsyncTest.FinalStep, target.AwaitStep);
         }
     }
-    
+
     public class SyncAdvice : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
@@ -40,6 +40,14 @@ namespace MethodLevelTest
             var target = (AsyncTest)context.Target;
             await context.ProceedAsync();
             Assert.AreEqual(AsyncTest.FinalStep, target.AwaitStep);
+        }
+    }
+
+    public class AsyncAdvice : Attribute, IAsyncMethodAdvice
+    {
+        public async Task Advise(AsyncMethodAdviceContext context)
+        {
+            await context.ProceedAsync();
         }
     }
 
@@ -82,6 +90,18 @@ namespace MethodLevelTest
             return s;
         }
 
+        [AsyncAdvice]
+        public async Task<int> SumTo2(int total)
+        {
+            var s = 0;
+            for (int step = 1; step <= total; step++)
+            {
+                s += step;
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+            return s;
+        }
+
         public void F1()
         { }
 
@@ -113,6 +133,15 @@ namespace MethodLevelTest
             var t = Task.Run(() => SumTo(3));
             t.Wait();
             Assert.AreEqual(1 + 2 + 3, t.Result);
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        public void IntAsyncTest()
+        {
+            var t = Task.Run(() => SumTo2(4));
+            t.Wait();
+            Assert.AreEqual(1 + 2 + 3 + 4, t.Result);
         }
     }
 }
