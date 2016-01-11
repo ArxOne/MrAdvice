@@ -102,6 +102,12 @@ namespace MethodLevelTest
             return s;
         }
 
+        [AsyncAdvice]
+        public int RegularSumTo(int total)
+        {
+            return Enumerable.Range(1, total).Sum();
+        }
+
         public void F1()
         { }
 
@@ -142,6 +148,14 @@ namespace MethodLevelTest
             var t = Task.Run(() => SumTo2(4));
             t.Wait();
             Assert.AreEqual(1 + 2 + 3 + 4, t.Result);
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        public void AsyncOnSyncTest()
+        {
+            var t = RegularSumTo(5);
+            Assert.AreEqual(1 + 2 + 3 + 4 + 5, t);
         }
     }
 }
