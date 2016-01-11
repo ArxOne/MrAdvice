@@ -76,6 +76,7 @@ namespace ArxOne.MrAdvice
                     adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
             }
 
+            // TODO: link this task to return value (if this latter is a task)
             adviceContext.Invoke();
             return adviceValues.ReturnValue;
         }
