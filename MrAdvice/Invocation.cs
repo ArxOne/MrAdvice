@@ -10,8 +10,10 @@ namespace ArxOne.MrAdvice
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using Advice;
     using Aspect;
+    using Threading;
     using Utility;
 
     /// <summary>
@@ -76,9 +78,27 @@ namespace ArxOne.MrAdvice
                     adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
             }
 
-            // TODO: link this task to return value (if this latter is a task)
-            adviceContext.Invoke();
-            return adviceValues.ReturnValue;
+            // if the method is no task, then we return immediately
+            // (and the adviceTask is completed)
+            var adviceTask = adviceContext.Invoke();
+            var resultTask = adviceValues.ReturnValue as Task;
+            // null adviceTask means aspect was sync, so everything already ended
+            if (resultTask == null || adviceTask == null)
+                return adviceValues.ReturnValue;
+
+            // otherwise, see if it is a Task or Task<>
+
+            // Task is simple too: the advised method is a subtask,
+            // so the advice is completed after the method is completed too
+            if (adviceValues.ReturnValue == typeof(Task))
+                return adviceTask;
+
+            // only Task<> left here
+            // we need to create a new source and mark it as complete once the advice has completed
+            var taskType = resultTask.GetTaskType();
+            var tcs = TaskCompletionSource.Create(taskType);
+            adviceTask.ContinueWith(t => tcs.SetResult(resultTask.GetResult()));
+            return tcs.Task;
         }
 
         /// <summary>
