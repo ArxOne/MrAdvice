@@ -40,7 +40,7 @@ namespace ArxOne.MrAdvice.Advice
                 var methodInfo = TargetMethod as MethodInfo;
                 if (methodInfo == null) // ctor
                     return false;
-                return methodInfo.ReturnType != typeof (void);
+                return methodInfo.ReturnType != typeof(void);
             }
         }
 
@@ -54,7 +54,7 @@ namespace ArxOne.MrAdvice.Advice
         {
             get
             {
-                if(!HasReturnValue)
+                if (!HasReturnValue)
                     throw new InvalidOperationException("Method has no ReturnValue");
                 return AdviceValues.ReturnValue;
             }
@@ -89,6 +89,12 @@ namespace ArxOne.MrAdvice.Advice
             _methodAdvice = methodAdvice;
             TargetMethod = targetMethod;
         }
+
+
+        /// <summary>
+        /// Proceeds to the next advice
+        /// </summary>
+        public void Proceed() => InvokeNext()?.Wait();
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).

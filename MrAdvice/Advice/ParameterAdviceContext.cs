@@ -118,6 +118,11 @@ namespace ArxOne.MrAdvice.Advice
         }
 
         /// <summary>
+        /// Proceeds to the next advice
+        /// </summary>
+        public void Proceed() => InvokeNext()?.Wait();
+
+        /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
         internal override Task Invoke()
