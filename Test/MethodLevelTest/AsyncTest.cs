@@ -114,8 +114,8 @@ namespace MethodLevelTest
         public async void F2()
         { }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        //[TestMethod]
+        //[TestCategory("Async")]
         public void VoidSyncTest()
         {
             var f1 = GetType().GetMethod("F1");
