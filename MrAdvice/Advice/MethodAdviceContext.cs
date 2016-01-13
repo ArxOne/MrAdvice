@@ -16,7 +16,7 @@ namespace ArxOne.MrAdvice.Advice
     /// Method advice context, passed to method advisors
     /// </summary>
     [DebuggerDisplay("MethodInfo {TargetMethod}")]
-    public class MethodAdviceContext : AdviceContext
+    public class MethodAdviceContext : SyncAdviceContext
     {
         /// <summary>
         /// Gets the parameters.
@@ -89,12 +89,6 @@ namespace ArxOne.MrAdvice.Advice
             _methodAdvice = methodAdvice;
             TargetMethod = targetMethod;
         }
-
-
-        /// <summary>
-        /// Proceeds to the next advice
-        /// </summary>
-        public void Proceed() => InvokeNext()?.Wait();
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).

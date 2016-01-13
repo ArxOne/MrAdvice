@@ -16,7 +16,7 @@ namespace ArxOne.MrAdvice.Advice
     /// Parameter advice context, passed to parameter advisors
     /// </summary>
     [DebuggerDisplay("ParameterInfo {TargetParameter}")]
-    public class ParameterAdviceContext : AdviceContext
+    public class ParameterAdviceContext : SyncAdviceContext
     {
         private readonly IParameterAdvice _parameterAdvice;
         private readonly int _parameterIndex;

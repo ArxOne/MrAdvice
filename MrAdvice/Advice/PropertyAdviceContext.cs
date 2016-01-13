@@ -17,7 +17,7 @@ namespace ArxOne.MrAdvice.Advice
     /// Property advice context, passed to property advisors
     /// </summary>
     [DebuggerDisplay("Property: {TargetProperty}, {DebuggerGetSet}")]
-    public class PropertyAdviceContext : AdviceContext
+    public class PropertyAdviceContext : SyncAdviceContext
     {
         /// <summary>
         /// Gets the index for property.
@@ -141,12 +141,7 @@ namespace ArxOne.MrAdvice.Advice
             else
                 Index = new ArraySpan<object>(AdviceValues.Parameters, 1, AdviceValues.Parameters.Length - 1);
         }
-
-        /// <summary>
-        /// Proceeds to the next advice
-        /// </summary>
-        public void Proceed() => InvokeNext()?.Wait();
-
+        
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
