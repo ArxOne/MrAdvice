@@ -5,6 +5,7 @@
     using System.Diagnostics;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Threading;
 
     /// <summary>
     /// Method advice context, passed to method advisors
@@ -44,6 +45,8 @@
         /// <value>
         /// The return value.
         /// </value>
+        /// <exception cref="InvalidOperationException" accessor="get">Method has no ReturnValue</exception>
+        /// <exception cref="InvalidOperationException" accessor="set">Method has no ReturnValue</exception>
         public object ReturnValue
         {
             get
@@ -83,6 +86,11 @@
             _methodAdvice = methodAdvice;
             TargetMethod = targetMethod;
         }
+
+        /// <summary>
+        /// Proceeds to the next advice, asynchronously
+        /// </summary>
+        public Task ProceedAsync() => InvokeNext() ?? Tasks.Void();
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).

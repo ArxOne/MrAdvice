@@ -57,19 +57,10 @@ namespace ArxOne.MrAdvice.Advice
         }
 
         /// <summary>
-        /// Proceeds to the next advice
+        /// Invokes the next advice.
         /// </summary>
-        public void Proceed()
-        {
-            var task = _nextAdviceContext.Invoke();
-            // if there is a task, we wait for it
-            task?.Wait();
-        }
-
-        /// <summary>
-        /// Proceeds to the next advice, asynchronously
-        /// </summary>
-        public Task ProceedAsync() => _nextAdviceContext.Invoke() ?? Tasks.Void();
+        /// <returns></returns>
+        protected Task InvokeNext() => _nextAdviceContext.Invoke();
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).
