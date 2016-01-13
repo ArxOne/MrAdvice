@@ -15,6 +15,11 @@ namespace MethodLevelTest
     using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    public class CustomException : Exception
+    {
+
+    }
+
     public class CheckSyncAdvice : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
@@ -103,6 +108,21 @@ namespace MethodLevelTest
         }
 
         [AsyncAdvice]
+        public async Task ThrowException(bool now)
+        {
+            if (!now)
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            throw new CustomException();
+        }
+
+        public async Task RawThrowException(bool now)
+        {
+            if (!now)
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            throw new CustomException();
+        }
+
+        [AsyncAdvice]
         public int RegularSumTo(int total)
         {
             return Enumerable.Range(1, total).Sum();
@@ -156,6 +176,54 @@ namespace MethodLevelTest
         {
             var t = RegularSumTo(5);
             Assert.AreEqual(1 + 2 + 3 + 4 + 5, t);
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        [ExpectedException(typeof(CustomException))]
+        public void ImmediateExceptionTest()
+        {
+            try
+            {
+                var t = Task.Run(() => ThrowException(true));
+                t.Wait();
+            }
+            catch (AggregateException e) when (e.InnerException is CustomException)
+            {
+                throw e.InnerException;
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        [ExpectedException(typeof(CustomException))]
+        public void DelayedExceptionTest()
+        {
+            try
+            {
+                var t = Task.Run(() => ThrowException(false));
+                t.Wait();
+            }
+            catch (AggregateException e) when (e.InnerException is CustomException)
+            {
+                throw e.InnerException;
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        [ExpectedException(typeof(CustomException))]
+        public void NotAdvisedExceptionTest()
+        {
+            try
+            {
+                var t = Task.Run(() => RawThrowException(false));
+                t.Wait();
+            }
+            catch (AggregateException e) when (e.InnerException is CustomException)
+            {
+                throw e.InnerException;
+            }
         }
     }
 }

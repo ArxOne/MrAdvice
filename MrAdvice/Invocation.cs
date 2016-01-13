@@ -96,9 +96,37 @@ namespace ArxOne.MrAdvice
             // only Task<> left here
             // we need to create a new source and mark it as complete once the advice has completed
             var taskType = resultTask.GetTaskType();
-            var tcs = TaskCompletionSource.Create(taskType);
-            adviceTask.ContinueWith(t => tcs.SetResult(resultTask.GetResult()));
-            return tcs.Task;
+            var adviceTaskSource = TaskCompletionSource.Create(taskType);
+            adviceTask.ContinueWith(t => ContinueTask(t, adviceTaskSource, resultTask));
+            return adviceTaskSource.Task;
+        }
+
+        /// <summary>
+        /// Continues the advice task by setting the advised method results.
+        /// </summary>
+        /// <param name="adviceTask">The advice task.</param>
+        /// <param name="adviceTaskSource">The advice task source.</param>
+        /// <param name="advisedTask">The advised task.</param>
+        private static void ContinueTask(Task adviceTask, TaskCompletionSource adviceTaskSource, Task advisedTask)
+        {
+            var eq = ReferenceEquals(adviceTask, advisedTask);
+            if (adviceTask.IsFaulted)
+                adviceTaskSource.SetException(FlattenException(adviceTask.Exception));
+            else
+                adviceTaskSource.SetResult(advisedTask.GetResult());
+        }
+
+        /// <summary>
+        /// Flattens the exception (removes aggregate exception).
+        /// </summary>
+        /// <param name="e">The e.</param>
+        /// <returns></returns>
+        private static Exception FlattenException(Exception e)
+        {
+            var a = e as AggregateException;
+            if (a == null)
+                return e;
+            return a.InnerException;
         }
 
         /// <summary>
