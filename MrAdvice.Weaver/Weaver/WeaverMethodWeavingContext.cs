@@ -97,7 +97,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return;
 
             var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
-            foreach (var ctor in _typeDefinition.GetConstructors())
+            foreach (var ctor in _typeDefinition.GetConstructors().ToArray())
             {
                 if (once && ctor.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as MethodReference, true)))
                     continue;
