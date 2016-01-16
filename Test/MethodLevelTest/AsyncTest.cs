@@ -56,6 +56,21 @@ namespace MethodLevelTest
         }
     }
 
+    [AttributeUsage(AttributeTargets.Method)]
+    public class AsyncPlusOne : Attribute, IAsyncMethodAdvice
+    {
+        public async Task Advise(AsyncMethodAdviceContext context)
+        {
+            await context.ProceedAsync();
+            context.ReturnValue = Plus(((dynamic)context.ReturnValue).Result, 1);
+        }
+
+        private async Task<int> Plus(int i, int j)
+        {
+            return await Task.FromResult(i + j);
+        }
+    }
+
     [TestClass]
     public class AsyncTest
     {
@@ -224,6 +239,23 @@ namespace MethodLevelTest
             {
                 throw e.InnerException;
             }
+        }
+
+        [AsyncPlusOne]
+        public async Task<int> Get100()
+        {
+            await Task.Delay(3000);
+            return 100;
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        public void PlusOneTest()
+        {
+            var t = Task.Run(() => Get100());
+            t.Wait();
+            var r = t.Result;
+            Assert.AreEqual(101, r);
         }
     }
 }

@@ -40,8 +40,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod,
-            bool abstractedTarget, Type[] genericArguments)
+        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, bool abstractedTarget, Type[] genericArguments)
         {
             var aspectInfo = GetAspectInfo(methodBase, innerMethod, abstractedTarget, genericArguments);
 
@@ -81,23 +80,25 @@ namespace ArxOne.MrAdvice
             // if the method is no task, then we return immediately
             // (and the adviceTask is completed)
             var adviceTask = adviceContext.Invoke();
-            var resultTask = adviceValues.ReturnValue as Task;
-            // null adviceTask means aspect was sync, so everything already ended
-            if (resultTask == null || adviceTask == null)
+
+            var advisedMethodInfo = aspectInfo.AdvisedMethod as MethodInfo;
+            var returnType = advisedMethodInfo?.ReturnType;
+            // no Task means aspect was sync, so everything already ended
+            // TODO: this is actually not true, since an async method can be void :frown:
+            if (adviceTask == null || returnType == null || !typeof(Task).IsAssignableFrom(returnType))
                 return adviceValues.ReturnValue;
 
             // otherwise, see if it is a Task or Task<>
 
             // Task is simple too: the advised method is a subtask,
             // so the advice is completed after the method is completed too
-            if (adviceValues.ReturnValue == typeof(Task))
+            if (returnType == typeof(Task))
                 return adviceTask;
 
             // only Task<> left here
             // we need to create a new source and mark it as complete once the advice has completed
-            var taskType = resultTask.GetTaskType();
-            var adviceTaskSource = TaskCompletionSource.Create(taskType);
-            adviceTask.ContinueWith(t => ContinueTask(t, adviceTaskSource, resultTask));
+            var adviceTaskSource = TaskCompletionSource.Create(returnType.GetTaskType());
+            adviceTask.ContinueWith(t => ContinueTask(t, adviceTaskSource, adviceValues));
             return adviceTaskSource.Task;
         }
 
@@ -106,14 +107,17 @@ namespace ArxOne.MrAdvice
         /// </summary>
         /// <param name="adviceTask">The advice task.</param>
         /// <param name="adviceTaskSource">The advice task source.</param>
-        /// <param name="advisedTask">The advised task.</param>
-        private static void ContinueTask(Task adviceTask, TaskCompletionSource adviceTaskSource, Task advisedTask)
+        /// <param name="adviceValues"></param>
+        private static void ContinueTask(Task adviceTask, TaskCompletionSource adviceTaskSource, AdviceValues adviceValues)
         {
-            var eq = ReferenceEquals(adviceTask, advisedTask);
             if (adviceTask.IsFaulted)
                 adviceTaskSource.SetException(FlattenException(adviceTask.Exception));
             else
-                adviceTaskSource.SetResult(advisedTask.GetResult());
+            {
+                var advisedTask = (Task)adviceValues.ReturnValue;
+                var result = advisedTask.GetResult();
+                adviceTaskSource.SetResult(result);
+            }
         }
 
         /// <summary>
