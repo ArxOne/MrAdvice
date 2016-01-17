@@ -86,7 +86,10 @@ namespace ArxOne.MrAdvice
             // no Task means aspect was sync, so everything already ended
             // TODO: this is actually not true, since an async method can be void :frown:
             if (adviceTask == null || returnType == null || !typeof(Task).IsAssignableFrom(returnType))
+            {
+                adviceTask?.Wait();
                 return adviceValues.ReturnValue;
+            }
 
             // otherwise, see if it is a Task or Task<>
 

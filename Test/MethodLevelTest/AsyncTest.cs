@@ -11,6 +11,7 @@ namespace MethodLevelTest
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
+    using System.Threading;
     using System.Threading.Tasks;
     using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -256,6 +257,41 @@ namespace MethodLevelTest
             t.Wait();
             var r = t.Result;
             Assert.AreEqual(101, r);
+        }
+
+        public class AsyncPlusOne2 : Attribute, IAsyncMethodAdvice
+        {
+            public async Task Advise(AsyncMethodAdviceContext context)
+            {
+                await context.ProceedAsync();
+                if (context.HasReturnValue)
+                {
+                    if (context.ReturnValue is Task)
+                        context.ReturnValue = Plus(((dynamic)context.ReturnValue).Result, 1);
+                    else
+                        context.ReturnValue = (int)context.ReturnValue + 1;
+                }
+            }
+
+            private async Task<int> Plus(int i, int j)
+            {
+                await Task.Delay(1000);
+                return await Task.FromResult(i + j);
+            }
+        }
+        [AsyncPlusOne2]
+        public int Get1000()
+        {
+            //Thread.Sleep(3000);
+            return 1000;
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        public void AsyncOnSync2Test()
+        {
+            var r = Get1000();
+            Assert.AreEqual(1001, r);
         }
     }
 }
