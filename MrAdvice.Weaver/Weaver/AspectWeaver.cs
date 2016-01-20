@@ -309,7 +309,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private static bool IsWeavable(MarkedNode markedMethod)
         {
-            return !markedMethod.Node.Method.IsAbstract;
+            return markedMethod.Node.Method.HasBody || markedMethod.Node.Method.HasPInvokeInfo;
         }
 
         /// <summary>
