@@ -67,8 +67,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Advice\AdvisedInterface.cs" />
-    <Compile Include="Advice\AsyncMethodAdviceContext.cs" />
-    <Compile Include="Advice\IAsyncMethodAdvice.cs" />
+    <Compile Include="Advice\MethodAsyncAdviceContext.cs" />
+    <Compile Include="Advice\IMethodAsyncAdvice.cs" />
     <Compile Include="Advice\IMethodWeavingAdvice.cs" />
     <Compile Include="Advice\IWeavingAdvice.cs" />
     <Compile Include="Advice\MethodWeavingContext.cs" />

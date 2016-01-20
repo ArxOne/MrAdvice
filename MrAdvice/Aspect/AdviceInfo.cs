@@ -32,7 +32,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// <value>
         /// The method advice.
         /// </value>
-        public IAsyncMethodAdvice AsyncMethodAdvice => Advice as IAsyncMethodAdvice;
+        public IMethodAsyncAdvice AsyncMethodAdvice => Advice as IMethodAsyncAdvice;
 
         /// <summary>
         /// Gets the property advice or null if none.

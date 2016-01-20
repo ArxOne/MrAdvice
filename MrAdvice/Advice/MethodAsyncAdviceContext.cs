@@ -11,7 +11,7 @@
     /// Method advice context, passed to method advisors
     /// </summary>
     [DebuggerDisplay("async MethodInfo {TargetMethod}")]
-    public class AsyncMethodAdviceContext : AdviceContext
+    public class MethodAsyncAdviceContext : AdviceContext
     {
         /// <summary>
         /// Gets the parameters.
@@ -71,7 +71,7 @@
         /// </value>
         public MethodBase TargetMethod { get; }
 
-        private readonly IAsyncMethodAdvice _methodAdvice;
+        private readonly IMethodAsyncAdvice _methodAdvice;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodAdviceContext" /> class.
@@ -80,7 +80,7 @@
         /// <param name="targetMethod">The target method.</param>
         /// <param name="adviceValues">The call values.</param>
         /// <param name="nextAdviceContext">The next advice context.</param>
-        internal AsyncMethodAdviceContext(IAsyncMethodAdvice methodAdvice, MethodBase targetMethod, AdviceValues adviceValues, AdviceContext nextAdviceContext)
+        internal MethodAsyncAdviceContext(IMethodAsyncAdvice methodAdvice, MethodBase targetMethod, AdviceValues adviceValues, AdviceContext nextAdviceContext)
             : base(adviceValues, nextAdviceContext)
         {
             _methodAdvice = methodAdvice;

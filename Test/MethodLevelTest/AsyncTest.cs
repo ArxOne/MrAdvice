@@ -39,9 +39,9 @@ namespace MethodLevelTest
         }
     }
 
-    public class CheckAsyncAdvice : Attribute, IAsyncMethodAdvice
+    public class CheckAsyncAdvice : Attribute, IMethodAsyncAdvice
     {
-        public async Task Advise(AsyncMethodAdviceContext context)
+        public async Task Advise(MethodAsyncAdviceContext context)
         {
             var target = (AsyncTest)context.Target;
             await context.ProceedAsync();
@@ -49,18 +49,18 @@ namespace MethodLevelTest
         }
     }
 
-    public class AsyncAdvice : Attribute, IAsyncMethodAdvice
+    public class AsyncAdvice : Attribute, IMethodAsyncAdvice
     {
-        public async Task Advise(AsyncMethodAdviceContext context)
+        public async Task Advise(MethodAsyncAdviceContext context)
         {
             await context.ProceedAsync();
         }
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class AsyncPlusOne : Attribute, IAsyncMethodAdvice
+    public class AsyncPlusOne : Attribute, IMethodAsyncAdvice
     {
-        public async Task Advise(AsyncMethodAdviceContext context)
+        public async Task Advise(MethodAsyncAdviceContext context)
         {
             await context.ProceedAsync();
             context.ReturnValue = Plus(((dynamic)context.ReturnValue).Result, 1);
@@ -259,9 +259,9 @@ namespace MethodLevelTest
             Assert.AreEqual(101, r);
         }
 
-        public class AsyncPlusOne2 : Attribute, IAsyncMethodAdvice
+        public class AsyncPlusOne2 : Attribute, IMethodAsyncAdvice
         {
-            public async Task Advise(AsyncMethodAdviceContext context)
+            public async Task Advise(MethodAsyncAdviceContext context)
             {
                 await context.ProceedAsync();
                 if (context.HasReturnValue)
