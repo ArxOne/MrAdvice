@@ -79,7 +79,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// <c>true</c> if this instance is generic; otherwise, <c>false</c>.
         /// </value>
-        public virtual bool IsGeneric { get { return false; } }
+        public virtual bool IsGeneric => false;
 
         /// <summary>
         /// Gets the method matching this node.
@@ -87,7 +87,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The method.
         /// </value>
-        public virtual MethodDefinition Method { get { return null; } }
+        public virtual MethodDefinition Method => null;
 
         /// <summary>
         /// Gets the self and ancestors.
@@ -113,19 +113,13 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// Gets the ancestors to all children (recursively).
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<ReflectionNode> GetAncestorsToChildren()
-        {
-            return GetSelfAndAncestors().Reverse().Concat(GetAllChildren());
-        }
+        public IEnumerable<ReflectionNode> GetAncestorsToChildren() => GetSelfAndAncestors().Reverse().Concat(GetAllChildren());
 
         /// <summary>
         /// Determines whether this member is in a generic tree.
         /// </summary>
         /// <returns></returns>
-        public bool IsAnyGeneric()
-        {
-            return GetSelfAndAncestors().Any(n => n.IsGeneric);
-        }
+        public bool IsAnyGeneric() => GetSelfAndAncestors().Any(n => n.IsGeneric);
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="ModuleDefinition"/> to <see cref="ReflectionNode"/>.
@@ -134,10 +128,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ReflectionNode(ModuleDefinition moduleDefinition)
-        {
-            return new ModuleReflectionNode(moduleDefinition);
-        }
+        public static implicit operator ReflectionNode(ModuleDefinition moduleDefinition) => new ModuleReflectionNode(moduleDefinition);
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="MethodDefinition"/> to <see cref="ReflectionNode"/>.
@@ -146,9 +137,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ReflectionNode(MethodDefinition methodDefinition)
-        {
-            return new MethodReflectionNode(methodDefinition);
-        }
+        public static implicit operator ReflectionNode(MethodDefinition methodDefinition) => new MethodReflectionNode(methodDefinition);
     }
 }

@@ -23,10 +23,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        protected override ReflectionNode LoadParent()
-        {
-            return new MethodReflectionNode(_methodDefinition);
-        }
+        protected override ReflectionNode LoadParent() => new MethodReflectionNode(_methodDefinition);
 
         private static readonly ReflectionNode[] NoChild = new ReflectionNode[0];
 
@@ -36,10 +33,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        protected override IEnumerable<ReflectionNode> LoadChildren()
-        {
-            return NoChild;
-        }
+        protected override IEnumerable<ReflectionNode> LoadChildren() => NoChild;
 
         /// <summary>
         /// Gets the custom attributes at this level.
@@ -47,12 +41,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The custom attributes.
         /// </value>
-        public override IEnumerable<CustomAttribute> CustomAttributes
-        {
-            get { return _parameterDefinition.CustomAttributes; }
-        }
+        public override IEnumerable<CustomAttribute> CustomAttributes => _parameterDefinition.CustomAttributes;
 
-        private string DebugString { get { return string.Format("Parameter {0}", _parameterDefinition.Name); } }
+        private string DebugString => $"Parameter {_parameterDefinition.Name}";
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -60,10 +51,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            return DebugString;
-        }
+        public override string ToString() => DebugString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ParameterReflectionNode"/> class.

@@ -47,11 +47,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        /// <exception cref="System.NotImplementedException"></exception>
-        protected override IEnumerable<ReflectionNode> LoadChildren()
-        {
-            return _methodDefinition.Parameters.Select(p => new ParameterReflectionNode(p, _methodDefinition));
-        }
+        protected override IEnumerable<ReflectionNode> LoadChildren() => _methodDefinition.Parameters.Select(p => new ParameterReflectionNode(p, _methodDefinition));
 
         /// <summary>
         /// Gets the custom attributes at this level.
@@ -59,14 +55,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The custom attributes.
         /// </value>
-        public override IEnumerable<CustomAttribute> CustomAttributes
-        {
-            get
-            {
-                return _methodDefinition.CustomAttributes
-                    .Concat(_methodDefinition.MethodReturnType.CustomAttributes); // return type has attributes
-            }
-        }
+        public override IEnumerable<CustomAttribute> CustomAttributes => _methodDefinition.CustomAttributes.Concat(_methodDefinition.MethodReturnType.CustomAttributes); // return type has attributes
 
         /// <summary>
         /// Gets a value indicating whether this instance is generic.
@@ -74,10 +63,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// <c>true</c> if this instance is generic; otherwise, <c>false</c>.
         /// </value>
-        public override bool IsGeneric
-        {
-            get { return _methodDefinition.HasGenericParameters; }
-        }
+        public override bool IsGeneric => _methodDefinition.HasGenericParameters;
 
         /// <summary>
         /// Gets the method matching this node.
@@ -85,9 +71,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The method.
         /// </value>
-        public override MethodDefinition Method { get { return _methodDefinition; } }
+        public override MethodDefinition Method => _methodDefinition;
 
-        private string DebugString { get { return string.Format("Method {0}", _methodDefinition.FullName); } }
+        private string DebugString => $"Method {_methodDefinition.FullName}";
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -95,10 +81,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            return DebugString;
-        }
+        public override string ToString() => DebugString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodReflectionNode" /> class.
@@ -118,9 +101,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator MethodReflectionNode(MethodDefinition methodDefinition)
-        {
-            return new MethodReflectionNode(methodDefinition);
-        }
+        public static implicit operator MethodReflectionNode(MethodDefinition methodDefinition) => new MethodReflectionNode(methodDefinition);
     }
 }

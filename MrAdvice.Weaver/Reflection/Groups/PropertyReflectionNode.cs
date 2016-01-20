@@ -22,10 +22,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        protected override ReflectionNode LoadParent()
-        {
-            return new TypeReflectionNode(_propertyDefinition.DeclaringType);
-        }
+        protected override ReflectionNode LoadParent() => new TypeReflectionNode(_propertyDefinition.DeclaringType);
 
         /// <summary>
         /// Gets the children.
@@ -33,7 +30,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        /// <exception cref="System.NotImplementedException"></exception>
         protected override IEnumerable<ReflectionNode> LoadChildren()
         {
             if (_propertyDefinition.GetMethod != null)
@@ -48,18 +44,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The custom attributes.
         /// </value>
-        public override IEnumerable<CustomAttribute> CustomAttributes
-        {
-            get
-            {
-                //Logger.WriteDebug("> {0}", _propertyDefinition.FullName);
-                //foreach (var a in _propertyDefinition.CustomAttributes)
-                //    Logger.WriteDebug(">> {0}", a.AttributeType.FullName);
-                return _propertyDefinition.CustomAttributes;
-            }
-        }
+        public override IEnumerable<CustomAttribute> CustomAttributes => _propertyDefinition.CustomAttributes;
 
-        private string DebugString { get { return string.Format("Property {0}", _propertyDefinition.FullName); } }
+        private string DebugString => $"Property {_propertyDefinition.FullName}";
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -67,10 +54,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            return DebugString;
-        }
+        public override string ToString() => DebugString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyReflectionNode"/> class.

@@ -23,10 +23,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        protected override ReflectionNode LoadParent()
-        {
-            return new AssemblyReflectionNode(_moduleDefinition.Assembly);
-        }
+        protected override ReflectionNode LoadParent() => new AssemblyReflectionNode(_moduleDefinition.Assembly);
 
         /// <summary>
         /// Gets the children.
@@ -34,10 +31,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        protected override IEnumerable<ReflectionNode> LoadChildren()
-        {
-            return _moduleDefinition.GetTypes().OrderBy(t => t.Name).Select(t => new TypeReflectionNode(t));
-        }
+        protected override IEnumerable<ReflectionNode> LoadChildren() => _moduleDefinition.GetTypes().OrderBy(t => t.Name).Select(t => new TypeReflectionNode(t));
 
         /// <summary>
         /// Gets the custom attributes at this level.
@@ -45,12 +39,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The custom attributes.
         /// </value>
-        public override IEnumerable<CustomAttribute> CustomAttributes
-        {
-            get { return _moduleDefinition.CustomAttributes; }
-        }
+        public override IEnumerable<CustomAttribute> CustomAttributes => _moduleDefinition.CustomAttributes;
 
-        private string DebugString { get { return string.Format("Module {0}", _moduleDefinition.FullyQualifiedName); } }
+        private string DebugString => $"Module {_moduleDefinition.FullyQualifiedName}";
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -58,10 +49,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            return DebugString;
-        }
+        public override string ToString() => DebugString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleReflectionNode"/> class.
@@ -79,9 +67,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ModuleReflectionNode(ModuleDefinition moduleDefinition)
-        {
-            return new ModuleReflectionNode(moduleDefinition);
-        }
+        public static implicit operator ModuleReflectionNode(ModuleDefinition moduleDefinition) => new ModuleReflectionNode(moduleDefinition);
     }
 }

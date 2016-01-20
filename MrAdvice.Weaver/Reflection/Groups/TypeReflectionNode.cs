@@ -24,10 +24,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        protected override ReflectionNode LoadParent()
-        {
-            return new ModuleReflectionNode(_typeDefinition.Module);
-        }
+        protected override ReflectionNode LoadParent() => new ModuleReflectionNode(_typeDefinition.Module);
 
         /// <summary>
         /// Gets the children.
@@ -51,10 +48,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The custom attributes.
         /// </value>
-        public override IEnumerable<CustomAttribute> CustomAttributes
-        {
-            get { return _typeDefinition.CustomAttributes; }
-        }
+        public override IEnumerable<CustomAttribute> CustomAttributes => _typeDefinition.CustomAttributes;
 
         /// <summary>
         /// Gets a value indicating whether this instance is generic.
@@ -62,12 +56,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// <c>true</c> if this instance is generic; otherwise, <c>false</c>.
         /// </value>
-        public override bool IsGeneric
-        {
-            get { return _typeDefinition.HasGenericParameters; }
-        }
+        public override bool IsGeneric => _typeDefinition.HasGenericParameters;
 
-        private string DebugString { get { return string.Format("Type {0}", _typeDefinition.FullName); } }
+        private string DebugString => $"Type {_typeDefinition.FullName}";
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.

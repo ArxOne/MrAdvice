@@ -22,10 +22,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        protected override ReflectionNode LoadParent()
-        {
-            return null;
-        }
+        protected override ReflectionNode LoadParent() => null;
 
         /// <summary>
         /// Gets the children.
@@ -33,10 +30,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        protected override IEnumerable<ReflectionNode> LoadChildren()
-        {
-            return new[] { new ModuleReflectionNode(_assemblyDefinition.MainModule) };
-        }
+        protected override IEnumerable<ReflectionNode> LoadChildren() => new[] { new ModuleReflectionNode(_assemblyDefinition.MainModule) };
 
         /// <summary>
         /// Gets the custom attributes at this level.
@@ -44,12 +38,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The custom attributes.
         /// </value>
-        public override IEnumerable<CustomAttribute> CustomAttributes
-        {
-            get { return _assemblyDefinition.CustomAttributes; }
-        }
+        public override IEnumerable<CustomAttribute> CustomAttributes => _assemblyDefinition.CustomAttributes;
 
-        private string DebugString { get { return string.Format("Assembly {0}", _assemblyDefinition.FullName); } }
+        private string DebugString => $"Assembly {_assemblyDefinition.FullName}";
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -57,10 +48,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            return DebugString;
-        }
+        public override string ToString() => DebugString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssemblyReflectionNode"/> class.

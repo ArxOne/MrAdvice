@@ -40,6 +40,9 @@ namespace MethodLevelTest
     [TestClass]
     public class BasicTests
     {
+        [EmptyMethodAdvice]
+        public delegate void SomeDelegate();
+
         [TestMethod]
         [TestCategory("Weaving")]
         public void MethodTest()
