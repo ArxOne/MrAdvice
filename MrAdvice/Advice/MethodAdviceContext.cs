@@ -18,6 +18,8 @@ namespace ArxOne.MrAdvice.Advice
     [DebuggerDisplay("MethodInfo {TargetMethod}")]
     public class MethodAdviceContext : SyncAdviceContext
     {
+        private readonly IMethodAdvice _methodAdvice;
+
         /// <summary>
         /// Gets the parameters.
         /// Each parameter can be individually changed before Call.Proceed()
@@ -73,8 +75,14 @@ namespace ArxOne.MrAdvice.Advice
         /// The target method.
         /// </value>
         public MethodBase TargetMethod { get; }
-
-        private readonly IMethodAdvice _methodAdvice;
+        
+        /// <summary>
+        /// Gets a value indicating whether the target method is asynchronous.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the target method is asynchronous; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsTargetMethodAsync => typeof(Task).IsAssignableFrom((TargetMethod as MethodInfo)?.ReturnType);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodAdviceContext" /> class.

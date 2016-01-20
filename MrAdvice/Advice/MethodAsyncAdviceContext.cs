@@ -13,6 +13,8 @@
     [DebuggerDisplay("async MethodInfo {TargetMethod}")]
     public class MethodAsyncAdviceContext : AdviceContext
     {
+        private readonly IMethodAsyncAdvice _methodAdvice;
+
         /// <summary>
         /// Gets the parameters.
         /// Each parameter can be individually changed before Call.Proceed()
@@ -71,7 +73,13 @@
         /// </value>
         public MethodBase TargetMethod { get; }
 
-        private readonly IMethodAsyncAdvice _methodAdvice;
+        /// <summary>
+        /// Gets a value indicating whether the target method is asynchronous.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the target method is asynchronous; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsTargetMethodAsync => typeof (Task).IsAssignableFrom((TargetMethod as MethodInfo)?.ReturnType);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodAdviceContext" /> class.
