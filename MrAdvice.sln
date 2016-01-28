@@ -72,6 +72,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UwpTest", "Test\UwpTest\UwpTest.csproj", "{B8380D73-626A-42F1-AA73-741540F57F02}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BclTest", "Test\BclTest\BclTest.csproj", "{0B230E8B-862F-4AB8-B9A2-D76222E63CF2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B300CC88-B778-4543-AE8B-86D456BE88D7} = {B300CC88-B778-4543-AE8B-86D456BE88D7}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
