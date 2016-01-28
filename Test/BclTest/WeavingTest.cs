@@ -8,6 +8,7 @@
 namespace BclTest
 {
     using System;
+    using System.Threading.Tasks;
     using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -31,6 +32,7 @@ namespace BclTest
         [TestCategory("Weaving")]
         public void BclAdviceTest()
         {
+            var t = typeof (TaskEx);
             var r = F(10);
             Assert.AreEqual(13, r);
         }
