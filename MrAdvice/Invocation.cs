@@ -385,7 +385,7 @@ namespace ArxOne.MrAdvice
             // now try to find the property
             // ReSharper disable once PossibleNullReferenceException
             var propertyInfo = methodInfo.DeclaringType.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                .SingleOrDefault(p => p.GetGetMethod() == methodInfo || p.GetSetMethod() == methodInfo);
+                .SingleOrDefault(p => p.GetGetMethod(true) == methodInfo || p.GetSetMethod(true) == methodInfo);
             if (propertyInfo == null)
                 return null; // this should never happen
 
