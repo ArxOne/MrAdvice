@@ -91,6 +91,16 @@ namespace ArxOne.MrAdvice.Weaver
         private void WeaveAdvices(MarkedNode markedMethod, Types types)
         {
             var method = markedMethod.Node.Method;
+
+            // sanity check
+            var moduleDefinition = method.Module;
+            if (method.ReturnType.SafeEquivalent(moduleDefinition.SafeImport(typeof(void))))
+            {
+                var customAttributes = method.CustomAttributes;
+                if (customAttributes.Any(c => c.AttributeType.Name == "AsyncStateMachineAttribute"))
+                    Logger.WriteWarning("Advising async void method '{0}' could confuse async advices. Consider switching its return type to async Task.", method.FullName);
+            }
+
             if (method.IsAbstract)
             {
                 method.Attributes = (method.Attributes & ~MethodAttributes.Abstract) | MethodAttributes.Virtual;

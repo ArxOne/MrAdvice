@@ -293,5 +293,9 @@ namespace MethodLevelTest
             var r = Get1000();
             Assert.AreEqual(1001, r);
         }
+
+        [AsyncAdvice]
+        public async void GenerateWarning()
+        { }
     }
 }
