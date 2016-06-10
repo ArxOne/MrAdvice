@@ -7,6 +7,7 @@
 namespace MethodLevelTest
 {
     using System;
+    using System.Collections.Generic;
     using System.Runtime.InteropServices;
     using Advices;
     using ArxOne.MrAdvice;
@@ -130,6 +131,17 @@ namespace MethodLevelTest
             int b;
             c.UsesOut(4, out b);
             Assert.AreEqual(4, b);
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void OutGenericParameterTest()
+        {
+            var c = new EmptyAdvisedClass();
+            List<int> b;
+            c.UsesOut(new List<int> { 5 }, out b);
+            Assert.AreEqual(1, b.Count);
+            Assert.AreEqual(5, b[0]);
         }
 
         //[TestMethod]

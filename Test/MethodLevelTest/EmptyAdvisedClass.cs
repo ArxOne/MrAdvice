@@ -6,6 +6,7 @@
 #endregion
 namespace MethodLevelTest
 {
+    using System.Collections.Generic;
     using System.Reflection;
     using Advices;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -106,6 +107,12 @@ namespace MethodLevelTest
 
         [EmptyMethodAdvice]
         public void UsesOut(int a, out int b)
+        {
+            b = a;
+        }
+
+        [EmptyMethodAdvice]
+        public void UsesOut(List<int> a, out List<int> b)
         {
             b = a;
         }
