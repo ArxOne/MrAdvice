@@ -14,15 +14,15 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Runtime.Versioning;
     using Advice;
     using Annotation;
+    using dnlib.DotNet;
+    using dnlib.DotNet.Emit;
     using Introduction;
     using IO;
-    using Mono.Cecil;
-    using Mono.Cecil.Cil;
-    using Mono.Cecil.Rocks;
     using Properties;
     using Reflection;
     using Reflection.Groups;
     using Utility;
+    using ModuleDefMD = dnlib.DotNet.ModuleDefMD;
 
     /// <summary>
     /// Aspect weaver core
@@ -47,7 +47,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified module definition.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        public void Weave(ModuleDefinition moduleDefinition)
+        public void Weave(ModuleDefMD moduleDefinition)
         {
             var auditTimer = new AuditTimer();
             var stopwatch = new Stopwatch();
@@ -82,7 +82,7 @@ namespace ArxOne.MrAdvice.Weaver
             auditTimer.NewZone("Weavable methods detection");
             var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface, types).Where(IsWeavable).ToArray();
             auditTimer.NewZone("Abstract targets");
-            var generatedFieldsToBeRemoved = new List<FieldReference>();
+            var generatedFieldsToBeRemoved = new List<FieldDef>();
             var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
             if (methodsWithAbstractTarget.Length > 0)
             {
@@ -91,12 +91,22 @@ namespace ArxOne.MrAdvice.Weaver
                     Logger.WriteDebug("Field {0} to be removed", fieldReference.FullName);
             }
             auditTimer.NewZone("Methods weaving");
-            weavableMethods.AsParallel().ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
+            weavableMethods
+#if !DEBUG
+                .AsParallel()
+#endif
+                .ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
+
+            return;
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
             auditTimer.NewZone("Interface methods weaving");
-            weavableInterfaces.AsParallel().ForAll(i => WeaveInterface(moduleDefinition, i));
+            weavableInterfaces
+#if !DEBUG
+                .AsParallel()
+#endif
+                .ForAll(i => WeaveInterface(moduleDefinition, i));
 
             //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
@@ -104,12 +114,14 @@ namespace ArxOne.MrAdvice.Weaver
             auditTimer.NewZone("Info advices weaving");
             var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IInfoAdvice));
             moduleDefinition.GetTypes()
+#if !DEBUG
                 .AsParallel()
+#endif
                 .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
 
             auditTimer.NewZone("Abstract targets cleanup");
             foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
-                generatedFieldToBeRemoved.DeclaringType.Resolve().Fields.Remove(generatedFieldToBeRemoved.Resolve());
+                generatedFieldToBeRemoved.DeclaringType.Fields.Remove(generatedFieldToBeRemoved);
 
             auditTimer.LastZone();
 
@@ -119,15 +131,14 @@ namespace ArxOne.MrAdvice.Weaver
             var maxLength = report.Keys.Max(k => k.Length);
             Logger.WriteDebug("--- Timings --------------------------");
             foreach (var reportPart in report)
-                Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength),
-                    (int)reportPart.Value.TotalMilliseconds);
+                Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength), (int)reportPart.Value.TotalMilliseconds);
             Logger.WriteDebug("--------------------------------------");
 
             Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
                 moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
         }
 
-        private IEnumerable<FieldDefinition> GetRemovableFields(IList<MarkedNode> nodes, Types types)
+        private IEnumerable<FieldDef> GetRemovableFields(IList<MarkedNode> nodes, Types types)
         {
             var type = nodes.First().Node.Method.DeclaringType;
             // get all types
@@ -141,21 +152,21 @@ namespace ArxOne.MrAdvice.Weaver
             return removableFields;
         }
 
-        private IEnumerable<Tuple<FieldDefinition, int>> GetRemovableFields(IEnumerable<MethodDefinition> methods, Types types)
+        private IEnumerable<Tuple<FieldDef, int>> GetRemovableFields(IEnumerable<MethodDef> methods, Types types)
         {
             var allFields = methods.SelectMany(m => GetRemovableFields(m, types));
             var fieldsCount = allFields.GroupBy(f => f);
             return fieldsCount.Select(f => Tuple.Create(f.Key, f.Count()));
         }
 
-        private IEnumerable<FieldDefinition> GetRemovableFields(MethodDefinition method, Types types)
+        private IEnumerable<FieldDef> GetRemovableFields(MethodDef method, Types types)
         {
             return from instruction in method.Body.Instructions
-                   let fieldReference = instruction.Operand as FieldReference
+                   let fieldReference = instruction.Operand as IField
                    where fieldReference != null && fieldReference.DeclaringType.SafeEquivalent(method.DeclaringType)
-                   let fieldDefinition = fieldReference.Resolve()
+                   let fieldDefinition = fieldReference.ResolveFieldDef()
                    where fieldDefinition.CustomAttributes.Any(a => a.AttributeType.SafeEquivalent(types.CompilerGeneratedAttributeType))
-                   select fieldReference.Resolve();
+                   select fieldDefinition;
         }
 
         /// <summary>
@@ -164,28 +175,28 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
-        private static TargetFramework GetTargetFramework(ModuleDefinition moduleDefinition)
+        private static TargetFramework GetTargetFramework(ModuleDef moduleDefinition)
         {
             var targetFrameworkAttributeType = moduleDefinition.SafeImport(typeof(TargetFrameworkAttribute));
             var targetFrameworkAttribute = moduleDefinition.Assembly.CustomAttributes.SingleOrDefault(a => a.AttributeType.SafeEquivalent(targetFrameworkAttributeType));
             if (targetFrameworkAttribute == null)
             {
-                switch (moduleDefinition.Runtime)
+                switch (moduleDefinition.RuntimeVersion)
                 {
-                    case TargetRuntime.Net_1_0:
+                    case ".NET 1.0":
                         return new TargetFramework(new Version(1, 0));
-                    case TargetRuntime.Net_1_1:
+                    case ".NET 1.1":
                         return new TargetFramework(new Version(1, 1));
-                    case TargetRuntime.Net_2_0:
+                    case ".NET 2.0":
                         return new TargetFramework(new Version(2, 0));
-                    case TargetRuntime.Net_4_0:
+                    case ".NET 4.0":
                         return new TargetFramework(new Version(4, 0));
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new ArgumentOutOfRangeException(nameof(moduleDefinition.RuntimeVersion));
                 }
             }
 
-            return new TargetFramework((string)targetFrameworkAttribute.ConstructorArguments[0].Value);
+            return new TargetFramework(((UTF8String)targetFrameworkAttribute.ConstructorArguments[0].Value).String);
         }
 
         /// <summary>
@@ -194,22 +205,16 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="adviceMemberTypeReference">The type reference.</param>
         /// <param name="introducedFieldType">Type of the introduced field.</param>
         /// <returns></returns>
-        private static bool IsIntroduction(TypeReference adviceMemberTypeReference, out TypeReference introducedFieldType)
+        private static bool IsIntroduction(ITypeDefOrRef adviceMemberTypeReference, out ITypeDefOrRef introducedFieldType)
         {
-            if (!adviceMemberTypeReference.IsGenericInstance)
+            var genericAdviceMemberTypeReference = adviceMemberTypeReference.TryGetGenericInstSig();
+            if (genericAdviceMemberTypeReference == null || genericAdviceMemberTypeReference.FullName != typeof(IntroducedField<>).FullName)
             {
                 introducedFieldType = null;
                 return false;
             }
 
-            var genericAdviceMemberTypeReference = (GenericInstanceType)adviceMemberTypeReference;
-            if (genericAdviceMemberTypeReference.GetElementType().FullName != typeof(IntroducedField<>).FullName)
-            {
-                introducedFieldType = null;
-                return false;
-            }
-
-            introducedFieldType = genericAdviceMemberTypeReference.GenericArguments[0];
+            introducedFieldType = genericAdviceMemberTypeReference.GenericArguments[0].ToTypeDefOrRef();
             return true;
         }
 
@@ -219,14 +224,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <returns></returns>
-        private IEnumerable<TypeReference> GetAdviceHandledInterfaces(ModuleDefinition moduleDefinition)
+        private IEnumerable<ITypeDefOrRef> GetAdviceHandledInterfaces(ModuleDef moduleDefinition)
         {
             // the first method to look for in the final AdviceExtensions.Handle<>() method
             var adviceExtensionsType = TypeResolver.Resolve(moduleDefinition, typeof(AdviceExtensions));
-            var adviceHandleMethod = adviceExtensionsType.GetMethods().Single(m => m.IsPublic && m.HasGenericParameters && m.Name == nameof(AdviceExtensions.Handle));
-            var methodsSearched = new HashSet<MethodReference>(new MethodReferenceComparer()) { adviceHandleMethod };
-            var foundHandledInterfaces = new HashSet<TypeReference>(new TypeReferenceComparer());
-            var methodsToSearch = new List<Tuple<MethodDefinition, int>> { Tuple.Create(adviceHandleMethod, 0) };
+            var adviceHandleMethod = adviceExtensionsType.Methods.Single(m => m.IsPublic && m.HasGenericParameters && m.Name == nameof(AdviceExtensions.Handle));
+            var methodsSearched = new HashSet<MethodDef>(new MethodReferenceComparer()) { adviceHandleMethod };
+            var foundHandledInterfaces = new HashSet<ITypeDefOrRef>(new TypeReferenceComparer());
+            var methodsToSearch = new List<Tuple<MethodDef, int>> { Tuple.Create(adviceHandleMethod, 0) };
             while (methodsToSearch.Count > 0)
             {
                 var methodToSearch = methodsToSearch[0];
@@ -236,19 +241,19 @@ namespace ArxOne.MrAdvice.Weaver
                     // if the supposed interface type itself is a generic parameter
                     // this means that the calling method (Item2) is itself a generic parameter
                     // and we have to lookup for calls to this method
-                    if (t.Item1.IsGenericParameter)
+                    if (t.Item1.ContainsGenericParameter)
                     {
                         if (!methodsSearched.Contains(t.Item2))
                         {
                             // ReSharper disable once AccessToForEachVariableInClosure
-                            var parameterIndex = t.Item2.GenericParameters.IndexOf(p => p.Name == t.Item1.Name);
+                            var parameterIndex = t.Item2.GenericParameters.IndexOf(p => p.Name == t.Item1.TypeName);
                             methodsSearched.Add(t.Item2);
                             methodsToSearch.Add(Tuple.Create(t.Item2, parameterIndex));
                             Logger.WriteDebug("Now looking for references to '{0} [{1}]'", methodToSearch, parameterIndex);
                         }
                     }
                     // only interfaces are processed by now
-                    else if (t.Item1.Resolve().IsInterface)
+                    else if (TypeResolver.Resolve(t.Item1).IsInterface)
                     {
                         // otherwise, this is a direct call, keep the injected interface name
                         if (!foundHandledInterfaces.Contains(t.Item1))
@@ -269,11 +274,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="invokedMethod">The invoked method.</param>
         /// <param name="genericParameterIndex">Index of the generic parameter.</param>
         /// <returns></returns>
-        private static IEnumerable<Tuple<TypeReference, MethodDefinition>> GetAdviceHandledInterfaces(ModuleDefinition moduleDefinition,
-            MethodReference invokedMethod, int genericParameterIndex)
+        private static IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(ModuleDef moduleDefinition,
+            IMethodDefOrRef invokedMethod, int genericParameterIndex)
         {
-            return moduleDefinition.GetTypes().SelectMany(t => t.GetMethods().Where(m => m.HasBody)
-                .AsParallel().SelectMany(definition => GetAdviceHandledInterfaces(definition, invokedMethod, genericParameterIndex)));
+            return moduleDefinition.GetTypes().SelectMany(t => t.Methods.Where(m => m.HasBody)
+#if !DEBUG
+                .AsParallel()
+#endif
+                .SelectMany(definition => GetAdviceHandledInterfaces(definition, invokedMethod, genericParameterIndex)));
         }
 
         /// <summary>
@@ -284,19 +292,22 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="invokedMethod">The invoked method.</param>
         /// <param name="genericParameterIndex">Index of the generic parameter.</param>
         /// <returns></returns>
-        private static IEnumerable<Tuple<TypeReference, MethodDefinition>> GetAdviceHandledInterfaces(MethodDefinition methodDefinition,
-            MethodReference invokedMethod, int genericParameterIndex)
+        private static IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(MethodDef methodDefinition,
+            IMethodDefOrRef invokedMethod, int genericParameterIndex)
         {
             foreach (var instruction in methodDefinition.Body.Instructions)
             {
                 if (instruction.OpCode == OpCodes.Call || instruction.OpCode == OpCodes.Calli || instruction.OpCode == OpCodes.Callvirt)
                 {
-                    var invokedMethodReference = (MethodReference)instruction.Operand;
-                    if (invokedMethodReference.IsGenericInstance && invokedMethodReference.SafeEquivalent(invokedMethod))
+                    var invokedMethodReference = (IMethod)instruction.Operand;
+                    if (invokedMethodReference.NumberOfGenericParameters > 0 && invokedMethodReference.SafeEquivalent(invokedMethod))
                     {
-                        var advisedInterface = ((GenericInstanceMethod)invokedMethodReference).GenericArguments[genericParameterIndex];
+                        var methodSig = invokedMethodReference.MethodSig;
+                        var methodSpec = (MethodSpec)invokedMethodReference;
+                        var advisedInterface = methodSpec.GenericInstMethodSig.GenericArguments[0];
+                        //var advisedInterface = invokedMethodReference.ResolveMethodDef().GenericParameters[genericParameterIndex];
                         //Logger.WriteDebug("Found Advice to '{0}'", advisedInterface);
-                        yield return Tuple.Create(advisedInterface, methodDefinition);
+                        yield return Tuple.Create(advisedInterface.ToTypeDefOrRef(), methodDefinition);
                     }
                 }
             }
@@ -309,7 +320,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private static bool IsWeavable(MarkedNode markedMethod)
         {
-            return markedMethod.Node.Method.HasBody || markedMethod.Node.Method.HasPInvokeInfo;
+            return markedMethod.Node.Method.HasBody || markedMethod.Node.Method.IsPinvokeImpl;
         }
 
         /// <summary>
@@ -319,9 +330,12 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="markerInterface">The marker interface.</param>
         /// <param name="types">The types.</param>
         /// <returns></returns>
-        private IEnumerable<MarkedNode> GetMarkedMethods(ReflectionNode reflectionNode, TypeDefinition markerInterface, Types types)
+        private IEnumerable<MarkedNode> GetMarkedMethods(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, Types types)
         {
-            return reflectionNode.GetAncestorsToChildren().AsParallel()
+            return reflectionNode.GetAncestorsToChildren()
+#if !DEBUG
+                .AsParallel()
+#endif
                 .Where(n => n.Method != null)
                 .Select(n => new MarkedNode { Node = n, Definitions = GetAllMarkers(n, markerInterface, types).ToArray() })
                 .Where(m => m.Definitions.Length > 0);
@@ -334,10 +348,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="markerInterface">The advice interface.</param>
         /// <param name="types">The types.</param>
         /// <returns></returns>
-        private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, TypeDefinition markerInterface, Types types)
+        private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, Types types)
         {
             var markers = reflectionNode.GetAncestorsToChildren()
-                .SelectMany(n => n.CustomAttributes.SelectMany(a => a.AttributeType.Resolve().GetSelfAndParents())
+                .SelectMany(n => n.CustomAttributes.SelectMany(a => TypeResolver.Resolve(a.AttributeType).GetSelfAndParents())
                     .Where(t => IsMarker(t, markerInterface)))
                 .Distinct()
                 .Select(t => GetMarkerDefinition(t, types));
@@ -347,8 +361,8 @@ namespace ArxOne.MrAdvice.Weaver
             return markers;
         }
 
-        private readonly IDictionary<TypeDefinition, MarkerDefinition> _markerDefinitions
-            = new Dictionary<TypeDefinition, MarkerDefinition>();
+        private readonly IDictionary<TypeDef, MarkerDefinition> _markerDefinitions
+            = new Dictionary<TypeDef, MarkerDefinition>();
 
         /// <summary>
         /// Gets the marker definition.
@@ -356,7 +370,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="types">The types.</param>
         /// <returns></returns>
-        private MarkerDefinition GetMarkerDefinition(TypeDefinition typeDefinition, Types types)
+        private MarkerDefinition GetMarkerDefinition(TypeDef typeDefinition, Types types)
         {
             lock (_markerDefinitions)
             {
@@ -376,7 +390,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="types">The types.</param>
         /// <returns></returns>
-        private static MarkerDefinition CreateMarkerDefinition(TypeDefinition typeDefinition, Types types)
+        private static MarkerDefinition CreateMarkerDefinition(TypeDef typeDefinition, Types types)
         {
             var priorityAttributes = typeDefinition.CustomAttributes.Where(a => a.AttributeType.SafeEquivalent(types.PriorityAttributeType)).ToList();
             if (priorityAttributes.Count > 1)
@@ -405,7 +419,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="typeReference">The type reference.</param>
         /// <param name="markerInterface">The aspect marker interface.</param>
         /// <returns></returns>
-        private bool IsMarker(TypeReference typeReference, TypeDefinition markerInterface)
+        private bool IsMarker(ITypeDefOrRef typeReference, ITypeDefOrRef markerInterface)
         {
             lock (_isMarker)
             {
@@ -417,9 +431,12 @@ namespace ArxOne.MrAdvice.Weaver
                     return isMarker;
 
                 // otherwise look for type or implemented interfaces (recursively)
-                var interfaces = typeReference.Resolve().Interfaces;
+                var typeDef = TypeResolver.Resolve(typeReference);
+                if (typeDef == null)
+                    return false;
+                var interfaces = typeDef.Interfaces;
                 _isMarker[key] = isMarker = typeReference.SafeEquivalent(markerInterface)
-                                               || interfaces.Any(i => IsMarker(i, markerInterface));
+                                               || interfaces.Any(i => IsMarker(i.Interface, markerInterface));
                 return isMarker;
             }
         }

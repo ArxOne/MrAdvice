@@ -10,20 +10,17 @@ namespace ArxOne.MrAdvice.Weaver
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using System.Xml.Schema;
     using Advice;
+    using dnlib.DotNet;
+    using dnlib.DotNet.Emit;
     using IO;
-    using Mono.Cecil;
-    using Mono.Cecil.Cil;
-    using Mono.Cecil.Rocks;
     using Utility;
 
     internal class WeaverMethodWeavingContext : MethodWeavingContext
     {
-        private readonly TypeDefinition _typeDefinition;
+        private readonly TypeDef _typeDefinition;
         private readonly Types _types;
+        private readonly TypeResolver _typeResolver;
 
         /// <summary>
         /// Gets the properties.
@@ -33,7 +30,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </value>
         public virtual IEnumerable<string> Properties
         {
-            get { return _typeDefinition.Properties.Select(p => p.Name); }
+            get { return _typeDefinition.Properties.Select(p => p.Name.String); }
         }
 
         /// <summary>
@@ -43,11 +40,13 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="type">The type (original type).</param>
         /// <param name="targetMethodName">Name of the target method.</param>
         /// <param name="types">The types.</param>
-        public WeaverMethodWeavingContext(TypeDefinition typeDefinition, Type type, string targetMethodName, Types types)
+        /// <param name="typeResolver">The type resolver.</param>
+        public WeaverMethodWeavingContext(TypeDef typeDefinition, Type type, string targetMethodName, Types types, TypeResolver typeResolver)
             : base(type, targetMethodName)
         {
             _typeDefinition = typeDefinition;
             _types = types;
+            _typeResolver = typeResolver;
         }
 
         /// <summary>
@@ -58,7 +57,7 @@ namespace ArxOne.MrAdvice.Weaver
         public override void AddPublicAutoProperty(string propertyName, Type propertyType)
         {
             var moduleDefinition = _typeDefinition.Module;
-            _typeDefinition.AddPublicAutoProperty(propertyName, moduleDefinition.Import(propertyType));
+            _typeDefinition.AddPublicAutoProperty(propertyName, moduleDefinition.Import(propertyType), moduleDefinition, _typeResolver);
         }
 
         /// <summary>
@@ -97,9 +96,9 @@ namespace ArxOne.MrAdvice.Weaver
                 return;
 
             var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
-            foreach (var ctor in _typeDefinition.GetConstructors().ToArray())
+            foreach (var ctor in _typeDefinition.FindConstructors().ToArray())
             {
-                if (once && ctor.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as MethodReference, true)))
+                if (once && ctor.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as IMethod, true)))
                     continue;
 
                 var instructions = new Instructions(ctor.Body.Instructions, _typeDefinition.Module);

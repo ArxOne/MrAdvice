@@ -7,14 +7,14 @@
 namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Reflection group, property level
     /// </summary>
     internal class PropertyReflectionNode : ReflectionNode
     {
-        private readonly PropertyDefinition _propertyDefinition;
+        private readonly PropertyDef _propertyDefinition;
 
         /// <summary>
         /// Gets the parent.
@@ -60,7 +60,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// Initializes a new instance of the <see cref="PropertyReflectionNode"/> class.
         /// </summary>
         /// <param name="propertyDefinition">The property definition.</param>
-        public PropertyReflectionNode(PropertyDefinition propertyDefinition)
+        public PropertyReflectionNode(PropertyDef propertyDefinition)
         {
             _propertyDefinition = propertyDefinition;
         }

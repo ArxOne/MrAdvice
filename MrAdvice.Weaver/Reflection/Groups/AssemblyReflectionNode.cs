@@ -7,14 +7,15 @@
 namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
-    using Mono.Cecil;
+    using dnlib.DotNet;
+    using Utility;
 
     /// <summary>
     /// Reflection group, assembly level
     /// </summary>
     internal class AssemblyReflectionNode : ReflectionNode
     {
-        private readonly AssemblyDefinition _assemblyDefinition;
+        private readonly AssemblyDef _assemblyDefinition;
 
         /// <summary>
         /// Gets the parent.
@@ -30,7 +31,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        protected override IEnumerable<ReflectionNode> LoadChildren() => new[] { new ModuleReflectionNode(_assemblyDefinition.MainModule) };
+        protected override IEnumerable<ReflectionNode> LoadChildren() => new[] { new ModuleReflectionNode(_assemblyDefinition.GetMainModule()) };
 
         /// <summary>
         /// Gets the custom attributes at this level.
@@ -54,7 +55,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// Initializes a new instance of the <see cref="AssemblyReflectionNode"/> class.
         /// </summary>
         /// <param name="assemblyDefinition">The assembly definition.</param>
-        public AssemblyReflectionNode(AssemblyDefinition assemblyDefinition)
+        public AssemblyReflectionNode(AssemblyDef assemblyDefinition)
         {
             _assemblyDefinition = assemblyDefinition;
         }

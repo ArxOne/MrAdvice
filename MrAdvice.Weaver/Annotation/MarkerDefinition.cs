@@ -7,11 +7,11 @@
 
 namespace ArxOne.MrAdvice.Annotation
 {
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     internal class MarkerDefinition
     {
-        public TypeReference Type;
+        public ITypeDefOrRef Type;
 
         public int Priority;
 

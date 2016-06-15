@@ -8,15 +8,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Mono.Cecil;
-    using Mono.Cecil.Rocks;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Reflection group, type level
     /// </summary>
     internal class TypeReflectionNode : ReflectionNode
     {
-        private readonly TypeDefinition _typeDefinition;
+        private readonly TypeDef _typeDefinition;
 
         /// <summary>
         /// Gets the parent.
@@ -36,9 +35,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         {
             foreach (var propertyDefinition in _typeDefinition.Properties.OrderBy(p => p.Name))
                 yield return new PropertyReflectionNode(propertyDefinition);
-            foreach (var constructorMethodDefinition in _typeDefinition.GetConstructors())
+            foreach (var constructorMethodDefinition in _typeDefinition.FindConstructors())
                 yield return new MethodReflectionNode(constructorMethodDefinition);
-            foreach (var methodDefinition in _typeDefinition.GetMethods().OrderBy(m => m.Name).Where(m => !m.IsSpecialName))
+            foreach (var methodDefinition in _typeDefinition.Methods.OrderBy(m => m.Name).Where(m => !m.IsSpecialName))
                 yield return new MethodReflectionNode(methodDefinition);
         }
 
@@ -75,7 +74,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// Initializes a new instance of the <see cref="TypeReflectionNode"/> class.
         /// </summary>
         /// <param name="typeDefinition">The type definition.</param>
-        public TypeReflectionNode(TypeDefinition typeDefinition)
+        public TypeReflectionNode(TypeDef typeDefinition)
         {
             _typeDefinition = typeDefinition;
         }

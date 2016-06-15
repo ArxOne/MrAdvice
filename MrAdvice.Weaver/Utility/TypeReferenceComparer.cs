@@ -8,12 +8,12 @@
 namespace ArxOne.MrAdvice.Utility
 {
     using System.Collections.Generic;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Equality comparer for method references
     /// </summary>
-    internal class TypeReferenceComparer : IEqualityComparer<TypeReference>
+    internal class TypeReferenceComparer : IEqualityComparer<ITypeDefOrRef>
     {
         /// <summary>
         /// Determines whether the specified objects are equal.
@@ -23,7 +23,7 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns>
         /// true if the specified objects are equal; otherwise, false.
         /// </returns>
-        public bool Equals(TypeReference x, TypeReference y)
+        public bool Equals(ITypeDefOrRef x, ITypeDefOrRef y)
         {
             return x.SafeEquivalent(y);
         }
@@ -35,7 +35,7 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public int GetHashCode(TypeReference obj)
+        public int GetHashCode(ITypeDefOrRef obj)
         {
             return obj.FullName.GetHashCode();
         }

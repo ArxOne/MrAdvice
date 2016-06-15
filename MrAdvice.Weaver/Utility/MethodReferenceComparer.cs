@@ -1,12 +1,12 @@
 ﻿namespace ArxOne.MrAdvice.Utility
 {
     using System.Collections.Generic;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Equality comparer for method references
     /// </summary>
-    internal class MethodReferenceComparer : IEqualityComparer<MethodReference>
+    internal class MethodReferenceComparer : IEqualityComparer<MethodDef>
     {
         /// <summary>
         /// Determines whether the specified objects are equal.
@@ -16,7 +16,7 @@
         /// <returns>
         /// true if the specified objects are equal; otherwise, false.
         /// </returns>
-        public bool Equals(MethodReference x, MethodReference y)
+        public bool Equals(MethodDef x, MethodDef y)
         {
             return x.SafeEquivalent(y, true);
         }
@@ -28,7 +28,7 @@
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
-        public int GetHashCode(MethodReference obj)
+        public int GetHashCode(MethodDef obj)
         {
             return obj.DeclaringType.FullName.GetHashCode() ^ obj.Name.GetHashCode();
         }

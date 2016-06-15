@@ -7,17 +7,17 @@
 
 namespace ArxOne.MrAdvice.Weaver
 {
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Common markers
     /// </summary>
     internal class Types
     {
-        public TypeReference CompilerGeneratedAttributeType;
-        public TypeDefinition PriorityAttributeType;
-        public TypeDefinition AbstractTargetAttributeType;
+        public ITypeDefOrRef CompilerGeneratedAttributeType;
+        public ITypeDefOrRef PriorityAttributeType;
+        public ITypeDefOrRef AbstractTargetAttributeType;
 
-        public TypeDefinition WeavingAdviceAttributeType;
+        public ITypeDefOrRef WeavingAdviceAttributeType;
     }
 }

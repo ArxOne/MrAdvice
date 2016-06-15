@@ -10,7 +10,7 @@ namespace ArxOne.MrAdvice.Reflection
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     public class TypeLoader
     {
@@ -28,7 +28,7 @@ namespace ArxOne.MrAdvice.Reflection
         /// </summary>
         /// <param name="typeReference">The type reference.</param>
         /// <returns></returns>
-        public Type GetType(TypeReference typeReference)
+        public Type GetType(ITypeDefOrRef typeReference)
         {
             if (_assembliesLoader != null)
             {

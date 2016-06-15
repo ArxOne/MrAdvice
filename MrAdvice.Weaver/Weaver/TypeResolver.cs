@@ -9,7 +9,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Mono.Cecil;
+    using dnlib.DotNet;
     using Utility;
 
     /// <summary>
@@ -17,6 +17,8 @@ namespace ArxOne.MrAdvice.Weaver
     /// </summary>
     internal class TypeResolver
     {
+        private const int Depth = 2;
+
         /// <summary>
         /// Gets or sets the assembly resolver.
         /// </summary>
@@ -25,7 +27,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </value>
         public IAssemblyResolver AssemblyResolver { get; set; }
 
-        private readonly IDictionary<string, TypeDefinition> _resolvedTypes = new Dictionary<string, TypeDefinition>();
+        private readonly IDictionary<string, TypeDef> _resolvedTypesByName = new Dictionary<string, TypeDef>();
 
         /// <summary>
         /// Resolves the full name to a type definiton.
@@ -34,19 +36,19 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="fullName">The full name.</param>
         /// <returns></returns>
-        public TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName)
+        public TypeDef Resolve(ModuleDef moduleDefinition, string fullName)
         {
-            lock (_resolvedTypes)
+            lock (_resolvedTypesByName)
             {
-                TypeDefinition typeDefinition;
-                if (_resolvedTypes.TryGetValue(fullName, out typeDefinition))
+                TypeDef typeDefinition;
+                if (_resolvedTypesByName.TryGetValue(fullName, out typeDefinition))
                     return typeDefinition;
 
                 // 2 levels, because of level of dependency:
                 // - level 0: the assembly where advices are injected
                 // - level 1: the assembly containing the advice
                 // - level 2: the advices dependencies
-                _resolvedTypes[fullName] = typeDefinition = Resolve(moduleDefinition, fullName, true, 2);
+                _resolvedTypesByName[fullName] = typeDefinition = Resolve(moduleDefinition, fullName, true, Depth);
                 return typeDefinition;
             }
         }
@@ -59,11 +61,13 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="ignoreSystem">if set to <c>true</c> [ignore system].</param>
         /// <param name="depth">The depth.</param>
         /// <returns></returns>
-        private TypeDefinition Resolve(ModuleDefinition moduleDefinition, string fullName, bool ignoreSystem, int depth)
+        private TypeDef Resolve(ModuleDef moduleDefinition, string fullName, bool ignoreSystem, int depth)
         {
             return moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth)
                 .Select(referencedModule => referencedModule.GetTypes()
+#if !DEBUG
                     .AsParallel()
+#endif
                     .FirstOrDefault(t => t.FullName == fullName))
                 .FirstOrDefault(foundType => foundType != null);
         }
@@ -74,9 +78,25 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="type">The type.</param>
         /// <returns></returns>
-        public TypeDefinition Resolve(ModuleDefinition moduleDefinition, Type type)
+        public TypeDef Resolve(ModuleDef moduleDefinition, Type type)
         {
             return Resolve(moduleDefinition, type.FullName);
+        }
+
+        /// <summary>
+        /// Resolves the specified type definition or reference.
+        /// </summary>
+        /// <param name="typeDefOrRef">The type definition or reference.</param>
+        /// <returns></returns>
+        public TypeDef Resolve(ITypeDefOrRef typeDefOrRef)
+        {
+            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue))
+            {
+                var typeDef = reference.Find(typeDefOrRef);
+                if (typeDef != null)
+                    return typeDef;
+            }
+            return null;
         }
     }
 }

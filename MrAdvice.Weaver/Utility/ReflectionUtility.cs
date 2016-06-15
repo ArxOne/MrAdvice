@@ -9,7 +9,7 @@ namespace ArxOne.MrAdvice.Utility
     using System;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// What is extreme laziness? :)
@@ -189,7 +189,7 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="methodDefinition">The method definition.</param>
         /// <returns></returns>
-        internal static bool IsPropertyMethod(this MethodDefinition methodDefinition)
+        internal static bool IsPropertyMethod(this MethodDef methodDefinition)
         {
             if (!methodDefinition.IsSpecialName)
                 return false;

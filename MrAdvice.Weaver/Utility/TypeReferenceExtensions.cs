@@ -7,7 +7,7 @@
 namespace ArxOne.MrAdvice.Utility
 {
     using System.Reflection;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Extensions to TypeReference
@@ -21,7 +21,7 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="a">a.</param>
         /// <param name="b">The b.</param>
         /// <returns></returns>
-        public static bool SafeEquivalent(this TypeReference a, TypeReference b)
+        public static bool SafeEquivalent(this ITypeDefOrRef a, ITypeDefOrRef b)
         {
             if (a == null || b == null)
                 return (a == null) == (b == null);
@@ -29,18 +29,32 @@ namespace ArxOne.MrAdvice.Utility
         }
 
         /// <summary>
-        /// Determines if two <see cref="MethodReference"/> are equivalent.
+        /// Determines if two TypeReferences are equivalent.
+        /// Because sadly, this feature is not implemented in TypeReference
+        /// </summary>
+        /// <param name="a">a.</param>
+        /// <param name="b">The b.</param>
+        /// <returns></returns>
+        public static bool SafeEquivalent(this TypeSig a, TypeSig b)
+        {
+            if (a == null || b == null)
+                return (a == null) == (b == null);
+            return a.FullName == b.FullName;
+        }
+
+        /// <summary>
+        /// Determines if two <see cref="IMethodDefOrRef"/> are equivalent.
         /// Because sadly, this feature is not implemented in TypeReference
         /// </summary>
         /// <param name="a">a.</param>
         /// <param name="b">The b.</param>
         /// <param name="fullCompare">if set to <c>true</c> [full compare].</param>
         /// <returns></returns>
-        public static bool SafeEquivalent(this MethodReference a, MethodReference b, bool fullCompare = false)
+        public static bool SafeEquivalent(this IMethod a, IMethod b, bool fullCompare = false)
         {
             if (a == null || b == null)
                 return (a == null) == (b == null);
-            if (fullCompare && a.GenericParameters.Count != b.GenericParameters.Count)
+            if (fullCompare && a.NumberOfGenericParameters != b.NumberOfGenericParameters)
                 return false;
             return a.DeclaringType.FullName == b.DeclaringType.FullName && a.Name == b.Name;
         }
@@ -60,6 +74,28 @@ namespace ArxOne.MrAdvice.Utility
             if (fullCompare && a.GetGenericArguments().Length != b.GetGenericArguments().Length)
                 return false;
             return a.DeclaringType.FullName == b.DeclaringType.FullName && a.Name == b.Name;
+        }
+
+        /// <summary>
+        /// Resolves the specified assembly resolver.
+        /// </summary>
+        /// <param name="typeDefOrRef">The type definition or reference.</param>
+        /// <param name="assemblyResolver">The assembly resolver.</param>
+        /// <returns></returns>
+        public static TypeDef ResolveTypeDef(this ITypeDefOrRef typeDefOrRef, IAssemblyResolver assemblyResolver)
+        {
+            var typeDef = typeDefOrRef as TypeDef;
+            if (typeDef != null)
+                return typeDef;
+
+            foreach (var module in typeDefOrRef.Module.GetSelfAndReferences(assemblyResolver, false, 2))
+            {
+                typeDef = module.Find(typeDefOrRef);
+                if (typeDef != null)
+                    return typeDef;
+            }
+
+            return null;
         }
     }
 }

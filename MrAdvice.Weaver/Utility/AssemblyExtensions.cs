@@ -11,8 +11,8 @@ namespace ArxOne.MrAdvice.Utility
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using dnlib.DotNet;
     using IO;
-    using Mono.Cecil;
 
     internal static class AssemblyExtensions
     {
@@ -22,7 +22,7 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="assembly">The assembly.</param>
         /// <param name="typeReference">The type reference.</param>
         /// <returns></returns>
-        public static Type GetType(this Assembly assembly, TypeReference typeReference)
+        public static Type GetType(this Assembly assembly, TypeRef typeReference)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace ArxOne.MrAdvice.Utility
 
                 foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
                 {
-var type=                    a.GetType(fullName);
+                    var type = a.GetType(fullName);
                     if (type != null)
                         return type;
                 }
@@ -55,6 +55,12 @@ var type=                    a.GetType(fullName);
                    string.Join(Environment.NewLine + "------------" + Environment.NewLine, e.LoaderExceptions.Select(le => le.ToString())));
                 throw;
             }
+        }
+
+        public static ModuleDef GetMainModule(this AssemblyDef assemblyDef)
+        {
+            return assemblyDef.ManifestModule;
+            //return assemblyDef.FindModule("<Module>");
         }
     }
 }

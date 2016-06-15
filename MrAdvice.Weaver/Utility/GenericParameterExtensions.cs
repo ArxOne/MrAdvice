@@ -6,7 +6,7 @@
 #endregion
 namespace ArxOne.MrAdvice.Utility
 {
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Extensions to GenericParameter
@@ -19,11 +19,9 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="genericParameter">The generic parameter.</param>
         /// <param name="methodDefinition">The method definition.</param>
         /// <returns></returns>
-        public static GenericParameter Clone(this GenericParameter genericParameter, MethodDefinition methodDefinition)
+        public static GenericParam Clone(this GenericParam genericParameter, MethodDef methodDefinition)
         {
-            var newGenericParameter = new GenericParameter(methodDefinition);
-            newGenericParameter.Attributes = genericParameter.Attributes;
-            newGenericParameter.Name = genericParameter.Name;
+            var newGenericParameter = new GenericParamUser(genericParameter.Number, genericParameter.Flags, genericParameter.Name);
             return newGenericParameter;
         }
     }

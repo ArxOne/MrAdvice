@@ -12,6 +12,8 @@ namespace ExternalAdviceTest
 
     public class EmptyExternalAdvisedClass
     {
+        public string WeavingAdvisedMethodTest_Property2 { get; set; }
+
         [ExternalEmptyAdvice]
         public void MethodTest()
         {

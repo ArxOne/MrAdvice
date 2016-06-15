@@ -8,14 +8,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Reflection group, module level
     /// </summary>
     internal class ModuleReflectionNode : ReflectionNode
     {
-        private readonly ModuleDefinition _moduleDefinition;
+        private readonly ModuleDef _moduleDefinition;
 
         /// <summary>
         /// Gets the parent.
@@ -41,7 +41,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public override IEnumerable<CustomAttribute> CustomAttributes => _moduleDefinition.CustomAttributes;
 
-        private string DebugString => $"Module {_moduleDefinition.FullyQualifiedName}";
+        private string DebugString => $"Module {_moduleDefinition.FullName}";
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -55,18 +55,18 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// Initializes a new instance of the <see cref="ModuleReflectionNode"/> class.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        public ModuleReflectionNode(ModuleDefinition moduleDefinition)
+        public ModuleReflectionNode(ModuleDef moduleDefinition)
         {
             _moduleDefinition = moduleDefinition;
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="ModuleDefinition"/> to <see cref="ModuleReflectionNode"/>.
+        /// Performs an implicit conversion from <see cref="ModuleDef"/> to <see cref="ModuleReflectionNode"/>.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ModuleReflectionNode(ModuleDefinition moduleDefinition) => new ModuleReflectionNode(moduleDefinition);
+        public static implicit operator ModuleReflectionNode(ModuleDef moduleDefinition) => new ModuleReflectionNode(moduleDefinition);
     }
 }

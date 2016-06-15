@@ -4,12 +4,12 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace ArxOne.MrAdvice.Reflection.Groups
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Represents a reflection group.
@@ -87,7 +87,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The method.
         /// </value>
-        public virtual MethodDefinition Method => null;
+        public virtual MethodDef Method => null;
 
         /// <summary>
         /// Gets the self and ancestors.
@@ -122,21 +122,21 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         public bool IsAnyGeneric() => GetSelfAndAncestors().Any(n => n.IsGeneric);
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="ModuleDefinition"/> to <see cref="ReflectionNode"/>.
+        /// Performs an implicit conversion from <see cref="ModuleDef"/> to <see cref="ReflectionNode"/>.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ReflectionNode(ModuleDefinition moduleDefinition) => new ModuleReflectionNode(moduleDefinition);
+        public static implicit operator ReflectionNode(ModuleDef moduleDefinition) => new ModuleReflectionNode(moduleDefinition);
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="MethodDefinition"/> to <see cref="ReflectionNode"/>.
+        /// Performs an implicit conversion from <see cref="MethodDef"/> to <see cref="ReflectionNode"/>.
         /// </summary>
         /// <param name="methodDefinition">The method definition.</param>
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ReflectionNode(MethodDefinition methodDefinition) => new MethodReflectionNode(methodDefinition);
+        public static implicit operator ReflectionNode(MethodDef methodDefinition) => new MethodReflectionNode(methodDefinition);
     }
 }

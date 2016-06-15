@@ -7,7 +7,7 @@
 
 namespace ArxOne.MrAdvice.Utility
 {
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Extensions to property definition
@@ -19,7 +19,7 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="propertyDefinition">The property definition.</param>
         /// <returns></returns>
-        public static bool HasAnyPublic(this PropertyDefinition propertyDefinition)
+        public static bool HasAnyPublic(this PropertyDef  propertyDefinition)
         {
             if (propertyDefinition.GetMethod != null && propertyDefinition.GetMethod.IsPublic)
                 return true;

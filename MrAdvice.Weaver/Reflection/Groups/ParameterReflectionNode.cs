@@ -7,15 +7,15 @@
 namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
-    using Mono.Cecil;
+    using dnlib.DotNet;
 
     /// <summary>
     /// Reflection node, parameter level
     /// </summary>
     internal class ParameterReflectionNode : ReflectionNode
     {
-        private readonly ParameterDefinition _parameterDefinition;
-        private readonly MethodDefinition _methodDefinition;
+        private readonly ParamDef _parameterDefinition;
+        private readonly MethodDef _methodDefinition;
 
         /// <summary>
         /// Gets the parent.
@@ -58,7 +58,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </summary>
         /// <param name="parameterDefinition">The parameter definition.</param>
         /// <param name="methodDefinition">The method definition.</param>
-        public ParameterReflectionNode(ParameterDefinition parameterDefinition, MethodDefinition methodDefinition)
+        public ParameterReflectionNode(ParamDef parameterDefinition, MethodDef methodDefinition)
         {
             _parameterDefinition = parameterDefinition;
             _methodDefinition = methodDefinition;

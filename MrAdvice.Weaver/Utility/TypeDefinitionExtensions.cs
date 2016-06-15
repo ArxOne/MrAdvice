@@ -7,11 +7,15 @@
 
 namespace ArxOne.MrAdvice.Utility
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Runtime.CompilerServices;
-    using Mono.Cecil;
-    using Mono.Cecil.Cil;
+    using dnlib.DotNet;
+    using dnlib.DotNet.Emit;
     using Weaver;
+    using FieldAttributes = dnlib.DotNet.FieldAttributes;
+    using MethodAttributes = dnlib.DotNet.MethodAttributes;
 
     public static class TypeDefinitionExtensions
     {
@@ -20,15 +24,15 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="typeDefinition">The type definition.</param>
         /// <returns></returns>
-        public static IEnumerable<TypeDefinition> GetSelfAndParents(this TypeDefinition typeDefinition)
+        public static IEnumerable<TypeDef> GetSelfAndParents(this TypeDef typeDefinition)
         {
-            for (;;)
+            while (typeDefinition != null)
             {
                 yield return typeDefinition;
                 var baseType = typeDefinition.BaseType;
                 if (baseType == null)
                     break;
-                typeDefinition = baseType.Resolve();
+                typeDefinition = baseType.ResolveTypeDef();
             }
         }
 
@@ -37,33 +41,33 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="name">The name.</param>
-        /// <param name="type">The type.</param>
-        public static void AddPublicAutoProperty(this TypeDefinition typeDefinition, string name, TypeReference type)
+        /// <param name="typeReference">The type reference.</param>
+        /// <param name="moduleDefinition">The module definition.</param>
+        /// <param name="typeResolver">The type resolver.</param>
+        internal static void AddPublicAutoProperty(this TypeDef typeDefinition, string name, ITypeDefOrRef typeReference, ModuleDef moduleDefinition, TypeResolver typeResolver)
         {
-            var moduleDefinition = typeDefinition.Module;
-            var typeReference = moduleDefinition.SafeImport(type);
             var compilerGeneratedAttribute = moduleDefinition.SafeImport(typeof(CompilerGeneratedAttribute));
             // backing field
-            var backingFieldDefinition = new FieldDefinition($"<{name}>k__BackingField", FieldAttributes.Private, typeReference);
-            backingFieldDefinition.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute));
+            var backingFieldDefinition = new FieldDefUser($"<{name}>k__BackingField", new FieldSig(typeReference.ToTypeSig()), FieldAttributes.Private);
+            backingFieldDefinition.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute, typeResolver));
             typeDefinition.Fields.Add(backingFieldDefinition);
             // property...
-            var propertyDefinition = new PropertyDefinition(name, PropertyAttributes.None, typeReference);
+            var propertyDefinition = new PropertyDefUser(name, new PropertySig(true, typeReference.ToTypeSig()));
             typeDefinition.Properties.Add(propertyDefinition);
             // ...setter
-            propertyDefinition.SetMethod = CreatePropertyMethod("set_" + name, moduleDefinition.Import(typeof(void)));
-            propertyDefinition.SetMethod.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute));
+            propertyDefinition.SetMethod = CreatePropertyMethod("set_" + name, moduleDefinition.CorLibTypes.Void, Tuple.Create(typeReference.ToTypeSig(), "value"));
+            propertyDefinition.SetMethod.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute, typeResolver));
             typeDefinition.Methods.Add(propertyDefinition.SetMethod);
-            var setterParameter = new ParameterDefinition("value", ParameterAttributes.In, typeReference);
-            propertyDefinition.SetMethod.Parameters.Add(setterParameter);
+            var setterParameter = new ParamDefUser("value");
+            propertyDefinition.SetMethod.ParamDefs.Add(setterParameter);
             var setterIntructions = new Instructions(propertyDefinition.SetMethod.Body.Instructions, moduleDefinition);
             setterIntructions.Emit(OpCodes.Ldarg_0);
             setterIntructions.Emit(OpCodes.Ldarg_1);
             setterIntructions.Emit(OpCodes.Stfld, backingFieldDefinition);
             setterIntructions.Emit(OpCodes.Ret);
             // ...getter
-            propertyDefinition.GetMethod = CreatePropertyMethod("get_" + name, typeReference);
-            propertyDefinition.GetMethod.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute));
+            propertyDefinition.GetMethod = CreatePropertyMethod("get_" + name, typeReference.ToTypeSig());
+            propertyDefinition.GetMethod.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute, typeResolver));
             typeDefinition.Methods.Add(propertyDefinition.GetMethod);
             var getterIntructions = new Instructions(propertyDefinition.GetMethod.Body.Instructions, moduleDefinition);
             getterIntructions.Emit(OpCodes.Ldarg_0);
@@ -75,13 +79,18 @@ namespace ArxOne.MrAdvice.Utility
         /// Creates a property method (getter or setter).
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <param name="type">The type.</param>
+        /// <param name="returnType">Type of the return.</param>
+        /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        private static MethodDefinition CreatePropertyMethod(string name, TypeReference type)
+        private static MethodDefUser CreatePropertyMethod(string name, TypeSig returnType, params Tuple<TypeSig, string>[] parameters)
         {
             const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig;
-            var methodDefinition = new MethodDefinition(name, methodAttributes, type);
-            methodDefinition.Body = new MethodBody(methodDefinition) { InitLocals = true };
+            var methodSig = new MethodSig(CallingConvention.HasThis, 0, returnType, parameters.Select(p => p.Item1).ToArray());
+            var methodDefinition = new MethodDefUser(name, methodSig, methodAttributes);
+            var methodParameters = new MethodParameters(methodDefinition);
+            for (int index = 0; index < parameters.Length; index++)
+                methodParameters[0].ParamDef.Name = parameters[index].Item2;
+            methodDefinition.Body = new CilBody { InitLocals = true };
             return methodDefinition;
         }
     }

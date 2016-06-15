@@ -8,8 +8,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
     using System.Linq;
+    using dnlib.DotNet;
     using IO;
-    using Mono.Cecil;
     using Utility;
 
     /// <summary>
@@ -17,8 +17,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
     /// </summary>
     internal class MethodReflectionNode : ReflectionNode
     {
-        private readonly MethodDefinition _methodDefinition;
-        private PropertyDefinition _propertyDefinition;
+        private readonly MethodDef _methodDefinition;
+        private PropertyDef _propertyDefinition;
 
         /// <summary>
         /// Gets the parent.
@@ -47,7 +47,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        protected override IEnumerable<ReflectionNode> LoadChildren() => _methodDefinition.Parameters.Select(p => new ParameterReflectionNode(p, _methodDefinition));
+        protected override IEnumerable<ReflectionNode> LoadChildren() => _methodDefinition.Parameters.Where(p => !p.IsHiddenThisParameter && p.ParamDef != null)
+            .Select(p => new ParameterReflectionNode(p.ParamDef, _methodDefinition));
 
         /// <summary>
         /// Gets the custom attributes at this level.
@@ -55,7 +56,18 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The custom attributes.
         /// </value>
-        public override IEnumerable<CustomAttribute> CustomAttributes => _methodDefinition.CustomAttributes.Concat(_methodDefinition.MethodReturnType.CustomAttributes); // return type has attributes
+        public override IEnumerable<CustomAttribute> CustomAttributes
+        {
+            get
+            {
+                IEnumerable<CustomAttribute> customAttributes = _methodDefinition.CustomAttributes;
+                if (_methodDefinition.Parameters.ReturnParameter.ParamDef != null)
+                    customAttributes = customAttributes.Concat(_methodDefinition.Parameters.ReturnParameter.ParamDef.CustomAttributes);
+                return customAttributes;
+            }
+        }
+
+        // return type has attributes
 
         /// <summary>
         /// Gets a value indicating whether this instance is generic.
@@ -71,7 +83,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The method.
         /// </value>
-        public override MethodDefinition Method => _methodDefinition;
+        public override MethodDef Method => _methodDefinition;
 
         private string DebugString => $"Method {_methodDefinition.FullName}";
 
@@ -88,19 +100,19 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </summary>
         /// <param name="methodDefinition">The method definition.</param>
         /// <param name="propertyDefinition">The property.</param>
-        public MethodReflectionNode(MethodDefinition methodDefinition, PropertyDefinition propertyDefinition = null)
+        public MethodReflectionNode(MethodDef methodDefinition, PropertyDef propertyDefinition = null)
         {
             _methodDefinition = methodDefinition;
             _propertyDefinition = propertyDefinition;
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="MethodDefinition"/> to <see cref="MethodReflectionNode"/>.
+        /// Performs an implicit conversion from <see cref="MethodDef"/> to <see cref="MethodReflectionNode"/>.
         /// </summary>
         /// <param name="methodDefinition">The method definition.</param>
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator MethodReflectionNode(MethodDefinition methodDefinition) => new MethodReflectionNode(methodDefinition);
+        public static implicit operator MethodReflectionNode(MethodDef methodDefinition) => new MethodReflectionNode(methodDefinition);
     }
 }

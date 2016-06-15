@@ -6,13 +6,14 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2CCCBE1D-9CC5-40A9-A816-484F98B10774}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ArxOne.MrAdvice</RootNamespace>
     <AssemblyName>MrAdvice.Weaver</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -26,6 +27,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +36,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -41,25 +44,14 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\MrAdvice\Properties\MrAdvice.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net40\Mono.Cecil.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Mdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Pdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="StitcherBoy, Version=0.4.1.0, Culture=neutral, PublicKeyToken=a3be45b63ddcbf4d, processorArchitecture=MSIL">
+      <HintPath>..\packages\StitcherBoy.0.4.1\lib\net45\StitcherBoy.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -77,6 +69,7 @@
     <Compile Include="Annotation\MarkedNode.cs" />
     <Compile Include="Annotation\MarkerDefinition.cs" />
     <Compile Include="AuditTimer.cs" />
+    <None Include="Blobber" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\Groups\AssemblyReflectionNode.cs" />
     <Compile Include="Reflection\Groups\MethodReflectionNode.cs" />
@@ -90,13 +83,16 @@
     <Compile Include="Reflection\TypeLoader.cs" />
     <Compile Include="Utility\AssemblyExtensions.cs" />
     <Compile Include="Utility\EnumerableExtensions.cs" />
+    <Compile Include="Utility\MethodParameters.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />
+    <Compile Include="Utility\ParamDefExtensions.cs" />
     <Compile Include="Utility\PropertyDefinitionExtensions.cs" />
     <Compile Include="Utility\TypeDefinitionExtensions.cs" />
     <Compile Include="Utility\TypeReferenceComparer.cs" />
     <Compile Include="Utility\ModuleDefinitionExtensions.cs" />
     <Compile Include="Utility\ReflectionUtility.cs" />
-    <Compile Include="ModuleWeaver.cs" />
+    <Compile Include="WeaverStitcher.cs" />
+    <Compile Include="WeaverTask.cs" />
     <Compile Include="Weaver\AspectWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.Names.cs" />
     <Compile Include="Weaver\AspectWeaver.Weave.cs" />
@@ -137,6 +133,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets'))" />
+    <Error Condition="!Exists('..\packages\Blobber.0.2.0\build\Blobber.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Blobber.0.2.0\build\Blobber.targets'))" />
   </Target>
   <PropertyGroup>
     <PostBuildEvent>rem --- ILMerge
@@ -150,4 +147,5 @@ rem "$(SolutionDir)Tools\ILMerge.exe" /out:"$(TargetPath)" "$(ProjectDir)\obj\$(
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\Blobber.0.2.0\build\Blobber.targets" Condition="Exists('..\packages\Blobber.0.2.0\build\Blobber.targets')" />
 </Project>

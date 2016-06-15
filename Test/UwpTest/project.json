@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
     "Fody": "1.29.4",
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0"
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.1.0"
   },
   "frameworks": {
     "uap10.0": {}

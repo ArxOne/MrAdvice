@@ -15,13 +15,16 @@ namespace ExternalAdviceTest
         [TestCategory("Weaving")]
         public void ExternalAdviceTest()
         {
-            new EmptyExternalAdvisedClass().MethodTest();
+            var emptyExternalAdvisedClass = new EmptyExternalAdvisedClass();
+            emptyExternalAdvisedClass.MethodTest();
         }
+
         [TestMethod]
         [TestCategory("Weaving")]
         public void ExternalWeavingAdviceTest()
         {
-            new EmptyExternalAdvisedClass().WeavingAdvisedMethodTest();
+            var emptyExternalAdvisedClass = new EmptyExternalAdvisedClass();
+            emptyExternalAdvisedClass.WeavingAdvisedMethodTest();
         }
     }
 }

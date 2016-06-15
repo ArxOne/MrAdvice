@@ -7,10 +7,11 @@
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Reflection;
-    using Mono.Cecil;
-    using Mono.Cecil.Cil;
-    using Mono.Collections.Generic;
+    using dnlib.DotNet;
+    using dnlib.DotNet.Emit;
     using Utility;
 
     /// <summary>
@@ -19,8 +20,8 @@ namespace ArxOne.MrAdvice.Weaver
     /// </summary>
     public class Instructions
     {
-        private readonly Collection<Instruction> _instructions;
-        private readonly ModuleDefinition _moduleDefinition;
+        private readonly IList<Instruction> _instructions;
+        private readonly ModuleDef _moduleDefinition;
 
         /// <summary>
         /// Gets or sets the cursor.
@@ -43,7 +44,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="instructions">The instructions.</param>
         /// <param name="moduleDefinition">The module definition.</param>
-        public Instructions(Collection<Instruction> instructions, ModuleDefinition moduleDefinition)
+        public Instructions(IList<Instruction> instructions, ModuleDef moduleDefinition)
         {
             _instructions = instructions;
             _moduleDefinition = moduleDefinition;
@@ -85,7 +86,7 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, value));
         }
 
-        public Instructions Emit(OpCode opCode, TypeReference value)
+        public Instructions Emit(OpCode opCode, TypeRef value)
         {
             return Insert(Instruction.Create(opCode, value));
         }
@@ -95,9 +96,19 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
         }
 
-        public Instructions Emit(OpCode opCode, MethodReference value)
+        public Instructions Emit(OpCode opCode, CorLibTypeSig value)
         {
             return Insert(Instruction.Create(opCode, value));
+        }
+
+        public Instructions Emit(OpCode opCode, IMethodDefOrRef value)
+        {
+            return Insert(Instruction.Create(opCode, value));
+        }
+
+        public Instructions Emit(OpCode opCode, GenericParam value)
+        {
+            return Insert(new Instruction(opCode, value));
         }
 
         public Instructions Emit(OpCode opCode, MethodBase value)
@@ -105,7 +116,17 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
         }
 
-        public Instructions Emit(OpCode opCode, FieldReference value)
+        public Instructions Emit(OpCode opCode, IMethod value)
+        {
+            return Insert(Instruction.Create(opCode, value));
+        }
+
+        public Instructions Emit(OpCode opCode, IField value)
+        {
+            return Insert(Instruction.Create(opCode, value));
+        }
+
+        public Instructions Emit(OpCode opCode, ITokenOperand value)
         {
             return Insert(Instruction.Create(opCode, value));
         }
@@ -120,12 +141,12 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, value));
         }
 
-        public Instructions Emit(OpCode opCode, ParameterDefinition value)
+        public Instructions Emit(OpCode opCode, Parameter value)
         {
             return Insert(Instruction.Create(opCode, value));
         }
 
-        public Instructions Emit(OpCode opCode, VariableDefinition value)
+        public Instructions Emit(OpCode opCode, Local value)
         {
             return Insert(Instruction.Create(opCode, value));
         }
@@ -135,13 +156,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="parameter">The parameter.</param>
         /// <returns></returns>
-        public Instructions EmitLdarg(ParameterDefinition parameter)
+        public Instructions EmitLdarg(Parameter parameter)
         {
-            var index = parameter.Index;
-            // when the method is non static, the parameter index must have +1 (because 0 is "this" and first parameter is indexed 0 anyway)
-            if (parameter.Method.HasThis)
-                index++;
-            switch (index)
+            switch (parameter.Index)
             {
                 case 0:
                     return Emit(OpCodes.Ldarg_0);
@@ -160,7 +177,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// Emits a ldloc.
         /// </summary>
         /// <param name="variableDefinition">The variable definition.</param>
-        public Instructions EmitLdloc(VariableDefinition variableDefinition)
+        public Instructions EmitLdloc(Local variableDefinition)
         {
             switch (variableDefinition.Index)
             {
@@ -181,7 +198,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// Emits a stloc.
         /// </summary>
         /// <param name="variableDefinition">The variable definition.</param>
-        public Instructions EmitStloc(VariableDefinition variableDefinition)
+        public Instructions EmitStloc(Local variableDefinition)
         {
             switch (variableDefinition.Index)
             {
@@ -235,15 +252,16 @@ namespace ArxOne.MrAdvice.Weaver
         /// Emits unbox or cast when necessary.
         /// </summary>
         /// <param name="targetType">Type of the target.</param>
-        public Instructions EmitUnboxOrCastIfNecessary(TypeReference targetType)
+        public Instructions EmitUnboxOrCastIfNecessary(ITypeDefOrRef targetType)
         {
             // for generics and some unknown reason, an unbox_any is needed
-            if (targetType.IsGenericParameter)
-                return Emit(OpCodes.Unbox_Any, targetType);
-            if (targetType.IsValueType)
-                return Emit(OpCodes.Unbox_Any, targetType);
-            if (!targetType.SafeEquivalent(targetType.Module.SafeImport(typeof(object))))
-                return Emit(OpCodes.Castclass, targetType);
+            var targetTypeSig = targetType.ToTypeSig();
+            if (targetTypeSig.IsGenericParameter)
+                return Emit(OpCodes.Unbox_Any, ((GenericSig)targetTypeSig).GenericParam);
+            if (targetType.IsValueType || targetType.IsPrimitive)
+                return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetType));
+            if (!targetType.SafeEquivalent(_moduleDefinition.CorLibTypes.Object.TypeDefOrRef))
+                return Emit(OpCodes.Castclass, _moduleDefinition.SafeImport(targetType));
             return this;
         }
 
@@ -251,10 +269,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// Emits box when necessary.
         /// </summary>
         /// <param name="targetType">Type of the target.</param>
-        public Instructions EmitBoxIfNecessary(TypeReference targetType)
+        public Instructions EmitBoxIfNecessary(ITypeDefOrRef targetType)
         {
-            if (targetType.IsValueType || targetType.IsGenericParameter)
-                return Emit(OpCodes.Box, targetType);
+            if (targetType.IsValueType || targetType.IsGenericParam)
+                return Emit(OpCodes.Box, _moduleDefinition.SafeImport(targetType));
             return this;
         }
 
@@ -262,7 +280,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// Emits a ldind.
         /// </summary>
         /// <param name="type">The type.</param>
-        public Instructions EmitLdind(TypeReference type)
+        public Instructions EmitLdind(ITypeDefOrRef type)
         {
             if (type.IsValueType)
             {
@@ -284,7 +302,7 @@ namespace ArxOne.MrAdvice.Weaver
                     return Emit(OpCodes.Ldind_R4);
                 if (type.SafeEquivalent(type.Module.SafeImport(typeof(Double))))
                     return Emit(OpCodes.Ldind_R8);
-                return Emit(OpCodes.Ldobj, type);
+                return Emit(OpCodes.Ldobj, _moduleDefinition.SafeImport(type));
             }
             return Emit(OpCodes.Ldind_Ref);
         }
@@ -293,7 +311,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// Emits a stind.
         /// </summary>
         /// <param name="type">The type.</param>
-        public Instructions EmitStind(TypeReference type)
+        public Instructions EmitStind(ITypeDefOrRef type)
         {
             if (type.IsValueType)
             {
@@ -309,7 +327,7 @@ namespace ArxOne.MrAdvice.Weaver
                     return Emit(OpCodes.Stind_R4);
                 if (type.SafeEquivalent(type.Module.SafeImport(typeof(Double))))
                     return Emit(OpCodes.Stind_R8);
-                return Emit(OpCodes.Stobj, type);
+                return Emit(OpCodes.Stobj, _moduleDefinition.SafeImport(type));
             }
             return Emit(OpCodes.Stind_Ref);
         }
