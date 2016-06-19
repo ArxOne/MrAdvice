@@ -22,7 +22,7 @@ namespace TestApplication
 
     public class SomeClass
     {
-        //[SomeAdvice]
+        [SomeAdvice]
         public int Add(int a, int b)
         {
             var c = a + b;

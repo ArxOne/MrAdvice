@@ -13,6 +13,8 @@ namespace ArxOne.MrAdvice.Utility
         public static void Set(this ParamDef paramDef, ParamDef source)
         {
             paramDef.Name = source.Name;
+            paramDef.Sequence = source.Sequence;
+            //paramDef.Rid = source.Rid;
             if (source.HasMarshalType)
                 paramDef.MarshalType = source.MarshalType;
             if (source.HasConstant)

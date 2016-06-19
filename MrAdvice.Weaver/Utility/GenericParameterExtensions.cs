@@ -24,5 +24,7 @@ namespace ArxOne.MrAdvice.Utility
             var newGenericParameter = new GenericParamUser(genericParameter.Number, genericParameter.Flags, genericParameter.Name);
             return newGenericParameter;
         }
+
+
     }
 }

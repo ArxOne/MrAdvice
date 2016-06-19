@@ -86,7 +86,6 @@
     <Compile Include="Utility\MethodParameters.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />
     <Compile Include="Utility\ParamDefExtensions.cs" />
-    <Compile Include="Utility\MethodDefExtensions.cs" />
     <Compile Include="Utility\PropertyDefinitionExtensions.cs" />
     <Compile Include="Utility\TypeDefinitionExtensions.cs" />
     <Compile Include="Utility\TypeReferenceComparer.cs" />

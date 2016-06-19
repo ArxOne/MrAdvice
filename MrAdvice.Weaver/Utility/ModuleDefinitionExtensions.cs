@@ -146,10 +146,24 @@ namespace ArxOne.MrAdvice.Utility
                 return moduleDefinition.Import(fieldInfo);
         }
 
+        public static TypeSig SafeImport(this ModuleDef moduleDefinition, TypeSig typeSig)
+        {
+            lock (moduleDefinition)
+                return moduleDefinition.Import(typeSig);
+        }
+
         public static TypeRef SafeImport(this ModuleDef moduleDefinition, ITypeDefOrRef typeReference)
         {
             lock (moduleDefinition)
-                return moduleDefinition.Import(typeReference.ResolveTypeDef());
+            {
+                var typeRef = typeReference as TypeRef;
+                if (typeRef != null)
+                    return moduleDefinition.Import(typeRef);
+                var typeDef = typeReference as TypeDef;
+                if (typeDef != null)
+                    return moduleDefinition.Import(typeDef);
+                throw new InvalidOperationException($"{typeReference} is neither TypeRef or TypeDef");
+            }
         }
 
         public static TypeRef SafeImport(this ModuleDef moduleDefinition, Type type)
@@ -162,7 +176,7 @@ namespace ArxOne.MrAdvice.Utility
         {
             var constructor = typeResolver.Resolve(customAttributeType).FindConstructors().Single();
             var importedCtor = moduleDefinition.SafeImport(constructor);
-            return new CustomAttribute((ICustomAttributeType) importedCtor, new byte[] { 1, 0, 0, 0 });
+            return new CustomAttribute((ICustomAttributeType)importedCtor, new byte[] { 1, 0, 0, 0 });
         }
     }
 }

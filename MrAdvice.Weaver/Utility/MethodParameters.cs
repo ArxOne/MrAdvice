@@ -47,5 +47,17 @@ namespace ArxOne.MrAdvice.Utility
         public IEnumerator<Parameter> GetEnumerator() => _reindex.Select(i => _methodDef.Parameters[i]).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public void SetParamDefs(MethodDef targetMethod)
+        {
+            for (int parameterIndex = 0; parameterIndex < Count; parameterIndex++)
+            {
+                var paramDefUser = new ParamDefUser();
+                paramDefUser.Set(this[parameterIndex].ParamDef);
+                targetMethod.ParamDefs.Add(paramDefUser);
+                //targetMethod.Parameters[parameterIndex].CreateParamDef();
+                //targetMethod.Parameters[parameterIndex].ParamDef.Set(this[parameterIndex].ParamDef);
+            }
+        }
     }
 }

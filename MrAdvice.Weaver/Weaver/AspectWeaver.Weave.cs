@@ -154,6 +154,7 @@ namespace ArxOne.MrAdvice.Weaver
                 else
                     innerMethodName = GetInnerMethodName(methodName);
                 var innerMethod = new MethodDefUser(innerMethodName, method.MethodSig, innerMethodAttributes);
+                new MethodParameters(method).SetParamDefs(innerMethod);
                 innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
                 innerMethod.ImplAttributes = method.ImplAttributes;
                 innerMethod.SemanticsAttributes = method.SemanticsAttributes;
@@ -206,7 +207,7 @@ namespace ArxOne.MrAdvice.Weaver
             method.Body.ExceptionHandlers.Clear();
             var instructions = new Instructions(method.Body.Instructions, method.Module);
 
-            var isStatic = method.Attributes.HasFlag(MethodAttributes.Static);
+            var isStatic = method.IsStatic;
 
             // parameters
             Local parametersVariable = null;
@@ -235,7 +236,7 @@ namespace ArxOne.MrAdvice.Weaver
                             parameterType = parameter.Type.Next;
                             instructions.EmitLdind(parameterType.ToTypeDefOrRef());
                         }
-                        instructions.EmitBoxIfNecessary(parameterType.ToTypeDefOrRef()); // ... and boxes it
+                        instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
                         instructions.Emit(OpCodes.Stelem_Ref);
                     }
                 }
@@ -341,7 +342,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // get return value
             if (!method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
-                instructions.EmitUnboxOrCastIfNecessary(method.ReturnType.ToTypeDefOrRef());
+                instructions.EmitUnboxOrCastIfNecessary(method.ReturnType);
             else
                 instructions.Emit(OpCodes.Pop); // if no return type, ignore Proceed() result
 
@@ -367,7 +368,7 @@ namespace ArxOne.MrAdvice.Weaver
                     //    var referenceParameterType = (ByReferenceType)parameter.ParameterType;
                     //    parameterElementType = (GenericInstanceType)referenceParameterType.ElementType;
                     //}
-                    instructions.EmitUnboxOrCastIfNecessary(parameterElementType.ToTypeDefOrRef());
+                    instructions.EmitUnboxOrCastIfNecessary(parameterElementType);
                     instructions.EmitStind(parameterElementType.ToTypeDefOrRef()); // result is stored in ref parameter
                 }
             }
@@ -536,12 +537,7 @@ namespace ArxOne.MrAdvice.Weaver
             implementationMethod.ReturnType = interfaceMethod.ReturnType;
             implementationType.Methods.Add(implementationMethod);
             implementationMethod.IsSpecialName = interfaceMethod.IsSpecialName;
-            for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
-            {
-                implementationMethod.Parameters[parameterIndex].CreateParamDef();
-                implementationMethod.Parameters[parameterIndex].ParamDef.Set(methodParameters[parameterIndex].ParamDef);
-            }
-            //implementationMethod.Parameters.AddRange(interfaceMethod.Parameters);
+            methodParameters.SetParamDefs(implementationMethod);
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
             implementationMethod.Overrides.Add(new MethodOverride(interfaceMethod, interfaceMethod));
             WritePointcutBody(implementationMethod, null, false);

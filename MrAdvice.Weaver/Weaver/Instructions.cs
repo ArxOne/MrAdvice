@@ -91,6 +91,11 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, value));
         }
 
+        public Instructions Emit(OpCode opCode, TypeSig value)
+        {
+            return Insert(Instruction.Create(opCode, value.ToTypeDefOrRef()));
+        }
+
         public Instructions Emit(OpCode opCode, Type value)
         {
             return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
@@ -251,28 +256,29 @@ namespace ArxOne.MrAdvice.Weaver
         /// <summary>
         /// Emits unbox or cast when necessary.
         /// </summary>
-        /// <param name="targetType">Type of the target.</param>
-        public Instructions EmitUnboxOrCastIfNecessary(ITypeDefOrRef targetType)
+        /// <param name="targetTypeSig">The target type sig.</param>
+        /// <returns></returns>
+        public Instructions EmitUnboxOrCastIfNecessary(TypeSig targetTypeSig)
         {
             // for generics and some unknown reason, an unbox_any is needed
-            var targetTypeSig = targetType.ToTypeSig();
             if (targetTypeSig.IsGenericParameter)
                 return Emit(OpCodes.Unbox_Any, ((GenericSig)targetTypeSig).GenericParam);
-            if (targetType.IsValueType || targetType.IsPrimitive)
-                return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetType));
-            if (!targetType.SafeEquivalent(_moduleDefinition.CorLibTypes.Object.TypeDefOrRef))
-                return Emit(OpCodes.Castclass, _moduleDefinition.SafeImport(targetType));
+            if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive)
+                return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetTypeSig));
+            if (!targetTypeSig.SafeEquivalent(_moduleDefinition.CorLibTypes.Object))
+                return Emit(OpCodes.Castclass, _moduleDefinition.SafeImport(targetTypeSig));
             return this;
         }
 
         /// <summary>
         /// Emits box when necessary.
         /// </summary>
-        /// <param name="targetType">Type of the target.</param>
-        public Instructions EmitBoxIfNecessary(ITypeDefOrRef targetType)
+        /// <param name="targetTypeSig">The target type.</param>
+        /// <returns></returns>
+        public Instructions EmitBoxIfNecessary(TypeSig targetTypeSig)
         {
-            if (targetType.IsValueType || targetType.IsGenericParam)
-                return Emit(OpCodes.Box, _moduleDefinition.SafeImport(targetType));
+            if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive || targetTypeSig.IsGenericInstanceType)
+                return Emit(OpCodes.Box, _moduleDefinition.SafeImport(targetTypeSig));
             return this;
         }
 
