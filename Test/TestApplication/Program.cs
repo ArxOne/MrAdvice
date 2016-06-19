@@ -33,9 +33,15 @@ namespace TestApplication
         public void Nop()
         {
             int a = 1;
+            F(a);
             int b = 12;
+            F(b);
             var c = a + b;
+            F(c);
         }
+
+        private void F(object c)
+        { }
     }
 
     public class SomeAdvice : Attribute, IMethodAdvice

@@ -167,14 +167,16 @@ namespace ArxOne.MrAdvice.Weaver
                 }
                 else
                 {
-                    innerMethod.Body = new CilBody();
-                    innerMethod.Body.InitLocals = method.Body.InitLocals;
-                    innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
-                    innerMethod.Body.Variables.AddRange(method.Body.Variables);
-                    innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
+                    //innerMethod.Body = new CilBody();
+                    //innerMethod.Body.InitLocals = method.Body.InitLocals;
+                    //innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
+                    //innerMethod.Body.Variables.AddRange(method.Body.Variables);
+                    //innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
 
-                    innerMethod.Body.Scope = method.Body.Scope;
-                    method.Body.Scope = null;
+                    //innerMethod.Body.Scope = method.Body.Scope;
+                    //method.Body.Scope = null;
+                    innerMethod.Body = method.Body;
+                    method.Body = new CilBody();
                 }
 
                 WritePointcutBody(method, innerMethod, false);
@@ -374,6 +376,7 @@ namespace ArxOne.MrAdvice.Weaver
             instructions.Emit(OpCodes.Ret);
 
             method.Body.Scope = new PdbScope { Start = method.Body.Instructions[0] };
+            method.Body.Scope.Scopes.Add(new PdbScope { Start = method.Body.Instructions[0] });
         }
 
         /// <summary>
