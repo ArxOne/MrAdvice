@@ -12,12 +12,11 @@ namespace ExternalAdviceTest
 
     public class EmptyExternalAdvisedClass
     {
-        public string WeavingAdvisedMethodTest_Property2 { get; set; }
-
         [ExternalEmptyAdvice]
         public void MethodTest()
         {
             var thisMethod = MethodBase.GetCurrentMethod();
+            F(thisMethod);
             Assert.AreNotEqual("MethodTest", thisMethod.Name);
         }
 
@@ -25,7 +24,11 @@ namespace ExternalAdviceTest
         public void WeavingAdvisedMethodTest()
         {
             var property = GetType().GetProperty("WeavingAdvisedMethodTest_Property");
+            F(property);
             Assert.IsNotNull(property);
         }
+
+        void F(object o)
+        { }
     }
 }

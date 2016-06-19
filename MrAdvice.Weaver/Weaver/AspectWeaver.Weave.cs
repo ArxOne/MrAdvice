@@ -8,12 +8,14 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.SymbolStore;
     using System.Linq;
     using System.Reflection;
     using Advice;
     using Annotation;
     using dnlib.DotNet;
     using dnlib.DotNet.Emit;
+    using dnlib.DotNet.Pdb;
     using Introduction;
     using IO;
     using Reflection.Groups;
@@ -22,6 +24,7 @@ namespace ArxOne.MrAdvice.Weaver
     using FieldAttributes = dnlib.DotNet.FieldAttributes;
     using MethodAttributes = dnlib.DotNet.MethodAttributes;
     using PropertyAttributes = dnlib.DotNet.PropertyAttributes;
+    using SymbolReaderCreator = dnlib.DotNet.Pdb.Managed.SymbolReaderCreator;
     using TypeAttributes = dnlib.DotNet.TypeAttributes;
 
     partial class AspectWeaver
@@ -91,7 +94,7 @@ namespace ArxOne.MrAdvice.Weaver
             var method = markedMethod.Node.Method;
 
             // sanity check
-            var moduleDefinition = method.Module;
+            var moduleDefinition = (ModuleDefMD)method.Module;
             if (method.ReturnType.SafeEquivalent(moduleDefinition.SafeImport(typeof(void)).ToTypeSig()))
             {
                 var customAttributes = method.CustomAttributes;
@@ -161,12 +164,6 @@ namespace ArxOne.MrAdvice.Weaver
                     method.ImplMap = null;
                     method.IsPreserveSig = false;
                     method.IsPinvokeImpl = false;
-                    // TODO: reimplement
-                    //innerMethod.PInvokeInfo = method.PInvokeInfo;
-                    //// must be removed before attributes are updated (otherwise Cecil gets angry)
-                    //method.PInvokeInfo = null;
-                    //method.IsPreserveSig = false;
-                    //method.IsPInvokeImpl = false;
                 }
                 else
                 {
@@ -175,6 +172,9 @@ namespace ArxOne.MrAdvice.Weaver
                     innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
                     innerMethod.Body.Variables.AddRange(method.Body.Variables);
                     innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
+
+                    innerMethod.Body.Scope = method.Body.Scope;
+                    method.Body.Scope = null;
                 }
 
                 WritePointcutBody(method, innerMethod, false);
@@ -372,6 +372,8 @@ namespace ArxOne.MrAdvice.Weaver
 
             // and return
             instructions.Emit(OpCodes.Ret);
+
+            method.Body.Scope = new PdbScope { Start = method.Body.Instructions[0] };
         }
 
         /// <summary>
