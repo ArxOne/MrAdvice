@@ -113,7 +113,8 @@ namespace ArxOne.MrAdvice.Weaver
 
         public Instructions Emit(OpCode opCode, GenericParam value)
         {
-            return Insert(new Instruction(opCode, value));
+            var moduleDef = value.DeclaringMethod != null ? value.DeclaringMethod.Module : value.DeclaringType.Module;
+            return Insert(Instruction.Create(opCode, new TypeRefUser(moduleDef, null, value.FullName, moduleDef)));
         }
 
         public Instructions Emit(OpCode opCode, MethodBase value)
