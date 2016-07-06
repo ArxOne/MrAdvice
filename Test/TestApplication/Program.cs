@@ -17,19 +17,23 @@ namespace TestApplication
             var sc = new SomeClass();
             var c = sc.Add(2, 3);
             sc.Nop();
+
+            sc.DoGeneric<int>();
+            var z = new SomeGenericClass<string>();
+            z.Do();
         }
     }
 
     public class SomeClass
     {
-        [SomeAdvice]
+        //[SomeAdvice]
         public int Add(int a, int b)
         {
             var c = a + b;
             return c;
         }
 
-        [SomeAdvice]
+        //[SomeAdvice]
         public void Nop()
         {
             int a = 1;
@@ -42,9 +46,32 @@ namespace TestApplication
 
         private void F(object c)
         { }
+
+        [SomeOtherAdvice]
+        public void DoGeneric<TAnything>()
+        {
+            var t = typeof(TAnything);
+        }
+    }
+
+    public class SomeGenericClass<TSomething>
+    {
+        [SomeOtherAdvice]
+        public void Do()
+        {
+            var t = typeof(TSomething);
+        }
     }
 
     public class SomeAdvice : Attribute, IMethodAdvice
+    {
+        public void Advise(MethodAdviceContext context)
+        {
+            context.Proceed();
+        }
+    }
+
+    public class SomeOtherAdvice : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
         {
