@@ -25,10 +25,7 @@ namespace ArxOne.MrAdvice.Collection
         /// <summary>
         /// Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.
         /// </summary>
-        public int Count
-        {
-            get { return _length; }
-        }
+        public int Count => _length;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ArraySpan{TItem}"/> class.
@@ -51,10 +48,7 @@ namespace ArxOne.MrAdvice.Collection
         /// <returns>
         /// A <see cref="T:System.Collections.Generic.IEnumerator`1" /> that can be used to iterate through the collection.
         /// </returns>
-        public IEnumerator<TItem> GetEnumerator()
-        {
-            return _innerList.Skip(_startIndex).Take(_length).GetEnumerator();
-        }
+        public IEnumerator<TItem> GetEnumerator() => _innerList.Skip(_startIndex).Take(_length).GetEnumerator();
 
         /// <summary>
         /// Returns an enumerator that iterates through a collection.
@@ -62,10 +56,7 @@ namespace ArxOne.MrAdvice.Collection
         /// <returns>
         /// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
         /// </returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
@@ -74,10 +65,7 @@ namespace ArxOne.MrAdvice.Collection
         /// <returns>
         /// true if <paramref name="item" /> is found in the <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, false.
         /// </returns>
-        public bool Contains(TItem item)
-        {
-            return _innerList.Skip(_startIndex).Take(_length).Contains(item, _comparer);
-        }
+        public bool Contains(TItem item) => _innerList.Skip(_startIndex).Take(_length).Contains(item, _comparer);
 
         /// <summary>
         /// Copies to the target array.
@@ -93,10 +81,7 @@ namespace ArxOne.MrAdvice.Collection
         /// <summary>
         /// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
+        public bool IsReadOnly => false;
 
         /// <summary>
         /// Determines the index of a specific item in the <see cref="T:System.Collections.Generic.IList`1" />.

@@ -20,10 +20,10 @@ namespace ArxOne.MrAdvice.Advice
     public class PropertyAdviceContext : SyncAdviceContext
     {
         /// <summary>
-        /// Gets the index for property.
+        /// Gets the index(es) for property.
         /// </summary>
         /// <value>
-        /// The index.
+        /// The index(es).
         /// </value>
         public IList<object> Index { get; }
 
@@ -52,13 +52,13 @@ namespace ArxOne.MrAdvice.Advice
             {
                 if (!HasValue)
                     throw new InvalidOperationException("Method has no Value");
-                return AdviceValues.Parameters[0];
+                return AdviceValues.Arguments[0];
             }
             set
             {
                 if (!HasValue)
                     throw new InvalidOperationException("Method has no Value");
-                AdviceValues.Parameters[0] = value;
+                AdviceValues.Arguments[0] = value;
             }
         }
 
@@ -137,9 +137,9 @@ namespace ArxOne.MrAdvice.Advice
             TargetProperty = propertyInfo;
             IsSetter = isSetter;
             if (IsGetter)
-                Index = new ArraySpan<object>(AdviceValues.Parameters, 0, AdviceValues.Parameters.Length);
+                Index = new ArraySpan<object>(AdviceValues.Arguments, 0, AdviceValues.Arguments.Length);
             else
-                Index = new ArraySpan<object>(AdviceValues.Parameters, 1, AdviceValues.Parameters.Length - 1);
+                Index = new ArraySpan<object>(AdviceValues.Arguments, 1, AdviceValues.Arguments.Length - 1);
         }
 
         /// <summary>

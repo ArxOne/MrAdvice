@@ -10,7 +10,6 @@ namespace ArxOne.MrAdvice.Advice
     using System.Diagnostics;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Threading;
 
     /// <summary>
     /// Parameter advice context, passed to parameter advisors
@@ -63,13 +62,13 @@ namespace ArxOne.MrAdvice.Advice
             get
             {
                 if (_parameterIndex >= 0)
-                    return AdviceValues.Parameters[_parameterIndex];
+                    return AdviceValues.Arguments[_parameterIndex];
                 return AdviceValues.ReturnValue;
             }
             set
             {
                 if (_parameterIndex >= 0)
-                    AdviceValues.Parameters[_parameterIndex] = value;
+                    AdviceValues.Arguments[_parameterIndex] = value;
                 else
                     AdviceValues.ReturnValue = value;
             }

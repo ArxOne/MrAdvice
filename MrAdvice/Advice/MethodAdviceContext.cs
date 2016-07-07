@@ -27,7 +27,17 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The parameters.
         /// </value>
-        public IList<object> Parameters => AdviceValues.Parameters;
+        [Obsolete("Use Arguments instead")]
+        public IList<object> Parameters => AdviceValues.Arguments;
+
+        /// <summary>
+        /// Gets the argument.
+        /// Each argument can be individually changed before Call.Proceed()
+        /// </summary>
+        /// <value>
+        /// The arguments.
+        /// </value>
+        public IList<object> Arguments => AdviceValues.Arguments;
 
         /// <summary>
         /// Gets a value indicating whether the advised method has a return value.
