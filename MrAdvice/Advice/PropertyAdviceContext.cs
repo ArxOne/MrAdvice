@@ -141,7 +141,21 @@ namespace ArxOne.MrAdvice.Advice
             else
                 Index = new ArraySpan<object>(AdviceValues.Parameters, 1, AdviceValues.Parameters.Length - 1);
         }
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PropertyAdviceContext"/> class.
+        /// </summary>
+        /// <param name="propertyAdvice">The property advice.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="isSetter">if set to <c>true</c> [is setter].</param>
+        /// <param name="target">The target.</param>
+        /// <param name="targetType">Type of the target.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="nextAdviceContext">The next advice context.</param>
+        protected PropertyAdviceContext(IPropertyAdvice propertyAdvice, PropertyInfo propertyInfo, bool isSetter, object target, Type targetType, object[] parameters, AdviceContext nextAdviceContext)
+            : this(propertyAdvice, propertyInfo, isSetter, new AdviceValues(target, targetType, parameters), nextAdviceContext)
+        { }
+
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>

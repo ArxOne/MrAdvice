@@ -14,15 +14,26 @@ namespace ArxOne.MrAdvice.Advice
     /// <summary>
     /// Special terminal advice, which calls the final method
     /// </summary>
-    internal class InnerMethodContext : AdviceContext
+    public class InnerMethodContext : AdviceContext
     {
         private readonly MethodInfo _innerMethod;
 
-        public InnerMethodContext(AdviceValues adviceValues, MethodInfo innerMethod)
+        internal InnerMethodContext(AdviceValues adviceValues, MethodInfo innerMethod)
             : base(adviceValues, null)
         {
             _innerMethod = innerMethod;
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InnerMethodContext"/> class.
+        /// </summary>
+        /// <param name="target">The target.</param>
+        /// <param name="targetType">Type of the target.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="innerMethod">The inner method.</param>
+        protected InnerMethodContext(object target, Type targetType, object[] parameters, MethodInfo innerMethod)
+            : this(new AdviceValues(target, targetType, parameters), innerMethod)
+        { }
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).

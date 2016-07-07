@@ -118,6 +118,21 @@ namespace ArxOne.MrAdvice.Advice
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ParameterAdviceContext"/> class.
+        /// </summary>
+        /// <param name="parameterAdvice">The parameter advice.</param>
+        /// <param name="targetParameter">The target parameter.</param>
+        /// <param name="parameterIndex">Index of the parameter.</param>
+        /// <param name="target">The target.</param>
+        /// <param name="targetType">Type of the target.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="nextAdviceContext">The next advice context.</param>
+        protected ParameterAdviceContext(IParameterAdvice parameterAdvice, ParameterInfo targetParameter, int parameterIndex,
+            object target, Type targetType, object[] parameters, AdviceContext nextAdviceContext)
+            : this(parameterAdvice, targetParameter, parameterIndex, new AdviceValues(target, targetType, parameters), nextAdviceContext)
+        { }
+
+        /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>
         internal override Task Invoke()
