@@ -16,7 +16,7 @@ namespace MethodLevelTest.Advices
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string)context.Parameters[0] + "A";
+            context.Arguments[0] = (string)context.Arguments[0] + "A";
             context.Proceed();
         }
     }
@@ -29,7 +29,7 @@ namespace MethodLevelTest.Advices
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string)context.Parameters[0] + "B";
+            context.Arguments[0] = (string)context.Arguments[0] + "B";
             context.Proceed();
         }
     }
@@ -42,7 +42,7 @@ namespace MethodLevelTest.Advices
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string)context.Parameters[0] + "C";
+            context.Arguments[0] = (string)context.Arguments[0] + "C";
             context.Proceed();
         }
     }
@@ -55,7 +55,7 @@ namespace MethodLevelTest.Advices
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string)context.Parameters[0] + "D";
+            context.Arguments[0] = (string)context.Arguments[0] + "D";
             context.Proceed();
         }
     }
@@ -68,7 +68,7 @@ namespace MethodLevelTest.Advices
     {
         public void Advise(MethodAdviceContext context)
         {
-            context.Parameters[0] = (string)context.Parameters[0] + "E";
+            context.Arguments[0] = (string)context.Arguments[0] + "E";
             context.Proceed();
         }
     }
