@@ -258,12 +258,8 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Newarr, moduleDefinition.SafeImport(typeof(Type)));
                 instructions.EmitStloc(genericParametersVariable);
 
-                var genericParameters = new List<GenericParam>();
-                for (int typeGenericParameterIndex = 0; typeGenericParameterIndex < typeGenericParametersCount; typeGenericParameterIndex++)
-                    genericParameters.Add(method.DeclaringType.GenericParameters[typeGenericParameterIndex]);
-                genericParameters.AddRange(method.GenericParameters);
-
-                for (int genericParameterIndex = 0; genericParameterIndex < genericParameters.Count; genericParameterIndex++)
+                var methodGenericParametersCount = method.GenericParameters.Count;
+                for (int genericParameterIndex = 0; genericParameterIndex < typeGenericParametersCount + methodGenericParametersCount; genericParameterIndex++)
                 {
                     instructions.EmitLdloc(genericParametersVariable); // array
                     instructions.EmitLdc(genericParameterIndex); // array index
