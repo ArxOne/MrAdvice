@@ -267,7 +267,10 @@ namespace ArxOne.MrAdvice.Weaver
                 {
                     instructions.EmitLdloc(genericParametersVariable); // array
                     instructions.EmitLdc(genericParameterIndex); // array index
-                    instructions.Emit(OpCodes.Ldtoken, genericParameters[genericParameterIndex]);
+                    if (genericParameterIndex < typeGenericParametersCount)
+                        instructions.Emit(OpCodes.Ldtoken, new GenericVar(genericParameterIndex, method.DeclaringType)); //genericParameters[genericParameterIndex]);
+                    else
+                        instructions.Emit(OpCodes.Ldtoken, new GenericMVar(genericParameterIndex - typeGenericParametersCount, method)); //genericParameters[genericParameterIndex]);
                     // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                     instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle())));
                     instructions.Emit(OpCodes.Stelem_Ref);
