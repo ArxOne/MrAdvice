@@ -97,7 +97,7 @@ namespace ArxOne.MrAdvice.Weaver
 #endif
                 .ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
 
-            return;
+#if !NO1
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
@@ -109,6 +109,8 @@ namespace ArxOne.MrAdvice.Weaver
                 .ForAll(i => WeaveInterface(moduleDefinition, i));
 
             //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+#endif
+#if NO2
 
             // and then, the info advices
             auditTimer.NewZone("Info advices weaving");
@@ -118,7 +120,7 @@ namespace ArxOne.MrAdvice.Weaver
                 .AsParallel()
 #endif
                 .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
-
+#endif
             auditTimer.NewZone("Abstract targets cleanup");
             foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
                 generatedFieldToBeRemoved.DeclaringType.Fields.Remove(generatedFieldToBeRemoved);
@@ -292,8 +294,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="invokedMethod">The invoked method.</param>
         /// <param name="genericParameterIndex">Index of the generic parameter.</param>
         /// <returns></returns>
-        private static IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(MethodDef methodDefinition,
-            IMethodDefOrRef invokedMethod, int genericParameterIndex)
+        private static IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(MethodDef methodDefinition, IMethodDefOrRef invokedMethod, int genericParameterIndex)
         {
             foreach (var instruction in methodDefinition.Body.Instructions)
             {
@@ -302,10 +303,8 @@ namespace ArxOne.MrAdvice.Weaver
                     var invokedMethodReference = (IMethod)instruction.Operand;
                     if (invokedMethodReference.NumberOfGenericParameters > 0 && invokedMethodReference.SafeEquivalent(invokedMethod))
                     {
-                        var methodSig = invokedMethodReference.MethodSig;
                         var methodSpec = (MethodSpec)invokedMethodReference;
-                        var advisedInterface = methodSpec.GenericInstMethodSig.GenericArguments[0];
-                        //var advisedInterface = invokedMethodReference.ResolveMethodDef().GenericParameters[genericParameterIndex];
+                        var advisedInterface = methodSpec.GenericInstMethodSig.GenericArguments[genericParameterIndex];
                         //Logger.WriteDebug("Found Advice to '{0}'", advisedInterface);
                         yield return Tuple.Create(advisedInterface.ToTypeDefOrRef(), methodDefinition);
                     }

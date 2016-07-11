@@ -111,11 +111,11 @@ namespace ArxOne.MrAdvice.Weaver
             return Insert(Instruction.Create(opCode, value));
         }
 
-        public Instructions Emit(OpCode opCode, GenericParam value)
-        {
-            var moduleDef = value.DeclaringMethod != null ? value.DeclaringMethod.Module : value.DeclaringType.Module;
-            return Insert(Instruction.Create(opCode, new TypeRefUser(null, null, value.FullName, moduleDef)));
-        }
+        //public Instructions Emit(OpCode opCode, GenericParam value)
+        //{
+        //    var moduleDef = value.DeclaringMethod != null ? value.DeclaringMethod.Module : value.DeclaringType.Module;
+        //    return Insert(Instruction.Create(opCode, new TypeRefUser(null, null, value.FullName, moduleDef)));
+        //}
 
         public Instructions Emit(OpCode opCode, MethodBase value)
         {
@@ -263,7 +263,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             // for generics and some unknown reason, an unbox_any is needed
             if (targetTypeSig.IsGenericParameter)
-                return Emit(OpCodes.Unbox_Any, ((GenericSig)targetTypeSig).GenericParam);
+                return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetTypeSig));
             if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive)
                 return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetTypeSig));
             if (!targetTypeSig.SafeEquivalent(_moduleDefinition.CorLibTypes.Object))

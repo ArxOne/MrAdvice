@@ -456,6 +456,7 @@ namespace ArxOne.MrAdvice.Weaver
             TypeDef implementationType;
             TypeDef advisedInterfaceType;
             TypeDef interfaceTypeDefinition;
+            InterfaceImpl interfaceImplementation;
             lock (moduleDefinition)
             {
                 // ensure we're creating the interface only once
@@ -470,17 +471,17 @@ namespace ArxOne.MrAdvice.Weaver
                 advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(AdvisedInterface));
                 var advisedInterfaceTypeReference = moduleDefinition.SafeImport(advisedInterfaceType);
                 implementationType = new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) { Attributes = typeAttributes };
+                interfaceImplementation = new InterfaceImplUser(advisedInterfaceTypeReference);
+                implementationType.Interfaces.Add(interfaceImplementation);
 
                 lock (moduleDefinition)
                     moduleDefinition.Types.Add(implementationType);
             }
 
-            implementationType.Interfaces.Add(new InterfaceImplUser(interfaceType));
-
             // create empty .ctor. This .NET mofo wants it!
             var baseEmptyConstructor = moduleDefinition.SafeImport(TypeResolver.Resolve(advisedInterfaceType).FindConstructors().Single());
             const MethodAttributes ctorAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
-            var method = new MethodDefUser(".ctor", new MethodSig(), ctorAttributes);
+            var method = new MethodDefUser(".ctor", baseEmptyConstructor.MethodSig, ctorAttributes);
             method.Body = new CilBody();
             method.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             method.Body.Instructions.Add(Instruction.Create(OpCodes.Call, baseEmptyConstructor));
@@ -524,21 +525,21 @@ namespace ArxOne.MrAdvice.Weaver
         private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate)
         {
             var methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual | (injectAsPrivate ? MethodAttributes.Public : MethodAttributes.Private);
-            var methodParameters = new MethodParameters(interfaceMethod);
-            var implementationMethodSig = new MethodSig(interfaceMethod.CallingConvention, (uint)interfaceMethod.GenericParameters.Count, interfaceMethod.ReturnType,
-                methodParameters.Select(p => p.Type).ToArray())
-            {
-                HasThis = interfaceMethod.HasThis,
-                ExplicitThis = interfaceMethod.ExplicitThis,
-                CallingConvention = interfaceMethod.CallingConvention,
-            };
-            var implementationMethod = new MethodDefUser(interfaceMethod.Name, implementationMethodSig, methodAttributes);
-            implementationMethod.ReturnType = interfaceMethod.ReturnType;
+            //var methodParameters = new MethodParameters(interfaceMethod);
+            //var implementationMethodSig = new MethodSig(interfaceMethod.CallingConvention, (uint)interfaceMethod.GenericParameters.Count, interfaceMethod.ReturnType,
+            //    methodParameters.Select(p => p.Type).ToArray())
+            //{
+            //    HasThis = interfaceMethod.HasThis,
+            //    ExplicitThis = interfaceMethod.ExplicitThis,
+            //    CallingConvention = interfaceMethod.CallingConvention,
+            //};
+            var implementationMethod = new MethodDefUser(interfaceMethod.Name, interfaceMethod.MethodSig /*implementationMethodSig*/, methodAttributes);
+            //implementationMethod.ReturnType = interfaceMethod.ReturnType;
             implementationType.Methods.Add(implementationMethod);
-            implementationMethod.IsSpecialName = interfaceMethod.IsSpecialName;
-            methodParameters.SetParamDefs(implementationMethod);
+            //implementationMethod.IsSpecialName = interfaceMethod.IsSpecialName;
+            //methodParameters.SetParamDefs(implementationMethod);
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
-            implementationMethod.Overrides.Add(new MethodOverride(interfaceMethod, interfaceMethod));
+            implementationMethod.Overrides.Add(new MethodOverride(interfaceMethod, implementationMethod /*interfaceMethod*/));
             WritePointcutBody(implementationMethod, null, false);
             return implementationMethod;
         }
