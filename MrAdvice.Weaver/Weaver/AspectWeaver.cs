@@ -97,8 +97,6 @@ namespace ArxOne.MrAdvice.Weaver
 #endif
                 .ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
 
-#if !NO1
-
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
             auditTimer.NewZone("Interface methods weaving");
@@ -109,8 +107,6 @@ namespace ArxOne.MrAdvice.Weaver
                 .ForAll(i => WeaveInterface(moduleDefinition, i));
 
             //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
-#endif
-#if NO2
 
             // and then, the info advices
             auditTimer.NewZone("Info advices weaving");
@@ -120,7 +116,7 @@ namespace ArxOne.MrAdvice.Weaver
                 .AsParallel()
 #endif
                 .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
-#endif
+
             auditTimer.NewZone("Abstract targets cleanup");
             foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
                 generatedFieldToBeRemoved.DeclaringType.Fields.Remove(generatedFieldToBeRemoved);

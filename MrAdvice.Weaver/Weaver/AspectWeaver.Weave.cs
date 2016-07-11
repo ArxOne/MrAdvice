@@ -60,7 +60,7 @@ namespace ArxOne.MrAdvice.Weaver
             var staticCtor = infoAdvisedType.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
             if (staticCtor == null)
             {
-                staticCtor = new MethodDefUser(cctorMethodName, new MethodSig(),
+                staticCtor = new MethodDefUser(cctorMethodName, MethodSig.CreateStatic(moduleDefinition.CorLibTypes.Void),
                     (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
                     | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
                 staticCtor.Body = new CilBody();
@@ -456,7 +456,6 @@ namespace ArxOne.MrAdvice.Weaver
             TypeDef implementationType;
             TypeDef advisedInterfaceType;
             TypeDef interfaceTypeDefinition;
-            InterfaceImpl interfaceImplementation;
             lock (moduleDefinition)
             {
                 // ensure we're creating the interface only once
@@ -471,8 +470,7 @@ namespace ArxOne.MrAdvice.Weaver
                 advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(AdvisedInterface));
                 var advisedInterfaceTypeReference = moduleDefinition.SafeImport(advisedInterfaceType);
                 implementationType = new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) { Attributes = typeAttributes };
-                interfaceImplementation = new InterfaceImplUser(advisedInterfaceTypeReference);
-                implementationType.Interfaces.Add(interfaceImplementation);
+                implementationType.Interfaces.Add(new InterfaceImplUser(advisedInterfaceTypeReference));
 
                 lock (moduleDefinition)
                     moduleDefinition.Types.Add(implementationType);
