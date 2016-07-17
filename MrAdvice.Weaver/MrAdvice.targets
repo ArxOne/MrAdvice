@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)..\build\MrAdvice.Weaver.exe</MrAdvicePath>
+  </PropertyGroup>
+
+  <UsingTask
+      TaskName="MrAdviceTask"
+      AssemblyFile="$(MrAdvicePath)" />
+  <Target
+      Name="MrAdviceTarget"
+      AfterTargets="CoreCompile"
+      >
+    <MrAdviceTask ProjectPath="$(ProjectPath)" SolutionPath="$(SolutionPath)" AssemblyPath="@(IntermediateAssembly)" />
+  </Target>
+</Project>
+

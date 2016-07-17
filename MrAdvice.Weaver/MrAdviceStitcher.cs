@@ -17,7 +17,7 @@ namespace ArxOne.MrAdvice
     using StitcherBoy.Weaving;
     using Weaver;
 
-    public class WeaverStitcher : SingleStitcher
+    public class MrAdviceStitcher : SingleStitcher
     {
         protected override bool Process(StitcherContext context)
         {
@@ -38,7 +38,7 @@ namespace ArxOne.MrAdvice
         /// Loads the weaved assembly.
         /// </summary>
         /// <returns></returns>
-        private Assembly LoadWeavedAssembly(StitcherContext context, IAssemblyResolver assemblyResolver)
+        private static Assembly LoadWeavedAssembly(StitcherContext context, IAssemblyResolver assemblyResolver)
         {
             foreach (var assemblyRef in context.Module.GetAssemblyRefs())
             {

@@ -91,8 +91,8 @@
     <Compile Include="Utility\TypeReferenceComparer.cs" />
     <Compile Include="Utility\ModuleDefinitionExtensions.cs" />
     <Compile Include="Utility\ReflectionUtility.cs" />
-    <Compile Include="WeaverStitcher.cs" />
-    <Compile Include="WeaverTask.cs" />
+    <Compile Include="MrAdviceStitcher.cs" />
+    <Compile Include="MrAdviceTask.cs" />
     <Compile Include="Weaver\AspectWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.Names.cs" />
     <Compile Include="Weaver\AspectWeaver.Weave.cs" />
@@ -109,11 +109,22 @@
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
       <Link>Properties\MrAdvice.snk</Link>
     </None>
+    <None Include="MrAdvice.nuspec">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MrAdvice.tt</DependentUpon>
+    </None>
+    <None Include="MrAdvice.targets" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="MrAdvice.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MrAdvice.nuspec</LastGenOutput>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
