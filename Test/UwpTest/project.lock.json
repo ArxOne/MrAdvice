@@ -3,7 +3,6 @@
   "version": 1,
   "targets": {
     "UAP,Version=v10.0": {
-      "Fody/1.29.4": {},
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -1781,7 +1780,6 @@
       }
     },
     "UAP,Version=v10.0/win10-arm": {
-      "Fody/1.29.4": {},
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -3420,7 +3418,6 @@
       }
     },
     "UAP,Version=v10.0/win10-arm-aot": {
-      "Fody/1.29.4": {},
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -5017,7 +5014,6 @@
       }
     },
     "UAP,Version=v10.0/win10-x64": {
-      "Fody/1.29.4": {},
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -6664,7 +6660,6 @@
       }
     },
     "UAP,Version=v10.0/win10-x64-aot": {
-      "Fody/1.29.4": {},
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -8261,7 +8256,6 @@
       }
     },
     "UAP,Version=v10.0/win10-x86": {
-      "Fody/1.29.4": {},
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -9908,7 +9902,6 @@
       }
     },
     "UAP,Version=v10.0/win10-x86-aot": {
-      "Fody/1.29.4": {},
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
           "System.Collections": "4.0.10",
@@ -11506,29 +11499,6 @@
     }
   },
   "libraries": {
-    "Fody/1.29.4": {
-      "sha512": "GVlhR6Ngy5/plww+7WFMyWCjS/rFl3Nzev/DuAW7CXhfmMDmNEX+TQMmUQ7yflohNHT6u2RVCQhv2mMoJm81kg==",
-      "type": "Package",
-      "files": [
-        "Content/FodyWeavers.xml",
-        "Fody.dll",
-        "Fody.nuspec",
-        "Fody.pdb",
-        "FodyCommon.dll",
-        "FodyCommon.pdb",
-        "FodyIsolated.dll",
-        "FodyIsolated.pdb",
-        "Mono.Cecil.Mdb.dll",
-        "Mono.Cecil.Pdb.dll",
-        "Mono.Cecil.Rocks.dll",
-        "Mono.Cecil.dll",
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "build/dotnet/Fody.targets",
-        "build/portable-net+sl+win+wpa+wp/Fody.targets",
-        "package/services/metadata/core-properties/5d620024e2ee4c1e86baaffdeb76e630.psmdcp"
-      ]
-    },
     "Microsoft.CSharp/4.0.0": {
       "sha512": "oWqeKUxHXdK6dL2CFjgMcaBISbkk+AqEg+yvJHE4DElNzS4QaTsCflgkkqZwVlWby1Dg9zo9n+iCAMFefFdJ/A==",
       "type": "Package",
@@ -14990,7 +14960,6 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Fody >= 1.29.4",
       "Microsoft.NETCore.UniversalWindowsPlatform >= 5.1.0"
     ],
     "UAP,Version=v10.0": []
