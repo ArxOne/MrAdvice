@@ -4,6 +4,7 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace ArxOne.MrAdvice
 {
     using System;
@@ -96,3 +97,4 @@ namespace ArxOne.MrAdvice
         }
     }
 }
+
