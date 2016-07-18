@@ -4,8 +4,8 @@ version: '{branch}-{build}'
 
 branches:
   only:
-    - master
     - fody
+    - dnlib
 
 before_build:
   nuget restore MrAdvice.sln
