@@ -334,5 +334,25 @@ namespace MethodLevelTest
             var p = PInvoker.GetCurrentProcess();
             Assert.AreEqual(1234, p.ToInt32());
         }
+
+        public class A
+        {
+
+        }
+
+        [ChangeParameter(NewParameter = 12)]
+        public string ConstrainedMethod<TValue>(int i, TValue v)
+            where TValue : A
+        {
+            return i.ToString() + v.ToString();
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void GenericConstraintTest()
+        {
+            var r = ConstrainedMethod(3, new A());
+            Assert.IsTrue(r.StartsWith("12"));
+        }
     }
 }
