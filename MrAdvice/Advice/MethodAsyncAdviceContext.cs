@@ -22,7 +22,17 @@
         /// <value>
         /// The parameters.
         /// </value>
-        public IList<object> Parameters => AdviceValues.Parameters;
+        [Obsolete("Use Arguments instead")]
+        public IList<object> Parameters => AdviceValues.Arguments;
+
+        /// <summary>
+        /// Gets the argument.
+        /// Each argument can be individually changed before Call.Proceed()
+        /// </summary>
+        /// <value>
+        /// The arguments.
+        /// </value>
+        public IList<object> Arguments => AdviceValues.Arguments;
 
         /// <summary>
         /// Gets a value indicating whether the advised method has a return value.
@@ -79,7 +89,7 @@
         /// <value>
         /// <c>true</c> if the target method is asynchronous; otherwise, <c>false</c>.
         /// </value>
-        public bool IsTargetMethodAsync => typeof (Task).IsAssignableFrom((TargetMethod as MethodInfo)?.ReturnType);
+        public bool IsTargetMethodAsync => typeof(Task).IsAssignableFrom((TargetMethod as MethodInfo)?.ReturnType);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodAdviceContext" /> class.
@@ -96,9 +106,23 @@
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="MethodAsyncAdviceContext"/> class.
+        /// </summary>
+        /// <param name="methodAdvice">The method advice.</param>
+        /// <param name="targetMethod">The target method.</param>
+        /// <param name="target">The target.</param>
+        /// <param name="targetType">Type of the target.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="nextAdviceContext">The next advice context.</param>
+        protected MethodAsyncAdviceContext(IMethodAsyncAdvice methodAdvice, MethodBase targetMethod, object target, Type targetType, object[] parameters,
+            AdviceContext nextAdviceContext)
+            : this(methodAdvice, targetMethod, new AdviceValues(target, targetType, parameters), nextAdviceContext)
+        { }
+
+        /// <summary>
         /// Proceeds to the next advice, asynchronously
         /// </summary>
-        public Task ProceedAsync() => InvokeNext() ?? Tasks.Void();
+        public virtual Task ProceedAsync() => InvokeNext() ?? Tasks.Void();
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).

@@ -20,10 +20,10 @@ namespace ArxOne.MrAdvice.Advice
     public class PropertyAdviceContext : SyncAdviceContext
     {
         /// <summary>
-        /// Gets the index for property.
+        /// Gets the index(es) for property.
         /// </summary>
         /// <value>
-        /// The index.
+        /// The index(es).
         /// </value>
         public IList<object> Index { get; }
 
@@ -52,13 +52,13 @@ namespace ArxOne.MrAdvice.Advice
             {
                 if (!HasValue)
                     throw new InvalidOperationException("Method has no Value");
-                return AdviceValues.Parameters[0];
+                return AdviceValues.Arguments[0];
             }
             set
             {
                 if (!HasValue)
                     throw new InvalidOperationException("Method has no Value");
-                AdviceValues.Parameters[0] = value;
+                AdviceValues.Arguments[0] = value;
             }
         }
 
@@ -137,11 +137,25 @@ namespace ArxOne.MrAdvice.Advice
             TargetProperty = propertyInfo;
             IsSetter = isSetter;
             if (IsGetter)
-                Index = new ArraySpan<object>(AdviceValues.Parameters, 0, AdviceValues.Parameters.Length);
+                Index = new ArraySpan<object>(AdviceValues.Arguments, 0, AdviceValues.Arguments.Length);
             else
-                Index = new ArraySpan<object>(AdviceValues.Parameters, 1, AdviceValues.Parameters.Length - 1);
+                Index = new ArraySpan<object>(AdviceValues.Arguments, 1, AdviceValues.Arguments.Length - 1);
         }
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PropertyAdviceContext"/> class.
+        /// </summary>
+        /// <param name="propertyAdvice">The property advice.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="isSetter">if set to <c>true</c> [is setter].</param>
+        /// <param name="target">The target.</param>
+        /// <param name="targetType">Type of the target.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="nextAdviceContext">The next advice context.</param>
+        protected PropertyAdviceContext(IPropertyAdvice propertyAdvice, PropertyInfo propertyInfo, bool isSetter, object target, Type targetType, object[] parameters, AdviceContext nextAdviceContext)
+            : this(propertyAdvice, propertyInfo, isSetter, new AdviceValues(target, targetType, parameters), nextAdviceContext)
+        { }
+
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// </summary>

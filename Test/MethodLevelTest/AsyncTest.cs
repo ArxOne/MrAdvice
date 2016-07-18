@@ -11,7 +11,6 @@ namespace MethodLevelTest
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
-    using System.Threading;
     using System.Threading.Tasks;
     using ArxOne.MrAdvice.Advice;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -147,7 +146,9 @@ namespace MethodLevelTest
         public void F1()
         { }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async void F2()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         { }
 
         //[TestMethod]
@@ -253,7 +254,7 @@ namespace MethodLevelTest
         [TestCategory("Async")]
         public void PlusOneTest()
         {
-            var t = Task.Run(() => Get100());
+            var t = Task.Run(Get100);
             t.Wait();
             var r = t.Result;
             Assert.AreEqual(101, r);
@@ -295,7 +296,9 @@ namespace MethodLevelTest
         }
 
         [AsyncAdvice]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async void GenerateWarning()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         { }
     }
 }

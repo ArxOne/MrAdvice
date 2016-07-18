@@ -10,7 +10,6 @@ namespace ArxOne.MrAdvice.Advice
     using System.Diagnostics;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Threading;
 
     /// <summary>
     /// Parameter advice context, passed to parameter advisors
@@ -63,13 +62,13 @@ namespace ArxOne.MrAdvice.Advice
             get
             {
                 if (_parameterIndex >= 0)
-                    return AdviceValues.Parameters[_parameterIndex];
+                    return AdviceValues.Arguments[_parameterIndex];
                 return AdviceValues.ReturnValue;
             }
             set
             {
                 if (_parameterIndex >= 0)
-                    AdviceValues.Parameters[_parameterIndex] = value;
+                    AdviceValues.Arguments[_parameterIndex] = value;
                 else
                     AdviceValues.ReturnValue = value;
             }
@@ -116,6 +115,21 @@ namespace ArxOne.MrAdvice.Advice
             _parameterAdvice = parameterAdvice;
             _parameterIndex = parameterIndex;
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParameterAdviceContext"/> class.
+        /// </summary>
+        /// <param name="parameterAdvice">The parameter advice.</param>
+        /// <param name="targetParameter">The target parameter.</param>
+        /// <param name="parameterIndex">Index of the parameter.</param>
+        /// <param name="target">The target.</param>
+        /// <param name="targetType">Type of the target.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="nextAdviceContext">The next advice context.</param>
+        protected ParameterAdviceContext(IParameterAdvice parameterAdvice, ParameterInfo targetParameter, int parameterIndex,
+            object target, Type targetType, object[] parameters, AdviceContext nextAdviceContext)
+            : this(parameterAdvice, targetParameter, parameterIndex, new AdviceValues(target, targetType, parameters), nextAdviceContext)
+        { }
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).

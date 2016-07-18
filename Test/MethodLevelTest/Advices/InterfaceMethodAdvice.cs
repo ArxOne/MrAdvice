@@ -26,7 +26,7 @@ namespace MethodLevelTest.Advices
 
             // now, some advice
             if (NewFirstParameter.HasValue)
-                context.Parameters[0] = NewFirstParameter.Value;
+                context.Arguments[0] = NewFirstParameter.Value;
             if (NewReturnValue.HasValue)
                 context.ReturnValue = NewReturnValue.Value;
         }

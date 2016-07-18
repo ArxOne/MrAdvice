@@ -29,13 +29,13 @@ namespace ArxOne.MrAdvice.Advice
         /// </value>
         public Type TargetType { get; set; }
         /// <summary>
-        /// Gets the parameters (directly used by invoke).
-        /// In/ref/out parameters are stored here.
+        /// Gets the arguments (directly used by invoke).
+        /// In/ref/out arguments are stored here.
         /// </summary>
         /// <value>
         /// The parameters.
         /// </value>
-        public object[] Parameters { get; private set; }
+        public object[] Arguments { get; private set; }
         /// <summary>
         /// Gets or sets the return value.
         /// </summary>
@@ -49,13 +49,13 @@ namespace ArxOne.MrAdvice.Advice
         /// </summary>
         /// <param name="target">The target.</param>
         /// <param name="targetType">Type of the target.</param>
-        /// <param name="parameters">The parameters.</param>
-        public AdviceValues(object target, Type targetType, object[] parameters)
+        /// <param name="arguments">The arguments.</param>
+        public AdviceValues(object target, Type targetType, object[] arguments)
         {
             Target = target;
             TargetType = targetType;
             // null means empty, so actually empty fits better here
-            Parameters = parameters ?? new object[0];
+            Arguments = arguments ?? new object[0];
         }
     }
 }

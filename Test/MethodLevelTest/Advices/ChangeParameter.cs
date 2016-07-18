@@ -31,7 +31,7 @@ namespace MethodLevelTest.Advices
         public void Advise(MethodAdviceContext call)
         {
             if (_newParameter.HasValue)
-                call.Parameters[0] = _newParameter.Value;
+                call.Arguments[0] = _newParameter.Value;
             call.Proceed();
             if (_newReturnValue.HasValue)
                 call.ReturnValue = _newReturnValue.Value;
