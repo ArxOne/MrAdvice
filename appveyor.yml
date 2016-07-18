@@ -5,6 +5,7 @@ version: '{branch}-{build}'
 branches:
   only:
     - master
+    - fody
 
 before_build:
   nuget restore MrAdvice.sln
