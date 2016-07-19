@@ -337,7 +337,7 @@ namespace MethodLevelTest
 
         public class A
         {
-
+            public int V;
         }
 
         [ChangeParameter(NewParameter = 12)]
@@ -354,5 +354,32 @@ namespace MethodLevelTest
             var r = ConstrainedMethod(3, new A());
             Assert.IsTrue(r.StartsWith("12"));
         }
+#if FAILS_AT_WEAVE
+        public interface IConstrainedInterface
+        {
+            TValue GetSomething<TValue>(int i, TValue v)
+                where TValue : A;
+        }
+
+        [ChangeParameter(NewParameter = 34)]
+        public class ConstrainedClass : IConstrainedInterface
+        {
+            public TValue GetSomething<TValue>(int i, TValue v)
+                where TValue : A
+            {
+                v.V = i;
+                return v;
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void InterfaceGenericConstraintTest()
+        {
+            var c = new ConstrainedClass();
+            var r = c.GetSomething(5, new A());
+            Assert.AreEqual(34, r.V);
+        }
+#endif
     }
 }
