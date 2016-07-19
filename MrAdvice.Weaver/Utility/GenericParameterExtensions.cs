@@ -24,6 +24,8 @@ namespace ArxOne.MrAdvice.Utility
             var newGenericParameter = new GenericParameter(methodDefinition);
             newGenericParameter.Attributes = genericParameter.Attributes;
             newGenericParameter.Name = genericParameter.Name;
+            if (genericParameter.HasConstraints)
+                newGenericParameter.Constraints.AddRange(genericParameter.Constraints);
             return newGenericParameter;
         }
     }
