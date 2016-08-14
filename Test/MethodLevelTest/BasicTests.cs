@@ -354,7 +354,6 @@ namespace MethodLevelTest
             var r = ConstrainedMethod(3, new A());
             Assert.IsTrue(r.StartsWith("12"));
         }
-#if FAILS_AT_WEAVE
         public interface IConstrainedInterface
         {
             TValue GetSomething<TValue>(int i, TValue v)
@@ -380,6 +379,5 @@ namespace MethodLevelTest
             var r = c.GetSomething(5, new A());
             Assert.AreEqual(34, r.V);
         }
-#endif
     }
 }
