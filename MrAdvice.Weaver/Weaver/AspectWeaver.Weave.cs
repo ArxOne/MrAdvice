@@ -58,7 +58,8 @@ namespace ArxOne.MrAdvice.Weaver
 
             const string cctorMethodName = ".cctor";
             var staticCtor = infoAdvisedType.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
-            if (staticCtor == null)
+            var newStaticCtor = staticCtor == null;
+            if (newStaticCtor)
             {
                 staticCtor = new MethodDefUser(cctorMethodName, MethodSig.CreateStatic(moduleDefinition.CorLibTypes.Void),
                     (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
@@ -81,7 +82,9 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(getTypeFromHandleMethodInfo));
             }
             instructions.Emit(OpCodes.Call, proceedMethod);
-            instructions.Emit(OpCodes.Ret);
+            // ret is only emitted if the method is new
+            if (newStaticCtor)
+                instructions.Emit(OpCodes.Ret);
         }
 
         /// <summary>
