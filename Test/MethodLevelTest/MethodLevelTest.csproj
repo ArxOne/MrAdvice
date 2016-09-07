@@ -135,6 +135,7 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <!-- <Error Condition="!Exists('..\..\packages\Fody.1.29.4\build\dotnet\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Fody.1.29.4\build\dotnet\Fody.targets'))" /> -->
   </Target>
+  <Import Project="$(SolutionDir)\MrAdvice.Weaver\MrAdvice.targets" />
   <PropertyGroup>
     <PostBuildEvent>"$(SolutionDir)\Tools\peverify.bat" "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>

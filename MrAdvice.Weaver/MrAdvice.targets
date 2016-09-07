@@ -5,13 +5,8 @@
     <MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)..\build\MrAdvice.Weaver.exe</MrAdvicePath>
   </PropertyGroup>
 
-  <UsingTask
-      TaskName="MrAdviceTask"
-      AssemblyFile="$(MrAdvicePath)" />
-  <Target
-      Name="MrAdviceTarget"
-      AfterTargets="CoreCompile"
-      >
+  <UsingTask TaskName="MrAdviceTask" AssemblyFile="$(MrAdvicePath)" />
+  <Target Name="MrAdviceTarget" AfterTargets="CoreCompile">
     <MrAdviceTask ProjectPath="$(ProjectPath)" SolutionPath="$(SolutionPath)" AssemblyPath="@(IntermediateAssembly)" />
   </Target>
 </Project>

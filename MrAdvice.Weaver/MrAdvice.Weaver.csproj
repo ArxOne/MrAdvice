@@ -114,7 +114,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>MrAdvice.tt</DependentUpon>
     </None>
-    <None Include="MrAdvice.targets" />
+    <None Include="MrAdvice.targets">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -132,8 +134,6 @@
     <ProjectReference Include="..\MrAdvice\MrAdvice.csproj">
       <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
       <Name>MrAdvice</Name>
-      <Private>True</Private>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -144,7 +144,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets'))" />
-    <Error Condition="!Exists('..\packages\Blobber.0.5.0\build\Blobber.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Blobber.0.5.0\build\Blobber.targets'))" />
+    <Error Condition="!Exists('..\packages\Blobber.0.5.3\build\Blobber.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Blobber.0.5.3\build\Blobber.targets'))" />
   </Target>
   <PropertyGroup>
     <PostBuildEvent>if not exist "$(SolutionDir)\build" mkdir "$(SolutionDir)\build"
@@ -159,5 +159,5 @@ copy "$(TargetPath)" "$(SolutionDir)\build\$(TargetFileName).debugTask"
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Blobber.0.5.0\build\Blobber.targets" Condition="Exists('..\packages\Blobber.0.5.0\build\Blobber.targets')" />
+  <Import Project="..\packages\Blobber.0.5.3\build\Blobber.targets" Condition="Exists('..\packages\Blobber.0.5.3\build\Blobber.targets')" />
 </Project>
