@@ -99,10 +99,15 @@ public class ModuleWeaver
     {
         var assemblyName = new AssemblyName(args.Name);
         LogInfo($"Trying to resolve {args.Name}");
-        var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => ReferencesAssembly(assemblyName, a.GetName()));
-        if (loadedAssembly == null)
+        var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => ReferencesAssembly(assemblyName, a.GetName())).ToArray();
+        if (loadedAssemblies.Length == 0)
             LogError($"{args.Name} not resolved");
-        return loadedAssembly;
+        if (loadedAssemblies.Length > 1)
+        {
+            var loadAssembliesNames = string.Join(", ", loadedAssemblies.Select(a => a.GetName().ToString()));
+            LogWarning($"Multiple assemblies found: {loadAssembliesNames}");
+        }
+        return loadedAssemblies[0];
     }
 
     private static bool ReferencesAssembly(AssemblyName a, AssemblyName b)
