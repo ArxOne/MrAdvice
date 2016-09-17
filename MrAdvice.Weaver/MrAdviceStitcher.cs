@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice
 {
     using System;
     using System.IO;
+    using System.IO.Compression;
     using System.Linq;
     using System.Reflection;
     using dnlib.DotNet;
@@ -30,8 +31,30 @@ namespace ArxOne.MrAdvice
             var typeResolver = new TypeResolver { AssemblyResolver = assemblyResolver };
             var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
             var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, TypeLoader = typeLoader };
+            // TODO: use blobber's resolution (WTF?)
+            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+            //AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => MrAdviceTask.AssemblyResolve(GetType().Assembly, e);
             aspectWeaver.Weave(context.Module);
             return true;
+        }
+
+        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            var assemblyName = new AssemblyName(args.Name);
+            var resourceName = $"blobber:embedded.gz:{assemblyName.Name}";
+
+            using (var resourceStream = GetType().Assembly.GetManifestResourceStream(resourceName))
+            {
+                if (resourceStream == null)
+                    return null;
+                using (var gzipStream = new GZipStream(resourceStream, CompressionMode.Decompress))
+                using (var memoryStream = new MemoryStream())
+                {
+                    gzipStream.CopyTo(memoryStream);
+                    var assembly = Assembly.Load(memoryStream.ToArray());
+                    return assembly;
+                }
+            }
         }
 
         /// <summary>

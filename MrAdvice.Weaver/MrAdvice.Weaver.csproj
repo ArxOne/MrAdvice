@@ -50,8 +50,8 @@
   <ItemGroup>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="StitcherBoy, Version=0.5.0.0, Culture=neutral, PublicKeyToken=a3be45b63ddcbf4d, processorArchitecture=MSIL">
-      <HintPath>..\packages\StitcherBoy.0.5.0\lib\net45\StitcherBoy.dll</HintPath>
+    <Reference Include="StitcherBoy, Version=0.5.2.1, Culture=neutral, PublicKeyToken=a3be45b63ddcbf4d, processorArchitecture=MSIL">
+      <HintPath>..\packages\StitcherBoy.0.5.2.1\lib\net45\StitcherBoy.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -144,7 +144,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets'))" />
-    <Error Condition="!Exists('..\packages\Blobber.0.5.3\build\Blobber.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Blobber.0.5.3\build\Blobber.targets'))" />
+    <Error Condition="!Exists('..\packages\Blobber.0.5.7.2\build\Blobber.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Blobber.0.5.7.2\build\Blobber.targets'))" />
   </Target>
   <PropertyGroup>
     <PostBuildEvent>if not exist "$(SolutionDir)\build" mkdir "$(SolutionDir)\build"
@@ -159,5 +159,5 @@ copy "$(TargetPath)" "$(SolutionDir)\build\$(TargetFileName).debugTask"
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Blobber.0.5.3\build\Blobber.targets" Condition="Exists('..\packages\Blobber.0.5.3\build\Blobber.targets')" />
+  <Import Project="..\packages\Blobber.0.5.7.2\build\Blobber.targets" Condition="Exists('..\packages\Blobber.0.5.7.2\build\Blobber.targets')" />
 </Project>

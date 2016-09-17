@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Runtime.Versioning;
     using Advice;
@@ -32,6 +33,7 @@ namespace ArxOne.MrAdvice.Weaver
     internal partial class AspectWeaver
     {
         public TypeResolver TypeResolver { get; set; }
+
         public TypeLoader TypeLoader { get; set; }
 
         /// <summary>
@@ -135,7 +137,7 @@ namespace ArxOne.MrAdvice.Weaver
             Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
                 moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
         }
-
+        
         private IEnumerable<FieldDef> GetRemovableFields(IList<MarkedNode> nodes, Types types)
         {
             var type = nodes.First().Node.Method.DeclaringType;
