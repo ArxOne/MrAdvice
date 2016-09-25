@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Linq;
     using dnlib.DotNet;
+    using IO;
     using Utility;
 
     /// <summary>
@@ -63,14 +64,35 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private TypeDef Resolve(ModuleDef moduleDefinition, string fullName, bool ignoreSystem, int depth)
         {
+            //Logger.WriteDebug("Trying to resolve in the following modules:");
+            //foreach (var module in moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, 10))
+            //    Logger.WriteDebug($" {module.FullName}");
+            //foreach (var assemblyRef in moduleDefinition.GetAssemblyRefs())
+            //{
+            //    Logger.WriteDebug($"Ref '{assemblyRef.FullName}' from '{moduleDefinition.FullName}'");
+            //    var assemblyDef =   AssemblyResolver.Resolve(assemblyRef, moduleDefinition);
+            //    if (assemblyDef == null)
+            //        Logger.WriteError(" Can't resolve!");
+            //    else
+            //    {
+            //        var m = assemblyDef.GetMainModule();
+            //        Logger.WriteDebug($" Loaded {m.FullName}");
+            //    }
+            //}
             return moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth)
-                .Select(referencedModule => referencedModule.GetTypes()
+                .SelectMany(referencedModule => referencedModule.GetTypes())
 #if !DEBUG
                     .AsParallel()
 #endif
-                    .FirstOrDefault(t => t.FullName == fullName))
-                .FirstOrDefault(foundType => foundType != null);
+                .FirstOrDefault(t => Matches(t, fullName));
         }
+
+        private static bool Matches(TypeDef type, string fullName)
+        {
+            //Logger.WriteDebug("Checking type {0}", type.FullName);
+            return type.FullName == fullName;
+        }
+
 
         /// <summary>
         /// Resolves the specified type to Cecil.

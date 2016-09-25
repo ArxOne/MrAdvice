@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
@@ -51,6 +52,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         public void Weave(ModuleDefMD moduleDefinition)
         {
+            //Logger.LogInfo("Modules and dependencies:");
+            //var selfAndReferences = moduleDefinition.GetSelfAndReferences(TypeResolver.AssemblyResolver, false, 10).ToArray();
+            //foreach (var r in selfAndReferences)
+            //{
+            //    Logger.LogInfo($"Module {r.Name.ToString()}");
+            //}
+            //Logger.LogInfo($"Current directory: {Environment.CurrentDirectory}");
+
             var auditTimer = new AuditTimer();
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -137,7 +146,7 @@ namespace ArxOne.MrAdvice.Weaver
             Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
                 moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
         }
-        
+
         private IEnumerable<FieldDef> GetRemovableFields(IList<MarkedNode> nodes, Types types)
         {
             var type = nodes.First().Node.Method.DeclaringType;

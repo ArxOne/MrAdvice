@@ -43,7 +43,7 @@ namespace ArxOne.MrAdvice.Utility
                 yield return thisModule;
 
                 // now, recurse
-                if (depth != 0)
+                if (depth > 0)
                 {
                     foreach (var referencedModule in thisModule.GetReferencedModules(assemblyResolver, ignoreSystem))
                     {
@@ -120,12 +120,30 @@ namespace ArxOne.MrAdvice.Utility
         {
             try
             {
-                Logger.WriteDebug("TryLoad '{0}'", assemblyNameReference.FullName);
-                return assemblyResolver.Resolve(assemblyNameReference, source);
+                Logger.WriteDebug("TryLoad '{0}' from '{1}'", assemblyNameReference.FullName, source.FullName);
+                var assemblyDef = assemblyResolver.Resolve(assemblyNameReference, source) ?? LoadEmbedded(assemblyNameReference);
+                if (assemblyDef == null)
+                    Logger.WriteWarning("Can't load '{0}'", assemblyNameReference.FullName);
+                return assemblyDef;
             }
             catch (FileNotFoundException)
             { }
+            Logger.WriteError("Failed loading '{0}'", assemblyNameReference.FullName);
             return null;
+        }
+
+        /// <summary>
+        /// Loads embedded assembly. This is used only to find MrAdvice, which from some unknown reasons can not be loaded otherwise
+        /// </summary>
+        /// <param name="assemblyNameReference">The assembly name reference.</param>
+        /// <returns></returns>
+        private static AssemblyDef LoadEmbedded(AssemblyRef assemblyNameReference)
+        {
+            var assemblyName = new AssemblyName(assemblyNameReference.FullName);
+            var assemblyData = MrAdviceStitcher.ResolveAssembly(assemblyName);
+            if (assemblyData == null)
+                return null;
+            return AssemblyDef.Load(assemblyData);
         }
 
         public static IMethod SafeImport(this ModuleDef moduleDefinition, IMethod methodReference)

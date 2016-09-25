@@ -15,18 +15,28 @@ namespace ArxOne.MrAdvice
     using dnlib.DotNet;
     using IO;
     using Reflection;
+    using StitcherBoy.Project;
     using StitcherBoy.Weaving;
     using Weaver;
 
     public class MrAdviceStitcher : SingleStitcher
     {
+        public MrAdviceStitcher()
+        {
+            Logger.LogInfo = s => Logging.Write(s);
+            Logger.LogWarning = s => Logging.WriteWarning(s);
+            Logger.LogError = s => Logging.WriteError(s);
+        }
+
+        protected override void OnProjectDefinitionLoadError(object sender, ProjectDefinitionLoadErrorEventArgs e)
+        {
+            Logger.LogError($"Error while loading project {e.ProjectDefinition.ProjectPath}: {e.Exception}");
+        }
+
         protected override bool Process(StitcherContext context)
         {
             // instances are created here
             // please also note poor man's dependency injection (which is enough for us here)
-            Logger.LogInfo = s => Logging.Write(s);
-            Logger.LogWarning = s => Logging.WriteWarning(s);
-            Logger.LogError = s => Logging.WriteError(s);
             var assemblyResolver = new AssemblyResolver();
             var typeResolver = new TypeResolver { AssemblyResolver = assemblyResolver };
             var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
@@ -41,9 +51,23 @@ namespace ArxOne.MrAdvice
         private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name);
+            var assemblyData = ResolveAssembly(assemblyName);
+            if (assemblyData == null)
+                return null;
+
+            return Assembly.Load(assemblyData);
+        }
+
+        /// <summary>
+        /// Resolves the assembly.
+        /// </summary>
+        /// <param name="assemblyName">Name of the assembly.</param>
+        /// <returns></returns>
+        public static byte[] ResolveAssembly(AssemblyName assemblyName)
+        {
             var resourceName = $"blobber:embedded.gz:{assemblyName.Name}";
 
-            using (var resourceStream = GetType().Assembly.GetManifestResourceStream(resourceName))
+            using (var resourceStream = typeof(MrAdviceStitcher).Assembly.GetManifestResourceStream(resourceName))
             {
                 if (resourceStream == null)
                     return null;
@@ -51,8 +75,7 @@ namespace ArxOne.MrAdvice
                 using (var memoryStream = new MemoryStream())
                 {
                     gzipStream.CopyTo(memoryStream);
-                    var assembly = Assembly.Load(memoryStream.ToArray());
-                    return assembly;
+                    return memoryStream.ToArray();
                 }
             }
         }

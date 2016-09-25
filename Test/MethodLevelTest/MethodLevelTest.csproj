@@ -102,10 +102,6 @@
       <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
       <Name>MrAdvice</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ExternalAdvices\ExternalAdvices.csproj">
-      <Project>{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}</Project>
-      <Name>ExternalAdvices</Name>
-    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
