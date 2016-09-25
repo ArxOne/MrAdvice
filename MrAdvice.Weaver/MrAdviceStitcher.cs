@@ -88,9 +88,12 @@ namespace ArxOne.MrAdvice
         {
             foreach (var assemblyRef in context.Module.GetAssemblyRefs())
             {
-                var referencePath = assemblyResolver.Resolve(assemblyRef, context.Module).ManifestModule.Location;
                 try
                 {
+                    var assemblyRefName = new AssemblyName(assemblyRef.FullName);
+                    if (assemblyRefName.Name == "MrAdvice")
+                        continue;
+                    var referencePath = assemblyResolver.Resolve(assemblyRef, context.Module).ManifestModule.Location;
                     var fileName = Path.GetFileName(referencePath);
                     // right, this is dirty!
                     if (fileName == "MrAdvice.dll" && AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "MrAdvice"))
@@ -100,7 +103,7 @@ namespace ArxOne.MrAdvice
                 }
                 catch (Exception e)
                 {
-                    Logger.WriteWarning("Can't load {0}: {1}", referencePath, e.GetType().Name);
+                    Logger.WriteWarning("Can't load {0}: {1}", assemblyRef.FullName, e.GetType().Name);
                 }
             }
             var bytes = File.ReadAllBytes(context.Module.Assembly.ManifestModule.Location);
