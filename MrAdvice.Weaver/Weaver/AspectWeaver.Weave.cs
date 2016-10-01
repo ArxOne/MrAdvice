@@ -540,7 +540,7 @@ namespace ArxOne.MrAdvice.Weaver
             //implementationMethod.IsSpecialName = interfaceMethod.IsSpecialName;
             //methodParameters.SetParamDefs(implementationMethod);
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
-            implementationMethod.Overrides.Add(new MethodOverride(interfaceMethod, implementationMethod /*interfaceMethod*/));
+            implementationMethod.Overrides.Add(new MethodOverride(implementationMethod, interfaceMethod));
             WritePointcutBody(implementationMethod, null, false);
             return implementationMethod;
         }
