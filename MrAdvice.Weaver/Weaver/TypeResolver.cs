@@ -79,12 +79,15 @@ namespace ArxOne.MrAdvice.Weaver
             //        Logger.WriteDebug($" Loaded {m.FullName}");
             //    }
             //}
-            return moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth)
-                .SelectMany(referencedModule => referencedModule.GetTypes())
-#if !DEBUG
-                    .AsParallel()
-#endif
-                .FirstOrDefault(t => Matches(t, fullName));
+            lock (_resolvedTypesByName)
+            {
+                return moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth)
+                  .SelectMany(referencedModule => referencedModule.GetTypes())
+                  //#if !DEBUG
+                  //                    .AsParallel()
+                  //#endif
+                  .FirstOrDefault(t => Matches(t, fullName));
+            }
         }
 
         private static bool Matches(TypeDef type, string fullName)
@@ -112,11 +115,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public TypeDef Resolve(ITypeDefOrRef typeDefOrRef)
         {
-            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue))
+            lock (_resolvedTypesByName)
             {
-                var typeDef = reference.Find(typeDefOrRef);
-                if (typeDef != null)
-                    return typeDef;
+                foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue))
+                {
+                    var typeDef = reference.Find(typeDefOrRef);
+                    if (typeDef != null)
+                        return typeDef;
+                }
             }
             return null;
         }
