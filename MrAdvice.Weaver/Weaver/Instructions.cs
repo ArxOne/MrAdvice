@@ -308,56 +308,56 @@ namespace ArxOne.MrAdvice.Weaver
         /// <summary>
         /// Emits a ldind.
         /// </summary>
-        /// <param name="type">The type.</param>
-        public Instructions EmitLdind(ITypeDefOrRef type)
+        /// <param name="typeSig">The type sig.</param>
+        /// <returns></returns>
+        public Instructions EmitLdind(TypeSig typeSig)
         {
-            if (type.IsValueType)
-            {
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Byte))))
-                    return Emit(OpCodes.Ldind_U1);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(SByte))))
-                    return Emit(OpCodes.Ldind_I1);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int16))))
-                    return Emit(OpCodes.Ldind_I2);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(UInt16))))
-                    return Emit(OpCodes.Ldind_U2);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int32))))
-                    return Emit(OpCodes.Ldind_I4);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(UInt32))))
-                    return Emit(OpCodes.Ldind_U4);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int64))) || type.SafeEquivalent(type.Module.SafeImport(typeof(UInt64))))
-                    return Emit(OpCodes.Ldind_I8);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Single))))
-                    return Emit(OpCodes.Ldind_R4);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Double))))
-                    return Emit(OpCodes.Ldind_R8);
-                return Emit(OpCodes.Ldobj, _moduleDefinition.SafeImport(type));
-            }
+            var corLibTypes = _moduleDefinition.CorLibTypes;
+            if (typeSig == corLibTypes.Byte)
+                return Emit(OpCodes.Ldind_U1);
+            if (typeSig == corLibTypes.SByte)
+                return Emit(OpCodes.Ldind_I1);
+            if (typeSig == corLibTypes.Int16)
+                return Emit(OpCodes.Ldind_I2);
+            if (typeSig == corLibTypes.UInt16)
+                return Emit(OpCodes.Ldind_U2);
+            if (typeSig == corLibTypes.Int32)
+                return Emit(OpCodes.Ldind_I4);
+            if (typeSig == corLibTypes.UInt32)
+                return Emit(OpCodes.Ldind_U4);
+            if (typeSig == corLibTypes.Int64 || typeSig == corLibTypes.UInt64)
+                return Emit(OpCodes.Ldind_I8);
+            if (typeSig == corLibTypes.Single)
+                return Emit(OpCodes.Ldind_R4);
+            if (typeSig == corLibTypes.Double)
+                return Emit(OpCodes.Ldind_R8);
+            if (typeSig.IsPrimitive)
+                return Emit(OpCodes.Ldobj, _moduleDefinition.SafeImport(typeSig));
             return Emit(OpCodes.Ldind_Ref);
         }
 
         /// <summary>
         /// Emits a stind.
         /// </summary>
-        /// <param name="type">The type.</param>
-        public Instructions EmitStind(ITypeDefOrRef type)
+        /// <param name="typeSig">The type sig.</param>
+        /// <returns></returns>
+        public Instructions EmitStind(TypeSig typeSig)
         {
-            if (type.IsValueType)
-            {
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Byte))) || type.SafeEquivalent(type.Module.SafeImport(typeof(SByte))))
-                    return Emit(OpCodes.Stind_I1);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int16))) || type.SafeEquivalent(type.Module.SafeImport(typeof(UInt16))))
-                    return Emit(OpCodes.Stind_I2);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int32))) || type.SafeEquivalent(type.Module.SafeImport(typeof(UInt32))))
-                    return Emit(OpCodes.Stind_I4);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Int64))) || type.SafeEquivalent(type.Module.SafeImport(typeof(UInt64))))
-                    return Emit(OpCodes.Stind_I8);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Single))))
-                    return Emit(OpCodes.Stind_R4);
-                if (type.SafeEquivalent(type.Module.SafeImport(typeof(Double))))
-                    return Emit(OpCodes.Stind_R8);
-                return Emit(OpCodes.Stobj, _moduleDefinition.SafeImport(type));
-            }
+            var corLibTypes = _moduleDefinition.CorLibTypes;
+            if (typeSig == corLibTypes.Byte || typeSig == corLibTypes.SByte)
+                return Emit(OpCodes.Stind_I1);
+            if (typeSig == corLibTypes.Int16 || typeSig == corLibTypes.UInt16)
+                return Emit(OpCodes.Stind_I2);
+            if (typeSig == corLibTypes.Int32 || typeSig == corLibTypes.UInt32)
+                return Emit(OpCodes.Stind_I4);
+            if (typeSig == corLibTypes.Int64 || typeSig == corLibTypes.UInt64)
+                return Emit(OpCodes.Stind_I8);
+            if (typeSig == corLibTypes.Single)
+                return Emit(OpCodes.Stind_R4);
+            if (typeSig == corLibTypes.Double)
+                return Emit(OpCodes.Stind_R8);
+            if (typeSig.IsPrimitive)
+                return Emit(OpCodes.Stobj, _moduleDefinition.SafeImport(typeSig));
             return Emit(OpCodes.Stind_Ref);
         }
     }

@@ -234,10 +234,10 @@ namespace ArxOne.MrAdvice.Weaver
                         instructions.EmitLdc(parameterIndex); // array index
                         instructions.EmitLdarg(parameter); // loads given parameter...
                         var parameterType = parameter.Type;
-                        if (parameter.Type.IsByRef) // ...if ref, loads it as referenced value
+                        if (parameterType is ByRefSig) // ...if ref, loads it as referenced value
                         {
                             parameterType = parameter.Type.Next;
-                            instructions.EmitLdind(parameterType.ToTypeDefOrRef());
+                            instructions.EmitLdind(parameterType);
                         }
                         instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
                         instructions.Emit(OpCodes.Stelem_Ref);
@@ -352,7 +352,7 @@ namespace ArxOne.MrAdvice.Weaver
             for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
             {
                 var parameter = methodParameters[parameterIndex];
-                if (parameter.Type.IsByRef)
+                if (parameter.Type is ByRefSig)
                 {
                     instructions.EmitLdarg(parameter); // loads given parameter (it is a ref)
                     instructions.EmitLdloc(parametersVariable); // array
@@ -371,7 +371,7 @@ namespace ArxOne.MrAdvice.Weaver
                     //    parameterElementType = (GenericInstanceType)referenceParameterType.ElementType;
                     //}
                     instructions.EmitUnboxOrCastIfNecessary(parameterElementType);
-                    instructions.EmitStind(parameterElementType.ToTypeDefOrRef()); // result is stored in ref parameter
+                    instructions.EmitStind(parameterElementType); // result is stored in ref parameter
                 }
             }
 
@@ -473,7 +473,7 @@ namespace ArxOne.MrAdvice.Weaver
                 advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(AdvisedInterface));
                 var advisedInterfaceTypeReference = moduleDefinition.SafeImport(advisedInterfaceType);
                 implementationType = new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) { Attributes = typeAttributes };
-                implementationType.Interfaces.Add(new InterfaceImplUser(advisedInterfaceTypeReference));
+                implementationType.Interfaces.Add(new InterfaceImplUser(interfaceTypeDefinition));
 
                 lock (moduleDefinition)
                     moduleDefinition.Types.Add(implementationType);
