@@ -161,7 +161,6 @@ namespace ArxOne.MrAdvice.Weaver
                 innerMethod.GenericParameters.AddRange(method.GenericParameters.Select(p => p.Clone(innerMethod)));
                 innerMethod.ImplAttributes = method.ImplAttributes;
                 innerMethod.SemanticsAttributes = method.SemanticsAttributes;
-                //innerMethod.Parameters.AddRange(method.Parameters);
                 if (method.IsPinvokeImpl)
                 {
                     innerMethod.ImplMap = method.ImplMap;
@@ -171,14 +170,6 @@ namespace ArxOne.MrAdvice.Weaver
                 }
                 else
                 {
-                    //innerMethod.Body = new CilBody();
-                    //innerMethod.Body.InitLocals = method.Body.InitLocals;
-                    //innerMethod.Body.Instructions.AddRange(method.Body.Instructions);
-                    //innerMethod.Body.Variables.AddRange(method.Body.Variables);
-                    //innerMethod.Body.ExceptionHandlers.AddRange(method.Body.ExceptionHandlers);
-
-                    //innerMethod.Body.Scope = method.Body.Scope;
-                    //method.Body.Scope = null;
                     innerMethod.Body = method.Body;
                     method.Body = new CilBody();
                 }

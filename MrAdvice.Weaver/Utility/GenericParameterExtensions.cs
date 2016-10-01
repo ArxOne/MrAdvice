@@ -6,6 +6,7 @@
 #endregion
 namespace ArxOne.MrAdvice.Utility
 {
+    using System.Linq;
     using dnlib.DotNet;
 
     /// <summary>
@@ -22,9 +23,18 @@ namespace ArxOne.MrAdvice.Utility
         public static GenericParam Clone(this GenericParam genericParameter, MethodDef methodDefinition)
         {
             var newGenericParameter = new GenericParamUser(genericParameter.Number, genericParameter.Flags, genericParameter.Name);
+            newGenericParameter.GenericParamConstraints.AddRange(genericParameter.GenericParamConstraints.Select(c => c.Clone()));
             return newGenericParameter;
         }
 
-
+        /// <summary>
+        /// Clones the specified generic parameter constraint.
+        /// </summary>
+        /// <param name="genericParamConstraint">The generic parameter constraint.</param>
+        /// <returns></returns>
+        public static GenericParamConstraint Clone(this GenericParamConstraint genericParamConstraint)
+        {
+            return new GenericParamConstraintUser(genericParamConstraint.Constraint);
+        }
     }
 }
