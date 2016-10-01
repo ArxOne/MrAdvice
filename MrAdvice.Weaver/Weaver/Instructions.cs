@@ -262,11 +262,16 @@ namespace ArxOne.MrAdvice.Weaver
         public Instructions EmitUnboxOrCastIfNecessary(TypeSig targetTypeSig)
         {
             // for generics and some unknown reason, an unbox_any is needed
-            if (targetTypeSig.IsGenericParameter)
+            //if (targetTypeSig.IsGenericParameter)
+            //    return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetTypeSig));
+            //if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive)
+            //    return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetTypeSig));
+            //if (!targetTypeSig.SafeEquivalent(_moduleDefinition.CorLibTypes.Object))
+            //    return Emit(OpCodes.Castclass, _moduleDefinition.SafeImport(targetTypeSig));
+            //return this;
+            if (MustBox(targetTypeSig))
                 return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetTypeSig));
-            if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive)
-                return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetTypeSig));
-            if (!targetTypeSig.SafeEquivalent(_moduleDefinition.CorLibTypes.Object))
+            if (MustCast(targetTypeSig))
                 return Emit(OpCodes.Castclass, _moduleDefinition.SafeImport(targetTypeSig));
             return this;
         }
@@ -278,9 +283,26 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public Instructions EmitBoxIfNecessary(TypeSig targetTypeSig)
         {
-            if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive || targetTypeSig.IsGenericInstanceType)
+            if (MustBox(targetTypeSig))
                 return Emit(OpCodes.Box, _moduleDefinition.SafeImport(targetTypeSig));
             return this;
+        }
+
+        private static bool MustBox(TypeSig targetTypeSig)
+        {
+            // for generics and some unknown reason, an unbox_any is needed
+            if (targetTypeSig.IsGenericParameter || targetTypeSig.IsGenericInstanceType)
+                return true;
+            if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive)
+                return true;
+            return false;
+        }
+
+        private bool MustCast(TypeSig targetTypeSig)
+        {
+            if (targetTypeSig.SafeEquivalent(_moduleDefinition.CorLibTypes.Object))
+                return false;
+            return true;
         }
 
         /// <summary>
