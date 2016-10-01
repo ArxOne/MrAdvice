@@ -82,6 +82,7 @@
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
     <Compile Include="Reflection\TypeLoader.cs" />
     <Compile Include="Utility\AssemblyExtensions.cs" />
+    <Compile Include="Utility\DependenciesAssemblyResolver.cs" />
     <Compile Include="Utility\EnumerableExtensions.cs" />
     <Compile Include="Utility\MethodParameters.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />

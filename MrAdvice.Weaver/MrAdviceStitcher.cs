@@ -17,6 +17,7 @@ namespace ArxOne.MrAdvice
     using Reflection;
     using StitcherBoy.Project;
     using StitcherBoy.Weaving;
+    using Utility;
     using Weaver;
 
     public class MrAdviceStitcher : SingleStitcher
@@ -30,14 +31,14 @@ namespace ArxOne.MrAdvice
 
         protected override void OnProjectDefinitionLoadError(object sender, ProjectDefinitionLoadErrorEventArgs e)
         {
-            Logger.LogError($"Error while loading project {e.ProjectDefinition.ProjectPath}: {e.Exception}");
+            //Logger.LogError($"Error while loading project {e.ProjectDefinition.ProjectPath}: {e.Exception}");
         }
 
         protected override bool Process(StitcherContext context)
         {
             // instances are created here
             // please also note poor man's dependency injection (which is enough for us here)
-            var assemblyResolver = new AssemblyResolver();
+            var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(GetReferencePath).Where(p => p != null));
             var typeResolver = new TypeResolver { AssemblyResolver = assemblyResolver };
             var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
             var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, TypeLoader = typeLoader };
@@ -46,6 +47,35 @@ namespace ArxOne.MrAdvice
             //AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => MrAdviceTask.AssemblyResolve(GetType().Assembly, e);
             aspectWeaver.Weave(context.Module);
             return true;
+        }
+
+        private string GetReferencePath(AssemblyReference assemblyReference)
+        {
+            var projectDefinition = assemblyReference.ProjectDefinition;
+            if (projectDefinition == null)
+                return assemblyReference.Path;
+
+            //foreach (var k in projectDefinition.PropertiesKeys)
+            //{
+            //    try
+            //    {
+            //        Logger.WriteDebug("Key {0}: {1}", k, projectDefinition.GetProperty(k));
+            //    }
+            //    catch
+            //    {
+            //        Logger.WriteWarning("Key {0}: ouch", k);
+            //    }
+            //}
+
+            // the dependency may be found here:
+            // - relative to its project
+            // - in its relative outdir
+            // - with the target file name
+            var projectDir = Path.GetDirectoryName(projectDefinition.ProjectPath);
+            var outDir = projectDefinition.GetProperty("OutDir");
+            var targetFileName = projectDefinition.GetProperty("TargetFileName");
+            Logger.WriteDebug("{0} {1} {2}", projectDir, outDir, targetFileName);
+            return Path.Combine(projectDir, outDir, targetFileName);
         }
 
         private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
