@@ -217,7 +217,7 @@ namespace ArxOne.MrAdvice.Weaver
         private static bool IsIntroduction(ITypeDefOrRef adviceMemberTypeReference, out ITypeDefOrRef introducedFieldType)
         {
             var genericAdviceMemberTypeReference = adviceMemberTypeReference.TryGetGenericInstSig();
-            if (genericAdviceMemberTypeReference == null || genericAdviceMemberTypeReference.FullName != typeof(IntroducedField<>).FullName)
+            if (genericAdviceMemberTypeReference == null || genericAdviceMemberTypeReference.GenericType.FullName != typeof(IntroducedField<>).FullName)
             {
                 introducedFieldType = null;
                 return false;
