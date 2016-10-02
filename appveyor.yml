@@ -26,7 +26,7 @@ test:
     - '**\*Test.dll'
 
 artifacts:
-  - path: 'MrAdvice.Fody\bin\$(configuration)\*.nupkg'
+  - path: 'MrAdvice.Weaver\bin\$(configuration)\*.nupkg'
 
 deploy:
   provider: NuGet
