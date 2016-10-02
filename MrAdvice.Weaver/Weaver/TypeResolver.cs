@@ -115,6 +115,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public TypeDef Resolve(ITypeDefOrRef typeDefOrRef)
         {
+            if (typeDefOrRef == null)
+            {
+                Logger.LogWarning("null typeDefOrRef provided for resolution");
+                return null;
+            }
             lock (_resolvedTypesByName)
             {
                 foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue))
