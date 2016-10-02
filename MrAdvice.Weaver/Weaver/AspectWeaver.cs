@@ -190,20 +190,13 @@ namespace ArxOne.MrAdvice.Weaver
             var targetFrameworkAttribute = moduleDefinition.Assembly.CustomAttributes.SingleOrDefault(a => a.AttributeType.SafeEquivalent(targetFrameworkAttributeType));
             if (targetFrameworkAttribute == null)
             {
-                switch (moduleDefinition.RuntimeVersion)
-                {
-                    case ".NET 1.0":
-                        return new TargetFramework(new Version(1, 0));
-                    case ".NET 1.1":
-                        return new TargetFramework(new Version(1, 1));
-                    case ".NET 2.0":
-                        return new TargetFramework(new Version(2, 0));
-                    case ".NET 4.0":
-                        return new TargetFramework(new Version(4, 0));
-                    default:
-                        Logger.LogError($"Unknown RuntimeVersion: '{moduleDefinition.RuntimeVersion}'");
-                        throw new ArgumentOutOfRangeException(moduleDefinition.RuntimeVersion, nameof(moduleDefinition.RuntimeVersion));
-                }
+                var literalRuntimeVersion = moduleDefinition.RuntimeVersion;
+                Version runtimeVersion;
+                if (literalRuntimeVersion.StartsWith("v") && Version.TryParse(literalRuntimeVersion.Substring(1), out runtimeVersion))
+                    return new TargetFramework(runtimeVersion);
+
+                Logger.LogError($"Unknown RuntimeVersion: '{literalRuntimeVersion}'");
+                throw new ArgumentOutOfRangeException(literalRuntimeVersion, nameof(literalRuntimeVersion));
             }
 
             return new TargetFramework(((UTF8String)targetFrameworkAttribute.ConstructorArguments[0].Value).String);
