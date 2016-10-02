@@ -46,6 +46,8 @@ namespace ArxOne.MrAdvice.Utility
             Logger.WriteDebug("FindDependencies: {0}", assembly.FullName);
             foreach (var dependencyPath in _extraDependencies)
             {
+                if (!File.Exists(dependencyPath))
+                    continue;
                 var fileName = Path.GetFileNameWithoutExtension(dependencyPath);
                 if (string.Equals(fileName, assemblyName.Name))
                 {
