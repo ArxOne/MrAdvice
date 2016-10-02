@@ -55,17 +55,17 @@ namespace ArxOne.MrAdvice
             if (projectDefinition == null)
                 return assemblyReference.Path;
 
-            //foreach (var k in projectDefinition.PropertiesKeys)
-            //{
-            //    try
-            //    {
-            //        Logger.WriteDebug("Key {0}: {1}", k, projectDefinition.GetProperty(k));
-            //    }
-            //    catch
-            //    {
-            //        Logger.WriteWarning("Key {0}: ouch", k);
-            //    }
-            //}
+            foreach (var k in projectDefinition.PropertiesKeys)
+            {
+                try
+                {
+                    Logger.Write("Key {0}: {1}", k, projectDefinition.GetProperty(k));
+                }
+                catch
+                {
+                    Logger.Write("Key {0}: ouch", k);
+                }
+            }
 
             // the dependency may be found here:
             // - relative to its project
