@@ -6,7 +6,7 @@
 <package>
   <metadata>
     <id>MrAdvice</id>
-    <version><#=Version#>-alpha2</version>
+    <version><#=Version#>-alpha3</version>
     <title><#=Title#></title>
     <authors><#=Company#></authors>
     <owners><#=Company#></owners>
