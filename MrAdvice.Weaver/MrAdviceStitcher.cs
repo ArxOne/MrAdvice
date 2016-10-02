@@ -55,6 +55,7 @@ namespace ArxOne.MrAdvice
             if (projectDefinition == null)
                 return assemblyReference.Path;
 
+            Logger.Write("---- Keys for {0}", assemblyReference.Name);
             foreach (var k in projectDefinition.PropertiesKeys)
             {
                 try
