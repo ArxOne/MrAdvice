@@ -153,6 +153,19 @@
 copy "$(TargetPath)" "$(SolutionDir)\build\$(TargetFileName)"
 copy "$(TargetPath)" "$(SolutionDir)\build\$(TargetFileName).debugTask"
 
+rem --- NuGet pack and push ------------------------------------------------------------------------------
+
+
+
+if not "$(ConfigurationName)"=="Release" goto :noRelease
+
+
+
+"$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectDir)\MrAdvice.nuspec" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Tool -Properties ConfigurationName=$(ConfigurationName) -Symbols
+
+
+
+:noRelease
 </PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets" Condition="Exists('..\packages\Clarius.TransformOnBuild.1.1.12\build\Clarius.TransformOnBuild.targets')" />
