@@ -104,7 +104,7 @@ namespace ArxOne.MrAdvice.Weaver
             auditTimer.NewZone("Methods weaving");
             weavableMethods
 #if !DEBUG
-                .AsParallel()
+                //.AsParallel()
 #endif
                 .ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
 
@@ -113,7 +113,7 @@ namespace ArxOne.MrAdvice.Weaver
             auditTimer.NewZone("Interface methods weaving");
             weavableInterfaces
 #if !DEBUG
-                .AsParallel()
+                //.AsParallel()
 #endif
                 .ForAll(i => WeaveInterface(moduleDefinition, i));
 
@@ -124,7 +124,7 @@ namespace ArxOne.MrAdvice.Weaver
             var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IInfoAdvice));
             moduleDefinition.GetTypes()
 #if !DEBUG
-                .AsParallel()
+                //.AsParallel()
 #endif
                 .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
 
@@ -287,9 +287,6 @@ namespace ArxOne.MrAdvice.Weaver
             IMethodDefOrRef invokedMethod, int genericParameterIndex)
         {
             return moduleDefinition.GetTypes().SelectMany(t => t.Methods.Where(m => m.HasBody)
-#if !DEBUG
-                .AsParallel()
-#endif
                 .SelectMany(definition => GetAdviceHandledInterfaces(definition, invokedMethod, genericParameterIndex)));
         }
 
