@@ -201,7 +201,7 @@ namespace ArxOne.MrAdvice.Weaver
                     case ".NET 4.0":
                         return new TargetFramework(new Version(4, 0));
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(moduleDefinition.RuntimeVersion));
+                        throw new ArgumentOutOfRangeException(moduleDefinition.RuntimeVersion, nameof(moduleDefinition.RuntimeVersion));
                 }
             }
 
