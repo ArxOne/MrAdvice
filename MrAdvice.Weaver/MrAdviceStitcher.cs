@@ -55,25 +55,27 @@ namespace ArxOne.MrAdvice
             if (projectDefinition == null)
                 return assemblyReference.Path;
 
-            Logger.Write("---- Keys for {0}", assemblyReference.Name);
-            foreach (var k in projectDefinition.PropertiesKeys)
-            {
-                try
-                {
-                    Logger.Write("Key {0}: {1}", k, projectDefinition.GetProperty(k));
-                }
-                catch
-                {
-                    Logger.Write("Key {0}: ouch", k);
-                }
-            }
+            //Logger.Write("---- Keys for {0}", assemblyReference.Name);
+            //foreach (var k in projectDefinition.PropertiesKeys)
+            //{
+            //    try
+            //    {
+            //        Logger.Write("Key {0}: {1}", k, projectDefinition.GetProperty(k));
+            //    }
+            //    catch
+            //    {
+            //        Logger.Write("Key {0}: ouch", k);
+            //    }
+            //}
 
             // the dependency may be found here:
             // - relative to its project
             // - in its relative outdir
             // - with the target file name
             var projectDir = Path.GetDirectoryName(projectDefinition.ProjectPath);
-            var outDir = projectDefinition.GetProperty("OutputPath");
+            var outDir = projectDefinition.GetProperty("OutDir");
+            if (string.IsNullOrEmpty(outDir))
+                outDir = $"bin\\{projectDefinition.GetProperty("ConfigurationName")}";
             var targetFileName = projectDefinition.GetProperty("TargetFileName");
             Logger.WriteDebug("{0} {1} {2}", projectDir, outDir, targetFileName);
             return Path.Combine(projectDir, outDir, targetFileName);
