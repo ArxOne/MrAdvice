@@ -72,7 +72,7 @@ namespace ArxOne.MrAdvice
             // - in its relative outdir
             // - with the target file name
             var projectDir = Path.GetDirectoryName(projectDefinition.ProjectPath);
-            var outDir = projectDefinition.GetProperty("OutDir");
+            var outDir = projectDefinition.GetProperty("OutputPath");
             var targetFileName = projectDefinition.GetProperty("TargetFileName");
             Logger.WriteDebug("{0} {1} {2}", projectDir, outDir, targetFileName);
             return Path.Combine(projectDir, outDir, targetFileName);
