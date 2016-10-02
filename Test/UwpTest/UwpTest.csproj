@@ -19,7 +19,8 @@
     <PackageCertificateKeyFile>UwpTest_TemporaryKey.pfx</PackageCertificateKeyFile>
     <UnitTestPlatformVersion Condition="'$(UnitTestPlatformVersion)' == ''">14.0</UnitTestPlatformVersion>
     <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
-	<OutputPath>.</OutputPath>
+    <OutputPath>.</OutputPath>
+    <PackageCertificateThumbprint>859D8D85B9949F483C8A7E703249466B54A4B007</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>

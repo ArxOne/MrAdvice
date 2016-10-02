@@ -128,12 +128,18 @@ namespace ArxOne.MrAdvice
                     // right, this is dirty!
                     if (fileName == "MrAdvice.dll" && AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "MrAdvice"))
                         continue;
+
+                    //if (string.IsNullOrEmpty(referencePath))
+                    //{
+                    //    Logger.WriteDebug("Loading assembly from {0}", referencePath);
+                    //}
+
                     var referenceBytes = File.ReadAllBytes(referencePath);
                     Assembly.Load(referenceBytes);
                 }
                 catch (Exception e)
                 {
-                    Logger.WriteWarning("Can't load {0}: {1}", assemblyRef.FullName, e.GetType().Name);
+                    Logger.WriteWarning("Can't load {0}: {1}", assemblyRef.FullName, e.ToString());
                 }
             }
             var bytes = File.ReadAllBytes(context.Module.Assembly.ManifestModule.Location);

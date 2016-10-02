@@ -44,15 +44,16 @@ namespace ArxOne.MrAdvice.Utility
         {
             var assemblyName = new AssemblyName(assembly.FullName);
             Logger.WriteDebug("FindDependencies: {0}", assembly.FullName);
-            foreach (var extraDependency in _extraDependencies)
+            foreach (var dependencyPath in _extraDependencies)
             {
-                var fileName = Path.GetFileNameWithoutExtension(extraDependency);
+                var fileName = Path.GetFileNameWithoutExtension(dependencyPath);
                 if (string.Equals(fileName, assemblyName.Name))
                 {
                     try
                     {
-                        var assemblyBytes = File.ReadAllBytes(extraDependency);
+                        var assemblyBytes = File.ReadAllBytes(dependencyPath);
                         var assemblyDef = AssemblyDef.Load(assemblyBytes);
+                        assemblyDef.ManifestModule.Location = dependencyPath;
                         if (assemblyDef.FullName == assembly.FullName)
                             return assemblyDef;
                         Logger.WriteDebug("Expected '{0}', found '{1}'", assembly.FullName, assemblyDef.FullName);
