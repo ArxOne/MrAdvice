@@ -123,10 +123,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MrAdvice.tt">
+    <None Include="MrAdvice.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>MrAdvice.nuspec</LastGenOutput>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
