@@ -2,6 +2,7 @@
 
 ## News
 
+**2016-10-02**: Mr. Advice using dnlib is now released, under another package name, at https://www.nuget.org/packages/MrAdvice. If it behaves well with everyone, we are going to deprecate the version using Fody (because we can fly with our own wings :sunglasses:).  
 **2016-08-16**: No, Mr. Advice is not dead, but we're making undergoing changes.  
 The master branch is globally inactive, because the project is currently progressing in two other branches:
  * [fody](https://github.com/ArxOne/MrAdvice/tree/fody) where it keeps using Fody and Cecil, as it was written at first place.
