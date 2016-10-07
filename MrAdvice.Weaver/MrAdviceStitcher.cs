@@ -49,7 +49,7 @@ namespace ArxOne.MrAdvice
             return true;
         }
 
-        private string GetReferencePath(AssemblyReference assemblyReference)
+        private static string GetReferencePath(AssemblyReference assemblyReference)
         {
             var projectDefinition = assemblyReference.ProjectDefinition;
             if (projectDefinition == null)
@@ -81,7 +81,7 @@ namespace ArxOne.MrAdvice
             return Path.Combine(projectDir, outDir, targetFileName);
         }
 
-        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name);
             var assemblyData = ResolveAssembly(assemblyName);

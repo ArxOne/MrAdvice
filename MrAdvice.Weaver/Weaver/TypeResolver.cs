@@ -81,12 +81,8 @@ namespace ArxOne.MrAdvice.Weaver
             //}
             lock (_resolvedTypesByName)
             {
-                return moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth)
-                  .SelectMany(referencedModule => referencedModule.GetTypes())
-                  //#if !DEBUG
-                  //                    .AsParallel()
-                  //#endif
-                  .FirstOrDefault(t => Matches(t, fullName));
+                var selfAndReferences = moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth);
+                return selfAndReferences.SelectMany(referencedModule => referencedModule.GetTypes()).FirstOrDefault(t => Matches(t, fullName));
             }
         }
 
