@@ -7,7 +7,7 @@
 
   <UsingTask TaskName="MrAdviceTask" AssemblyFile="$(MrAdvicePath)" />
   <Target Name="MrAdviceTarget" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory">
-    <MrAdviceTask ProjectPath="$(ProjectPath)" SolutionPath="$(SolutionPath)" AssemblyPath="@(IntermediateAssembly)" Configuration="$(ConfigurationName)" />
+    <MrAdviceTask ProjectPath="$(ProjectPath)" SolutionPath="$(SolutionPath)" AssemblyPath="@(IntermediateAssembly)" Configuration="$(Configuration)" />
   </Target>
 </Project>
 
