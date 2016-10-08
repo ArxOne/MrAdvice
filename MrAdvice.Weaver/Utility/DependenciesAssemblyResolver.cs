@@ -31,7 +31,7 @@ namespace ArxOne.MrAdvice.Utility
 
         public AssemblyDef Resolve(IAssembly assembly, ModuleDef sourceModule)
         {
-            return _assemblyResolver.Resolve(assembly, sourceModule) ?? ResolveDependency(assembly);
+            return _assemblyResolver.Resolve(assembly, sourceModule) ?? ResolveDependency(assembly) ?? LoadEmbedded(assembly) ?? DiagnoseNotFound(assembly, sourceModule);
         }
 
         public bool AddToCache(AssemblyDef asm) => _assemblyResolver.AddToCache(asm);
@@ -40,7 +40,32 @@ namespace ArxOne.MrAdvice.Utility
 
         public void Clear() => _assemblyResolver.Clear();
 
-        private AssemblyDef ResolveDependency(IAssembly assembly)
+        private AssemblyDef DiagnoseNotFound(IFullName assembly, ModuleDef sourceModule)
+        {
+            Logger.WriteError("Assembly {0} not found", assembly.FullName);
+            foreach (var extraDependency in _extraDependencies)
+                Logger.WriteError("Searched {0}", extraDependency);
+
+            // this is totally dirty and won't live more than a few days until I figure out the problem with Appveyor
+            var sourceDirectory = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(sourceModule.Location))));
+            var baseName = new AssemblyName(assembly.FullName).Name;
+            Search(sourceDirectory, baseName + ".dll");
+            Search(sourceDirectory, baseName + ".exe");
+
+            return null;
+        }
+
+        private void Search(string directory, string fileName)
+        {
+            var path = Path.Combine(directory, fileName);
+            if (File.Exists(path))
+                Logger.WriteError("Found {0}", path);
+
+            foreach (var subDirectory in Directory.GetDirectories(directory))
+                Search(subDirectory, fileName);
+        }
+
+        private AssemblyDef ResolveDependency(IFullName assembly)
         {
             var assemblyName = new AssemblyName(assembly.FullName);
             Logger.WriteDebug("FindDependencies: {0}", assembly.FullName);
@@ -67,6 +92,20 @@ namespace ArxOne.MrAdvice.Utility
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Loads embedded assembly. This is used only to find MrAdvice, which from some unknown reasons can not be loaded otherwise
+        /// </summary>
+        /// <param name="assemblyNameReference">The assembly name reference.</param>
+        /// <returns></returns>
+        private static AssemblyDef LoadEmbedded(IFullName assemblyNameReference)
+        {
+            var assemblyName = new AssemblyName(assemblyNameReference.FullName);
+            var assemblyData = MrAdviceStitcher.ResolveAssembly(assemblyName);
+            if (assemblyData == null)
+                return null;
+            return AssemblyDef.Load(assemblyData);
         }
     }
 }
