@@ -30,7 +30,7 @@ namespace ArxOne.MrAdvice.Utility
 
         public AssemblyDef Resolve(IAssembly assembly, ModuleDef sourceModule)
         {
-            return _assemblyResolver.Resolve(assembly, sourceModule) ?? ResolveDependency(assembly) ?? LoadEmbedded(assembly) ?? DiagnoseNotFound(assembly, sourceModule);
+            return _assemblyResolver.Resolve(assembly, sourceModule) ?? ResolveDependency(assembly) ?? LoadEmbedded(assembly) /*?? DiagnoseNotFound(assembly, sourceModule)*/;
         }
 
         public bool AddToCache(AssemblyDef asm) => _assemblyResolver.AddToCache(asm);
