@@ -25,7 +25,7 @@ namespace ArxOne.MrAdvice.Utility
             _extraDependencies = extraDependencies.ToArray();
             _assemblyResolver = new AssemblyResolver();
             foreach (var extraDependency in _extraDependencies)
-                Logger.WriteDebug("Extra dependency: {0}", extraDependency);
+                Logger.WriteDebug("Extra dependency: {0}", extraDependency.Path);
         }
 
         public AssemblyDef Resolve(IAssembly assembly, ModuleDef sourceModule)
