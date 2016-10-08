@@ -38,7 +38,7 @@ namespace ArxOne.MrAdvice
         {
             // instances are created here
             // please also note poor man's dependency injection (which is enough for us here)
-            var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(GetReferencePath).Where(p => p != null));
+            var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(r => new Dependency(r)));
             var typeResolver = new TypeResolver { AssemblyResolver = assemblyResolver };
             var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
             var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, TypeLoader = typeLoader };
@@ -47,38 +47,6 @@ namespace ArxOne.MrAdvice
             //AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => MrAdviceTask.AssemblyResolve(GetType().Assembly, e);
             aspectWeaver.Weave(context.Module);
             return true;
-        }
-
-        private static string GetReferencePath(AssemblyReference assemblyReference)
-        {
-            var projectDefinition = assemblyReference.ProjectDefinition;
-            if (projectDefinition == null)
-                return assemblyReference.Path;
-
-            //Logger.Write("---- Keys for {0}", assemblyReference.Name);
-            //foreach (var k in projectDefinition.PropertiesKeys)
-            //{
-            //    try
-            //    {
-            //        Logger.Write("Key {0}: {1}", k, projectDefinition.GetProperty(k));
-            //    }
-            //    catch
-            //    {
-            //        Logger.Write("Key {0}: ouch", k);
-            //    }
-            //}
-
-            // the dependency may be found here:
-            // - relative to its project
-            // - in its relative outdir
-            // - with the target file name
-            var projectDir = Path.GetDirectoryName(projectDefinition.ProjectPath);
-            var outDir = projectDefinition.GetProperty("OutDir");
-            if (string.IsNullOrEmpty(outDir))
-                outDir = $"bin\\{projectDefinition.GetProperty("ConfigurationName")}";
-            var targetFileName = projectDefinition.GetProperty("TargetFileName");
-            Logger.WriteDebug("{0} {1} {2}", projectDir, outDir, targetFileName);
-            return Path.Combine(projectDir, outDir, targetFileName);
         }
 
         private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)

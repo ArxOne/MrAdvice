@@ -9,7 +9,6 @@ namespace ArxOne.MrAdvice.Utility
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -18,10 +17,10 @@ namespace ArxOne.MrAdvice.Utility
 
     public class DependenciesAssemblyResolver : IAssemblyResolver
     {
-        private readonly IEnumerable<string> _extraDependencies;
+        private readonly IEnumerable<Dependency> _extraDependencies;
         private readonly IAssemblyResolver _assemblyResolver;
 
-        public DependenciesAssemblyResolver(IEnumerable<string> extraDependencies)
+        public DependenciesAssemblyResolver(IEnumerable<Dependency> extraDependencies)
         {
             _extraDependencies = extraDependencies.ToArray();
             _assemblyResolver = new AssemblyResolver();
@@ -44,7 +43,7 @@ namespace ArxOne.MrAdvice.Utility
         {
             Logger.WriteError("Assembly {0} not found", assembly.FullName);
             foreach (var extraDependency in _extraDependencies)
-                Logger.WriteError("Searched {0}", extraDependency);
+                Logger.WriteWarning("**** Info: {0}", extraDependency.Info);
 
             // this is totally dirty and won't live more than a few days until I figure out the problem with Appveyor
             var sourceDirectory = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(sourceModule.Location))));
@@ -55,7 +54,7 @@ namespace ArxOne.MrAdvice.Utility
             return null;
         }
 
-        private void Search(string directory, string fileName)
+        private static void Search(string directory, string fileName)
         {
             var path = Path.Combine(directory, fileName);
             if (File.Exists(path))
@@ -69,9 +68,9 @@ namespace ArxOne.MrAdvice.Utility
         {
             var assemblyName = new AssemblyName(assembly.FullName);
             Logger.WriteDebug("FindDependencies: {0}", assembly.FullName);
-            foreach (var dependencyPath in _extraDependencies)
+            foreach (var dependencyPath in _extraDependencies.Select(d => d.Path))
             {
-                if (!File.Exists(dependencyPath))
+                if (string.IsNullOrEmpty(dependencyPath) || !File.Exists(dependencyPath))
                     continue;
                 var fileName = Path.GetFileNameWithoutExtension(dependencyPath);
                 if (string.Equals(fileName, assemblyName.Name))
