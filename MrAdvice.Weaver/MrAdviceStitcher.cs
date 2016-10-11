@@ -14,6 +14,7 @@ namespace ArxOne.MrAdvice
     using System.Reflection;
     using dnlib.DotNet;
     using IO;
+    using Microsoft.Build.Framework;
     using Reflection;
     using StitcherBoy.Project;
     using StitcherBoy.Weaving;
