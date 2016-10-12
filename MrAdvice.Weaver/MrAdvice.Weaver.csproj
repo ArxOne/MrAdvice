@@ -50,8 +50,8 @@
   <ItemGroup>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="StitcherBoy, Version=0.8.0.0, Culture=neutral, PublicKeyToken=a3be45b63ddcbf4d, processorArchitecture=MSIL">
-      <HintPath>..\packages\StitcherBoy.0.8.0\lib\net45\StitcherBoy.dll</HintPath>
+    <Reference Include="StitcherBoy, Version=0.10.0.0, Culture=neutral, PublicKeyToken=a3be45b63ddcbf4d, processorArchitecture=MSIL">
+      <HintPath>..\packages\StitcherBoy.0.10.0\lib\net45\StitcherBoy.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -82,8 +82,6 @@
     <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
     <Compile Include="Reflection\TypeLoader.cs" />
     <Compile Include="Utility\AssemblyExtensions.cs" />
-    <Compile Include="Utility\DependenciesAssemblyResolver.cs" />
-    <Compile Include="Utility\Dependency.cs" />
     <Compile Include="Utility\EnumerableExtensions.cs" />
     <Compile Include="Utility\MethodParameters.cs" />
     <Compile Include="Utility\MethodReferenceComparer.cs" />

@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <UsingTask TaskName="MrAdviceTask" AssemblyFile="$(MrAdvicePath)" />
-  <Target Name="MrAdviceTarget" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory">
-    <MrAdviceTask ProjectPath="$(ProjectPath)" SolutionPath="$(SolutionPath)" AssemblyPath="@(IntermediateAssembly)" Configuration="$(Configuration)" Platform="$(Platform)" />
+  <Target Name="MrAdviceTarget" AfterTargets="CoreCompile">
+    <MrAdviceTask AssemblyPath="@(IntermediateAssembly)" ReferencePath="@(ReferencePath)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+                  AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)" />
   </Target>
 </Project>
-

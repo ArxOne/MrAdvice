@@ -14,14 +14,11 @@ namespace ArxOne.MrAdvice
     using System.Reflection;
     using dnlib.DotNet;
     using IO;
-    using Microsoft.Build.Framework;
     using Reflection;
-    using StitcherBoy.Project;
-    using StitcherBoy.Weaving;
-    using Utility;
+    using StitcherBoy.Weaving.Build;
     using Weaver;
 
-    public class MrAdviceStitcher : SingleStitcher
+    public class MrAdviceStitcher : AssemblyStitcher
     {
         public MrAdviceStitcher()
         {
@@ -30,16 +27,12 @@ namespace ArxOne.MrAdvice
             Logger.LogError = s => Logging.WriteError(s);
         }
 
-        protected override void OnProjectDefinitionLoadError(object sender, ProjectDefinitionLoadErrorEventArgs e)
-        {
-            //Logger.LogError($"Error while loading project {e.ProjectDefinition.ProjectPath}: {e.Exception}");
-        }
-
-        protected override bool Process(StitcherContext context)
+        protected override bool Process(AssemblyStitcherContext context)
         {
             // instances are created here
             // please also note poor man's dependency injection (which is enough for us here)
-            var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(r => new Dependency(r)));
+            //var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(r => new Dependency(r)));
+            var assemblyResolver = context.AssemblyResolver;
             var typeResolver = new TypeResolver { AssemblyResolver = assemblyResolver };
             var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
             var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, TypeLoader = typeLoader };
@@ -86,7 +79,7 @@ namespace ArxOne.MrAdvice
         /// Loads the weaved assembly.
         /// </summary>
         /// <returns></returns>
-        private static Assembly LoadWeavedAssembly(StitcherContext context, IAssemblyResolver assemblyResolver)
+        private static Assembly LoadWeavedAssembly(AssemblyStitcherContext context, IAssemblyResolver assemblyResolver)
         {
             foreach (var assemblyRef in context.Module.GetAssemblyRefs())
             {
