@@ -18,6 +18,7 @@ namespace ArxOne.MrAdvice.Weaver
     using dnlib.DotNet.Pdb;
     using Introduction;
     using IO;
+    using Reflection;
     using Reflection.Groups;
     using Utility;
     using EventAttributes = dnlib.DotNet.EventAttributes;
@@ -76,7 +77,7 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(ReflectionUtility.GetMethodInfo(() => Assembly.GetExecutingAssembly())));
             else
             {
-                instructions.Emit(OpCodes.Ldtoken, moduleDefinition.SafeImport(infoAdvisedType));
+                instructions.Emit(OpCodes.Ldtoken, TypeImporter.Import(moduleDefinition, infoAdvisedType.ToTypeSig()));
                 // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                 var getTypeFromHandleMethodInfo = ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()));
                 instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(getTypeFromHandleMethodInfo));
@@ -462,7 +463,8 @@ namespace ArxOne.MrAdvice.Weaver
                 interfaceTypeDefinition = TypeResolver.Resolve(interfaceType);
                 var typeAttributes = (InjectAsPrivate ? TypeAttributes.NotPublic : TypeAttributes.Public) | TypeAttributes.Class | TypeAttributes.BeforeFieldInit;
                 advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(AdvisedInterface));
-                var advisedInterfaceTypeReference = moduleDefinition.SafeImport(advisedInterfaceType);
+                // TODO: this should work using TypeImporter.Import
+                var advisedInterfaceTypeReference = moduleDefinition.Import(advisedInterfaceType);
                 implementationType = new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) { Attributes = typeAttributes };
                 implementationType.Interfaces.Add(new InterfaceImplUser(interfaceTypeDefinition));
 
@@ -561,8 +563,8 @@ namespace ArxOne.MrAdvice.Weaver
                         if (isStatic)
                             fieldAttributes |= FieldAttributes.Static;
                         Logger.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);
-                        var introducedFieldTypeReference = moduleDefinition.SafeImport(introducedFieldType);
-                        var introducedField = new FieldDefUser(introducedFieldName, new FieldSig(introducedFieldTypeReference.ToTypeSig()), fieldAttributes);
+                        var introducedFieldTypeReference = TypeImporter.Import(moduleDefinition, introducedFieldType.ToTypeSig());
+                        var introducedField = new FieldDefUser(introducedFieldName, new FieldSig(introducedFieldTypeReference), fieldAttributes);
                         introducedField.CustomAttributes.Add(new CustomAttribute(markerAttribute));
                         advisedType.Fields.Add(introducedField);
                     }

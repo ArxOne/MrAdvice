@@ -19,6 +19,9 @@ namespace MethodLevelTest.Advices
 
         public void Advise(MethodAdviceContext context)
         {
+            if (ALists[context] == null)
+                ALists[context] = new List<ExternalClass>();
+            ALists[context].Add(new ExternalClass());
             var c = ALists[context].Count;
             context.Proceed();
         }

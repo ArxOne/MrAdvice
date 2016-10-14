@@ -155,21 +155,7 @@ namespace ArxOne.MrAdvice.Utility
             lock (moduleDefinition)
                 return moduleDefinition.Import(typeSig);
         }
-
-        public static TypeRef SafeImport(this ModuleDef moduleDefinition, ITypeDefOrRef typeReference)
-        {
-            lock (moduleDefinition)
-            {
-                var typeRef = typeReference as TypeRef;
-                if (typeRef != null)
-                    return moduleDefinition.Import(typeRef);
-                var typeDef = typeReference as TypeDef;
-                if (typeDef != null)
-                    return moduleDefinition.Import(typeDef);
-                throw new InvalidOperationException($"{typeReference} is neither TypeRef or TypeDef");
-            }
-        }
-
+        
         public static TypeRef SafeImport(this ModuleDef moduleDefinition, Type type)
         {
             lock (moduleDefinition)
