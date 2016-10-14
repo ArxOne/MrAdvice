@@ -73,6 +73,7 @@
     <Compile Include="Advices\AddA.cs" />
     <Compile Include="Advices\Async.cs" />
     <Compile Include="Advices\ChangeParameter.cs" />
+    <Compile Include="Advices\ComplexIntroductionAdvice.cs" />
     <Compile Include="Advices\EmptyParameterAdvice.cs" />
     <Compile Include="Advices\EmptyPropertyAdvice.cs" />
     <Compile Include="Advices\InterfaceCheckAdvice.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="AsyncTest.cs" />
     <Compile Include="BasicTests.cs" />
     <Compile Include="Advices\EmptyMethodAdvice.cs" />
+    <Compile Include="ComplexIntroducedClass.cs" />
     <Compile Include="EmptyAdvisedClass.cs" />
     <Compile Include="GenericEmptyAdvisedClass.cs" />
     <Compile Include="IAdvisedInterface.cs" />
@@ -107,6 +109,10 @@
     <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj">
       <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
       <Name>MrAdvice</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ExternalAdvices\ExternalAdvices.csproj">
+      <Project>{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}</Project>
+      <Name>ExternalAdvices</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

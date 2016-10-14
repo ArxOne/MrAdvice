@@ -30,6 +30,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>ExternalAdvices.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -37,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyAdvice.cs" />
+    <Compile Include="ExternalClass.cs" />
     <Compile Include="ExternalEmptyAdvice.cs" />
     <Compile Include="AddProperty.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -46,6 +53,9 @@
       <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
       <Name>MrAdvice</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ExternalAdvices.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

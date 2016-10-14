@@ -47,5 +47,13 @@ namespace MethodLevelTest
 
             Assert.AreEqual("10", IntroductionAdvice.LastRandomString);
         }
+
+        [TestMethod]
+        [TestCategory("Introduction")]
+        public void ComplexIntroductionTest()
+        {
+            var c = new ComplexIntroducedClass();
+            c.CMethod();
+        }
     }
 }
