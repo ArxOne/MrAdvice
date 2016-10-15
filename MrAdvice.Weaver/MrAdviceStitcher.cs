@@ -50,7 +50,11 @@ namespace ArxOne.MrAdvice
 
             // because versions may differ, we'll pretend they're all the same
             if (assemblyName.Name == "MrAdvice")
-                return typeof(IAdvice).Assembly;
+            {
+                var mrAdviceAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
+                if (mrAdviceAssembly != null)
+                    return mrAdviceAssembly;
+            }
 
             var assemblyData = ResolveAssembly(assemblyName);
             if (assemblyData == null)
