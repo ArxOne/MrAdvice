@@ -12,6 +12,7 @@ namespace ArxOne.MrAdvice
     using System.IO.Compression;
     using System.Linq;
     using System.Reflection;
+    using Advice;
     using dnlib.DotNet;
     using IO;
     using Reflection;
@@ -46,6 +47,11 @@ namespace ArxOne.MrAdvice
         private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name);
+
+            // because versions may differ, we'll pretend they're all the same
+            if (assemblyName.Name == "MrAdvice")
+                return typeof(IAdvice).Assembly;
+
             var assemblyData = ResolveAssembly(assemblyName);
             if (assemblyData == null)
                 return null;
