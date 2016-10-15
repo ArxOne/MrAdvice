@@ -331,7 +331,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             return reflectionNode.GetAncestorsToChildren()
 #if !DEBUG
-                //.AsParallel()
+                .AsParallel()
 #endif
                 .Where(n => n.Method != null)
                 .Select(n => new MarkedNode { Node = n, Definitions = GetAllMarkers(n, markerInterface, types).ToArray() })
@@ -348,7 +348,9 @@ namespace ArxOne.MrAdvice.Weaver
         private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, Types types)
         {
             var markers = reflectionNode.GetAncestorsToChildren()
-                .SelectMany(n => n.CustomAttributes.SelectMany(a => TypeResolver.Resolve(a.AttributeType).GetSelfAndParents())
+                .SelectMany(n => n.CustomAttributes
+                    .Where(a => !a.AttributeType.DefinitionAssembly.IsSystem())
+                    .SelectMany(a => TypeResolver.Resolve(a.AttributeType).GetSelfAndParents())
                     .Where(t => IsMarker(t, markerInterface)))
                 .Distinct()
                 .Select(t => GetMarkerDefinition(t, types));
@@ -358,8 +360,7 @@ namespace ArxOne.MrAdvice.Weaver
             return markers;
         }
 
-        private readonly IDictionary<TypeDef, MarkerDefinition> _markerDefinitions
-            = new Dictionary<TypeDef, MarkerDefinition>();
+        private readonly IDictionary<TypeDef, MarkerDefinition> _markerDefinitions = new Dictionary<TypeDef, MarkerDefinition>();
 
         /// <summary>
         /// Gets the marker definition.

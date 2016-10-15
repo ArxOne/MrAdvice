@@ -26,9 +26,19 @@ namespace ArxOne.MrAdvice.Weaver
         /// <value>
         /// The assembly resolver.
         /// </value>
-        public IAssemblyResolver AssemblyResolver { get; set; }
+        public IAssemblyResolver AssemblyResolver
+        {
+            get { return _assemblyResolver; }
+            set
+            {
+                _assemblyResolver = value;
+                _resolver = new Resolver(value);
+            }
+        }
 
         private readonly IDictionary<string, TypeDef> _resolvedTypesByName = new Dictionary<string, TypeDef>();
+        private IAssemblyResolver _assemblyResolver;
+        private IResolver _resolver;
 
         /// <summary>
         /// Resolves the full name to a type definiton.
@@ -92,7 +102,6 @@ namespace ArxOne.MrAdvice.Weaver
             return type.FullName == fullName;
         }
 
-
         /// <summary>
         /// Resolves the specified type to Cecil.
         /// </summary>
@@ -118,12 +127,40 @@ namespace ArxOne.MrAdvice.Weaver
             }
             lock (_resolvedTypesByName)
             {
-                foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue))
-                {
-                    var typeDef = reference.Find(typeDefOrRef);
-                    if (typeDef != null)
-                        return typeDef;
-                }
+                TypeDef typeDef;
+                if (!_resolvedTypesByName.TryGetValue(typeDefOrRef.AssemblyQualifiedName, out typeDef))
+                    _resolvedTypesByName[typeDefOrRef.AssemblyQualifiedName] = typeDef = DoResolve(typeDefOrRef);
+                return typeDef;
+            }
+        }
+
+        private TypeDef DoResolve(ITypeDefOrRef typeDefOrRef)
+        {
+            return AsTypeDef(typeDefOrRef) ?? ResolverResolve(typeDefOrRef) ?? FullResolve(typeDefOrRef);
+        }
+
+
+        private TypeDef AsTypeDef(ITypeDefOrRef typeDefOrRef)
+        {
+            return typeDefOrRef as TypeDef;
+        }
+
+        private TypeDef ResolverResolve(ITypeDefOrRef typeDefOrRef)
+        {
+            var typeRef = (TypeRef)typeDefOrRef;
+            var typeDef = _resolver.Resolve(typeRef);
+            return typeDef;
+        }
+
+        private TypeDef FullResolve(ITypeDefOrRef typeDefOrRef)
+        {
+            // this method is actually never called...
+            // TODO: remove
+            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue))
+            {
+                var typeDef = reference.Find(typeDefOrRef);
+                if (typeDef != null)
+                    return typeDef;
             }
             return null;
         }

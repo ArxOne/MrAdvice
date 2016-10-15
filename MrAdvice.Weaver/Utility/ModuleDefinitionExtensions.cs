@@ -78,7 +78,7 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="nameReference">The name reference.</param>
         /// <returns></returns>
-        private static bool IsSystem(AssemblyRef nameReference)
+        public static bool IsSystem(this IAssembly nameReference)
         {
             if (nameReference.Name == "mscorlib")
                 return true;
