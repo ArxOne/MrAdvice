@@ -20,7 +20,8 @@ using ArxOne.MrAdvice.Properties;
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion(Product.Version)]
+[assembly: AssemblyVersion("<#=VersionMajor#>")]
+[assembly: AssemblyFileVersion("<#=Version#>")]
 
 namespace ArxOne.MrAdvice.Properties
 {
