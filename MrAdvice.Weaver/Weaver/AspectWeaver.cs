@@ -147,7 +147,7 @@ namespace ArxOne.MrAdvice.Weaver
             Logging.WriteDebug("--------------------------------------");
 
             Logging.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
-                moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
+                moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework.ToString(), Product.Version);
         }
 
         private IEnumerable<FieldDef> GetRemovableFields(IList<MarkedNode> nodes, Types types)
