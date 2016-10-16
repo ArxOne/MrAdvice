@@ -34,18 +34,27 @@ namespace ArxOne.MrAdvice
 #else
             _logging = Logging;
 #endif
-            // instances are created here
-            // please also note poor man's dependency injection (which is enough for us here)
-            //var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(r => new Dependency(r)));
-            var assemblyResolver = context.AssemblyResolver;
-            var typeResolver = new TypeResolver { Logging = _logging, AssemblyResolver = assemblyResolver };
-            var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
-            var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
-            // TODO: use blobber's resolution (WTF?)
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-            //AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => MrAdviceTask.AssemblyResolve(GetType().Assembly, e);
-            aspectWeaver.Weave(context.Module);
-            return true;
+            _logging.WriteDebug("Start");
+            try
+            {
+                // instances are created here
+                // please also note poor man's dependency injection (which is enough for us here)
+                //var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(r => new Dependency(r)));
+                var assemblyResolver = context.AssemblyResolver;
+                var typeResolver = new TypeResolver { Logging = _logging, AssemblyResolver = assemblyResolver };
+                var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
+                var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
+                // TODO: use blobber's resolution (WTF?)
+                AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+                //AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => MrAdviceTask.AssemblyResolve(GetType().Assembly, e);
+                aspectWeaver.Weave(context.Module);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logging.WriteError("Internal error: {0}", e);
+            }
+            return false;
         }
 
         private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
