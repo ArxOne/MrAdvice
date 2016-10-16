@@ -329,7 +329,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private IEnumerable<MarkedNode> GetMarkedMethods(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, Types types)
         {
-            return reflectionNode.GetAncestorsToChildren()
+            var ancestorsToChildren = reflectionNode.GetAncestorsToChildren().ToArray();
+            return ancestorsToChildren
 #if !DEBUG
                 .AsParallel()
 #endif

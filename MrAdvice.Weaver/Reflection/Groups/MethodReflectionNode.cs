@@ -34,7 +34,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
             var declaringType = _methodDefinition.DeclaringType;
             if (_methodDefinition.IsPropertyMethod())
             {
-                var propertyName = ReflectionUtility.GetPropertyName(_methodDefinition.Name);
                 _propertyDefinition = declaringType.Properties.Single(p => p.GetMethod == _methodDefinition || p.SetMethod == _methodDefinition);
                 return new PropertyReflectionNode(_propertyDefinition);
             }
