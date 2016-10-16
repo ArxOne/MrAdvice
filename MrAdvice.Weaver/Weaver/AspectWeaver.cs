@@ -335,7 +335,7 @@ namespace ArxOne.MrAdvice.Weaver
             var ancestorsToChildren = reflectionNode.GetAncestorsToChildren().ToArray();
             return ancestorsToChildren
 #if !DEBUG
-                .AsParallel()
+                //.AsParallel()
 #endif
                 .Where(n => n.Method != null)
                 .Select(n => new MarkedNode { Node = n, Definitions = GetAllMarkers(n, markerInterface, types).ToArray() })
