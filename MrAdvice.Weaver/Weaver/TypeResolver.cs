@@ -10,7 +10,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Collections.Generic;
     using System.Linq;
     using dnlib.DotNet;
-    using IO;
+    using StitcherBoy.Logging;
     using Utility;
 
     /// <summary>
@@ -18,6 +18,8 @@ namespace ArxOne.MrAdvice.Weaver
     /// </summary>
     internal class TypeResolver
     {
+        public ILogging Logging { get; set; }
+
         private const int Depth = 2;
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="fullName">The full name.</param>
         /// <param name="ignoreSystem">if set to <c>true</c> [ignore system].</param>
         /// <param name="depth">The depth.</param>
+        /// <param name="logging">The logging.</param>
         /// <returns></returns>
         private TypeDef Resolve(ModuleDef moduleDefinition, string fullName, bool ignoreSystem, int depth)
         {
@@ -91,7 +94,7 @@ namespace ArxOne.MrAdvice.Weaver
             //}
             lock (_resolvedTypesByName)
             {
-                var selfAndReferences = moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth);
+                var selfAndReferences = moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth, Logging);
                 return selfAndReferences.SelectMany(referencedModule => referencedModule.GetTypes()).FirstOrDefault(t => Matches(t, fullName));
             }
         }
@@ -122,7 +125,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             if (typeDefOrRef == null)
             {
-                Logger.LogWarning("null typeDefOrRef provided for resolution");
+                Logging.WriteWarning("null typeDefOrRef provided for resolution");
                 return null;
             }
             lock (_resolvedTypesByName)
@@ -156,7 +159,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             // this method is actually never called...
             // TODO: remove
-            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue))
+            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue, Logging))
             {
                 var typeDef = reference.Find(typeDefOrRef);
                 if (typeDef != null)

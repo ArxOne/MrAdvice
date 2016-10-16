@@ -50,7 +50,7 @@ namespace ArxOne.MrAdvice.Weaver
                                                        select m).SingleOrDefault();
             if (proceedRuntimeInitializersReference == null)
             {
-                Logger.WriteWarning("Info advice method not found");
+                Logging.WriteWarning("Info advice method not found");
                 return;
             }
 
@@ -103,23 +103,23 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 var customAttributes = method.CustomAttributes;
                 if (customAttributes.Any(c => c.AttributeType.Name == "AsyncStateMachineAttribute"))
-                    Logger.WriteWarning("Advising async void method '{0}' could confuse async advices. Consider switching its return type to async Task.", method.FullName);
+                    Logging.WriteWarning("Advising async void method '{0}' could confuse async advices. Consider switching its return type to async Task.", method.FullName);
             }
 
             if (method.IsAbstract)
             {
                 method.Attributes = (method.Attributes & ~MethodAttributes.Abstract) | MethodAttributes.Virtual;
-                Logger.WriteDebug("Weaving abstract method '{0}'", method.FullName);
+                Logging.WriteDebug("Weaving abstract method '{0}'", method.FullName);
                 WritePointcutBody(method, null, false);
             }
             else if (markedMethod.AbstractTarget)
             {
-                Logger.WriteDebug("Weaving and abstracting method '{0}'", method.FullName);
+                Logging.WriteDebug("Weaving and abstracting method '{0}'", method.FullName);
                 WritePointcutBody(method, null, true);
             }
             else
             {
-                Logger.WriteDebug("Weaving method '{0}'", method.FullName);
+                Logging.WriteDebug("Weaving method '{0}'", method.FullName);
 
                 var methodName = method.Name;
 
@@ -129,7 +129,7 @@ namespace ArxOne.MrAdvice.Weaver
                 {
                     var typeDefinition = markedMethod.Node.Method.DeclaringType;
                     var initialType = TypeLoader.GetType(typeDefinition);
-                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, types, TypeResolver);
+                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, types, TypeResolver, Logging);
                     foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
                     {
                         var weavingAdviceType = TypeLoader.GetType(weavingAdviceMarker.Type);
@@ -410,7 +410,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface, types).Where(IsWeavable).Any())
             {
-                Logger.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
+                Logging.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
                 WeaveInfoAdvices(typeDefinition, moduleDefinition, false);
             }
         }
@@ -432,7 +432,7 @@ namespace ArxOne.MrAdvice.Weaver
             }
             catch (Exception e)
             {
-                Logger.WriteError("Error while weaving method '{0}': {1}", method.FullName, e);
+                Logging.WriteError("Error while weaving method '{0}': {1}", method.FullName, e);
             }
         }
 
@@ -447,7 +447,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="interfaceType">Type of the interface.</param>
         private void WeaveInterface(ModuleDef moduleDefinition, ITypeDefOrRef interfaceType)
         {
-            Logger.WriteDebug("Weaving interface '{0}'", interfaceType.FullName);
+            Logging.WriteDebug("Weaving interface '{0}'", interfaceType.FullName);
             TypeDef implementationType;
             TypeDef advisedInterfaceType;
             TypeDef interfaceTypeDefinition;
@@ -562,7 +562,7 @@ namespace ArxOne.MrAdvice.Weaver
                         var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
                         if (isStatic)
                             fieldAttributes |= FieldAttributes.Static;
-                        Logger.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);
+                        Logging.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);
                         var introducedFieldTypeReference = TypeImporter.Import(moduleDefinition, introducedFieldType.ToTypeSig());
                         var introducedField = new FieldDefUser(introducedFieldName, new FieldSig(introducedFieldTypeReference), fieldAttributes);
                         introducedField.CustomAttributes.Add(new CustomAttribute(markerAttribute));

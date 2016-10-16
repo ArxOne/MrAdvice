@@ -12,31 +12,35 @@ namespace ArxOne.MrAdvice
     using System.IO.Compression;
     using System.Linq;
     using System.Reflection;
-    using Advice;
     using dnlib.DotNet;
     using IO;
     using Reflection;
+    using StitcherBoy.Logging;
     using StitcherBoy.Weaving.Build;
     using Weaver;
 
     public class MrAdviceStitcher : AssemblyStitcher
     {
+        private ILogging _logging;
+
         public MrAdviceStitcher()
         {
-            Logger.LogInfo = s => Logging.Write(s);
-            Logger.LogWarning = s => Logging.WriteWarning(s);
-            Logger.LogError = s => Logging.WriteError(s);
         }
 
         protected override bool Process(AssemblyStitcherContext context)
         {
+#if DEBUG
+            _logging = new MultiLogging(Logging, new FileLogging("MrAdvice.log"));
+#else
+            _logging = Logging;
+#endif
             // instances are created here
             // please also note poor man's dependency injection (which is enough for us here)
             //var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(r => new Dependency(r)));
             var assemblyResolver = context.AssemblyResolver;
-            var typeResolver = new TypeResolver { AssemblyResolver = assemblyResolver };
+            var typeResolver = new TypeResolver { Logging = _logging, AssemblyResolver = assemblyResolver };
             var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
-            var aspectWeaver = new AspectWeaver { TypeResolver = typeResolver, TypeLoader = typeLoader };
+            var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
             // TODO: use blobber's resolution (WTF?)
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             //AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => MrAdviceTask.AssemblyResolve(GetType().Assembly, e);
@@ -89,7 +93,7 @@ namespace ArxOne.MrAdvice
         /// Loads the weaved assembly.
         /// </summary>
         /// <returns></returns>
-        private static Assembly LoadWeavedAssembly(AssemblyStitcherContext context, IAssemblyResolver assemblyResolver)
+        private Assembly LoadWeavedAssembly(AssemblyStitcherContext context, IAssemblyResolver assemblyResolver)
         {
             foreach (var assemblyRef in context.Module.GetAssemblyRefs())
             {
@@ -114,7 +118,7 @@ namespace ArxOne.MrAdvice
                 }
                 catch (Exception e)
                 {
-                    Logger.WriteWarning("Can't load {0}: {1}", assemblyRef.FullName, e.ToString());
+                    _logging.WriteWarning("Can't load {0}: {1}", assemblyRef.FullName, e.ToString());
                 }
             }
             var bytes = File.ReadAllBytes(context.Module.Assembly.ManifestModule.Location);

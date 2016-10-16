@@ -8,6 +8,7 @@ namespace ArxOne.MrAdvice.Utility
 {
     using System.Reflection;
     using dnlib.DotNet;
+    using StitcherBoy.Logging;
 
     /// <summary>
     /// Extensions to TypeReference
@@ -81,14 +82,15 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="typeDefOrRef">The type definition or reference.</param>
         /// <param name="assemblyResolver">The assembly resolver.</param>
+        /// <param name="logging">The logging.</param>
         /// <returns></returns>
-        public static TypeDef ResolveTypeDef(this ITypeDefOrRef typeDefOrRef, IAssemblyResolver assemblyResolver)
+        public static TypeDef ResolveTypeDef(this ITypeDefOrRef typeDefOrRef, IAssemblyResolver assemblyResolver, ILogging logging)
         {
             var typeDef = typeDefOrRef as TypeDef;
             if (typeDef != null)
                 return typeDef;
 
-            foreach (var module in typeDefOrRef.Module.GetSelfAndReferences(assemblyResolver, false, 2))
+            foreach (var module in typeDefOrRef.Module.GetSelfAndReferences(assemblyResolver, false, 2, logging))
             {
                 typeDef = module.Find(typeDefOrRef);
                 if (typeDef != null)

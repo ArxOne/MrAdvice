@@ -14,6 +14,7 @@ namespace ArxOne.MrAdvice.Weaver
     using dnlib.DotNet;
     using dnlib.DotNet.Emit;
     using IO;
+    using StitcherBoy.Logging;
     using Utility;
 
     internal class WeaverMethodWeavingContext : MethodWeavingContext
@@ -21,6 +22,7 @@ namespace ArxOne.MrAdvice.Weaver
         private readonly TypeDef _typeDefinition;
         private readonly Types _types;
         private readonly TypeResolver _typeResolver;
+        private readonly ILogging _logging;
 
         /// <summary>
         /// Gets the properties.
@@ -28,10 +30,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <value>
         /// The properties.
         /// </value>
-        public virtual IEnumerable<string> Properties
-        {
-            get { return _typeDefinition.Properties.Select(p => p.Name.String); }
-        }
+        public virtual IEnumerable<string> Properties => _typeDefinition.Properties.Select(p => p.Name.String);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WeaverMethodWeavingContext" /> class.
@@ -41,12 +40,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="targetMethodName">Name of the target method.</param>
         /// <param name="types">The types.</param>
         /// <param name="typeResolver">The type resolver.</param>
-        public WeaverMethodWeavingContext(TypeDef typeDefinition, Type type, string targetMethodName, Types types, TypeResolver typeResolver)
+        /// <param name="logging">The logging.</param>
+        public WeaverMethodWeavingContext(TypeDef typeDefinition, Type type, string targetMethodName, Types types, TypeResolver typeResolver, ILogging logging)
             : base(type, targetMethodName)
         {
             _typeDefinition = typeDefinition;
             _types = types;
             _typeResolver = typeResolver;
+            _logging = logging;
         }
 
         /// <summary>
@@ -84,12 +85,12 @@ namespace ArxOne.MrAdvice.Weaver
             var methodInfo = initializer.Method;
             if (!methodInfo.IsStatic)
             {
-                Logger.WriteError("The method {0}.{1} must be static", methodInfo.DeclaringType.FullName, methodInfo.Name);
+                _logging.WriteError("The method {0}.{1} must be static", methodInfo.DeclaringType.FullName, methodInfo.Name);
                 error = true;
             }
             if (!methodInfo.IsPublic)
             {
-                Logger.WriteError("The method {0}.{1} must be public", methodInfo.DeclaringType.FullName, methodInfo.Name);
+                _logging.WriteError("The method {0}.{1} must be public", methodInfo.DeclaringType.FullName, methodInfo.Name);
                 error = true;
             }
             if (error)

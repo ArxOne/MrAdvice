@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using ArxOne.MrAdvice;
+using StitcherBoy;
 
 // ReSharper disable once CheckNamespace
 public class MrAdviceTask : StitcherTask<MrAdviceStitcher>
@@ -21,7 +22,7 @@ public class MrAdviceTask : StitcherTask<MrAdviceStitcher>
     /// <returns></returns>
     public static int Main(string[] args)
     {
-        SetupBlobber();
+        BlobberHelper.Setup();
         return Run(new MrAdviceTask(), LoadArgs(args));
     }
 
@@ -47,18 +48,5 @@ public class MrAdviceTask : StitcherTask<MrAdviceStitcher>
             }
         }
         return args;
-    }
-
-    private static Type GetLoader() => Assembly.GetExecutingAssembly().GetType("\u2302");
-
-    public static void SetupBlobber()
-    {
-        // this is Blobber's official method to execute setup on task assemblies
-        GetLoader().GetMethod("Register").Invoke(null, new object[0]);
-    }
-
-    public static Assembly AssemblyResolve(Assembly assembly, ResolveEventArgs e)
-    {
-        return (Assembly)GetLoader().GetMethod("Resolve").Invoke(null, new object[] { assembly, e.Name });
     }
 }

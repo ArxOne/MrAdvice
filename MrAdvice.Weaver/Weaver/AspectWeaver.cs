@@ -23,6 +23,7 @@ namespace ArxOne.MrAdvice.Weaver
     using Properties;
     using Reflection;
     using Reflection.Groups;
+    using StitcherBoy.Logging;
     using Utility;
     using ModuleDefMD = dnlib.DotNet.ModuleDefMD;
 
@@ -36,6 +37,8 @@ namespace ArxOne.MrAdvice.Weaver
         public TypeResolver TypeResolver { get; set; }
 
         public TypeLoader TypeLoader { get; set; }
+
+        public ILogging Logging { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether all additional methods and fields are injected as prived.
@@ -69,7 +72,7 @@ namespace ArxOne.MrAdvice.Weaver
             var adviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IAdvice));
             if (adviceInterface == null)
             {
-                Logger.WriteWarning("IAdvice interface not found here (not referenced means not used), exiting");
+                Logging.WriteWarning("IAdvice interface not found here (not referenced means not used), exiting");
                 return;
             }
 
@@ -99,7 +102,7 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 generatedFieldsToBeRemoved.AddRange(GetRemovableFields(methodsWithAbstractTarget, types));
                 foreach (var fieldReference in generatedFieldsToBeRemoved)
-                    Logger.WriteDebug("Field {0} to be removed", fieldReference.FullName);
+                    Logging.WriteDebug("Field {0} to be removed", fieldReference.FullName);
             }
             auditTimer.NewZone("Methods weaving");
             weavableMethods
@@ -138,12 +141,12 @@ namespace ArxOne.MrAdvice.Weaver
 
             var report = auditTimer.GetReport();
             var maxLength = report.Keys.Max(k => k.Length);
-            Logger.WriteDebug("--- Timings --------------------------");
+            Logging.WriteDebug("--- Timings --------------------------");
             foreach (var reportPart in report)
-                Logger.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength), (int)reportPart.Value.TotalMilliseconds);
-            Logger.WriteDebug("--------------------------------------");
+                Logging.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength), (int)reportPart.Value.TotalMilliseconds);
+            Logging.WriteDebug("--------------------------------------");
 
-            Logger.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
+            Logging.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
                 moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework, Product.Version);
         }
 
@@ -184,7 +187,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
-        private static TargetFramework GetTargetFramework(ModuleDef moduleDefinition)
+        private TargetFramework GetTargetFramework(ModuleDef moduleDefinition)
         {
             var targetFrameworkAttributeType = moduleDefinition.SafeImport(typeof(TargetFrameworkAttribute));
             var targetFrameworkAttribute = moduleDefinition.Assembly.CustomAttributes.SingleOrDefault(a => a.AttributeType.SafeEquivalent(targetFrameworkAttributeType));
@@ -195,7 +198,7 @@ namespace ArxOne.MrAdvice.Weaver
                 if (literalRuntimeVersion.StartsWith("v") && Version.TryParse(literalRuntimeVersion.Substring(1), out runtimeVersion))
                     return new TargetFramework(runtimeVersion);
 
-                Logger.LogError($"Unknown RuntimeVersion: '{literalRuntimeVersion}'");
+                Logging.WriteError($"Unknown RuntimeVersion: '{literalRuntimeVersion}'");
                 throw new ArgumentOutOfRangeException(literalRuntimeVersion, nameof(literalRuntimeVersion));
             }
 
@@ -252,7 +255,7 @@ namespace ArxOne.MrAdvice.Weaver
                             var parameterIndex = t.Item2.GenericParameters.IndexOf(p => p.Name == t.Item1.TypeName);
                             methodsSearched.Add(t.Item2);
                             methodsToSearch.Add(Tuple.Create(t.Item2, parameterIndex));
-                            Logger.WriteDebug("Now looking for references to '{0} [{1}]'", methodToSearch, parameterIndex);
+                            Logging.WriteDebug("Now looking for references to '{0} [{1}]'", methodToSearch, parameterIndex);
                         }
                     }
                     // only interfaces are processed by now
@@ -389,23 +392,23 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="types">The types.</param>
         /// <returns></returns>
-        private static MarkerDefinition CreateMarkerDefinition(TypeDef typeDefinition, Types types)
+        private MarkerDefinition CreateMarkerDefinition(TypeDef typeDefinition, Types types)
         {
             var priorityAttributes = typeDefinition.CustomAttributes.Where(a => a.AttributeType.SafeEquivalent(types.PriorityAttributeType)).ToList();
             if (priorityAttributes.Count > 1)
-                Logger.WriteWarning("Advice {0} has more than one priority. Using the first found", typeDefinition.FullName);
+                Logging.WriteWarning("Advice {0} has more than one priority. Using the first found", typeDefinition.FullName);
 
             int priority = 0;
             if (priorityAttributes.Count > 0)
             {
                 var b = priorityAttributes[0].GetBlob();
                 priority = (b[5] << 24) | (b[4] << 16) | (b[3] << 8) | b[2];
-                Logger.WriteDebug("Advice {0} has priority {1}", typeDefinition.FullName, priority);
+                Logging.WriteDebug("Advice {0} has priority {1}", typeDefinition.FullName, priority);
             }
 
             var abstractTarget = typeDefinition.CustomAttributes.Any(a => a.AttributeType.SafeEquivalent(types.AbstractTargetAttributeType));
             if (abstractTarget)
-                Logger.WriteDebug("Advice {0} abstracts target", typeDefinition.FullName, priority);
+                Logging.WriteDebug("Advice {0} abstracts target", typeDefinition.FullName, priority);
             var markerDefinition = new MarkerDefinition { Type = typeDefinition, Priority = priority, AbstractTarget = abstractTarget };
             return markerDefinition;
         }
