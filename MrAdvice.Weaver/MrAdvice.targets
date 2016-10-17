@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)..\build\MrAdvice.Weaver.exe</MrAdvicePath>
+    <MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)MrAdvice.Weaver.exe</MrAdvicePath>
   </PropertyGroup>
 
   <UsingTask TaskName="MrAdviceTask" AssemblyFile="$(MrAdvicePath)" />
