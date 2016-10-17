@@ -119,7 +119,15 @@ namespace ArxOne.MrAdvice
             {
                 var advisedTask = (Task)adviceValues.ReturnValue;
                 var result = advisedTask.GetResult();
-                adviceTaskSource.SetResult(result);
+                try
+                {
+                    adviceTaskSource.SetResult(result);
+                }
+                catch (InvalidCastException e)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unsuccessfully tried to cast {0} ", result?.GetType().FullName);
+                    throw new InvalidCastException($"Wrong cast from {result?.GetType().FullName}", e);
+                }
             }
         }
 
