@@ -15,6 +15,7 @@ namespace ArxOne.MrAdvice
     using dnlib.DotNet;
     using IO;
     using Reflection;
+    using StitcherBoy;
     using StitcherBoy.Logging;
     using StitcherBoy.Weaving.Build;
     using Weaver;
@@ -46,18 +47,21 @@ namespace ArxOne.MrAdvice
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
                 // TODO: use blobber's resolution (WTF?)
                 AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-                //AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => MrAdviceTask.AssemblyResolve(GetType().Assembly, e);
+                BlobberHelper.Setup();
+
                 aspectWeaver.Weave(context.Module);
                 return true;
             }
             catch (Exception e)
             {
-                _logging.WriteError("Internal error: {0}", e);
+                _logging.WriteError("Internal error: {0}", e.ToString());
+                for (var ie = e.InnerException; ie != null; ie = ie.InnerException)
+                    _logging.WriteError("Inner exception: {0}", e.ToString());
             }
             return false;
         }
 
-        private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name);
 
@@ -69,7 +73,9 @@ namespace ArxOne.MrAdvice
                     return mrAdviceAssembly;
             }
 
-            var assemblyData = ResolveAssembly(assemblyName);
+            // otherwise fallback to embedded resources,
+            // which for some fucking reason are not resolved by Blobber!
+            var assemblyData = ResolveAssembly(assemblyName.Name);
             if (assemblyData == null)
                 return null;
 
@@ -81,9 +87,9 @@ namespace ArxOne.MrAdvice
         /// </summary>
         /// <param name="assemblyName">Name of the assembly.</param>
         /// <returns></returns>
-        public static byte[] ResolveAssembly(AssemblyName assemblyName)
+        private static byte[] ResolveAssembly(string assemblyName)
         {
-            var resourceName = $"blobber:embedded.gz:{assemblyName.Name}";
+            var resourceName = $"blobber:embedded.gz:{assemblyName}";
 
             using (var resourceStream = typeof(MrAdviceStitcher).Assembly.GetManifestResourceStream(resourceName))
             {

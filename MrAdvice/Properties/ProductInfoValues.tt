@@ -1,14 +1,14 @@
 ﻿<#
 // all common data between assembly information and nuspec package are stored here
 
-// semantic versioning: 
-// Major is incompatible API changes, 
+// semantic versioning:
+// Major is incompatible API changes,
 // Minor is backwards-compatible changes
 // Patch is no change.
 // Because multiple packages may depend on MrAdvice, the Assembly Version will only hold the Major version
 var VersionMajor = "2";
 var VersionMinor = "0";
-var VersionPatch = "13";
+var VersionPatch = "14";
 var Version = VersionMajor + "." + VersionMinor + "." + VersionPatch;
 
 var Title = "Mr. Advice";

@@ -55,14 +55,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         public void Weave(ModuleDefMD moduleDefinition)
         {
-            //Logger.LogInfo("Modules and dependencies:");
-            //var selfAndReferences = moduleDefinition.GetSelfAndReferences(TypeResolver.AssemblyResolver, false, 10).ToArray();
-            //foreach (var r in selfAndReferences)
-            //{
-            //    Logger.LogInfo($"Module {r.Name.ToString()}");
-            //}
-            //Logger.LogInfo($"Current directory: {Environment.CurrentDirectory}");
-
             var auditTimer = new AuditTimer();
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -107,18 +99,18 @@ namespace ArxOne.MrAdvice.Weaver
             auditTimer.NewZone("Methods weaving");
             weavableMethods
 #if !DEBUG
-                //.AsParallel()
+//.AsParallel()
 #endif
-                .ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
+                    .ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, types));
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
             auditTimer.NewZone("Interface methods weaving");
             weavableInterfaces
 #if !DEBUG
-                //.AsParallel()
+//.AsParallel()
 #endif
-                .ForAll(i => WeaveInterface(moduleDefinition, i));
+                    .ForAll(i => WeaveInterface(moduleDefinition, i));
 
             //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
@@ -127,9 +119,9 @@ namespace ArxOne.MrAdvice.Weaver
             var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IInfoAdvice));
             moduleDefinition.GetTypes()
 #if !DEBUG
-                //.AsParallel()
+//.AsParallel()
 #endif
-                .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
+                    .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, types));
 
             auditTimer.NewZone("Abstract targets cleanup");
             foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)

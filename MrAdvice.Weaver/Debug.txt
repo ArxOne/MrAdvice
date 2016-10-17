@@ -1,0 +1,9 @@
+﻿-- copy below to get mr advice parameters
+
+echo AssemblyPath="@(IntermediateAssembly)"
+echo ReferencePath="@(ReferencePath)"
+echo ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+echo AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)"
+echo SignAssembly="$(SignAssembly)"
+
+--
