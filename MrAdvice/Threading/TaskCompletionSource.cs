@@ -36,6 +36,11 @@ namespace ArxOne.MrAdvice.Threading
         public abstract void SetException(Exception e);
 
         /// <summary>
+        /// Sets to canceled state.
+        /// </summary>
+        public abstract void SetCanceled();
+
+        /// <summary>
         /// Creates a TaskCompletionSource for the given.
         /// </summary>
         /// <param name="taskType">Type of the task 
@@ -43,9 +48,9 @@ namespace ArxOne.MrAdvice.Threading
         /// <returns></returns>
         public static TaskCompletionSource Create(Type taskType)
         {
-            var tcsArgumentType = taskType == typeof (void) || taskType == null ? typeof (object) : taskType;
-            var tcsType = typeof (TaskCompletionSourceImplementation<>).MakeGenericType(tcsArgumentType);
-            var source = (TaskCompletionSource) Activator.CreateInstance(tcsType);
+            var tcsArgumentType = taskType == typeof(void) || taskType == null ? typeof(object) : taskType;
+            var tcsType = typeof(TaskCompletionSourceImplementation<>).MakeGenericType(tcsArgumentType);
+            var source = (TaskCompletionSource)Activator.CreateInstance(tcsType);
             return source;
         }
     }

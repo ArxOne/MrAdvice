@@ -115,6 +115,8 @@ namespace ArxOne.MrAdvice
         {
             if (adviceTask.IsFaulted)
                 adviceTaskSource.SetException(FlattenException(adviceTask.Exception));
+            else if (adviceTask.IsCanceled)
+                adviceTaskSource.SetCanceled();
             else
             {
                 var advisedTask = (Task)adviceValues.ReturnValue;

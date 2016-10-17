@@ -22,7 +22,7 @@ namespace ArxOne.MrAdvice.Threading
         /// <param name="result">The result.</param>
         public override void SetResult(object result)
         {
-            _source.SetResult((TResult) result);
+            _source.SetResult((TResult)result);
         }
 
         /// <summary>
@@ -32,6 +32,14 @@ namespace ArxOne.MrAdvice.Threading
         public override void SetException(Exception e)
         {
             _source.SetException(e);
+        }
+
+        /// <summary>
+        /// Sets to canceled state.
+        /// </summary>
+        public override void SetCanceled()
+        {
+            _source.SetCanceled();
         }
 
         /// <summary>
