@@ -9,7 +9,6 @@ namespace ArxOne.MrAdvice
 {
     using System;
     using System.IO;
-    using System.IO.Compression;
     using System.Linq;
     using System.Reflection;
     using dnlib.DotNet;
@@ -23,10 +22,6 @@ namespace ArxOne.MrAdvice
     public class MrAdviceStitcher : AssemblyStitcher
     {
         private ILogging _logging;
-
-        public MrAdviceStitcher()
-        {
-        }
 
         protected override bool Process(AssemblyStitcherContext context)
         {
@@ -45,7 +40,6 @@ namespace ArxOne.MrAdvice
                 var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
                 // TODO: use blobber's resolution (WTF?)
-                LoadAssembly("MrAdvice");
                 AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
                 BlobberHelper.Setup();
 
@@ -61,47 +55,15 @@ namespace ArxOne.MrAdvice
             return false;
         }
 
-        private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args) => LoadAssembly(new AssemblyName(args.Name).Name);
+        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args) => LoadAssembly(new AssemblyName(args.Name).Name);
 
-        private static Assembly LoadAssembly(string assemblyName)
+        private Assembly LoadAssembly(string assemblyName)
         {
             // because versions may differ, we'll pretend they're all the same
             if (assemblyName == "MrAdvice")
-            {
-                var mrAdviceAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName);
-                if (mrAdviceAssembly != null)
-                    return mrAdviceAssembly;
-            }
+                return GetType().Assembly;
 
-            // otherwise fallback to embedded resources,
-            // which for some fucking reason are not resolved by Blobber!
-            var assemblyData = ResolveAssembly(assemblyName);
-            if (assemblyData == null)
-                return null;
-
-            return Assembly.Load(assemblyData);
-        }
-
-        /// <summary>
-        /// Resolves the assembly.
-        /// </summary>
-        /// <param name="assemblyName">Name of the assembly.</param>
-        /// <returns></returns>
-        private static byte[] ResolveAssembly(string assemblyName)
-        {
-            var resourceName = $"blobber:embedded.gz:{assemblyName}";
-
-            using (var resourceStream = typeof(MrAdviceStitcher).Assembly.GetManifestResourceStream(resourceName))
-            {
-                if (resourceStream == null)
-                    return null;
-                using (var gzipStream = new GZipStream(resourceStream, CompressionMode.Decompress))
-                using (var memoryStream = new MemoryStream())
-                {
-                    gzipStream.CopyTo(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
+            return null;
         }
 
         /// <summary>
