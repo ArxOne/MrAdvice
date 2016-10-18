@@ -49,5 +49,16 @@ namespace ArxOne.MrAdvice.Threading
             var resultProperty = task.GetType().GetProperty("Result");
             return resultProperty.GetValue(task, new object[0]);
         }
+
+        /// <summary>
+        /// Continues the task, in a reflection way (opposed to generic way).
+        /// </summary>
+        /// <typeparam name="TTask">The type of the task.</typeparam>
+        /// <param name="task">The task.</param>
+        /// <param name="func">The function.</param>
+        /// <param name="resultType">Type of the result.</param>
+        /// <returns></returns>
+        public static Task ContinueWith<TTask>(this TTask task, Func<TTask, object> func, Type resultType)
+            where TTask : Task => TaskContinuer.ContinueWith(task, func, resultType);
     }
 }

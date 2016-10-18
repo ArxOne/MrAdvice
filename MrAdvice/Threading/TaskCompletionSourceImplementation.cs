@@ -49,5 +49,20 @@ namespace ArxOne.MrAdvice.Threading
         {
             _source = new TaskCompletionSource<TResult>();
         }
+
+        /// <summary>
+        /// Performs an action after current task is complete.
+        /// Action is run asynchronously
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <returns></returns>
+        public override Task ContinueWith(Action<Task> action)
+        {
+            return _source.Task.ContinueWith(delegate (Task<TResult> t)
+            {
+                action(t);
+                return t.Result;
+            });
+        }
     }
 }

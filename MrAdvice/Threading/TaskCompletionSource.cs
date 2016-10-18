@@ -43,7 +43,7 @@ namespace ArxOne.MrAdvice.Threading
         /// <summary>
         /// Creates a TaskCompletionSource for the given.
         /// </summary>
-        /// <param name="taskType">Type of the task 
+        /// <param name="taskType">Type of the task
         /// (may be void or null, in which case the result parameter to SetResult() is ignored).</param>
         /// <returns></returns>
         public static TaskCompletionSource Create(Type taskType)
@@ -53,5 +53,13 @@ namespace ArxOne.MrAdvice.Threading
             var source = (TaskCompletionSource)Activator.CreateInstance(tcsType);
             return source;
         }
+
+        /// <summary>
+        /// Performs an action after current task is complete.
+        /// Action is run asynchronously
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <returns></returns>
+        public abstract Task ContinueWith(Action<Task> action);
     }
 }

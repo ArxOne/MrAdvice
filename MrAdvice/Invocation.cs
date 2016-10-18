@@ -99,38 +99,9 @@ namespace ArxOne.MrAdvice
                 return adviceTask;
 
             // only Task<> left here
-            // we need to create a new source and mark it as complete once the advice has completed
-            var adviceTaskSource = TaskCompletionSource.Create(returnType.GetTaskType());
-            adviceTask.ContinueWith(t => ContinueTask(t, adviceTaskSource, adviceValues));
-            return adviceTaskSource.Task;
-        }
-
-        /// <summary>
-        /// Continues the advice task by setting the advised method results.
-        /// </summary>
-        /// <param name="adviceTask">The advice task.</param>
-        /// <param name="adviceTaskSource">The advice task source.</param>
-        /// <param name="adviceValues"></param>
-        private static void ContinueTask(Task adviceTask, TaskCompletionSource adviceTaskSource, AdviceValues adviceValues)
-        {
-            if (adviceTask.IsFaulted)
-                adviceTaskSource.SetException(FlattenException(adviceTask.Exception));
-            else if (adviceTask.IsCanceled)
-                adviceTaskSource.SetCanceled();
-            else
-            {
-                var advisedTask = (Task)adviceValues.ReturnValue;
-                var result = advisedTask.GetResult();
-                try
-                {
-                    adviceTaskSource.SetResult(result);
-                }
-                catch (InvalidCastException e)
-                {
-                    System.Diagnostics.Debug.WriteLine("Unsuccessfully tried to cast {0} ", result?.GetType().FullName);
-                    throw new InvalidCastException($"Wrong cast from {result?.GetType().FullName}", e);
-                }
-            }
+            var taskType = returnType.GetTaskType();
+            // a reflection equivalent of ContinueWith<TNewResult>, but this TNewResult, under taskType is known only at run-time
+            return adviceTask.ContinueWith(t => ((Task)adviceValues.ReturnValue).GetResult(), taskType);
         }
 
         /// <summary>
