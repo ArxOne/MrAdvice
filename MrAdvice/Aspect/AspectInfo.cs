@@ -23,35 +23,35 @@ namespace ArxOne.MrAdvice.Aspect
         /// <value>
         /// The advices.
         /// </value>
-        public IList<AdviceInfo> Advices { get; private set; }
+        public IList<AdviceInfo> Advices { get; }
         /// <summary>
         /// Gets the advised method.
         /// </summary>
         /// <value>
         /// The advised method.
         /// </value>
-        public MethodBase AdvisedMethod { get; private set; }
+        public MethodBase AdvisedMethod { get; }
         /// <summary>
         /// Gets the pointcut method.
         /// </summary>
         /// <value>
         /// The pointcut method.
         /// </value>
-        public MethodInfo PointcutMethod { get; private set; }
+        public MethodInfo PointcutMethod { get; }
         /// <summary>
         /// Gets the pointcut property, if any (if method is related to property).
         /// </summary>
         /// <value>
         /// The pointcut property.
         /// </value>
-        public PropertyInfo PointcutProperty { get; private set; }
+        public PropertyInfo PointcutProperty { get; }
         /// <summary>
         /// Gets a value indicating whether this instance is pointcut property setter.
         /// </summary>
         /// <value>
         /// <c>true</c> if this instance is pointcut property setter; otherwise, <c>false</c>.
         /// </value>
-        public bool IsPointcutPropertySetter { get; private set; }
+        public bool IsPointcutPropertySetter { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectInfo" /> class.
@@ -104,11 +104,7 @@ namespace ArxOne.MrAdvice.Aspect
             // cast here is safe, because we have generic parameters, meaning we're not in a ctor
             return new AspectInfo(Advices,
                 (MethodInfo)MakeGenericMethod(PointcutMethod, genericArguments),
-                MakeGenericMethod(AdvisedMethod, genericArguments))
-            {
-                PointcutProperty = PointcutProperty,
-                IsPointcutPropertySetter = IsPointcutPropertySetter
-            };
+                MakeGenericMethod(AdvisedMethod, genericArguments), PointcutProperty, IsPointcutPropertySetter);
         }
 
         /// <summary>

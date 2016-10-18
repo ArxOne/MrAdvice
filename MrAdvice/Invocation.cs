@@ -18,7 +18,7 @@ namespace ArxOne.MrAdvice
 
     /// <summary>
     /// Exposes a method to start advisors chain call
-    /// This class is public, since call from generated assembly. 
+    /// This class is public, since call from generated assembly.
     /// Semantically, it is internal.
     /// </summary>
     // ReSharper disable once UnusedMember.Global
