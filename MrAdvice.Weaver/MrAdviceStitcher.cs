@@ -32,20 +32,20 @@ namespace ArxOne.MrAdvice
         {
 #if DEBUG
             _logging = new MultiLogging(Logging, new FileLogging("MrAdvice.log"));
+            _logging.WriteDebug("Start");
 #else
             _logging = Logging;
 #endif
-            _logging.WriteDebug("Start");
             try
             {
                 // instances are created here
                 // please also note poor man's dependency injection (which is enough for us here)
-                //var assemblyResolver = new DependenciesAssemblyResolver(context.Project.References.Select(r => new Dependency(r)));
                 var assemblyResolver = context.AssemblyResolver;
                 var typeResolver = new TypeResolver { Logging = _logging, AssemblyResolver = assemblyResolver };
                 var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
                 // TODO: use blobber's resolution (WTF?)
+                LoadAssembly("MrAdvice");
                 AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
                 BlobberHelper.Setup();
 
@@ -61,21 +61,21 @@ namespace ArxOne.MrAdvice
             return false;
         }
 
-        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var assemblyName = new AssemblyName(args.Name);
+        private static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args) => LoadAssembly(new AssemblyName(args.Name).Name);
 
+        private static Assembly LoadAssembly(string assemblyName)
+        {
             // because versions may differ, we'll pretend they're all the same
-            if (assemblyName.Name == "MrAdvice")
+            if (assemblyName == "MrAdvice")
             {
-                var mrAdviceAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
+                var mrAdviceAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName);
                 if (mrAdviceAssembly != null)
                     return mrAdviceAssembly;
             }
 
             // otherwise fallback to embedded resources,
             // which for some fucking reason are not resolved by Blobber!
-            var assemblyData = ResolveAssembly(assemblyName.Name);
+            var assemblyData = ResolveAssembly(assemblyName);
             if (assemblyData == null)
                 return null;
 
