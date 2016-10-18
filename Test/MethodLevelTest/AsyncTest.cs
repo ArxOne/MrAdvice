@@ -17,7 +17,10 @@ namespace MethodLevelTest
 
     public class CustomException : Exception
     {
+    }
 
+    public class CustomException2 : Exception
+    {
     }
 
     public class CheckSyncAdvice : Attribute, IMethodAdvice
@@ -53,6 +56,21 @@ namespace MethodLevelTest
         public async Task Advise(MethodAsyncAdviceContext context)
         {
             await context.ProceedAsync();
+        }
+    }
+
+    public class AsyncExceptionTranslationAdvice : Attribute, IMethodAsyncAdvice
+    {
+        public async Task Advise(MethodAsyncAdviceContext context)
+        {
+            try
+            {
+                await context.ProceedAsync();
+            }
+            catch (CustomException)
+            {
+                throw new CustomException2();
+            }
         }
     }
 
@@ -124,6 +142,14 @@ namespace MethodLevelTest
 
         [AsyncAdvice]
         public async Task ThrowException(bool now)
+        {
+            if (!now)
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            throw new CustomException();
+        }
+
+        [AsyncExceptionTranslationAdvice]
+        public async Task ThrowTranslatedException(bool now)
         {
             if (!now)
                 await Task.Delay(TimeSpan.FromSeconds(2));
@@ -222,6 +248,22 @@ namespace MethodLevelTest
                 t.Wait();
             }
             catch (AggregateException e) when (e.InnerException is CustomException)
+            {
+                throw e.InnerException;
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        [ExpectedException(typeof(CustomException2))]
+        public void DelayedTranslatedExceptionTest()
+        {
+            try
+            {
+                var t = Task.Run(() => ThrowTranslatedException(false));
+                t.Wait();
+            }
+            catch (AggregateException e) when (e.InnerException is CustomException2)
             {
                 throw e.InnerException;
             }

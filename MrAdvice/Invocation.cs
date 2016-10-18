@@ -105,19 +105,6 @@ namespace ArxOne.MrAdvice
         }
 
         /// <summary>
-        /// Flattens the exception (removes aggregate exception).
-        /// </summary>
-        /// <param name="e">The e.</param>
-        /// <returns></returns>
-        private static Exception FlattenException(Exception e)
-        {
-            var a = e as AggregateException;
-            if (a == null)
-                return e;
-            return a.InnerException;
-        }
-
-        /// <summary>
         /// Gets the aspect information.
         /// </summary>
         /// <param name="methodBase">The method base.</param>
