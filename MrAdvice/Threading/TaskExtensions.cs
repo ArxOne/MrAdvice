@@ -10,6 +10,7 @@
 namespace ArxOne.MrAdvice.Threading
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -47,7 +48,14 @@ namespace ArxOne.MrAdvice.Threading
         public static object GetResult(this Task task)
         {
             var resultProperty = task.GetType().GetProperty("Result");
-            return resultProperty.GetValue(task, new object[0]);
+            try
+            {
+                return resultProperty.GetValue(task, new object[0]);
+            }
+            catch (TargetInvocationException e)
+            {
+                throw e.InnerException;
+            }
         }
 
         /// <summary>
