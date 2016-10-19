@@ -239,18 +239,15 @@ namespace ArxOne.MrAdvice.Weaver
 
             // methods...
             // ... target
-            instructions.Emit(OpCodes.Ldtoken, method);
+            var methodParameter = GetMethodParameter(method);
+            methodParameter.Emit(instructions);
 
             // ... inner... If provided
-            if (innerMethod != null)
-                instructions.Emit(OpCodes.Ldtoken, innerMethod);
-            else // equals to method, so will be ignored by Invocation.Proceed
-                instructions.Emit(OpCodes.Dup);
+            var innerMethodParameter = GetInnerMethodParameter(innerMethod);
+            innerMethodParameter.Emit(instructions);
 
-            if (method.DeclaringType.HasGenericParameters)
-                instructions.Emit(OpCodes.Ldtoken, method.DeclaringType);
-            else
-                instructions.Emit(OpCodes.Ldtoken, moduleDefinition.CorLibTypes.Void);
+            var typeParameter = GetTypeParameter(method);
+            typeParameter.Emit(instructions);
 
             // abstracted target
             instructions.Emit(abstractedTarget ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
@@ -359,6 +356,25 @@ namespace ArxOne.MrAdvice.Weaver
                     }
                     instructions.EmitLdloc(localParametersVariable);
                 }, instructions => instructions.Emit(OpCodes.Ldnull));
+        }
+
+        private InvocationParameter GetMethodParameter(MethodDef method)
+        {
+            return new InvocationParameter(true, instructions => instructions.Emit(OpCodes.Ldtoken, method), null);
+        }
+
+        private InvocationParameter GetInnerMethodParameter(MethodDef innerMethod)
+        {
+            return new InvocationParameter(innerMethod != null,
+                instructions => instructions.Emit(OpCodes.Ldtoken, innerMethod),
+                instructions => instructions.Emit(OpCodes.Dup));
+        }
+
+        private InvocationParameter GetTypeParameter(MethodDef method)
+        {
+            return new InvocationParameter(method.DeclaringType.HasGenericParameters,
+                instructions => instructions.Emit(OpCodes.Ldtoken, method.DeclaringType),
+                instructions => instructions.Emit(OpCodes.Ldtoken, method.Module.CorLibTypes.Void));
         }
 
         /// <summary>
