@@ -7,8 +7,6 @@
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.SymbolStore;
     using System.Linq;
     using System.Reflection;
     using Advice;
@@ -21,11 +19,8 @@ namespace ArxOne.MrAdvice.Weaver
     using Reflection;
     using Reflection.Groups;
     using Utility;
-    using EventAttributes = dnlib.DotNet.EventAttributes;
     using FieldAttributes = dnlib.DotNet.FieldAttributes;
     using MethodAttributes = dnlib.DotNet.MethodAttributes;
-    using PropertyAttributes = dnlib.DotNet.PropertyAttributes;
-    using SymbolReaderCreator = dnlib.DotNet.Pdb.Managed.SymbolReaderCreator;
     using TypeAttributes = dnlib.DotNet.TypeAttributes;
 
     partial class AspectWeaver
@@ -202,41 +197,6 @@ namespace ArxOne.MrAdvice.Weaver
             method.Body.ExceptionHandlers.Clear();
             var instructions = new Instructions(method.Body.Instructions, method.Module);
 
-            var isStatic = method.IsStatic;
-
-            // parameters
-            Local parametersVariable = null;
-            var methodParameters = new MethodParameters(method);
-            if (methodParameters.Count > 0)
-            {
-                parametersVariable = new Local(new SZArraySig(moduleDefinition.CorLibTypes.Object)) { Name = "parameters" };
-                method.Body.Variables.Add(parametersVariable);
-
-                instructions.EmitLdc(methodParameters.Count);
-                instructions.Emit(OpCodes.Newarr, moduleDefinition.CorLibTypes.Object);
-                instructions.EmitStloc(parametersVariable);
-                // setups parameters array
-                for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
-                {
-                    var parameter = methodParameters[parameterIndex];
-                    // we don't care about output parameters
-                    if (!parameter.ParamDef.IsOut)
-                    {
-                        instructions.EmitLdloc(parametersVariable); // array
-                        instructions.EmitLdc(parameterIndex); // array index
-                        instructions.EmitLdarg(parameter); // loads given parameter...
-                        var parameterType = parameter.Type;
-                        if (parameterType is ByRefSig) // ...if ref, loads it as referenced value
-                        {
-                            parameterType = parameter.Type.Next;
-                            instructions.EmitLdind(parameterType);
-                        }
-                        instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
-                        instructions.Emit(OpCodes.Stelem_Ref);
-                    }
-                }
-            }
-
             // if method has generic parameters, we also pass them to Proceed method
             Local genericParametersVariable = null;
             // on static methods from generic type, we also record the generic parameters type
@@ -273,10 +233,9 @@ namespace ArxOne.MrAdvice.Weaver
             targetParameter.Emit(instructions);
 
             // parameters
-            if (parametersVariable != null)
-                instructions.EmitLdloc(parametersVariable);
-            else
-                instructions.Emit(OpCodes.Ldnull);
+            Local parametersVariable;
+            var parametersParameters = GetParametersParameter(method, out parametersVariable);
+            parametersParameters.Emit(instructions);
 
             // methods...
             // ... target
@@ -319,6 +278,7 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Pop); // if no return type, ignore Proceed() result
 
             // loads back out/ref parameters
+            var methodParameters = new MethodParameters(method);
             for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
             {
                 var parameter = methodParameters[parameterIndex];
@@ -362,6 +322,43 @@ namespace ArxOne.MrAdvice.Weaver
                 if (method.IsConstructor)
                     i.Emit(OpCodes.Castclass, method.Module.CorLibTypes.Object);
             }, i => i.Emit(OpCodes.Ldnull));
+        }
+
+        private InvocationParameter GetParametersParameter(MethodDef method, out Local parametersVariable)
+        {
+            var methodParameters = new MethodParameters(method);
+            var hasParameters = methodParameters.Count > 0;
+            var localParametersVariable = parametersVariable = hasParameters ? new Local(new SZArraySig(method.Module.CorLibTypes.Object)) { Name = "parameters" } : null;
+            return new InvocationParameter(hasParameters,
+                delegate (Instructions instructions)
+                {
+                    method.Body.Variables.Add(localParametersVariable);
+
+                    instructions.EmitLdc(methodParameters.Count);
+                    instructions.Emit(OpCodes.Newarr, method.Module.CorLibTypes.Object);
+                    instructions.EmitStloc(localParametersVariable);
+                    // setups parameters array
+                    for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
+                    {
+                        var parameter = methodParameters[parameterIndex];
+                        // we don't care about output parameters
+                        if (!parameter.ParamDef.IsOut)
+                        {
+                            instructions.EmitLdloc(localParametersVariable); // array
+                            instructions.EmitLdc(parameterIndex); // array index
+                            instructions.EmitLdarg(parameter); // loads given parameter...
+                            var parameterType = parameter.Type;
+                            if (parameterType is ByRefSig) // ...if ref, loads it as referenced value
+                            {
+                                parameterType = parameter.Type.Next;
+                                instructions.EmitLdind(parameterType);
+                            }
+                            instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
+                            instructions.Emit(OpCodes.Stelem_Ref);
+                        }
+                    }
+                    instructions.EmitLdloc(localParametersVariable);
+                }, instructions => instructions.Emit(OpCodes.Ldnull));
         }
 
         /// <summary>
