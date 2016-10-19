@@ -110,9 +110,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Threading\TaskCompletionSource.cs" />
     <Compile Include="Threading\TaskCompletionSourceImplementation.cs" />
+    <Compile Include="Threading\TaskAccessor.cs" />
     <Compile Include="Threading\TaskContinuer.cs" />
     <Compile Include="Threading\TaskExtensions.cs" />
     <Compile Include="Threading\Tasks.cs" />
+    <Compile Include="Utility\ExceptionExtensions.cs" />
     <Compile Include="Utility\MemberInfoExtensions.cs" />
     <Compile Include="Utility\TypeExtensions.cs" />
   </ItemGroup>

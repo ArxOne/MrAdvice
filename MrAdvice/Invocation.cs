@@ -101,7 +101,33 @@ namespace ArxOne.MrAdvice
             // only Task<> left here
             var taskType = returnType.GetTaskType();
             // a reflection equivalent of ContinueWith<TNewResult>, but this TNewResult, under taskType is known only at run-time
-            return adviceTask.ContinueWith(t => ((Task)adviceValues.ReturnValue).GetResult(), taskType);
+            return adviceTask.ContinueWith(t => GetResult(adviceValues), taskType);
+        }
+
+        /// <summary>
+        /// Gets the result.
+        /// </summary>
+        /// <param name="adviceValues">The advice values.</param>
+        /// <returns></returns>
+        private static object GetResult(AdviceValues adviceValues)
+        {
+            var returnValue = (Task)adviceValues.ReturnValue;
+            if (returnValue.IsFaulted)
+                throw FlattenException(returnValue.Exception).PreserveStackTrace();
+            return returnValue.GetResult();
+        }
+
+        /// <summary>
+        /// Flattens the exception (removes aggregate exception).
+        /// </summary>
+        /// <param name="e">The e.</param>
+        /// <returns></returns>
+        private static Exception FlattenException(Exception e)
+        {
+            var a = e as AggregateException;
+            if (a == null)
+                return e;
+            return a.InnerException;
         }
 
         /// <summary>

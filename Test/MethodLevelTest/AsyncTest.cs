@@ -342,5 +342,38 @@ namespace MethodLevelTest
         public async void GenerateWarning()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         { }
+
+#if did_not_make_the_point
+        [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+        public class LogSuccessAsyncAttribute : Attribute, IMethodAsyncAdvice
+        {
+            public async Task Advise(MethodAsyncAdviceContext context)
+            {
+                await context.ProceedAsync();
+                Console.WriteLine("Success!");
+            }
+        }
+
+        public class Class
+        {
+            [LogSuccessAsync]
+            public async Task<int> Method()
+            {
+                await Task.Yield();
+                throw new NullReferenceException();
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        public async Task ShouldTest()
+        {
+            await Task.Yield();
+            var c = new Class();
+            Action d = async () => await c.Method();
+            d();
+            //  Assert.Throws(async () => await c.Method());
+        }
+#endif
     }
 }

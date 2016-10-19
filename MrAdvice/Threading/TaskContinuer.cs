@@ -28,6 +28,15 @@ namespace ArxOne.MrAdvice.Threading
         public abstract Task ContinueWith<TTask>(TTask task, Func<TTask, object> func)
             where TTask : Task;
 
+
+        /// <summary>
+        /// Continues the specified two tasks and returns result of last task.
+        /// </summary>
+        /// <param name="waitTask">The wait task.</param>
+        /// <param name="resultTask">The result task.</param>
+        /// <returns></returns>
+        public abstract Task ContinueWith(Task waitTask, Task resultTask);
+
         /// <summary>
         /// Creates a <see cref="TaskContinuer"/> for given result type.
         /// </summary>
@@ -54,6 +63,18 @@ namespace ArxOne.MrAdvice.Threading
         {
             return Create(resultType).ContinueWith(task, func);
         }
+
+        /// <summary>
+        /// Continues the specified two tasks and returns result of last task.
+        /// </summary>
+        /// <param name="waitTask">The wait task.</param>
+        /// <param name="resultTask">The result task.</param>
+        /// <param name="resultType">Type of the result.</param>
+        /// <returns></returns>
+        public static Task ContinueWith(Task waitTask, Task resultTask, Type resultType)
+        {
+            return Create(resultType).ContinueWith(waitTask, resultTask);
+        }
     }
 
     /// <summary>
@@ -71,12 +92,25 @@ namespace ArxOne.MrAdvice.Threading
         /// <returns></returns>
         public override Task ContinueWith<TTask>(TTask task, Func<TTask, object> func)
         {
-            return task.ContinueWith(delegate(Task t)
+            return task.ContinueWith(delegate (Task t)
             {
-                var typedTask = (TTask) t;
+                var typedTask = (TTask)t;
                 var result = func(typedTask);
-                return (TResult) result;
+                return (TResult)result;
             });
+        }
+
+        /// <summary>
+        /// Continues the specified two tasks and returns result of last task.
+        /// </summary>
+        /// <param name="waitTask">The wait task.</param>
+        /// <param name="resultTask">The result task.</param>
+        /// <returns></returns>
+        public override Task ContinueWith(Task waitTask, Task resultTask)
+        {
+            var typedResultTask = (Task<TResult>)resultTask;
+            var continuationTask = Task<TResult>.Factory.ContinueWhenAll(new[] { waitTask, resultTask }, t => typedResultTask.Result);
+            return continuationTask;
         }
     }
 }

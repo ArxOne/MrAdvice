@@ -45,18 +45,7 @@ namespace ArxOne.MrAdvice.Threading
         /// </summary>
         /// <param name="task">The task.</param>
         /// <returns></returns>
-        public static object GetResult(this Task task)
-        {
-            var resultProperty = task.GetType().GetProperty("Result");
-            try
-            {
-                return resultProperty.GetValue(task, new object[0]);
-            }
-            catch (TargetInvocationException e)
-            {
-                throw e.InnerException;
-            }
-        }
+        public static object GetResult(this Task task) => TaskAccessor.Create(task).Result;
 
         /// <summary>
         /// Continues the task, in a reflection way (opposed to generic way).
@@ -68,5 +57,14 @@ namespace ArxOne.MrAdvice.Threading
         /// <returns></returns>
         public static Task ContinueWith<TTask>(this TTask task, Func<TTask, object> func, Type resultType)
             where TTask : Task => TaskContinuer.ContinueWith(task, func, resultType);
+
+        /// <summary>
+        /// Continues the with.
+        /// </summary>
+        /// <param name="waitTask">The wait task.</param>
+        /// <param name="resultTask">The result task.</param>
+        /// <param name="resultType">Type of the result.</param>
+        /// <returns></returns>
+        public static Task ContinueWith(this Task waitTask, Task resultTask, Type resultType) => TaskContinuer.ContinueWith(waitTask, resultTask, resultType);
     }
 }
