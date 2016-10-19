@@ -197,23 +197,22 @@ namespace ArxOne.MrAdvice.Weaver
             method.Body.ExceptionHandlers.Clear();
             var instructions = new Instructions(method.Body.Instructions, method.Module);
 
-            var targetParameter = GetTargetArgument(method);
+            var targetArgument = GetTargetArgument(method);
             Local parametersVariable;
-            var parametersParameters = GetParametersArgument(method, out parametersVariable);
-            var methodParameter = GetMethodArgument(method);
-            var innerMethodParameter = GetInnerMethodArgument(innerMethod);
-            var typeParameter = GetTypeArgument(method);
-            var abstractedParameter = GetAbstractedArgument(abstractedTarget);
+            var parametersArgument = GetParametersArgument(method, out parametersVariable);
+            var methodArgument = GetMethodArgument(method);
+            var innerMethodArgument = GetInnerMethodArgument(innerMethod);
+            var typeArgument = GetTypeArgument(method);
+            var abstractedArgument = GetAbstractedArgument(abstractedTarget);
+            var genericParametersArgument = GetGenericParametersArgument(method);
 
-            var genericParametersParameter = GetGenericParametersArgument(method);
-
-            targetParameter.Emit(instructions);
-            parametersParameters.Emit(instructions);
-            methodParameter.Emit(instructions);
-            innerMethodParameter.Emit(instructions);
-            typeParameter.Emit(instructions);
-            abstractedParameter.Emit(instructions);
-            genericParametersParameter.Emit(instructions);
+            targetArgument.Emit(instructions);
+            parametersArgument.Emit(instructions);
+            methodArgument.Emit(instructions);
+            innerMethodArgument.Emit(instructions);
+            typeArgument.Emit(instructions);
+            abstractedArgument.Emit(instructions);
+            genericParametersArgument.Emit(instructions);
 
             // invoke the method
             var invocationType = TypeResolver.Resolve(moduleDefinition, typeof(Invocation));
