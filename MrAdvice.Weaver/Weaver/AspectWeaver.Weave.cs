@@ -283,11 +283,14 @@ namespace ArxOne.MrAdvice.Weaver
             // methods...
             // ... target
             // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-            instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod()));
+            //instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod()));
+            instructions.Emit(OpCodes.Ldtoken, method);
 
             // ... inner... If provided
             if (innerMethod != null)
             {
+                instructions.Emit(OpCodes.Ldtoken, innerMethod);
+#if NO
                 // if type is generic, this is a bit more complex, because we need to pass the type
                 if (method.DeclaringType.HasGenericParameters)
                 {
@@ -311,9 +314,12 @@ namespace ArxOne.MrAdvice.Weaver
                     // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                     instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle())));
                 }
+#endif
             }
             else
-                instructions.Emit(OpCodes.Ldnull);
+                instructions.Emit(OpCodes.Ldtoken, method);
+            //instructions.Emit(OpCodes.Ldnull);
+            instructions.Emit(OpCodes.Ldtoken, method.DeclaringType);
 
             // abstracted target
             instructions.Emit(abstractedTarget ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);

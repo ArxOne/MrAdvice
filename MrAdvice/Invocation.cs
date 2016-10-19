@@ -33,15 +33,20 @@ namespace ArxOne.MrAdvice
         /// </summary>
         /// <param name="target">The target.</param>
         /// <param name="parameters">The parameters.</param>
-        /// <param name="methodBase">The raw method base.</param>
-        /// <param name="innerMethod">The inner method.</param>
+        /// <param name="methodHandle">The method handle.</param>
+        /// <param name="innerMethodHandle">The inner method handle.</param>
+        /// <param name="typeHandle">The type handle.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="genericArguments">The generic arguments (to static type and/or method) in a single array.</param>
         /// <returns></returns>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedAdvice(object target, object[] parameters, MethodBase methodBase, MethodBase innerMethod, bool abstractedTarget, Type[] genericArguments)
+        public static object ProceedAdvice(object target, object[] parameters, RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle, RuntimeTypeHandle typeHandle,
+            bool abstractedTarget, Type[] genericArguments)
         {
+            var methodBase = MethodBase.GetMethodFromHandle(methodHandle, typeHandle);
+            var innerMethod = innerMethodHandle != methodHandle ? MethodBase.GetMethodFromHandle(innerMethodHandle, typeHandle) : null;
+
             var aspectInfo = GetAspectInfo(methodBase, innerMethod, abstractedTarget, genericArguments);
 
             // this is the case with auto implemented interface
