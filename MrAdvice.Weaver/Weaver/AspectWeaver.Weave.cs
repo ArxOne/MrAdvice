@@ -269,10 +269,8 @@ namespace ArxOne.MrAdvice.Weaver
             }
 
             // null or instance
-            instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
-            // to fix peverify 0x80131854
-            if (!isStatic && method.IsConstructor)
-                instructions.Emit(OpCodes.Castclass, moduleDefinition.CorLibTypes.Object);
+            var targetParameter = GetTargetParameter(method);
+            targetParameter.Emit(instructions);
 
             // parameters
             if (parametersVariable != null)
@@ -352,6 +350,18 @@ namespace ArxOne.MrAdvice.Weaver
 
             method.Body.Scope = new PdbScope { Start = method.Body.Instructions[0] };
             method.Body.Scope.Scopes.Add(new PdbScope { Start = method.Body.Instructions[0] });
+        }
+
+        private InvocationParameter GetTargetParameter(MethodDef method)
+        {
+            var isStatic = method.IsStatic;
+            return new InvocationParameter(!isStatic, delegate (Instructions i)
+            {
+                i.Emit(OpCodes.Ldarg_0);
+                // to fix peverify 0x80131854
+                if (method.IsConstructor)
+                    i.Emit(OpCodes.Castclass, method.Module.CorLibTypes.Object);
+            }, i => i.Emit(OpCodes.Ldnull));
         }
 
         /// <summary>
