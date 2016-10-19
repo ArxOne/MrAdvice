@@ -25,6 +25,9 @@ namespace ArxOne.MrAdvice
 
         protected override bool Process(AssemblyStitcherContext context)
         {
+            if (AlreadyProcessed(context))
+                return false;
+
 #if DEBUG
             _logging = new MultiLogging(Logging, new FileLogging("MrAdvice.log"));
             _logging.WriteDebug("Start");
@@ -53,6 +56,33 @@ namespace ArxOne.MrAdvice
                     _logging.WriteError("Inner exception: {0}", e.ToString());
             }
             return false;
+        }
+
+        private bool AlreadyProcessed(AssemblyStitcherContext context)
+        {
+            var processFilePath = GetProcessFilePath(context);
+            var processed = GetLastWriteDate(processFilePath) >= GetLastWriteDate(context.AssemblyPath);
+            if (!processed)
+            {
+                ModuleWritten += delegate
+                {
+                    File.WriteAllText(processFilePath,
+                        "This file is a marker for Mr.Advice to ensure the assembly wan't processed twice (in which case it would be as bad as crossing the streams).");
+                };
+            }
+            return processed;
+        }
+
+        private static string GetProcessFilePath(AssemblyStitcherContext context)
+        {
+            return context.AssemblyPath + ".\u2665MrAdvice";
+        }
+
+        private static DateTime GetLastWriteDate(string path)
+        {
+            if (!File.Exists(path))
+                return DateTime.MinValue;
+            return new FileInfo(path).LastWriteTimeUtc;
         }
 
         private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args) => LoadAssembly(new AssemblyName(args.Name).Name);

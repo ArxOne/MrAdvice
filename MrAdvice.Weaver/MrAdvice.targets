@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <UsingTask TaskName="MrAdviceTask" AssemblyFile="$(MrAdvicePath)" />
-  <Target Name="MrAdviceTarget" AfterTargets="CoreCompile">
+  <Target Name="MrAdviceTarget" AfterTargets="CoreCompile" Outputs="@(IntermediateAssembly[0]).♥MrAdvice">
     <MrAdviceTask AssemblyPath="@(IntermediateAssembly)" ReferencePath="@(ReferencePath)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                   AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)" />
   </Target>
