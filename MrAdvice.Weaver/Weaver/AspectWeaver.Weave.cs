@@ -197,37 +197,6 @@ namespace ArxOne.MrAdvice.Weaver
             method.Body.ExceptionHandlers.Clear();
             var instructions = new Instructions(method.Body.Instructions, method.Module);
 
-            // if method has generic parameters, we also pass them to Proceed method
-            Local genericParametersVariable = null;
-            // on static methods from generic type, we also record the generic parameters type
-            //var typeGenericParametersCount = isStatic ? method.DeclaringType.GenericParameters.Count : 0;
-            var typeGenericParametersCount = method.DeclaringType.GenericParameters.Count;
-            if (typeGenericParametersCount > 0 || method.HasGenericParameters)
-            {
-                //IL_0001: ldtoken !!T
-                //IL_0006: call class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
-                genericParametersVariable = new Local(new SZArraySig(moduleDefinition.SafeImport(typeof(Type)).ToTypeSig())) { Name = "genericParameters" };
-                method.Body.Variables.Add(genericParametersVariable);
-
-                instructions.EmitLdc(typeGenericParametersCount + method.GenericParameters.Count);
-                instructions.Emit(OpCodes.Newarr, moduleDefinition.SafeImport(typeof(Type)));
-                instructions.EmitStloc(genericParametersVariable);
-
-                var methodGenericParametersCount = method.GenericParameters.Count;
-                for (int genericParameterIndex = 0; genericParameterIndex < typeGenericParametersCount + methodGenericParametersCount; genericParameterIndex++)
-                {
-                    instructions.EmitLdloc(genericParametersVariable); // array
-                    instructions.EmitLdc(genericParameterIndex); // array index
-                    if (genericParameterIndex < typeGenericParametersCount)
-                        instructions.Emit(OpCodes.Ldtoken, new GenericVar(genericParameterIndex, method.DeclaringType)); //genericParameters[genericParameterIndex]);
-                    else
-                        instructions.Emit(OpCodes.Ldtoken, new GenericMVar(genericParameterIndex - typeGenericParametersCount, method)); //genericParameters[genericParameterIndex]);
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle())));
-                    instructions.Emit(OpCodes.Stelem_Ref);
-                }
-            }
-
             // null or instance
             var targetParameter = GetTargetParameter(method);
             targetParameter.Emit(instructions);
@@ -253,10 +222,8 @@ namespace ArxOne.MrAdvice.Weaver
             var abstractedParameter = GetAbstractedParameter(abstractedTarget);
             abstractedParameter.Emit(instructions);
 
-            if (genericParametersVariable != null)
-                instructions.EmitLdloc(genericParametersVariable);
-            else
-                instructions.Emit(OpCodes.Ldnull);
+            var genericParametersParameter = GetGenericParametersParameter(method);
+            genericParametersParameter.Emit(instructions);
 
             // invoke the method
             var invocationType = TypeResolver.Resolve(moduleDefinition, typeof(Invocation));
@@ -383,6 +350,44 @@ namespace ArxOne.MrAdvice.Weaver
             return new InvocationParameter(abstractedTarget,
                 i => i.Emit(OpCodes.Ldc_I4_1),
                 i => i.Emit(OpCodes.Ldc_I4_0));
+        }
+
+        private InvocationParameter GetGenericParametersParameter(MethodDef method)
+        {
+            // on static methods from generic type, we also record the generic parameters type
+            //var typeGenericParametersCount = isStatic ? method.DeclaringType.GenericParameters.Count : 0;
+            var typeGenericParametersCount = method.DeclaringType.GenericParameters.Count;
+            var hasGeneric = typeGenericParametersCount > 0 || method.HasGenericParameters;
+            // if method has generic parameters, we also pass them to Proceed method
+            var genericParametersVariable = hasGeneric ? new Local(new SZArraySig(method.Module.SafeImport(typeof(Type)).ToTypeSig())) { Name = "genericParameters" } : null;
+            return new InvocationParameter(hasGeneric,
+                delegate (Instructions instructions)
+                {
+                    //IL_0001: ldtoken !!T
+                    //IL_0006: call class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
+                    method.Body.Variables.Add(genericParametersVariable);
+
+                    instructions.EmitLdc(typeGenericParametersCount + method.GenericParameters.Count);
+                    instructions.Emit(OpCodes.Newarr, method.Module.SafeImport(typeof(Type)));
+                    instructions.EmitStloc(genericParametersVariable);
+
+                    var methodGenericParametersCount = method.GenericParameters.Count;
+                    for (int genericParameterIndex = 0; genericParameterIndex < typeGenericParametersCount + methodGenericParametersCount; genericParameterIndex++)
+                    {
+                        instructions.EmitLdloc(genericParametersVariable); // array
+                        instructions.EmitLdc(genericParameterIndex); // array index
+                        if (genericParameterIndex < typeGenericParametersCount)
+                            instructions.Emit(OpCodes.Ldtoken, new GenericVar(genericParameterIndex, method.DeclaringType));
+                        //genericParameters[genericParameterIndex]);
+                        else
+                            instructions.Emit(OpCodes.Ldtoken, new GenericMVar(genericParameterIndex - typeGenericParametersCount, method));
+                        //genericParameters[genericParameterIndex]);
+                        // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                        instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle())));
+                        instructions.Emit(OpCodes.Stelem_Ref);
+                    }
+                    instructions.EmitLdloc(genericParametersVariable);
+                }, instructions => instructions.Emit(OpCodes.Ldnull));
         }
 
         /// <summary>
