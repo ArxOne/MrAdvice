@@ -26,6 +26,8 @@ namespace ArxOne.MrAdvice
     {
         private static readonly IDictionary<MethodBase, AspectInfo> AspectInfos = new Dictionary<MethodBase, AspectInfo>();
 
+        private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
+
         /// <summary>
         /// Runs a method interception.
         /// We use a static method here, if one day we want to reuse Invocations or change mecanism,
@@ -44,8 +46,8 @@ namespace ArxOne.MrAdvice
         public static object ProceedAdvice(object target, object[] parameters, RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle, RuntimeTypeHandle typeHandle,
             bool abstractedTarget, Type[] genericArguments)
         {
-            var methodBase = MethodBase.GetMethodFromHandle(methodHandle, typeHandle);
-            var innerMethod = innerMethodHandle != methodHandle ? MethodBase.GetMethodFromHandle(innerMethodHandle, typeHandle) : null;
+            var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
+            var innerMethod = innerMethodHandle != methodHandle ? GetMethodFromHandle(innerMethodHandle, typeHandle) : null;
 
             var aspectInfo = GetAspectInfo(methodBase, innerMethod, abstractedTarget, genericArguments);
 
@@ -107,6 +109,19 @@ namespace ArxOne.MrAdvice
             var taskType = returnType.GetTaskType();
             // a reflection equivalent of ContinueWith<TNewResult>, but this TNewResult, under taskType is known only at run-time
             return adviceTask.ContinueWith(t => GetResult(adviceValues), taskType);
+        }
+
+        /// <summary>
+        /// Gets the method from handle.
+        /// </summary>
+        /// <param name="methodHandle">The method handle.</param>
+        /// <param name="typeHandle">The type handle.</param>
+        /// <returns></returns>
+        private static MethodBase GetMethodFromHandle(RuntimeMethodHandle methodHandle, RuntimeTypeHandle typeHandle)
+        {
+            if (typeHandle.Equals(VoidTypeHandle))
+                return MethodBase.GetMethodFromHandle(methodHandle);
+            return MethodBase.GetMethodFromHandle(methodHandle, typeHandle);
         }
 
         /// <summary>

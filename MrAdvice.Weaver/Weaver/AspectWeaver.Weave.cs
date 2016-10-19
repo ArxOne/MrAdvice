@@ -282,44 +282,18 @@ namespace ArxOne.MrAdvice.Weaver
 
             // methods...
             // ... target
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-            //instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod()));
             instructions.Emit(OpCodes.Ldtoken, method);
 
             // ... inner... If provided
             if (innerMethod != null)
-            {
                 instructions.Emit(OpCodes.Ldtoken, innerMethod);
-#if NO
-                // if type is generic, this is a bit more complex, because we need to pass the type
-                if (method.DeclaringType.HasGenericParameters)
-                {
-                    // we want to reuse the MethodBase.GetCurrentMethod() result
-                    // so it is stored into a variable, whose property DeclaringType is invoked later
-                    var currentMethodVariable = new Local(moduleDefinition.SafeImport(typeof(MethodBase)).ToTypeSig()) { Name = "currentMethod" };
-                    method.Body.Variables.Add(currentMethodVariable);
-                    instructions.EmitStloc(currentMethodVariable);
-                    instructions.EmitLdloc(currentMethodVariable);
+            else // equals to method, so will be ignored by Invocation.Proceed
+                instructions.Emit(OpCodes.Dup);
 
-                    instructions.Emit(OpCodes.Ldtoken, innerMethod);
-                    instructions.EmitLdloc(currentMethodVariable);
-                    instructions.Emit(OpCodes.Callvirt, ReflectionUtility.GetMethodInfo((Type t) => t.DeclaringType));
-                    instructions.Emit(OpCodes.Callvirt, ReflectionUtility.GetMethodInfo((Type t) => t.TypeHandle));
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle(), new RuntimeTypeHandle())));
-                }
-                else
-                {
-                    instructions.Emit(OpCodes.Ldtoken, innerMethod);
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle())));
-                }
-#endif
-            }
+            if (method.DeclaringType.HasGenericParameters)
+                instructions.Emit(OpCodes.Ldtoken, method.DeclaringType);
             else
-                instructions.Emit(OpCodes.Ldtoken, method);
-            //instructions.Emit(OpCodes.Ldnull);
-            instructions.Emit(OpCodes.Ldtoken, method.DeclaringType);
+                instructions.Emit(OpCodes.Ldtoken, moduleDefinition.CorLibTypes.Void);
 
             // abstracted target
             instructions.Emit(abstractedTarget ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
