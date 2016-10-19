@@ -250,7 +250,8 @@ namespace ArxOne.MrAdvice.Weaver
             typeParameter.Emit(instructions);
 
             // abstracted target
-            instructions.Emit(abstractedTarget ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
+            var abstractedParameter = GetAbstractedParameter(abstractedTarget);
+            abstractedParameter.Emit(instructions);
 
             if (genericParametersVariable != null)
                 instructions.EmitLdloc(genericParametersVariable);
@@ -375,6 +376,13 @@ namespace ArxOne.MrAdvice.Weaver
             return new InvocationParameter(method.DeclaringType.HasGenericParameters,
                 instructions => instructions.Emit(OpCodes.Ldtoken, method.DeclaringType),
                 instructions => instructions.Emit(OpCodes.Ldtoken, method.Module.CorLibTypes.Void));
+        }
+
+        private InvocationParameter GetAbstractedParameter(bool abstractedTarget)
+        {
+            return new InvocationParameter(abstractedTarget,
+                i => i.Emit(OpCodes.Ldc_I4_1),
+                i => i.Emit(OpCodes.Ldc_I4_0));
         }
 
         /// <summary>
