@@ -197,32 +197,22 @@ namespace ArxOne.MrAdvice.Weaver
             method.Body.ExceptionHandlers.Clear();
             var instructions = new Instructions(method.Body.Instructions, method.Module);
 
-            // null or instance
-            var targetParameter = GetTargetParameter(method);
-            targetParameter.Emit(instructions);
-
-            // parameters
+            var targetParameter = GetTargetArgument(method);
             Local parametersVariable;
-            var parametersParameters = GetParametersParameter(method, out parametersVariable);
+            var parametersParameters = GetParametersArgument(method, out parametersVariable);
+            var methodParameter = GetMethodArgument(method);
+            var innerMethodParameter = GetInnerMethodArgument(innerMethod);
+            var typeParameter = GetTypeArgument(method);
+            var abstractedParameter = GetAbstractedArgument(abstractedTarget);
+
+            var genericParametersParameter = GetGenericParametersArgument(method);
+
+            targetParameter.Emit(instructions);
             parametersParameters.Emit(instructions);
-
-            // methods...
-            // ... target
-            var methodParameter = GetMethodParameter(method);
             methodParameter.Emit(instructions);
-
-            // ... inner... If provided
-            var innerMethodParameter = GetInnerMethodParameter(innerMethod);
             innerMethodParameter.Emit(instructions);
-
-            var typeParameter = GetTypeParameter(method);
             typeParameter.Emit(instructions);
-
-            // abstracted target
-            var abstractedParameter = GetAbstractedParameter(abstractedTarget);
             abstractedParameter.Emit(instructions);
-
-            var genericParametersParameter = GetGenericParametersParameter(method);
             genericParametersParameter.Emit(instructions);
 
             // invoke the method
@@ -277,10 +267,10 @@ namespace ArxOne.MrAdvice.Weaver
             method.Body.Scope.Scopes.Add(new PdbScope { Start = method.Body.Instructions[0] });
         }
 
-        private InvocationParameter GetTargetParameter(MethodDef method)
+        private InvocationArgument GetTargetArgument(MethodDef method)
         {
             var isStatic = method.IsStatic;
-            return new InvocationParameter(!isStatic, delegate (Instructions i)
+            return new InvocationArgument(!isStatic, delegate (Instructions i)
             {
                 i.Emit(OpCodes.Ldarg_0);
                 // to fix peverify 0x80131854
@@ -289,12 +279,12 @@ namespace ArxOne.MrAdvice.Weaver
             }, i => i.Emit(OpCodes.Ldnull));
         }
 
-        private InvocationParameter GetParametersParameter(MethodDef method, out Local parametersVariable)
+        private InvocationArgument GetParametersArgument(MethodDef method, out Local parametersVariable)
         {
             var methodParameters = new MethodParameters(method);
             var hasParameters = methodParameters.Count > 0;
             var localParametersVariable = parametersVariable = hasParameters ? new Local(new SZArraySig(method.Module.CorLibTypes.Object)) { Name = "parameters" } : null;
-            return new InvocationParameter(hasParameters,
+            return new InvocationArgument(hasParameters,
                 delegate (Instructions instructions)
                 {
                     method.Body.Variables.Add(localParametersVariable);
@@ -326,33 +316,33 @@ namespace ArxOne.MrAdvice.Weaver
                 }, instructions => instructions.Emit(OpCodes.Ldnull));
         }
 
-        private InvocationParameter GetMethodParameter(MethodDef method)
+        private InvocationArgument GetMethodArgument(MethodDef method)
         {
-            return new InvocationParameter(true, instructions => instructions.Emit(OpCodes.Ldtoken, method), null);
+            return new InvocationArgument(true, instructions => instructions.Emit(OpCodes.Ldtoken, method), null);
         }
 
-        private InvocationParameter GetInnerMethodParameter(MethodDef innerMethod)
+        private InvocationArgument GetInnerMethodArgument(MethodDef innerMethod)
         {
-            return new InvocationParameter(innerMethod != null,
+            return new InvocationArgument(innerMethod != null,
                 instructions => instructions.Emit(OpCodes.Ldtoken, innerMethod),
                 instructions => instructions.Emit(OpCodes.Dup));
         }
 
-        private InvocationParameter GetTypeParameter(MethodDef method)
+        private InvocationArgument GetTypeArgument(MethodDef method)
         {
-            return new InvocationParameter(method.DeclaringType.HasGenericParameters,
+            return new InvocationArgument(method.DeclaringType.HasGenericParameters,
                 instructions => instructions.Emit(OpCodes.Ldtoken, method.DeclaringType),
                 instructions => instructions.Emit(OpCodes.Ldtoken, method.Module.CorLibTypes.Void));
         }
 
-        private InvocationParameter GetAbstractedParameter(bool abstractedTarget)
+        private InvocationArgument GetAbstractedArgument(bool abstractedTarget)
         {
-            return new InvocationParameter(abstractedTarget,
+            return new InvocationArgument(abstractedTarget,
                 i => i.Emit(OpCodes.Ldc_I4_1),
                 i => i.Emit(OpCodes.Ldc_I4_0));
         }
 
-        private InvocationParameter GetGenericParametersParameter(MethodDef method)
+        private InvocationArgument GetGenericParametersArgument(MethodDef method)
         {
             // on static methods from generic type, we also record the generic parameters type
             //var typeGenericParametersCount = isStatic ? method.DeclaringType.GenericParameters.Count : 0;
@@ -360,7 +350,7 @@ namespace ArxOne.MrAdvice.Weaver
             var hasGeneric = typeGenericParametersCount > 0 || method.HasGenericParameters;
             // if method has generic parameters, we also pass them to Proceed method
             var genericParametersVariable = hasGeneric ? new Local(new SZArraySig(method.Module.SafeImport(typeof(Type)).ToTypeSig())) { Name = "genericParameters" } : null;
-            return new InvocationParameter(hasGeneric,
+            return new InvocationArgument(hasGeneric,
                 delegate (Instructions instructions)
                 {
                     //IL_0001: ldtoken !!T

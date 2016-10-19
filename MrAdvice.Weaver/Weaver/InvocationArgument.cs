@@ -9,7 +9,7 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System;
 
-    public class InvocationParameter
+    public class InvocationArgument
     {
         /// <summary>
         /// Emits code to load value.
@@ -37,12 +37,12 @@ namespace ArxOne.MrAdvice.Weaver
         public Action<Instructions> Emit => HasValue ? EmitValue : EmitDefault;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InvocationParameter"/> class.
+        /// Initializes a new instance of the <see cref="InvocationArgument"/> class.
         /// </summary>
         /// <param name="hasValue">if set to <c>true</c> [has value].</param>
         /// <param name="emitValue">The emit value.</param>
         /// <param name="emitDefault">The emit default.</param>
-        public InvocationParameter(bool hasValue, Action<Instructions> emitValue, Action<Instructions> emitDefault)
+        public InvocationArgument(bool hasValue, Action<Instructions> emitValue, Action<Instructions> emitDefault)
         {
             EmitValue = emitValue;
             EmitDefault = emitDefault;

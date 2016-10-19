@@ -102,7 +102,7 @@
     <Compile Include="Weaver\AspectWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.Names.cs" />
     <Compile Include="Weaver\AspectWeaver.Weave.cs" />
-    <Compile Include="Weaver\InvocationParameter.cs" />
+    <Compile Include="Weaver\InvocationArgument.cs" />
     <Compile Include="Weaver\TypeResolver.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="Utility\GenericParameterExtensions.cs" />
