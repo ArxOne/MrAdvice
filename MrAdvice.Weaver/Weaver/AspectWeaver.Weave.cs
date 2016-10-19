@@ -206,24 +206,7 @@ namespace ArxOne.MrAdvice.Weaver
             var abstractedArgument = GetAbstractedArgument(abstractedTarget);
             var genericParametersArgument = GetGenericParametersArgument(method);
 
-            targetArgument.Emit(instructions);
-            parametersArgument.Emit(instructions);
-            methodArgument.Emit(instructions);
-            innerMethodArgument.Emit(instructions);
-            typeArgument.Emit(instructions);
-            abstractedArgument.Emit(instructions);
-            genericParametersArgument.Emit(instructions);
-
-            // invoke the method
-            var invocationType = TypeResolver.Resolve(moduleDefinition, typeof(Invocation));
-            if (invocationType == null)
-                throw new InvalidOperationException();
-            var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
-            if (proceedMethodReference == null)
-                throw new InvalidOperationException();
-            var proceedMethod = moduleDefinition.SafeImport(proceedMethodReference);
-
-            instructions.Emit(OpCodes.Call, proceedMethod);
+            WriteInvocationCall(instructions, targetArgument, parametersArgument, methodArgument, innerMethodArgument, typeArgument, abstractedArgument, genericParametersArgument);
 
             // get return value
             if (!method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
@@ -264,6 +247,30 @@ namespace ArxOne.MrAdvice.Weaver
 
             method.Body.Scope = new PdbScope { Start = method.Body.Instructions[0] };
             method.Body.Scope.Scopes.Add(new PdbScope { Start = method.Body.Instructions[0] });
+        }
+
+        /// <summary>
+        /// Writes the invocation call.
+        /// </summary>
+        /// <param name="instructions">The instructions.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <exception cref="InvalidOperationException">
+        /// </exception>
+        private void WriteInvocationCall(Instructions instructions, params InvocationArgument[] arguments)
+        {
+            foreach (var argument in arguments)
+                argument.Emit(instructions);
+
+            // invoke the method
+            var invocationType = TypeResolver.Resolve(instructions.Module, typeof(Invocation));
+            if (invocationType == null)
+                throw new InvalidOperationException();
+            var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
+            if (proceedMethodReference == null)
+                throw new InvalidOperationException();
+            var proceedMethod = instructions.Module.SafeImport(proceedMethodReference);
+
+            instructions.Emit(OpCodes.Call, proceedMethod);
         }
 
         private InvocationArgument GetTargetArgument(MethodDef method)
