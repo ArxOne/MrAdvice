@@ -26,7 +26,7 @@ namespace ArxOne.MrAdvice
         protected override bool Process(AssemblyStitcherContext context)
         {
 #if DEBUG
-            _logging = new MultiLogging(Logging, new FileLogging("MrAdvice.log"));
+            _logging = new MultiLogging(new DefaultLogging(Logging), new FileLogging("MrAdvice.log"));
             _logging.WriteDebug("Start");
 #else
             _logging = Logging;
