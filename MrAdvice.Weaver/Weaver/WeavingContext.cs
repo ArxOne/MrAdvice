@@ -7,7 +7,10 @@
 
 namespace ArxOne.MrAdvice.Weaver
 {
+    using System.Collections;
+    using System.Collections.Generic;
     using dnlib.DotNet;
+    using Utility;
 
     /// <summary>
     /// Weaving context
@@ -15,10 +18,16 @@ namespace ArxOne.MrAdvice.Weaver
     /// </summary>
     public class WeavingContext
     {
-        public ITypeDefOrRef CompilerGeneratedAttributeType;
-        public ITypeDefOrRef PriorityAttributeType;
-        public ITypeDefOrRef AbstractTargetAttributeType;
+        public ITypeDefOrRef CompilerGeneratedAttributeType { get; set; }
+        public ITypeDefOrRef PriorityAttributeType { get; set; }
+        public ITypeDefOrRef AbstractTargetAttributeType { get; set; }
 
-        public ITypeDefOrRef WeavingAdviceAttributeType;
+        public ITypeDefOrRef WeavingAdviceAttributeType { get; set; }
+
+        public TypeDef ShortcutClass { get; set; }
+
+        public IDictionary<bool[], IMethod> ShortcutMethods { get; } = new Dictionary<bool[], IMethod>(new SequenceEqualityComparer<bool>());
+
+        public IMethod InvocationProceedMethod { get; set; }
     }
 }

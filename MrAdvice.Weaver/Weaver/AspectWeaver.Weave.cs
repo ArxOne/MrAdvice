@@ -205,7 +205,7 @@ namespace ArxOne.MrAdvice.Weaver
             var abstractedArgument = GetAbstractedArgument(abstractedTarget);
             var genericParametersArgument = GetGenericParametersArgument(method);
 
-            WriteInvocationCall(instructions, targetArgument, parametersArgument, methodArgument, innerMethodArgument, typeArgument, abstractedArgument, genericParametersArgument);
+            WriteProceedCall(instructions, context, targetArgument, parametersArgument, methodArgument, innerMethodArgument, typeArgument, abstractedArgument, genericParametersArgument);
 
             // get return value
             if (!method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
@@ -252,24 +252,51 @@ namespace ArxOne.MrAdvice.Weaver
         /// Writes the invocation call.
         /// </summary>
         /// <param name="instructions">The instructions.</param>
+        /// <param name="context">The context.</param>
         /// <param name="arguments">The arguments.</param>
         /// <exception cref="InvalidOperationException">
         /// </exception>
-        private void WriteInvocationCall(Instructions instructions, params InvocationArgument[] arguments)
+        private void WriteProceedCall(Instructions instructions, WeavingContext context, params InvocationArgument[] arguments)
         {
+            var values = arguments.Select(a => a.HasValue).ToArray();
+            var proceedMethod = GetProceedMethod(values, instructions.Module, context);
+
             foreach (var argument in arguments)
                 argument.Emit(instructions);
 
-            // invoke the method
-            var invocationType = TypeResolver.Resolve(instructions.Module, typeof(Invocation));
-            if (invocationType == null)
-                throw new InvalidOperationException();
-            var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
-            if (proceedMethodReference == null)
-                throw new InvalidOperationException();
-            var proceedMethod = instructions.Module.SafeImport(proceedMethodReference);
-
             instructions.Emit(OpCodes.Call, proceedMethod);
+        }
+
+        private IMethod GetProceedMethod(bool[] values, ModuleDef module, WeavingContext context)
+        {
+            IMethod proceedMethod;
+            if (!context.ShortcutMethods.TryGetValue(values, out proceedMethod))
+                context.ShortcutMethods[values] = proceedMethod = LoadProceedMethod(values, module, context);
+            return proceedMethod;
+        }
+
+        private IMethod LoadProceedMethod(bool[] values, ModuleDef module, WeavingContext context)
+        {
+            // special case, full invoke
+            //            if (values.All(v => v))
+            {
+                return GetDefaultProceedMethod(module, context);
+            }
+        }
+
+        private IMethod GetDefaultProceedMethod(ModuleDef module, WeavingContext context)
+        {
+            if (context.InvocationProceedMethod == null)
+            {
+                var invocationType = TypeResolver.Resolve(module, typeof(Invocation));
+                if (invocationType == null)
+                    throw new InvalidOperationException();
+                var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
+                if (proceedMethodReference == null)
+                    throw new InvalidOperationException();
+                context.InvocationProceedMethod = module.SafeImport(proceedMethodReference);
+            }
+            return context.InvocationProceedMethod;
         }
 
         private InvocationArgument GetTargetArgument(MethodDef method)

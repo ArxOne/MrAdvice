@@ -73,6 +73,7 @@
     <Compile Include="Annotation\MarkerDefinition.cs" />
     <Compile Include="AuditTimer.cs" />
     <Compile Include="IO\DefaultLogging.cs" />
+    <Compile Include="Utility\SequenceEqualityComparer.cs" />
     <Compile Include="Weaver\WeavingContext.cs" />
     <None Include="Blobber" />
     <Compile Include="IO\FileLogging.cs" />
