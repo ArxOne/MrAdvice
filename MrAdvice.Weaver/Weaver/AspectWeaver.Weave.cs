@@ -15,7 +15,6 @@ namespace ArxOne.MrAdvice.Weaver
     using dnlib.DotNet.Emit;
     using dnlib.DotNet.Pdb;
     using Introduction;
-    using IO;
     using Reflection;
     using Reflection.Groups;
     using Utility;
@@ -87,8 +86,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified method.
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
-        /// <param name="types">The types.</param>
-        private void WeaveAdvices(MarkedNode markedMethod, Types types)
+        /// <param name="context">The context.</param>
+        private void WeaveAdvices(MarkedNode markedMethod, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
 
@@ -105,12 +104,12 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 method.Attributes = (method.Attributes & ~MethodAttributes.Abstract) | MethodAttributes.Virtual;
                 Logging.WriteDebug("Weaving abstract method '{0}'", method.FullName);
-                WritePointcutBody(method, null, false);
+                WritePointcutBody(method, null, false, context);
             }
             else if (markedMethod.AbstractTarget)
             {
                 Logging.WriteDebug("Weaving and abstracting method '{0}'", method.FullName);
-                WritePointcutBody(method, null, true);
+                WritePointcutBody(method, null, true, context);
             }
             else
             {
@@ -119,12 +118,12 @@ namespace ArxOne.MrAdvice.Weaver
                 var methodName = method.Name;
 
                 // our special recipe, with weaving advices
-                var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
+                var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceAttributeType, context).ToArray();
                 if (weavingAdvicesMarkers.Any())
                 {
                     var typeDefinition = markedMethod.Node.Method.DeclaringType;
                     var initialType = TypeLoader.GetType(typeDefinition);
-                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, types, TypeResolver, Logging);
+                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, context, TypeResolver, Logging);
                     foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
                     {
                         var weavingAdviceType = TypeLoader.GetType(weavingAdviceMarker.Type);
@@ -170,7 +169,7 @@ namespace ArxOne.MrAdvice.Weaver
                     method.Body = new CilBody();
                 }
 
-                WritePointcutBody(method, innerMethod, false);
+                WritePointcutBody(method, innerMethod, false, context);
                 lock (method.DeclaringType)
                     method.DeclaringType.Methods.Add(innerMethod);
             }
@@ -182,9 +181,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="method">The method.</param>
         /// <param name="innerMethod">The inner method.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
-        /// <exception cref="System.InvalidOperationException">
-        /// </exception>
-        private void WritePointcutBody(MethodDef method, MethodDef innerMethod, bool abstractedTarget)
+        /// <param name="context">The context.</param>
+        /// <exception cref="System.InvalidOperationException"></exception>
+        private void WritePointcutBody(MethodDef method, MethodDef innerMethod, bool abstractedTarget, WeavingContext context)
         {
             var moduleDefinition = method.Module;
 
@@ -393,11 +392,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="method">The method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="types">The types.</param>
-        private void WeaveIntroductions(MethodDef method, TypeDef adviceInterface, ModuleDef moduleDefinition, Types types)
+        /// <param name="context">The context.</param>
+        private void WeaveIntroductions(MethodDef method, TypeDef adviceInterface, ModuleDef moduleDefinition, WeavingContext context)
         {
             var typeDefinition = method.DeclaringType;
-            var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface, types);
+            var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface, context);
             var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, typeof(IntroducedFieldAttribute)).FindConstructors().Single());
             var markerAttributeCtorDef = new MemberRefUser(markerAttributeCtor.Module, markerAttributeCtor.Name, markerAttributeCtor.MethodSig, markerAttributeCtor.DeclaringType);
             // moduleDefinition.SafeImport(markerAttributeCtor).ResolveMethodDef();
@@ -417,10 +416,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="infoAdviceInterface">The information advice interface.</param>
-        /// <param name="types">The types.</param>
-        private void WeaveInfoAdvices(ModuleDef moduleDefinition, TypeDef typeDefinition, ITypeDefOrRef infoAdviceInterface, Types types)
+        /// <param name="context">The context.</param>
+        private void WeaveInfoAdvices(ModuleDef moduleDefinition, TypeDef typeDefinition, ITypeDefOrRef infoAdviceInterface, WeavingContext context)
         {
-            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface, types).Where(IsWeavable).Any())
+            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface, context).Where(IsWeavable).Any())
             {
                 Logging.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
                 WeaveInfoAdvices(typeDefinition, moduleDefinition, false);
@@ -434,13 +433,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="types">The types.</param>
-        private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, TypeDef adviceInterface, Types types)
+        /// <param name="context">The context.</param>
+        private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, TypeDef adviceInterface, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
             try
             {
-                WeaveAdvices(markedMethod, types);
-                WeaveIntroductions(method, adviceInterface, moduleDefinition, types);
+                WeaveAdvices(markedMethod, context);
+                WeaveIntroductions(method, adviceInterface, moduleDefinition, context);
             }
             catch (Exception e)
             {
@@ -457,7 +457,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="interfaceType">Type of the interface.</param>
-        private void WeaveInterface(ModuleDef moduleDefinition, ITypeDefOrRef interfaceType)
+        /// <param name="context">The context.</param>
+        private void WeaveInterface(ModuleDef moduleDefinition, ITypeDefOrRef interfaceType, WeavingContext context)
         {
             Logging.WriteDebug("Weaving interface '{0}'", interfaceType.FullName);
             TypeDef implementationType;
@@ -496,7 +497,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // create implementation methods
             foreach (var interfaceMethod in interfaceTypeDefinition.Methods.Where(m => !m.IsSpecialName))
-                WeaveInterfaceMethod(interfaceMethod, implementationType, true);
+                WeaveInterfaceMethod(interfaceMethod, implementationType, true, context);
 
             // create implementation properties
             foreach (var interfaceProperty in interfaceTypeDefinition.Properties)
@@ -504,9 +505,9 @@ namespace ArxOne.MrAdvice.Weaver
                 var implementationProperty = new PropertyDefUser(interfaceProperty.Name, interfaceProperty.PropertySig);
                 implementationType.Properties.Add(implementationProperty);
                 if (interfaceProperty.GetMethod != null)
-                    implementationProperty.GetMethod = WeaveInterfaceMethod(interfaceProperty.GetMethod, implementationType, InjectAsPrivate);
+                    implementationProperty.GetMethod = WeaveInterfaceMethod(interfaceProperty.GetMethod, implementationType, InjectAsPrivate, context);
                 if (interfaceProperty.SetMethod != null)
-                    implementationProperty.SetMethod = WeaveInterfaceMethod(interfaceProperty.SetMethod, implementationType, InjectAsPrivate);
+                    implementationProperty.SetMethod = WeaveInterfaceMethod(interfaceProperty.SetMethod, implementationType, InjectAsPrivate, context);
             }
 
             // create implementation events
@@ -515,9 +516,9 @@ namespace ArxOne.MrAdvice.Weaver
                 var implementationEvent = new EventDefUser(interfaceEvent.Name, interfaceEvent.EventType);
                 implementationType.Events.Add(implementationEvent);
                 if (interfaceEvent.AddMethod != null)
-                    implementationEvent.AddMethod = WeaveInterfaceMethod(interfaceEvent.AddMethod, implementationType, InjectAsPrivate);
+                    implementationEvent.AddMethod = WeaveInterfaceMethod(interfaceEvent.AddMethod, implementationType, InjectAsPrivate, context);
                 if (interfaceEvent.RemoveMethod != null)
-                    implementationEvent.RemoveMethod = WeaveInterfaceMethod(interfaceEvent.RemoveMethod, implementationType, InjectAsPrivate);
+                    implementationEvent.RemoveMethod = WeaveInterfaceMethod(interfaceEvent.RemoveMethod, implementationType, InjectAsPrivate, context);
             }
         }
 
@@ -527,8 +528,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="interfaceMethod">The interface method.</param>
         /// <param name="implementationType">Type of the implementation.</param>
         /// <param name="injectAsPrivate">if set to <c>true</c> [inject as private].</param>
+        /// <param name="context">The context.</param>
         /// <returns></returns>
-        private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate)
+        private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate, WeavingContext context)
         {
             var methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual | (injectAsPrivate ? MethodAttributes.Public : MethodAttributes.Private);
             //var methodParameters = new MethodParameters(interfaceMethod);
@@ -546,7 +548,7 @@ namespace ArxOne.MrAdvice.Weaver
             //methodParameters.SetParamDefs(implementationMethod);
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
             implementationMethod.Overrides.Add(new MethodOverride(implementationMethod, interfaceMethod));
-            WritePointcutBody(implementationMethod, null, false);
+            WritePointcutBody(implementationMethod, null, false, context);
             return implementationMethod;
         }
 

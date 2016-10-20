@@ -72,6 +72,7 @@
     <Compile Include="Annotation\MarkedNode.cs" />
     <Compile Include="Annotation\MarkerDefinition.cs" />
     <Compile Include="AuditTimer.cs" />
+    <Compile Include="Weaver\WeavingContext.cs" />
     <None Include="Blobber" />
     <Compile Include="IO\FileLogging.cs" />
     <Compile Include="IO\MultiLogging.cs" />
@@ -108,7 +109,6 @@
     <Compile Include="Utility\GenericParameterExtensions.cs" />
     <Compile Include="Weaver\Instructions.cs" />
     <Compile Include="Utility\TypeReferenceExtensions.cs" />
-    <Compile Include="Weaver\Types.cs" />
     <Compile Include="Weaver\WeaverMethodWeavingContext.cs" />
   </ItemGroup>
   <ItemGroup>
