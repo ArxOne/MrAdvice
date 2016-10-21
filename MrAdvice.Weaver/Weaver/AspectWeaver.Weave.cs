@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System;
     using System.Linq;
     using System.Reflection;
+    using System.Text;
     using Advice;
     using Annotation;
     using dnlib.DotNet;
@@ -258,30 +259,33 @@ namespace ArxOne.MrAdvice.Weaver
         /// </exception>
         private void WriteProceedCall(Instructions instructions, WeavingContext context, params InvocationArgument[] arguments)
         {
-            var values = arguments.Select(a => a.HasValue).ToArray();
-            var proceedMethod = GetProceedMethod(values, instructions.Module, context);
+            var proceedMethod = GetProceedMethod(arguments, instructions.Module, context);
 
             foreach (var argument in arguments)
-                argument.Emit(instructions);
+            {
+                if (argument.HasValue)
+                    argument.Emit(instructions);
+            }
 
             instructions.Emit(OpCodes.Call, proceedMethod);
         }
 
-        private IMethod GetProceedMethod(bool[] values, ModuleDef module, WeavingContext context)
+        private IMethod GetProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
         {
+            var values = arguments.Select(a => a.HasValue).ToArray();
             IMethod proceedMethod;
             if (!context.ShortcutMethods.TryGetValue(values, out proceedMethod))
-                context.ShortcutMethods[values] = proceedMethod = LoadProceedMethod(values, module, context);
+                context.ShortcutMethods[values] = proceedMethod = LoadProceedMethod(arguments, module, context);
             return proceedMethod;
         }
 
-        private IMethod LoadProceedMethod(bool[] values, ModuleDef module, WeavingContext context)
+        private IMethod LoadProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
         {
             // special case, full invoke
-            //            if (values.All(v => v))
-            {
+            if (arguments.All(a => a.HasValue))
                 return GetDefaultProceedMethod(module, context);
-            }
+
+            return CreateProceedMethod(arguments, module, context);
         }
 
         private IMethod GetDefaultProceedMethod(ModuleDef module, WeavingContext context)
@@ -297,6 +301,58 @@ namespace ArxOne.MrAdvice.Weaver
                 context.InvocationProceedMethod = module.SafeImport(proceedMethodReference);
             }
             return context.InvocationProceedMethod;
+        }
+
+        private IMethod CreateProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
+        {
+            // get the class from shortcuts
+            var shortcutType = context.ShortcutClass;
+            if (shortcutType == null)
+            {
+                shortcutType = new TypeDefUser("MrAdvice")
+                {
+                    BaseType = module.Import(module.CorLibTypes.Object).ToTypeDefOrRef(),
+                    Attributes = TypeAttributes.NotPublic | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed
+                };
+                module.Types.Add(shortcutType);
+                context.ShortcutClass = shortcutType;
+            }
+
+            // create the method name and signature
+            var nameBuilder = new StringBuilder("ProceedAspect");
+            var argumentIndex = 0;
+            var methodSig = new MethodSig { RetType = module.CorLibTypes.Object, HasThis = false };
+            var defaultProceedMethod = GetDefaultProceedMethod(module, context);
+            foreach (var argument in arguments)
+            {
+                if (!argument.HasValue)
+                    nameBuilder.Append((char)('\u2776' + argumentIndex)); // \u2460 for white
+                else
+                    methodSig.Params.Add(defaultProceedMethod.MethodSig.Params[argumentIndex]);
+                argumentIndex++;
+            }
+            // use them with method
+            var method = new MethodDefUser(nameBuilder.ToString(), methodSig) { Body = new CilBody(), Attributes = MethodAttributes.Public | MethodAttributes.Static };
+            shortcutType.Methods.Add(method);
+            var instructions = new Instructions(method.Body.Instructions, module);
+
+            // now, either get value from given arguments or from default
+            argumentIndex = 0;
+            var usedArgumentIndex = 0;
+            foreach (var argument in arguments)
+            {
+                if (argument.HasValue) // a given argument
+                    instructions.EmitLdarg(method.Parameters[usedArgumentIndex++]);
+                else
+                    arguments[argumentIndex].EmitDefault(instructions);
+                argumentIndex++;
+            }
+
+            instructions.Emit(OpCodes.Tailcall);
+            instructions.Emit(OpCodes.Call, defaultProceedMethod);
+            instructions.Emit(OpCodes.Ret);
+
+            return method;
         }
 
         private InvocationArgument GetTargetArgument(MethodDef method)
@@ -459,7 +515,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
-        /// <param name="types">The types.</param>
         /// <param name="context">The context.</param>
         private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, TypeDef adviceInterface, WeavingContext context)
         {
