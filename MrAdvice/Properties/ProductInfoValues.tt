@@ -10,7 +10,7 @@ var VersionMajor = "2";
 var VersionMinor = "1";
 var VersionPatch = "0";
 var Version = VersionMajor + "." + VersionMinor + "." + VersionPatch;
-var PreVersion = "-pre2";
+var PreVersion = "-pre3";
 
 var Title = "Mr. Advice";
 var Company = "Arx One";
