@@ -309,7 +309,7 @@ namespace ArxOne.MrAdvice.Weaver
             var shortcutType = context.ShortcutClass;
             if (shortcutType == null)
             {
-                shortcutType = new TypeDefUser("MrAdvice")
+                shortcutType = new TypeDefUser("ArxOne.MrAdvice", "\u26A1Invocation")
                 {
                     BaseType = module.Import(module.CorLibTypes.Object).ToTypeDefOrRef(),
                     Attributes = TypeAttributes.NotPublic | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed
@@ -318,20 +318,18 @@ namespace ArxOne.MrAdvice.Weaver
                 context.ShortcutClass = shortcutType;
             }
 
-            // create the method name and signature
+            // create the method
             var nameBuilder = new StringBuilder("ProceedAspect");
             var argumentIndex = 0;
             var methodSig = new MethodSig { RetType = module.CorLibTypes.Object, HasThis = false };
             var defaultProceedMethod = GetDefaultProceedMethod(module, context);
             foreach (var argument in arguments)
             {
-                if (!argument.HasValue)
-                    nameBuilder.Append((char)('\u2776' + argumentIndex)); // \u2460 for white
-                else
+                if (argument.HasValue)
                     methodSig.Params.Add(defaultProceedMethod.MethodSig.Params[argumentIndex]);
+                // One day if there are arguments collision risks (IE optional arguments with same type), overload name
                 argumentIndex++;
             }
-            // use them with method
             var method = new MethodDefUser(nameBuilder.ToString(), methodSig) { Body = new CilBody(), Attributes = MethodAttributes.Public | MethodAttributes.Static };
             shortcutType.Methods.Add(method);
             var instructions = new Instructions(method.Body.Instructions, module);
@@ -348,7 +346,7 @@ namespace ArxOne.MrAdvice.Weaver
                 argumentIndex++;
             }
 
-            instructions.Emit(OpCodes.Tailcall);
+            instructions.Emit(OpCodes.Tailcall); // because target method returns object and this method also returns an object
             instructions.Emit(OpCodes.Call, defaultProceedMethod);
             instructions.Emit(OpCodes.Ret);
 
@@ -358,13 +356,13 @@ namespace ArxOne.MrAdvice.Weaver
         private InvocationArgument GetTargetArgument(MethodDef method)
         {
             var isStatic = method.IsStatic;
-            return new InvocationArgument(!isStatic, delegate (Instructions i)
-            {
-                i.Emit(OpCodes.Ldarg_0);
-                // to fix peverify 0x80131854
-                if (method.IsConstructor)
-                    i.Emit(OpCodes.Castclass, method.Module.CorLibTypes.Object);
-            }, i => i.Emit(OpCodes.Ldnull));
+            return new InvocationArgument("This", !isStatic, delegate (Instructions i)
+           {
+               i.Emit(OpCodes.Ldarg_0);
+               // to fix peverify 0x80131854
+               if (method.IsConstructor)
+                   i.Emit(OpCodes.Castclass, method.Module.CorLibTypes.Object);
+           }, i => i.Emit(OpCodes.Ldnull));
         }
 
         private InvocationArgument GetParametersArgument(MethodDef method, out Local parametersVariable)
@@ -372,7 +370,7 @@ namespace ArxOne.MrAdvice.Weaver
             var methodParameters = new MethodParameters(method);
             var hasParameters = methodParameters.Count > 0;
             var localParametersVariable = parametersVariable = hasParameters ? new Local(new SZArraySig(method.Module.CorLibTypes.Object)) { Name = "parameters" } : null;
-            return new InvocationArgument(hasParameters,
+            return new InvocationArgument("Parameters", hasParameters,
                 delegate (Instructions instructions)
                 {
                     method.Body.Variables.Add(localParametersVariable);
@@ -406,26 +404,26 @@ namespace ArxOne.MrAdvice.Weaver
 
         private InvocationArgument GetMethodArgument(MethodDef method)
         {
-            return new InvocationArgument(true, instructions => instructions.Emit(OpCodes.Ldtoken, method), null);
+            return new InvocationArgument("Method", true, instructions => instructions.Emit(OpCodes.Ldtoken, method), null);
         }
 
         private InvocationArgument GetInnerMethodArgument(MethodDef innerMethod)
         {
-            return new InvocationArgument(innerMethod != null,
+            return new InvocationArgument("InnerMethod", innerMethod != null,
                 instructions => instructions.Emit(OpCodes.Ldtoken, innerMethod),
                 instructions => instructions.Emit(OpCodes.Dup));
         }
 
         private InvocationArgument GetTypeArgument(MethodDef method)
         {
-            return new InvocationArgument(method.DeclaringType.HasGenericParameters,
+            return new InvocationArgument("Type", method.DeclaringType.HasGenericParameters,
                 instructions => instructions.Emit(OpCodes.Ldtoken, method.DeclaringType),
                 instructions => instructions.Emit(OpCodes.Ldtoken, method.Module.CorLibTypes.Void));
         }
 
         private InvocationArgument GetAbstractedArgument(bool abstractedTarget)
         {
-            return new InvocationArgument(abstractedTarget,
+            return new InvocationArgument("Abstracted", abstractedTarget,
                 i => i.Emit(OpCodes.Ldc_I4_1),
                 i => i.Emit(OpCodes.Ldc_I4_0));
         }
@@ -438,7 +436,7 @@ namespace ArxOne.MrAdvice.Weaver
             var hasGeneric = typeGenericParametersCount > 0 || method.HasGenericParameters;
             // if method has generic parameters, we also pass them to Proceed method
             var genericParametersVariable = hasGeneric ? new Local(new SZArraySig(method.Module.SafeImport(typeof(Type)).ToTypeSig())) { Name = "genericParameters" } : null;
-            return new InvocationArgument(hasGeneric,
+            return new InvocationArgument("GenericArguments", hasGeneric,
                 delegate (Instructions instructions)
                 {
                     //IL_0001: ldtoken !!T
