@@ -6,6 +6,7 @@ branches:
   only:
     - fody
     - dnlib
+    - dnlib-speedup
 
 before_build:
   nuget restore MrAdvice.sln
@@ -14,7 +15,7 @@ configuration: Release
 platform: Any CPU
 
 build:
-  parallel: true   
+  parallel: true
   project: MrAdvice.sln
   publish_nuget: false
   publish_nuget_symbols: false

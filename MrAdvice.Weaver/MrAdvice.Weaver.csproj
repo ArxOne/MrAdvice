@@ -72,6 +72,9 @@
     <Compile Include="Annotation\MarkedNode.cs" />
     <Compile Include="Annotation\MarkerDefinition.cs" />
     <Compile Include="AuditTimer.cs" />
+    <Compile Include="IO\DefaultLogging.cs" />
+    <Compile Include="Utility\SequenceEqualityComparer.cs" />
+    <Compile Include="Weaver\WeavingContext.cs" />
     <None Include="Blobber" />
     <Compile Include="IO\FileLogging.cs" />
     <Compile Include="IO\MultiLogging.cs" />
@@ -102,12 +105,12 @@
     <Compile Include="Weaver\AspectWeaver.cs" />
     <Compile Include="Weaver\AspectWeaver.Names.cs" />
     <Compile Include="Weaver\AspectWeaver.Weave.cs" />
+    <Compile Include="Weaver\InvocationArgument.cs" />
     <Compile Include="Weaver\TypeResolver.cs" />
     <Compile Include="Utility\CollectionExtensions.cs" />
     <Compile Include="Utility\GenericParameterExtensions.cs" />
     <Compile Include="Weaver\Instructions.cs" />
     <Compile Include="Utility\TypeReferenceExtensions.cs" />
-    <Compile Include="Weaver\Types.cs" />
     <Compile Include="Weaver\WeaverMethodWeavingContext.cs" />
   </ItemGroup>
   <ItemGroup>

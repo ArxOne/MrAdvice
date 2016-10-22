@@ -21,7 +21,8 @@ namespace ArxOne.MrAdvice.Weaver
     public class Instructions
     {
         private readonly IList<Instruction> _instructions;
-        private readonly ModuleDef _moduleDefinition;
+
+        public ModuleDef Module { get; }
 
         /// <summary>
         /// Gets or sets the cursor.
@@ -43,11 +44,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// Initializes a new instance of the <see cref="Instructions"/> class.
         /// </summary>
         /// <param name="instructions">The instructions.</param>
-        /// <param name="moduleDefinition">The module definition.</param>
-        public Instructions(IList<Instruction> instructions, ModuleDef moduleDefinition)
+        /// <param name="module">The module definition.</param>
+        public Instructions(IList<Instruction> instructions, ModuleDef module)
         {
             _instructions = instructions;
-            _moduleDefinition = moduleDefinition;
+            Module = module;
         }
 
         private Instructions Insert(Instruction instruction)
@@ -98,7 +99,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         public Instructions Emit(OpCode opCode, Type value)
         {
-            return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
+            return Insert(Instruction.Create(opCode, Module.SafeImport(value)));
         }
 
         public Instructions Emit(OpCode opCode, CorLibTypeSig value)
@@ -119,7 +120,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         public Instructions Emit(OpCode opCode, MethodBase value)
         {
-            return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
+            return Insert(Instruction.Create(opCode, Module.SafeImport(value)));
         }
 
         public Instructions Emit(OpCode opCode, IMethod value)
@@ -139,7 +140,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         public Instructions Emit(OpCode opCode, FieldInfo value)
         {
-            return Insert(Instruction.Create(opCode, _moduleDefinition.SafeImport(value)));
+            return Insert(Instruction.Create(opCode, Module.SafeImport(value)));
         }
 
         public Instructions Emit(OpCode opCode, string value)
@@ -270,9 +271,9 @@ namespace ArxOne.MrAdvice.Weaver
             //    return Emit(OpCodes.Castclass, _moduleDefinition.SafeImport(targetTypeSig));
             //return this;
             if (MustBox(targetTypeSig))
-                return Emit(OpCodes.Unbox_Any, _moduleDefinition.SafeImport(targetTypeSig));
+                return Emit(OpCodes.Unbox_Any, Module.SafeImport(targetTypeSig));
             if (MustCast(targetTypeSig))
-                return Emit(OpCodes.Castclass, _moduleDefinition.SafeImport(targetTypeSig));
+                return Emit(OpCodes.Castclass, Module.SafeImport(targetTypeSig));
             return this;
         }
 
@@ -284,7 +285,7 @@ namespace ArxOne.MrAdvice.Weaver
         public Instructions EmitBoxIfNecessary(TypeSig targetTypeSig)
         {
             if (MustBox(targetTypeSig))
-                return Emit(OpCodes.Box, _moduleDefinition.SafeImport(targetTypeSig));
+                return Emit(OpCodes.Box, Module.SafeImport(targetTypeSig));
             return this;
         }
 
@@ -300,7 +301,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         private bool MustCast(TypeSig targetTypeSig)
         {
-            if (targetTypeSig.SafeEquivalent(_moduleDefinition.CorLibTypes.Object))
+            if (targetTypeSig.SafeEquivalent(Module.CorLibTypes.Object))
                 return false;
             return true;
         }
@@ -312,7 +313,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public Instructions EmitLdind(TypeSig typeSig)
         {
-            var corLibTypes = _moduleDefinition.CorLibTypes;
+            var corLibTypes = Module.CorLibTypes;
             if (typeSig == corLibTypes.Byte)
                 return Emit(OpCodes.Ldind_U1);
             if (typeSig == corLibTypes.SByte)
@@ -332,7 +333,7 @@ namespace ArxOne.MrAdvice.Weaver
             if (typeSig == corLibTypes.Double)
                 return Emit(OpCodes.Ldind_R8);
             if (typeSig.IsPrimitive)
-                return Emit(OpCodes.Ldobj, _moduleDefinition.SafeImport(typeSig));
+                return Emit(OpCodes.Ldobj, Module.SafeImport(typeSig));
             return Emit(OpCodes.Ldind_Ref);
         }
 
@@ -343,7 +344,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public Instructions EmitStind(TypeSig typeSig)
         {
-            var corLibTypes = _moduleDefinition.CorLibTypes;
+            var corLibTypes = Module.CorLibTypes;
             if (typeSig == corLibTypes.Byte || typeSig == corLibTypes.SByte)
                 return Emit(OpCodes.Stind_I1);
             if (typeSig == corLibTypes.Int16 || typeSig == corLibTypes.UInt16)
@@ -357,7 +358,7 @@ namespace ArxOne.MrAdvice.Weaver
             if (typeSig == corLibTypes.Double)
                 return Emit(OpCodes.Stind_R8);
             if (typeSig.IsPrimitive)
-                return Emit(OpCodes.Stobj, _moduleDefinition.SafeImport(typeSig));
+                return Emit(OpCodes.Stobj, Module.SafeImport(typeSig));
             return Emit(OpCodes.Stind_Ref);
         }
     }

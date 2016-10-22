@@ -7,25 +7,20 @@
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.SymbolStore;
     using System.Linq;
     using System.Reflection;
+    using System.Text;
     using Advice;
     using Annotation;
     using dnlib.DotNet;
     using dnlib.DotNet.Emit;
     using dnlib.DotNet.Pdb;
     using Introduction;
-    using IO;
     using Reflection;
     using Reflection.Groups;
     using Utility;
-    using EventAttributes = dnlib.DotNet.EventAttributes;
     using FieldAttributes = dnlib.DotNet.FieldAttributes;
     using MethodAttributes = dnlib.DotNet.MethodAttributes;
-    using PropertyAttributes = dnlib.DotNet.PropertyAttributes;
-    using SymbolReaderCreator = dnlib.DotNet.Pdb.Managed.SymbolReaderCreator;
     using TypeAttributes = dnlib.DotNet.TypeAttributes;
 
     partial class AspectWeaver
@@ -92,8 +87,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified method.
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
-        /// <param name="types">The types.</param>
-        private void WeaveAdvices(MarkedNode markedMethod, Types types)
+        /// <param name="context">The context.</param>
+        private void WeaveAdvices(MarkedNode markedMethod, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
 
@@ -110,12 +105,12 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 method.Attributes = (method.Attributes & ~MethodAttributes.Abstract) | MethodAttributes.Virtual;
                 Logging.WriteDebug("Weaving abstract method '{0}'", method.FullName);
-                WritePointcutBody(method, null, false);
+                WritePointcutBody(method, null, false, context);
             }
             else if (markedMethod.AbstractTarget)
             {
                 Logging.WriteDebug("Weaving and abstracting method '{0}'", method.FullName);
-                WritePointcutBody(method, null, true);
+                WritePointcutBody(method, null, true, context);
             }
             else
             {
@@ -124,12 +119,12 @@ namespace ArxOne.MrAdvice.Weaver
                 var methodName = method.Name;
 
                 // our special recipe, with weaving advices
-                var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, types.WeavingAdviceAttributeType, types).ToArray();
+                var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceAttributeType, context).ToArray();
                 if (weavingAdvicesMarkers.Any())
                 {
                     var typeDefinition = markedMethod.Node.Method.DeclaringType;
                     var initialType = TypeLoader.GetType(typeDefinition);
-                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, types, TypeResolver, Logging);
+                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, context, TypeResolver, Logging);
                     foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
                     {
                         var weavingAdviceType = TypeLoader.GetType(weavingAdviceMarker.Type);
@@ -175,7 +170,7 @@ namespace ArxOne.MrAdvice.Weaver
                     method.Body = new CilBody();
                 }
 
-                WritePointcutBody(method, innerMethod, false);
+                WritePointcutBody(method, innerMethod, false, context);
                 lock (method.DeclaringType)
                     method.DeclaringType.Methods.Add(innerMethod);
             }
@@ -187,9 +182,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="method">The method.</param>
         /// <param name="innerMethod">The inner method.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
-        /// <exception cref="System.InvalidOperationException">
-        /// </exception>
-        private void WritePointcutBody(MethodDef method, MethodDef innerMethod, bool abstractedTarget)
+        /// <param name="context">The context.</param>
+        /// <exception cref="System.InvalidOperationException"></exception>
+        private void WritePointcutBody(MethodDef method, MethodDef innerMethod, bool abstractedTarget, WeavingContext context)
         {
             var moduleDefinition = method.Module;
 
@@ -202,137 +197,16 @@ namespace ArxOne.MrAdvice.Weaver
             method.Body.ExceptionHandlers.Clear();
             var instructions = new Instructions(method.Body.Instructions, method.Module);
 
-            var isStatic = method.IsStatic;
+            var targetArgument = GetTargetArgument(method);
+            Local parametersVariable;
+            var parametersArgument = GetParametersArgument(method, out parametersVariable);
+            var methodArgument = GetMethodArgument(method);
+            var innerMethodArgument = GetInnerMethodArgument(innerMethod);
+            var typeArgument = GetTypeArgument(method);
+            var abstractedArgument = GetAbstractedArgument(abstractedTarget);
+            var genericParametersArgument = GetGenericParametersArgument(method);
 
-            // parameters
-            Local parametersVariable = null;
-            var methodParameters = new MethodParameters(method);
-            if (methodParameters.Count > 0)
-            {
-                parametersVariable = new Local(new SZArraySig(moduleDefinition.CorLibTypes.Object)) { Name = "parameters" };
-                method.Body.Variables.Add(parametersVariable);
-
-                instructions.EmitLdc(methodParameters.Count);
-                instructions.Emit(OpCodes.Newarr, moduleDefinition.CorLibTypes.Object);
-                instructions.EmitStloc(parametersVariable);
-                // setups parameters array
-                for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
-                {
-                    var parameter = methodParameters[parameterIndex];
-                    // we don't care about output parameters
-                    if (!parameter.ParamDef.IsOut)
-                    {
-                        instructions.EmitLdloc(parametersVariable); // array
-                        instructions.EmitLdc(parameterIndex); // array index
-                        instructions.EmitLdarg(parameter); // loads given parameter...
-                        var parameterType = parameter.Type;
-                        if (parameterType is ByRefSig) // ...if ref, loads it as referenced value
-                        {
-                            parameterType = parameter.Type.Next;
-                            instructions.EmitLdind(parameterType);
-                        }
-                        instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
-                        instructions.Emit(OpCodes.Stelem_Ref);
-                    }
-                }
-            }
-
-            // if method has generic parameters, we also pass them to Proceed method
-            Local genericParametersVariable = null;
-            // on static methods from generic type, we also record the generic parameters type
-            //var typeGenericParametersCount = isStatic ? method.DeclaringType.GenericParameters.Count : 0;
-            var typeGenericParametersCount = method.DeclaringType.GenericParameters.Count;
-            if (typeGenericParametersCount > 0 || method.HasGenericParameters)
-            {
-                //IL_0001: ldtoken !!T
-                //IL_0006: call class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
-                genericParametersVariable = new Local(new SZArraySig(moduleDefinition.SafeImport(typeof(Type)).ToTypeSig())) { Name = "genericParameters" };
-                method.Body.Variables.Add(genericParametersVariable);
-
-                instructions.EmitLdc(typeGenericParametersCount + method.GenericParameters.Count);
-                instructions.Emit(OpCodes.Newarr, moduleDefinition.SafeImport(typeof(Type)));
-                instructions.EmitStloc(genericParametersVariable);
-
-                var methodGenericParametersCount = method.GenericParameters.Count;
-                for (int genericParameterIndex = 0; genericParameterIndex < typeGenericParametersCount + methodGenericParametersCount; genericParameterIndex++)
-                {
-                    instructions.EmitLdloc(genericParametersVariable); // array
-                    instructions.EmitLdc(genericParameterIndex); // array index
-                    if (genericParameterIndex < typeGenericParametersCount)
-                        instructions.Emit(OpCodes.Ldtoken, new GenericVar(genericParameterIndex, method.DeclaringType)); //genericParameters[genericParameterIndex]);
-                    else
-                        instructions.Emit(OpCodes.Ldtoken, new GenericMVar(genericParameterIndex - typeGenericParametersCount, method)); //genericParameters[genericParameterIndex]);
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle())));
-                    instructions.Emit(OpCodes.Stelem_Ref);
-                }
-            }
-
-            // null or instance
-            instructions.Emit(isStatic ? OpCodes.Ldnull : OpCodes.Ldarg_0);
-            // to fix peverify 0x80131854
-            if (!isStatic && method.IsConstructor)
-                instructions.Emit(OpCodes.Castclass, moduleDefinition.CorLibTypes.Object);
-
-            // parameters
-            if (parametersVariable != null)
-                instructions.EmitLdloc(parametersVariable);
-            else
-                instructions.Emit(OpCodes.Ldnull);
-
-            // methods...
-            // ... target
-            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-            instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetCurrentMethod()));
-
-            // ... inner... If provided
-            if (innerMethod != null)
-            {
-                // if type is generic, this is a bit more complex, because we need to pass the type
-                if (method.DeclaringType.HasGenericParameters)
-                {
-                    // we want to reuse the MethodBase.GetCurrentMethod() result
-                    // so it is stored into a variable, whose property DeclaringType is invoked later
-                    var currentMethodVariable = new Local(moduleDefinition.SafeImport(typeof(MethodBase)).ToTypeSig()) { Name = "currentMethod" };
-                    method.Body.Variables.Add(currentMethodVariable);
-                    instructions.EmitStloc(currentMethodVariable);
-                    instructions.EmitLdloc(currentMethodVariable);
-
-                    instructions.Emit(OpCodes.Ldtoken, innerMethod);
-                    instructions.EmitLdloc(currentMethodVariable);
-                    instructions.Emit(OpCodes.Callvirt, ReflectionUtility.GetMethodInfo((Type t) => t.DeclaringType));
-                    instructions.Emit(OpCodes.Callvirt, ReflectionUtility.GetMethodInfo((Type t) => t.TypeHandle));
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle(), new RuntimeTypeHandle())));
-                }
-                else
-                {
-                    instructions.Emit(OpCodes.Ldtoken, innerMethod);
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => MethodBase.GetMethodFromHandle(new RuntimeMethodHandle())));
-                }
-            }
-            else
-                instructions.Emit(OpCodes.Ldnull);
-
-            // abstracted target
-            instructions.Emit(abstractedTarget ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
-
-            if (genericParametersVariable != null)
-                instructions.EmitLdloc(genericParametersVariable);
-            else
-                instructions.Emit(OpCodes.Ldnull);
-
-            // invoke the method
-            var invocationType = TypeResolver.Resolve(moduleDefinition, typeof(Invocation));
-            if (invocationType == null)
-                throw new InvalidOperationException();
-            var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
-            if (proceedMethodReference == null)
-                throw new InvalidOperationException();
-            var proceedMethod = moduleDefinition.SafeImport(proceedMethodReference);
-
-            instructions.Emit(OpCodes.Call, proceedMethod);
+            WriteProceedCall(instructions, context, targetArgument, parametersArgument, methodArgument, innerMethodArgument, typeArgument, abstractedArgument, genericParametersArgument);
 
             // get return value
             if (!method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
@@ -341,6 +215,7 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Pop); // if no return type, ignore Proceed() result
 
             // loads back out/ref parameters
+            var methodParameters = new MethodParameters(method);
             for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
             {
                 var parameter = methodParameters[parameterIndex];
@@ -375,17 +250,234 @@ namespace ArxOne.MrAdvice.Weaver
         }
 
         /// <summary>
+        /// Writes the invocation call.
+        /// </summary>
+        /// <param name="instructions">The instructions.</param>
+        /// <param name="context">The context.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <exception cref="InvalidOperationException">
+        /// </exception>
+        private void WriteProceedCall(Instructions instructions, WeavingContext context, params InvocationArgument[] arguments)
+        {
+            var proceedMethod = GetProceedMethod(arguments, instructions.Module, context);
+
+            foreach (var argument in arguments)
+            {
+                if (argument.HasValue)
+                    argument.Emit(instructions);
+            }
+
+            instructions.Emit(OpCodes.Call, proceedMethod);
+        }
+
+        private IMethod GetProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
+        {
+            var values = arguments.Select(a => a.HasValue).ToArray();
+            IMethod proceedMethod;
+            if (!context.ShortcutMethods.TryGetValue(values, out proceedMethod))
+                context.ShortcutMethods[values] = proceedMethod = LoadProceedMethod(arguments, module, context);
+            return proceedMethod;
+        }
+
+        private IMethod LoadProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
+        {
+            // special case, full invoke
+            if (arguments.All(a => a.HasValue))
+                return GetDefaultProceedMethod(module, context);
+
+            return CreateProceedMethod(arguments, module, context);
+        }
+
+        private IMethod GetDefaultProceedMethod(ModuleDef module, WeavingContext context)
+        {
+            if (context.InvocationProceedMethod == null)
+            {
+                var invocationType = TypeResolver.Resolve(module, typeof(Invocation));
+                if (invocationType == null)
+                    throw new InvalidOperationException();
+                var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
+                if (proceedMethodReference == null)
+                    throw new InvalidOperationException();
+                context.InvocationProceedMethod = module.SafeImport(proceedMethodReference);
+            }
+            return context.InvocationProceedMethod;
+        }
+
+        private IMethod CreateProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
+        {
+            // get the class from shortcuts
+            var shortcutType = context.ShortcutClass;
+            if (shortcutType == null)
+            {
+                shortcutType = new TypeDefUser("ArxOne.MrAdvice", "\u26A1Invocation")
+                {
+                    BaseType = module.Import(module.CorLibTypes.Object).ToTypeDefOrRef(),
+                    Attributes = TypeAttributes.NotPublic | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed
+                };
+                module.Types.Add(shortcutType);
+                context.ShortcutClass = shortcutType;
+            }
+
+            // create the method
+            var nameBuilder = new StringBuilder("ProceedAspect");
+            var argumentIndex = 0;
+            var methodSig = new MethodSig { RetType = module.CorLibTypes.Object, HasThis = false };
+            var defaultProceedMethod = GetDefaultProceedMethod(module, context);
+            foreach (var argument in arguments)
+            {
+                if (argument.HasValue)
+                    methodSig.Params.Add(defaultProceedMethod.MethodSig.Params[argumentIndex]);
+                // One day if there are arguments collision risks (IE optional arguments with same type), overload name
+                argumentIndex++;
+            }
+            var method = new MethodDefUser(nameBuilder.ToString(), methodSig) { Body = new CilBody(), Attributes = MethodAttributes.Public | MethodAttributes.Static };
+            shortcutType.Methods.Add(method);
+            var instructions = new Instructions(method.Body.Instructions, module);
+
+            // now, either get value from given arguments or from default
+            argumentIndex = 0;
+            var usedArgumentIndex = 0;
+            foreach (var argument in arguments)
+            {
+                if (argument.HasValue) // a given argument
+                    instructions.EmitLdarg(method.Parameters[usedArgumentIndex++]);
+                else
+                    arguments[argumentIndex].EmitDefault(instructions);
+                argumentIndex++;
+            }
+
+            instructions.Emit(OpCodes.Tailcall); // because target method returns object and this method also returns an object
+            instructions.Emit(OpCodes.Call, defaultProceedMethod);
+            instructions.Emit(OpCodes.Ret);
+
+            return method;
+        }
+
+        private InvocationArgument GetTargetArgument(MethodDef method)
+        {
+            var isStatic = method.IsStatic;
+            return new InvocationArgument("This", !isStatic, delegate (Instructions i)
+           {
+               i.Emit(OpCodes.Ldarg_0);
+               // to fix peverify 0x80131854
+               if (method.IsConstructor)
+                   i.Emit(OpCodes.Castclass, method.Module.CorLibTypes.Object);
+           }, i => i.Emit(OpCodes.Ldnull));
+        }
+
+        private InvocationArgument GetParametersArgument(MethodDef method, out Local parametersVariable)
+        {
+            var methodParameters = new MethodParameters(method);
+            var hasParameters = methodParameters.Count > 0;
+            var localParametersVariable = parametersVariable = hasParameters ? new Local(new SZArraySig(method.Module.CorLibTypes.Object)) { Name = "parameters" } : null;
+            return new InvocationArgument("Parameters", hasParameters,
+                delegate (Instructions instructions)
+                {
+                    method.Body.Variables.Add(localParametersVariable);
+
+                    instructions.EmitLdc(methodParameters.Count);
+                    instructions.Emit(OpCodes.Newarr, method.Module.CorLibTypes.Object);
+                    instructions.EmitStloc(localParametersVariable);
+                    // setups parameters array
+                    for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
+                    {
+                        var parameter = methodParameters[parameterIndex];
+                        // we don't care about output parameters
+                        if (!parameter.ParamDef.IsOut)
+                        {
+                            instructions.EmitLdloc(localParametersVariable); // array
+                            instructions.EmitLdc(parameterIndex); // array index
+                            instructions.EmitLdarg(parameter); // loads given parameter...
+                            var parameterType = parameter.Type;
+                            if (parameterType is ByRefSig) // ...if ref, loads it as referenced value
+                            {
+                                parameterType = parameter.Type.Next;
+                                instructions.EmitLdind(parameterType);
+                            }
+                            instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
+                            instructions.Emit(OpCodes.Stelem_Ref);
+                        }
+                    }
+                    instructions.EmitLdloc(localParametersVariable);
+                }, instructions => instructions.Emit(OpCodes.Ldnull));
+        }
+
+        private InvocationArgument GetMethodArgument(MethodDef method)
+        {
+            return new InvocationArgument("Method", true, instructions => instructions.Emit(OpCodes.Ldtoken, method), null);
+        }
+
+        private InvocationArgument GetInnerMethodArgument(MethodDef innerMethod)
+        {
+            return new InvocationArgument("InnerMethod", innerMethod != null,
+                instructions => instructions.Emit(OpCodes.Ldtoken, innerMethod),
+                instructions => instructions.Emit(OpCodes.Dup));
+        }
+
+        private InvocationArgument GetTypeArgument(MethodDef method)
+        {
+            return new InvocationArgument("Type", method.DeclaringType.HasGenericParameters,
+                instructions => instructions.Emit(OpCodes.Ldtoken, method.DeclaringType),
+                instructions => instructions.Emit(OpCodes.Ldtoken, method.Module.CorLibTypes.Void));
+        }
+
+        private InvocationArgument GetAbstractedArgument(bool abstractedTarget)
+        {
+            return new InvocationArgument("Abstracted", abstractedTarget,
+                i => i.Emit(OpCodes.Ldc_I4_1),
+                i => i.Emit(OpCodes.Ldc_I4_0));
+        }
+
+        private InvocationArgument GetGenericParametersArgument(MethodDef method)
+        {
+            // on static methods from generic type, we also record the generic parameters type
+            //var typeGenericParametersCount = isStatic ? method.DeclaringType.GenericParameters.Count : 0;
+            var typeGenericParametersCount = method.DeclaringType.GenericParameters.Count;
+            var hasGeneric = typeGenericParametersCount > 0 || method.HasGenericParameters;
+            // if method has generic parameters, we also pass them to Proceed method
+            var genericParametersVariable = hasGeneric ? new Local(new SZArraySig(method.Module.SafeImport(typeof(Type)).ToTypeSig())) { Name = "genericParameters" } : null;
+            return new InvocationArgument("GenericArguments", hasGeneric,
+                delegate (Instructions instructions)
+                {
+                    //IL_0001: ldtoken !!T
+                    //IL_0006: call class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
+                    method.Body.Variables.Add(genericParametersVariable);
+
+                    instructions.EmitLdc(typeGenericParametersCount + method.GenericParameters.Count);
+                    instructions.Emit(OpCodes.Newarr, method.Module.SafeImport(typeof(Type)));
+                    instructions.EmitStloc(genericParametersVariable);
+
+                    var methodGenericParametersCount = method.GenericParameters.Count;
+                    for (int genericParameterIndex = 0; genericParameterIndex < typeGenericParametersCount + methodGenericParametersCount; genericParameterIndex++)
+                    {
+                        instructions.EmitLdloc(genericParametersVariable); // array
+                        instructions.EmitLdc(genericParameterIndex); // array index
+                        if (genericParameterIndex < typeGenericParametersCount)
+                            instructions.Emit(OpCodes.Ldtoken, new GenericVar(genericParameterIndex, method.DeclaringType));
+                        //genericParameters[genericParameterIndex]);
+                        else
+                            instructions.Emit(OpCodes.Ldtoken, new GenericMVar(genericParameterIndex - typeGenericParametersCount, method));
+                        //genericParameters[genericParameterIndex]);
+                        // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                        instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle())));
+                        instructions.Emit(OpCodes.Stelem_Ref);
+                    }
+                    instructions.EmitLdloc(genericParametersVariable);
+                }, instructions => instructions.Emit(OpCodes.Ldnull));
+        }
+
+        /// <summary>
         /// Weaves the introductions.
         /// Introduces members as requested by aspects
         /// </summary>
         /// <param name="method">The method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="moduleDefinition">The module definition.</param>
-        /// <param name="types">The types.</param>
-        private void WeaveIntroductions(MethodDef method, TypeDef adviceInterface, ModuleDef moduleDefinition, Types types)
+        /// <param name="context">The context.</param>
+        private void WeaveIntroductions(MethodDef method, TypeDef adviceInterface, ModuleDef moduleDefinition, WeavingContext context)
         {
             var typeDefinition = method.DeclaringType;
-            var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface, types);
+            var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface, context);
             var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, typeof(IntroducedFieldAttribute)).FindConstructors().Single());
             var markerAttributeCtorDef = new MemberRefUser(markerAttributeCtor.Module, markerAttributeCtor.Name, markerAttributeCtor.MethodSig, markerAttributeCtor.DeclaringType);
             // moduleDefinition.SafeImport(markerAttributeCtor).ResolveMethodDef();
@@ -405,10 +497,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="infoAdviceInterface">The information advice interface.</param>
-        /// <param name="types">The types.</param>
-        private void WeaveInfoAdvices(ModuleDef moduleDefinition, TypeDef typeDefinition, ITypeDefOrRef infoAdviceInterface, Types types)
+        /// <param name="context">The context.</param>
+        private void WeaveInfoAdvices(ModuleDef moduleDefinition, TypeDef typeDefinition, ITypeDefOrRef infoAdviceInterface, WeavingContext context)
         {
-            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface, types).Where(IsWeavable).Any())
+            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface, context).Where(IsWeavable).Any())
             {
                 Logging.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
                 WeaveInfoAdvices(typeDefinition, moduleDefinition, false);
@@ -421,14 +513,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="adviceInterface">The advice interface.</param>
-        /// <param name="types">The types.</param>
-        private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, TypeDef adviceInterface, Types types)
+        /// <param name="context">The context.</param>
+        private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, TypeDef adviceInterface, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
             try
             {
-                WeaveAdvices(markedMethod, types);
-                WeaveIntroductions(method, adviceInterface, moduleDefinition, types);
+                WeaveAdvices(markedMethod, context);
+                WeaveIntroductions(method, adviceInterface, moduleDefinition, context);
             }
             catch (Exception e)
             {
@@ -445,7 +537,8 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="interfaceType">Type of the interface.</param>
-        private void WeaveInterface(ModuleDef moduleDefinition, ITypeDefOrRef interfaceType)
+        /// <param name="context">The context.</param>
+        private void WeaveInterface(ModuleDef moduleDefinition, ITypeDefOrRef interfaceType, WeavingContext context)
         {
             Logging.WriteDebug("Weaving interface '{0}'", interfaceType.FullName);
             TypeDef implementationType;
@@ -484,7 +577,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // create implementation methods
             foreach (var interfaceMethod in interfaceTypeDefinition.Methods.Where(m => !m.IsSpecialName))
-                WeaveInterfaceMethod(interfaceMethod, implementationType, true);
+                WeaveInterfaceMethod(interfaceMethod, implementationType, true, context);
 
             // create implementation properties
             foreach (var interfaceProperty in interfaceTypeDefinition.Properties)
@@ -492,9 +585,9 @@ namespace ArxOne.MrAdvice.Weaver
                 var implementationProperty = new PropertyDefUser(interfaceProperty.Name, interfaceProperty.PropertySig);
                 implementationType.Properties.Add(implementationProperty);
                 if (interfaceProperty.GetMethod != null)
-                    implementationProperty.GetMethod = WeaveInterfaceMethod(interfaceProperty.GetMethod, implementationType, InjectAsPrivate);
+                    implementationProperty.GetMethod = WeaveInterfaceMethod(interfaceProperty.GetMethod, implementationType, InjectAsPrivate, context);
                 if (interfaceProperty.SetMethod != null)
-                    implementationProperty.SetMethod = WeaveInterfaceMethod(interfaceProperty.SetMethod, implementationType, InjectAsPrivate);
+                    implementationProperty.SetMethod = WeaveInterfaceMethod(interfaceProperty.SetMethod, implementationType, InjectAsPrivate, context);
             }
 
             // create implementation events
@@ -503,9 +596,9 @@ namespace ArxOne.MrAdvice.Weaver
                 var implementationEvent = new EventDefUser(interfaceEvent.Name, interfaceEvent.EventType);
                 implementationType.Events.Add(implementationEvent);
                 if (interfaceEvent.AddMethod != null)
-                    implementationEvent.AddMethod = WeaveInterfaceMethod(interfaceEvent.AddMethod, implementationType, InjectAsPrivate);
+                    implementationEvent.AddMethod = WeaveInterfaceMethod(interfaceEvent.AddMethod, implementationType, InjectAsPrivate, context);
                 if (interfaceEvent.RemoveMethod != null)
-                    implementationEvent.RemoveMethod = WeaveInterfaceMethod(interfaceEvent.RemoveMethod, implementationType, InjectAsPrivate);
+                    implementationEvent.RemoveMethod = WeaveInterfaceMethod(interfaceEvent.RemoveMethod, implementationType, InjectAsPrivate, context);
             }
         }
 
@@ -515,8 +608,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="interfaceMethod">The interface method.</param>
         /// <param name="implementationType">Type of the implementation.</param>
         /// <param name="injectAsPrivate">if set to <c>true</c> [inject as private].</param>
+        /// <param name="context">The context.</param>
         /// <returns></returns>
-        private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate)
+        private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate, WeavingContext context)
         {
             var methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual | (injectAsPrivate ? MethodAttributes.Public : MethodAttributes.Private);
             //var methodParameters = new MethodParameters(interfaceMethod);
@@ -534,7 +628,7 @@ namespace ArxOne.MrAdvice.Weaver
             //methodParameters.SetParamDefs(implementationMethod);
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
             implementationMethod.Overrides.Add(new MethodOverride(implementationMethod, interfaceMethod));
-            WritePointcutBody(implementationMethod, null, false);
+            WritePointcutBody(implementationMethod, null, false, context);
             return implementationMethod;
         }
 

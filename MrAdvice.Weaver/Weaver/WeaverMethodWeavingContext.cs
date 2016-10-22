@@ -20,7 +20,7 @@ namespace ArxOne.MrAdvice.Weaver
     internal class WeaverMethodWeavingContext : MethodWeavingContext
     {
         private readonly TypeDef _typeDefinition;
-        private readonly Types _types;
+        private readonly WeavingContext _context;
         private readonly TypeResolver _typeResolver;
         private readonly ILogging _logging;
 
@@ -38,14 +38,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="typeDefinition">The type definition (type being built).</param>
         /// <param name="type">The type (original type).</param>
         /// <param name="targetMethodName">Name of the target method.</param>
-        /// <param name="types">The types.</param>
+        /// <param name="context">The context.</param>
         /// <param name="typeResolver">The type resolver.</param>
         /// <param name="logging">The logging.</param>
-        public WeaverMethodWeavingContext(TypeDef typeDefinition, Type type, string targetMethodName, Types types, TypeResolver typeResolver, ILogging logging)
+        public WeaverMethodWeavingContext(TypeDef typeDefinition, Type type, string targetMethodName, WeavingContext context, TypeResolver typeResolver, ILogging logging)
             : base(type, targetMethodName)
         {
             _typeDefinition = typeDefinition;
-            _types = types;
+            _context = context;
             _typeResolver = typeResolver;
             _logging = logging;
         }

@@ -8,6 +8,7 @@ namespace MethodLevelTest
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Runtime.InteropServices;
     using Advices;
     using ArxOne.MrAdvice;
