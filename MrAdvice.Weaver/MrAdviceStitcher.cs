@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice
 {
     using System;
     using System.IO;
+    using System.IO.Compression;
     using System.Linq;
     using System.Reflection;
     using dnlib.DotNet;
@@ -93,7 +94,36 @@ namespace ArxOne.MrAdvice
             if (assemblyName == "MrAdvice")
                 return GetType().Assembly;
 
-            return null;
+
+            // otherwise fallback to embedded resources,
+            // which for some fucking reason are not resolved by Blobber!
+            var assemblyData = ResolveAssembly(assemblyName);
+            if (assemblyData == null)
+                return null;
+
+            return Assembly.Load(assemblyData);
+        }
+
+        /// <summary>
+        /// Resolves the assembly.
+        /// </summary>
+        /// <param name="assemblyName">Name of the assembly.</param>
+        /// <returns></returns>
+        private static byte[] ResolveAssembly(string assemblyName)
+        {
+            var resourceName = $"blobber:embedded.gz:{assemblyName}";
+
+            using (var resourceStream = typeof(MrAdviceStitcher).Assembly.GetManifestResourceStream(resourceName))
+            {
+                if (resourceStream == null)
+                    return null;
+                using (var gzipStream = new GZipStream(resourceStream, CompressionMode.Decompress))
+                using (var memoryStream = new MemoryStream())
+                {
+                    gzipStream.CopyTo(memoryStream);
+                    return memoryStream.ToArray();
+                }
+            }
         }
 
         /// <summary>

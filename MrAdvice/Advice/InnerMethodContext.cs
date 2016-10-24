@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Advice
     using System.Reflection;
     using System.Threading.Tasks;
     using Threading;
+    using Utility;
 
     /// <summary>
     /// Special terminal advice, which calls the final method
@@ -56,10 +57,7 @@ namespace ArxOne.MrAdvice.Advice
             }
             catch (TargetInvocationException tie)
             {
-                var ie = tie.InnerException;
-                var p = typeof(Exception).GetMethod("PrepForRemoting", BindingFlags.NonPublic | BindingFlags.Instance);
-                p?.Invoke(ie, new object[0]);
-                throw ie;
+                throw tie.InnerException.PreserveStackTrace();
             }
         }
     }

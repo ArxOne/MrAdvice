@@ -25,10 +25,11 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static Exception PreserveStackTrace(this Exception exception)
         {
-            var preserveStackTrace = typeof(Exception).GetMethod("InternalPreserveStackTrace", BindingFlags.Instance | BindingFlags.NonPublic);
+            var preserveStackTrace = typeof(Exception).GetMethod("PrepForRemoting", BindingFlags.Instance | BindingFlags.NonPublic)
+                                     ?? typeof(Exception).GetMethod("InternalPreserveStackTrace", BindingFlags.Instance | BindingFlags.NonPublic);
             try
             {
-                preserveStackTrace.Invoke(exception, new object[0]);
+                preserveStackTrace?.Invoke(exception, new object[0]);
             }
             catch (MemberAccessException) { }
             return exception;
