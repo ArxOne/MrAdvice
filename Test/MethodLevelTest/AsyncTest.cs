@@ -375,5 +375,37 @@ namespace MethodLevelTest
             //  Assert.Throws(async () => await c.Method());
         }
 #endif
+
+        [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+        public class LogSuccessAsyncAttribute : Attribute, IMethodAsyncAdvice
+        {
+            public async Task Advise(MethodAsyncAdviceContext context)
+            {
+                await context.ProceedAsync();
+                Console.WriteLine("Success!");
+            }
+        }
+
+        public class Class
+        {
+            [LogSuccessAsync]
+            public Task<int> Method2(object p)
+            {
+                if (p == null)
+                {
+                    throw new ArgumentNullException("p");
+                }
+                return Task.FromResult(0);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Async")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task AsyncRunTest()
+        {
+            var c = new Class();
+            await c.Method2(null);
+        }
     }
 }
