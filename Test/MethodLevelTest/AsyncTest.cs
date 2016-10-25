@@ -379,6 +379,8 @@ namespace MethodLevelTest
         [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
         public class LogSuccessAsyncAttribute : Attribute, IMethodAsyncAdvice
         {
+            public LogSuccessAsyncAttribute() { }
+
             public async Task Advise(MethodAsyncAdviceContext context)
             {
                 await context.ProceedAsync();

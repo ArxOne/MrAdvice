@@ -380,5 +380,34 @@ namespace MethodLevelTest
             var r = c.GetSomething(5, new A());
             Assert.AreEqual(34, r.V);
         }
+
+#if NO
+        public class NoAdvice : Attribute, IMethodAdvice
+        {
+            public NoAdvice() { }
+
+            public void Advise(MethodAdviceContext context)
+            {
+                context.Proceed();
+            }
+        }
+
+        public class NotAdvised
+        {
+            [NoAdvice]
+            public void F<T>()
+            { }
+        }
+
+        [TestMethod]
+        [TestCategory("Generic")]
+        public void InstancesTest()
+        {
+            var na = new NotAdvised();
+            na.F<int>();
+            na.F<int>();
+            na.F<string>();
+        }
+#endif
     }
 }
