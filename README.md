@@ -1,15 +1,5 @@
 # Mr. Advice
 
-## News
-
-**2016-10-02**: Mr. Advice using dnlib is now released, under another package name, at https://www.nuget.org/packages/MrAdvice. If it behaves well with everyone, we are going to deprecate the version using Fody (because we can fly with our own wings :sunglasses:).  
-**2016-08-16**: No, Mr. Advice is not dead, but we're making undergoing changes.  
-The master branch is globally inactive, because the project is currently progressing in two other branches:
- * [fody](https://github.com/ArxOne/MrAdvice/tree/fody) where it keeps using Fody and Cecil, as it was written at first place.
- * [dnlib](https://github.com/ArxOne/MrAdvice/tree/dnlib), where it flies solo, using the excellent [dnlib](https://github.com/0xd4d/dnlib) and some other projects of my (main contributor [picrap](https://github.com/picrap)) own ([StitcherBoy](https://github.com/picrap/StitcherBoy) and [Blobber](https://github.com/picrap/Blobber)).
-
-Both branches are available as separate NuGet packages ([fody](https://www.nuget.org/packages/MrAdvice.Fody/) and [dnlib](https://www.nuget.org/packages/MrAdvice/), this latter being currenly unreleased); if dnlib version works, we'll probably drop the fody branch.
-
 ## Summary
 
 Mr. Advice is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net).  
@@ -32,7 +22,7 @@ Mr. Advice allows you to:
 
 ## How it works
 
-It is available as a NuGet package (https://www.nuget.org/packages/MrAdvice.Fody). There is also an automatic build with tests at appveyor. The current status is [![Build status](https://ci.appveyor.com/api/projects/status/96i8xbxf954x79vw?svg=true)](https://ci.appveyor.com/project/picrap/mradvice)
+It is available as a NuGet package (https://www.nuget.org/packages/MrAdvice). There is also an automatic build with tests at appveyor. The current status is [![Build status](https://ci.appveyor.com/api/projects/status/96i8xbxf954x79vw?svg=true)](https://ci.appveyor.com/project/picrap/mradvice)
 
 
 ## Philosophy
@@ -73,6 +63,12 @@ Your aspects can be injected at assembly, type or method level, simply by settin
 * When an aspect is injected at asembly level, all methods of all types are weaved.
 * When the aspect is injected at type level, all of its methods are weaved.
 * And of course, if the aspect is injected on a method, only the method is weaved.
+
+## Contributing
+
+Currently, Mr. Advice still exists in two flavors:
+* The brand new version using dnlib, in [master branch](https://github.com/ArxOne/MrAdvice). This is the branch you can contribute to, by forking and submitting pull requests.
+* A legacy version using Fody and Cecil still exists in [fody branch](https://github.com/ArxOne/MrAdvice/tree/fody). This version still exists in NuGet, and is available under ID [MrAdvice.Fody](https://www.nuget.org/packages/MrAdvice.Fody/). However, it is not supported anymore and may disappear in the future.
 
 ## Other projects using Mr. Advice
 
