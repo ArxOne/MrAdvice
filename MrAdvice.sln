@@ -25,6 +25,9 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VBMethodLevelTest", "Test\V
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{2585663B-1557-4E4C-A020-19FF5FE94D4F}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Icon", "Icon", "{C24CF080-EAAE-4F62-9A1B-E6F03421FB0C}"
 	ProjectSection(SolutionItems) = preProject
