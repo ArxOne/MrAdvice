@@ -26,6 +26,8 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VBMethodLevelTest", "Test\V
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{2585663B-1557-4E4C-A020-19FF5FE94D4F}"
 	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
 		README.md = README.md
 	EndProjectSection
 EndProject
