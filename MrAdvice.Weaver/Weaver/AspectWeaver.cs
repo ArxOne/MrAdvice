@@ -82,6 +82,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
+            var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceAttributeType, context).Where(IsWeavable).ToArray();
             var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface, context).Where(IsWeavable).ToArray();
             auditTimer.NewZone("Abstract targets");
             var generatedFieldsToBeRemoved = new List<FieldDef>();
@@ -92,6 +93,8 @@ namespace ArxOne.MrAdvice.Weaver
                 foreach (var fieldReference in generatedFieldsToBeRemoved)
                     Logging.WriteDebug("Field {0} to be removed", fieldReference.FullName);
             }
+            auditTimer.NewZone("Methods weaving advice");
+            weavingAdvicesMethods.ForAll(i => RunWeavingAdvices(i, context));
             auditTimer.NewZone("Methods weaving");
             weavableMethods
 #if !DEBUG

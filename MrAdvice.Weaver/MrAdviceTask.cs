@@ -5,10 +5,6 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using ArxOne.MrAdvice;
 using StitcherBoy;
 

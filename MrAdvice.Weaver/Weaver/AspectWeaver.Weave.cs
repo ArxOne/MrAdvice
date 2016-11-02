@@ -118,27 +118,6 @@ namespace ArxOne.MrAdvice.Weaver
 
                 var methodName = method.Name;
 
-                // our special recipe, with weaving advices
-                var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceAttributeType, context).ToArray();
-                if (weavingAdvicesMarkers.Any())
-                {
-                    var typeDefinition = markedMethod.Node.Method.DeclaringType;
-                    var initialType = TypeLoader.GetType(typeDefinition);
-                    var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, context, TypeResolver, Logging);
-                    foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
-                    {
-                        var weavingAdviceType = TypeLoader.GetType(weavingAdviceMarker.Type);
-                        var weavingAdvice = (IWeavingAdvice)Activator.CreateInstance(weavingAdviceType);
-                        var methodWeavingAdvice = weavingAdvice as IMethodWeavingAdvice;
-                        if (methodWeavingAdvice != null && !method.IsGetter && !method.IsSetter)
-                        {
-                            methodWeavingAdvice.Advise(weaverMethodWeavingContext);
-                        }
-                    }
-                    if (weaverMethodWeavingContext.TargetMethodName != methodName)
-                        methodName = method.Name = weaverMethodWeavingContext.TargetMethodName;
-                }
-
                 // create inner method
                 const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PInvokeImpl |
                                                           MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
@@ -174,6 +153,34 @@ namespace ArxOne.MrAdvice.Weaver
                 lock (method.DeclaringType)
                     method.DeclaringType.Methods.Add(innerMethod);
             }
+        }
+
+        /// <summary>
+        /// Weaves method with weaving advices <see cref="IWeavingAdvice"/>.
+        /// </summary>
+        /// <param name="markedMethod">The marked method.</param>
+        /// <param name="context">The context.</param>
+        private void RunWeavingAdvices(MarkedNode markedMethod, WeavingContext context)
+        {
+            var method = markedMethod.Node.Method;
+            var methodName = method.Name;
+
+            // our special recipe, with weaving advices
+            var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceAttributeType, context).ToArray();
+            var typeDefinition = markedMethod.Node.Method.DeclaringType;
+            var initialType = TypeLoader.GetType(typeDefinition);
+            var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, context, TypeResolver, Logging);
+            foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
+            {
+                Logging.WriteDebug("Weaving method '{0}' using weaving advice '{1}'", method.FullName, weavingAdviceMarker.Type.FullName);
+                var weavingAdviceType = TypeLoader.GetType(weavingAdviceMarker.Type);
+                var weavingAdvice = (IWeavingAdvice)Activator.CreateInstance(weavingAdviceType);
+                var methodWeavingAdvice = weavingAdvice as IMethodWeavingAdvice;
+                if (methodWeavingAdvice != null && !method.IsGetter && !method.IsSetter)
+                    methodWeavingAdvice.Advise(weaverMethodWeavingContext);
+            }
+            if (weaverMethodWeavingContext.TargetMethodName != methodName)
+                method.Name = weaverMethodWeavingContext.TargetMethodName;
         }
 
         /// <summary>
