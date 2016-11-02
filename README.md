@@ -1,5 +1,15 @@
 # Mr. Advice
 
+## News
+
+**2016-10-02**: Mr. Advice using dnlib is now released, under another package name, at https://www.nuget.org/packages/MrAdvice. If it behaves well with everyone, we are going to deprecate the version using Fody (because we can fly with our own wings :sunglasses:).  
+**2016-08-16**: No, Mr. Advice is not dead, but we're making undergoing changes.  
+The master branch is globally inactive, because the project is currently progressing in two other branches:
+ * [fody](https://github.com/ArxOne/MrAdvice/tree/fody) where it keeps using Fody and Cecil, as it was written at first place.
+ * [dnlib](https://github.com/ArxOne/MrAdvice/tree/dnlib), where it flies solo, using the excellent [dnlib](https://github.com/0xd4d/dnlib) and some other projects of my (main contributor [picrap](https://github.com/picrap)) own ([StitcherBoy](https://github.com/picrap/StitcherBoy) and [Blobber](https://github.com/picrap/Blobber)).
+
+Both branches are available as separate NuGet packages ([fody](https://www.nuget.org/packages/MrAdvice.Fody/) and [dnlib](https://www.nuget.org/packages/MrAdvice/), this latter being currenly unreleased); if dnlib version works, we'll probably drop the fody branch.
+
 ## Summary
 
 Mr. Advice is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net).  
