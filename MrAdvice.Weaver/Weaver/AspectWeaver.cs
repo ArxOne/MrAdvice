@@ -78,8 +78,6 @@ namespace ArxOne.MrAdvice.Weaver
             var targetFramework = GetTargetFramework(moduleDefinition);
             InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
 
-            //Logger.WriteDebug("t1: {0}ms", (int)stopwatch.ElapsedMilliseconds);
-
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
             var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceAttributeType, context).Where(IsWeavable).ToArray();
@@ -96,39 +94,23 @@ namespace ArxOne.MrAdvice.Weaver
             auditTimer.NewZone("Methods weaving advice");
             weavingAdvicesMethods.ForAll(i => RunWeavingAdvices(i, context));
             auditTimer.NewZone("Methods weaving");
-            weavableMethods
-#if !DEBUG
-//.AsParallel()
-#endif
-                    .ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, context));
+            weavableMethods.ForAll(m => WeaveMethod(moduleDefinition, m, adviceInterface, context));
 
             auditTimer.NewZone("Weavable interfaces detection");
             var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
             auditTimer.NewZone("Interface methods weaving");
-            weavableInterfaces
-#if !DEBUG
-//.AsParallel()
-#endif
-                    .ForAll(i => WeaveInterface(moduleDefinition, i, context));
-
-            //Logger.WriteDebug("t2: {0}ms", (int)stopwatch.ElapsedMilliseconds);
+            weavableInterfaces.ForAll(i => WeaveInterface(moduleDefinition, i, context));
 
             // and then, the info advices
             auditTimer.NewZone("Info advices weaving");
             var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IInfoAdvice));
-            moduleDefinition.GetTypes()
-#if !DEBUG
-//.AsParallel()
-#endif
-                    .ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, context));
+            moduleDefinition.GetTypes().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, context));
 
             auditTimer.NewZone("Abstract targets cleanup");
             foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
                 generatedFieldToBeRemoved.DeclaringType.Fields.Remove(generatedFieldToBeRemoved);
 
             auditTimer.LastZone();
-
-            //Logger.WriteDebug("t3: {0}ms", (int)stopwatch.ElapsedMilliseconds);
 
             var report = auditTimer.GetReport();
             var maxLength = report.Keys.Max(k => k.Length);
@@ -325,9 +307,6 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var ancestorsToChildren = reflectionNode.GetAncestorsToChildren().ToArray();
             return ancestorsToChildren
-#if !DEBUG
-                //.AsParallel()
-#endif
                 .Where(n => n.Method != null)
                 .Select(n => new MarkedNode { Node = n, Definitions = GetAllMarkers(n, markerInterface, context).ToArray() })
                 .Where(m => m.Definitions.Length > 0);
@@ -349,9 +328,6 @@ namespace ArxOne.MrAdvice.Weaver
                     .Where(t => IsMarker(t, markerInterface)))
                 .Distinct()
                 .Select(t => GetMarkerDefinition(t, context));
-#if DEBUG
-            //            Logger.WriteDebug(string.Format("{0} --> {1}", reflectionNode.ToString(), markers.Count()));
-#endif
             return markers;
         }
 
