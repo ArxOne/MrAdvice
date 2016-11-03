@@ -368,8 +368,8 @@ namespace ArxOne.MrAdvice.Weaver
             int priority = 0;
             if (priorityAttributes.Count > 0)
             {
-                var b = priorityAttributes[0].GetBlob();
-                priority = (b[5] << 24) | (b[4] << 16) | (b[3] << 8) | b[2];
+                var priorityAttribute = priorityAttributes[0];
+                priority = (int)priorityAttribute.ConstructorArguments[0].Value;
                 Logging.WriteDebug("Advice {0} has priority {1}", typeDefinition.FullName, priority);
             }
 
