@@ -24,7 +24,7 @@ namespace ArxOne.MrAdvice
     // ReSharper disable once UnusedMember.Global
     public static partial class Invocation
     {
-        private static readonly IDictionary<MethodBase, AspectInfo> AspectInfos = new Dictionary<MethodBase, AspectInfo>();
+        internal static readonly IDictionary<MethodBase, AspectInfo> AspectInfos = new Dictionary<MethodBase, AspectInfo>();
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
@@ -294,7 +294,7 @@ namespace ArxOne.MrAdvice
         /// <param name="targetMethod">The target method.</param>
         /// <param name="relatedPropertyInfo">The related property information.</param>
         /// <returns></returns>
-        private static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
+        internal static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
             where TAdvice : class, IAdvice
         {
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndParents().ToArray();

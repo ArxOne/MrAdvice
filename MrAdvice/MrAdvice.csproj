@@ -66,6 +66,7 @@
     <AssemblyOriginatorKeyFile>Properties\MrAdvice.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Advices.cs" />
     <Compile Include="Advice\AdvisedInterface.cs" />
     <Compile Include="Advice\MethodAsyncAdviceContext.cs" />
     <Compile Include="Advice\IMethodAsyncAdvice.cs" />
