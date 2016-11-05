@@ -4,12 +4,13 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Annotation;
     using dnlib.DotNet;
-    using IO;
     using Utility;
 
     /// <summary>
@@ -29,15 +30,15 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         protected override ReflectionNode LoadParent()
         {
             if (_propertyDefinition != null)
-                return new PropertyReflectionNode(_propertyDefinition);
+                return new PropertyReflectionNode(_propertyDefinition, null);
             // a bit tricky here, since a method can belong to a property
             var declaringType = _methodDefinition.DeclaringType;
             if (_methodDefinition.IsPropertyMethod())
             {
                 _propertyDefinition = declaringType.Properties.Single(p => p.GetMethod == _methodDefinition || p.SetMethod == _methodDefinition);
-                return new PropertyReflectionNode(_propertyDefinition);
+                return new PropertyReflectionNode(_propertyDefinition, null);
             }
-            return new TypeReflectionNode(declaringType);
+            return new TypeReflectionNode(declaringType, null);
         }
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// The children.
         /// </value>
         protected override IEnumerable<ReflectionNode> LoadChildren() => _methodDefinition.Parameters.Where(p => !p.IsHiddenThisParameter && p.ParamDef != null)
-            .Select(p => new ParameterReflectionNode(p.ParamDef, _methodDefinition));
+            .Select(p => new ParameterReflectionNode(p.ParamDef, _methodDefinition, this));
 
         /// <summary>
         /// Gets the custom attributes at this level.
@@ -66,7 +67,43 @@ namespace ArxOne.MrAdvice.Reflection.Groups
             }
         }
 
-        // return type has attributes
+        /// <summary>
+        /// Gets the attributes.
+        /// </summary>
+        /// <value>
+        /// The attributes.
+        /// </value>
+        public override MemberAttributes? Attributes
+        {
+            get
+            {
+                switch (_methodDefinition.Attributes & MethodAttributes.MemberAccessMask)
+                {
+                    case MethodAttributes.Private: // 1
+                        return MemberAttributes.PrivateMember;
+                    case MethodAttributes.FamANDAssem://2
+                        return MemberAttributes.FamilyAndAssemblyMember;
+                    case MethodAttributes.Assembly://3
+                        return MemberAttributes.AssemblyMember;
+                    case MethodAttributes.Family://4
+                        return MemberAttributes.FamilyMember;
+                    case MethodAttributes.FamORAssem://5
+                        return MemberAttributes.FamilyOrAssemblyMember;
+                    case MethodAttributes.Public://6
+                        return MemberAttributes.PublicMember;
+                    default:
+                        return 0; // WTF?
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public override string Name => $"{_methodDefinition.DeclaringType.FullName}.{_methodDefinition.Name}";
 
         /// <summary>
         /// Gets a value indicating whether this instance is generic.
@@ -98,11 +135,13 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// Initializes a new instance of the <see cref="MethodReflectionNode" /> class.
         /// </summary>
         /// <param name="methodDefinition">The method definition.</param>
+        /// <param name="parent">The parent.</param>
         /// <param name="propertyDefinition">The property.</param>
-        public MethodReflectionNode(MethodDef methodDefinition, PropertyDef propertyDefinition = null)
+        public MethodReflectionNode(MethodDef methodDefinition, ReflectionNode parent, PropertyDef propertyDefinition = null)
         {
             _methodDefinition = methodDefinition;
             _propertyDefinition = propertyDefinition;
+            Parent = parent;
         }
 
         /// <summary>
@@ -112,6 +151,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator MethodReflectionNode(MethodDef methodDefinition) => new MethodReflectionNode(methodDefinition);
+        public static implicit operator MethodReflectionNode(MethodDef methodDefinition) => new MethodReflectionNode(methodDefinition, null);
     }
 }

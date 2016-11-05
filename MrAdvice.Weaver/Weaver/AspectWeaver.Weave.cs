@@ -484,10 +484,9 @@ namespace ArxOne.MrAdvice.Weaver
         private void WeaveIntroductions(MethodDef method, TypeDef adviceInterface, ModuleDef moduleDefinition, WeavingContext context)
         {
             var typeDefinition = method.DeclaringType;
-            var advices = GetAllMarkers(new MethodReflectionNode(method), adviceInterface, context);
+            var advices = GetAllMarkers(new MethodReflectionNode(method, null), adviceInterface, context);
             var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, typeof(IntroducedFieldAttribute)).FindConstructors().Single());
             var markerAttributeCtorDef = new MemberRefUser(markerAttributeCtor.Module, markerAttributeCtor.Name, markerAttributeCtor.MethodSig, markerAttributeCtor.DeclaringType);
-            // moduleDefinition.SafeImport(markerAttributeCtor).ResolveMethodDef();
             foreach (var advice in advices)
             {
                 var adviceDefinition = TypeResolver.Resolve(advice.Type);
@@ -507,7 +506,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="context">The context.</param>
         private void WeaveInfoAdvices(ModuleDef moduleDefinition, TypeDef typeDefinition, ITypeDefOrRef infoAdviceInterface, WeavingContext context)
         {
-            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition), infoAdviceInterface, context).Where(IsWeavable).Any())
+            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition, null), infoAdviceInterface, context).Where(IsWeavable).Any())
             {
                 Logging.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
                 WeaveInfoAdvices(typeDefinition, moduleDefinition, false);

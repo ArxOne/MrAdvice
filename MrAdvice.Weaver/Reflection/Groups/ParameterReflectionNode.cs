@@ -23,7 +23,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        protected override ReflectionNode LoadParent() => new MethodReflectionNode(_methodDefinition);
+        protected override ReflectionNode LoadParent() => new MethodReflectionNode(_methodDefinition, null);
 
         private static readonly ReflectionNode[] NoChild = new ReflectionNode[0];
 
@@ -54,14 +54,16 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         public override string ToString() => DebugString;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ParameterReflectionNode"/> class.
+        /// Initializes a new instance of the <see cref="ParameterReflectionNode" /> class.
         /// </summary>
         /// <param name="parameterDefinition">The parameter definition.</param>
         /// <param name="methodDefinition">The method definition.</param>
-        public ParameterReflectionNode(ParamDef parameterDefinition, MethodDef methodDefinition)
+        /// <param name="parent">The parent.</param>
+        public ParameterReflectionNode(ParamDef parameterDefinition, MethodDef methodDefinition, MethodReflectionNode parent)
         {
             _parameterDefinition = parameterDefinition;
             _methodDefinition = methodDefinition;
+            Parent=parent;
         }
     }
 }

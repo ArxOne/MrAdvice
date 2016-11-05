@@ -31,7 +31,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        protected override IEnumerable<ReflectionNode> LoadChildren() => _moduleDefinition.GetTypes().OrderBy(t => t.Name).Select(t => new TypeReflectionNode(t));
+        protected override IEnumerable<ReflectionNode> LoadChildren() => _moduleDefinition.GetTypes().OrderBy(t => t.Name).Select(t => new TypeReflectionNode(t, this));
 
         /// <summary>
         /// Gets the custom attributes at this level.
@@ -52,12 +52,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         public override string ToString() => DebugString;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ModuleReflectionNode"/> class.
+        /// Initializes a new instance of the <see cref="ModuleReflectionNode" /> class.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        public ModuleReflectionNode(ModuleDef moduleDefinition)
+        /// <param name="parent">The parent.</param>
+        public ModuleReflectionNode(ModuleDef moduleDefinition, AssemblyReflectionNode parent)
         {
             _moduleDefinition = moduleDefinition;
+            Parent = parent;
         }
 
         /// <summary>
@@ -67,6 +69,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ModuleReflectionNode(ModuleDef moduleDefinition) => new ModuleReflectionNode(moduleDefinition);
+        public static implicit operator ModuleReflectionNode(ModuleDef moduleDefinition) => new ModuleReflectionNode(moduleDefinition, null);
     }
 }

@@ -31,7 +31,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        protected override IEnumerable<ReflectionNode> LoadChildren() => new[] { new ModuleReflectionNode(_assemblyDefinition.GetMainModule()) };
+        protected override IEnumerable<ReflectionNode> LoadChildren() => new[] { new ModuleReflectionNode(_assemblyDefinition.GetMainModule(), this) };
 
         /// <summary>
         /// Gets the custom attributes at this level.

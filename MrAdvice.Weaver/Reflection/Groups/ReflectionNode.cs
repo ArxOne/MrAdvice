@@ -9,13 +9,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Annotation;
     using dnlib.DotNet;
 
     /// <summary>
     /// Represents a reflection group.
     /// Can be assembly, module, type, [property], method, parameter, [return value]
     /// </summary>
-    internal abstract class ReflectionNode
+    public abstract class ReflectionNode
     {
         private ReflectionNode _parent;
 
@@ -33,6 +34,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
                     _parent = LoadParent();
                 return _parent;
             }
+            protected set { _parent = value; }
         }
 
         /// <summary>
@@ -90,6 +92,22 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         public virtual MethodDef Method => null;
 
         /// <summary>
+        /// Gets the attributes.
+        /// </summary>
+        /// <value>
+        /// The attributes.
+        /// </value>
+        public virtual MemberAttributes? Attributes => null;
+
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public virtual string Name => null;
+
+        /// <summary>
         /// Gets the self and ancestors.
         /// </summary>
         /// <returns></returns>
@@ -128,7 +146,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ReflectionNode(ModuleDef moduleDefinition) => new ModuleReflectionNode(moduleDefinition);
+        public static implicit operator ReflectionNode(ModuleDef moduleDefinition) => new ModuleReflectionNode(moduleDefinition, null);
 
         /// <summary>
         /// Performs an implicit conversion from <see cref="MethodDef"/> to <see cref="ReflectionNode"/>.
@@ -137,6 +155,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ReflectionNode(MethodDef methodDefinition) => new MethodReflectionNode(methodDefinition);
+        public static implicit operator ReflectionNode(MethodDef methodDefinition) => new MethodReflectionNode(methodDefinition, null);
     }
 }

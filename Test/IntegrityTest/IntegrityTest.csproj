@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TargetFrameworkTest.cs" />
+    <Compile Include="WildcardMatchTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MrAdvice.Weaver\MrAdvice.Weaver.csproj">

@@ -10,6 +10,22 @@ namespace TestApplication
     using System;
     using ArxOne.MrAdvice.Advice;
 
+    public class PublicClass
+    {
+        public void PublicMethod() { }
+
+        protected void ProtectedMethod() { }
+
+        private void PrivateMethod() { }
+
+        internal void InternalMethod() { }
+
+        protected internal void ProtectedInternalMethod() { }
+    }
+
+    internal class InternalClass
+    { }
+
     public static class Program
     {
         public static void Main(string[] args)

@@ -7,6 +7,7 @@
 namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
+    using Annotation;
     using dnlib.DotNet;
 
     /// <summary>
@@ -22,7 +23,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        protected override ReflectionNode LoadParent() => new TypeReflectionNode(_propertyDefinition.DeclaringType);
+        protected override ReflectionNode LoadParent() => new TypeReflectionNode(_propertyDefinition.DeclaringType, null);
 
         /// <summary>
         /// Gets the children.
@@ -33,9 +34,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         protected override IEnumerable<ReflectionNode> LoadChildren()
         {
             if (_propertyDefinition.GetMethod != null)
-                yield return new MethodReflectionNode(_propertyDefinition.GetMethod, _propertyDefinition);
+                yield return new MethodReflectionNode(_propertyDefinition.GetMethod, this, _propertyDefinition);
             if (_propertyDefinition.SetMethod != null)
-                yield return new MethodReflectionNode(_propertyDefinition.SetMethod, _propertyDefinition);
+                yield return new MethodReflectionNode(_propertyDefinition.SetMethod, this, _propertyDefinition);
         }
 
         /// <summary>
@@ -45,6 +46,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// The custom attributes.
         /// </value>
         public override IEnumerable<CustomAttribute> CustomAttributes => _propertyDefinition.CustomAttributes;
+
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public override string Name => $"{_propertyDefinition.DeclaringType.FullName}.{_propertyDefinition.Name}";
 
         private string DebugString => $"Property {_propertyDefinition.FullName}";
 
@@ -57,12 +66,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         public override string ToString() => DebugString;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PropertyReflectionNode"/> class.
+        /// Initializes a new instance of the <see cref="PropertyReflectionNode" /> class.
         /// </summary>
         /// <param name="propertyDefinition">The property definition.</param>
-        public PropertyReflectionNode(PropertyDef propertyDefinition)
+        /// <param name="parent">The parent.</param>
+        public PropertyReflectionNode(PropertyDef propertyDefinition, TypeReflectionNode parent)
         {
             _propertyDefinition = propertyDefinition;
+            Parent = parent;
         }
     }
 }
