@@ -186,3 +186,5 @@ MrAdvice.Weaver/MrAdvice.nuspec
 MrAdvice.Fody/References/
 MrAdvice.Fody/MrAdvice.nuspec
 *.debug
+
+.vs/
