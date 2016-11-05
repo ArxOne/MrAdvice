@@ -70,6 +70,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AbstractTargetTest.cs" />
+    <Compile Include="AdvicesTest.cs" />
     <Compile Include="Advices\AddA.cs" />
     <Compile Include="Advices\Async.cs" />
     <Compile Include="Advices\ChangeParameter.cs" />

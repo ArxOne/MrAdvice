@@ -66,6 +66,7 @@
     <AssemblyOriginatorKeyFile>Properties\MrAdvice.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Advices.cs" />
     <Compile Include="Advice\AdvisedInterface.cs" />
     <Compile Include="Advice\MethodAsyncAdviceContext.cs" />
     <Compile Include="Advice\IMethodAsyncAdvice.cs" />
@@ -75,7 +76,7 @@
     <Compile Include="Advice\SyncAdviceContext.cs" />
     <Compile Include="Advice\WeavingContext.cs" />
     <Compile Include="Annotation\AbstractTargetAttribute.cs" />
-    <Compile Include="Annotation\Pointcut.cs" />
+    <Compile Include="Annotation\ExecutionPointAttribute.cs" />
     <Compile Include="Aspect\AdviceInfo.cs" />
     <Compile Include="Advice\AdviceContext.cs" />
     <Compile Include="Advice\AdviceExtensions.cs" />
