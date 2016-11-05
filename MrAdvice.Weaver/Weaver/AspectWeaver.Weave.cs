@@ -149,10 +149,18 @@ namespace ArxOne.MrAdvice.Weaver
                     method.Body = new CilBody();
                 }
 
+                AddGeneratedAttribute(innerMethod, moduleDefinition, context);
+
                 WritePointcutBody(method, innerMethod, false, context);
                 lock (method.DeclaringType)
                     method.DeclaringType.Methods.Add(innerMethod);
             }
+        }
+
+        private static void AddGeneratedAttribute(MethodDefUser innerMethod, ModuleDefMD moduleDefinition, WeavingContext context)
+        {
+            var generatedAttribute = new CustomAttribute(context.ExecutionPointAttributeDefaultCtor);
+            innerMethod.CustomAttributes.Add(generatedAttribute);
         }
 
         /// <summary>

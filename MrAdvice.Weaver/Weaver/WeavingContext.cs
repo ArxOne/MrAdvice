@@ -29,5 +29,6 @@ namespace ArxOne.MrAdvice.Weaver
         public IDictionary<bool[], IMethod> ShortcutMethods { get; } = new Dictionary<bool[], IMethod>(new SequenceEqualityComparer<bool>());
 
         public IMethod InvocationProceedMethod { get; set; }
+        public MemberRef ExecutionPointAttributeDefaultCtor { get; set; }
     }
 }

@@ -35,24 +35,28 @@ namespace MethodLevelTest
         }
 
         [TestMethod]
+        [TestCategory("Advices")]
         public void AdvisedFromOutsideTest()
         {
             Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(GetType().GetMethod(nameof(Advised))));
         }
 
         [TestMethod]
+        [TestCategory("Advices")]
         public void AdvisedFromInsideTest()
         {
             Advised();
         }
 
         [TestMethod]
+        [TestCategory("Advices")]
         public void NotAdvisedFromOutsideTest()
         {
             Assert.IsNull(ArxOne.MrAdvice.Advices.Get(GetType().GetMethod(nameof(NotAdvised))));
         }
 
         [TestMethod]
+        [TestCategory("Advices")]
         public void NotAdvisedFromInsideTest()
         {
             NotAdvised();
