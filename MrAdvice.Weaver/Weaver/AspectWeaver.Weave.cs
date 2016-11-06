@@ -94,7 +94,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // sanity check
             var moduleDefinition = (ModuleDefMD)method.Module;
-            if (method.ReturnType.SafeEquivalent(moduleDefinition.SafeImport(typeof(void)).ToTypeSig()))
+            if (method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
             {
                 var customAttributes = method.CustomAttributes;
                 if (customAttributes.Any(c => c.AttributeType.Name == "AsyncStateMachineAttribute"))
@@ -174,7 +174,7 @@ namespace ArxOne.MrAdvice.Weaver
             var methodName = method.Name;
 
             // our special recipe, with weaving advices
-            var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceAttributeType, context).ToArray();
+            var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceInterfaceType, context).ToArray();
             var typeDefinition = markedMethod.Node.Method.DeclaringType;
             var initialType = TypeLoader.GetType(typeDefinition);
             var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, context, TypeResolver, Logging);

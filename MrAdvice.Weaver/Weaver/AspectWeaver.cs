@@ -71,9 +71,12 @@ namespace ArxOne.MrAdvice.Weaver
                 CompilerGeneratedAttributeType = moduleDefinition.Import(typeof(CompilerGeneratedAttribute)),
                 PriorityAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(PriorityAttribute)),
                 AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(AbstractTargetAttribute)),
-                WeavingAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(IWeavingAdvice)),
+                WeavingAdviceInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(IWeavingAdvice)),
 
                 ExecutionPointAttributeDefaultCtor = moduleDefinition.Import(TypeResolver.Resolve(moduleDefinition, typeof(ExecutionPointAttribute)).FindDefaultConstructor()),
+
+                ExcludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludePointcutAttribute)),
+                IncludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(IncludePointcutAttribute)),
             };
             // runtime check
             auditTimer.NewZone("Runtime check");
@@ -82,7 +85,7 @@ namespace ArxOne.MrAdvice.Weaver
 
             // weave methods (they can be property-related, too)
             auditTimer.NewZone("Weavable methods detection");
-            var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceAttributeType, context).Where(IsWeavable).ToArray();
+            var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(IsWeavable).ToArray();
             var weavableMethods = GetMarkedMethods(moduleDefinition, adviceInterface, context).Where(IsWeavable).ToArray();
             auditTimer.NewZone("Abstract targets");
             var generatedFieldsToBeRemoved = new List<FieldDef>();
@@ -125,7 +128,7 @@ namespace ArxOne.MrAdvice.Weaver
                 moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework.ToString(), Product.Version);
         }
 
-        private IEnumerable<FieldDef> GetRemovableFields(IList<MarkedNode> nodes, WeavingContext context)
+        private static IEnumerable<FieldDef> GetRemovableFields(IList<MarkedNode> nodes, WeavingContext context)
         {
             var type = nodes.First().Node.Method.DeclaringType;
             // get all types
@@ -139,14 +142,14 @@ namespace ArxOne.MrAdvice.Weaver
             return removableFields;
         }
 
-        private IEnumerable<Tuple<FieldDef, int>> GetRemovableFields(IEnumerable<MethodDef> methods, WeavingContext context)
+        private static IEnumerable<Tuple<FieldDef, int>> GetRemovableFields(IEnumerable<MethodDef> methods, WeavingContext context)
         {
             var allFields = methods.SelectMany(m => GetRemovableFields(m, context));
             var fieldsCount = allFields.GroupBy(f => f);
             return fieldsCount.Select(f => Tuple.Create(f.Key, f.Count()));
         }
 
-        private IEnumerable<FieldDef> GetRemovableFields(MethodDef method, WeavingContext context)
+        private static IEnumerable<FieldDef> GetRemovableFields(MethodDef method, WeavingContext context)
         {
             return from instruction in method.Body.Instructions
                    let fieldReference = instruction.Operand as IField
@@ -310,7 +313,8 @@ namespace ArxOne.MrAdvice.Weaver
             var ancestorsToChildren = reflectionNode.GetAncestorsToChildren().ToArray();
             return ancestorsToChildren
                 .Where(n => n.Method != null)
-                .Select(n => new MarkedNode { Node = n, Definitions = GetAllMarkers(n, markerInterface, context).ToArray() })
+                .Select(n => new MarkedNode(n, GetAllMarkers(n, markerInterface, context)))
+                .Where(m => GetPointcutRules(m, context).Match(m.Node))
                 .Where(m => m.Definitions.Length > 0);
         }
 
@@ -367,6 +371,7 @@ namespace ArxOne.MrAdvice.Weaver
             if (priorityAttributes.Count > 1)
                 Logging.WriteWarning("Advice {0} has more than one priority. Using the first found", typeDefinition.FullName);
 
+#if uneedednow
             int priority = 0;
             if (priorityAttributes.Count > 0)
             {
@@ -374,11 +379,12 @@ namespace ArxOne.MrAdvice.Weaver
                 priority = (int)priorityAttribute.ConstructorArguments[0].Value;
                 Logging.WriteDebug("Advice {0} has priority {1}", typeDefinition.FullName, priority);
             }
+#endif
 
             var abstractTarget = typeDefinition.CustomAttributes.Any(a => a.AttributeType.SafeEquivalent(context.AbstractTargetAttributeType));
             if (abstractTarget)
-                Logging.WriteDebug("Advice {0} abstracts target", typeDefinition.FullName, priority);
-            var markerDefinition = new MarkerDefinition { Type = typeDefinition, Priority = priority, AbstractTarget = abstractTarget };
+                Logging.WriteDebug("Advice {0} abstracts target", typeDefinition.FullName);
+            var markerDefinition = new MarkerDefinition(typeDefinition, abstractTarget);
             return markerDefinition;
         }
 

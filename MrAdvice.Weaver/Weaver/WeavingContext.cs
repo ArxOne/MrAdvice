@@ -9,6 +9,9 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
+    using Advice;
+    using Annotation;
     using dnlib.DotNet;
     using Utility;
 
@@ -16,19 +19,90 @@ namespace ArxOne.MrAdvice.Weaver
     /// Weaving context
     /// Allows to gather all common data
     /// </summary>
-    public class WeavingContext
+    internal class WeavingContext
     {
+        private readonly TypeResolver _typeResolver;
+
+        /// <summary>
+        /// Gets or sets the type of the <see cref="CompilerGeneratedAttribute"/>.
+        /// </summary>
+        /// <value>
+        /// The type of the compiler generated attribute.
+        /// </value>
         public ITypeDefOrRef CompilerGeneratedAttributeType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the <see cref="PriorityAttribute"/>.
+        /// </summary>
+        /// <value>
+        /// The type of the priority attribute.
+        /// </value>
         public ITypeDefOrRef PriorityAttributeType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the <see cref="AbstractTargetAttribute"/>.
+        /// </summary>
+        /// <value>
+        /// The type of the abstract target attribute.
+        /// </value>
         public ITypeDefOrRef AbstractTargetAttributeType { get; set; }
 
-        public ITypeDefOrRef WeavingAdviceAttributeType { get; set; }
+        /// <summary>
+        /// Gets or sets the type of the <see cref="IWeavingAdvice"/>.
+        /// </summary>
+        /// <value>
+        /// The type of the weaving advice attribute.
+        /// </value>
+        public ITypeDefOrRef WeavingAdviceInterfaceType { get; set; }
 
         public TypeDef ShortcutClass { get; set; }
 
+        /// <summary>
+        /// Gets the currently added shortcut methods (shortcut to <see cref="Invocation.ProceedAdvice"/> method).
+        /// </summary>
+        /// <value>
+        /// The shortcut methods.
+        /// </value>
         public IDictionary<bool[], IMethod> ShortcutMethods { get; } = new Dictionary<bool[], IMethod>(new SequenceEqualityComparer<bool>());
 
+        /// <summary>
+        /// Gets or sets the <see cref="Invocation.ProceedAdvice"/> method.
+        /// </summary>
+        /// <value>
+        /// The invocation proceed method.
+        /// </value>
         public IMethod InvocationProceedMethod { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ExecutionPointAttribute"/> constructor.
+        /// </summary>
+        /// <value>
+        /// The execution point attribute default ctor.
+        /// </value>
         public MemberRef ExecutionPointAttributeDefaultCtor { get; set; }
+
+        /// <summary>
+        /// Gets the advices rules.
+        /// </summary>
+        /// <value>
+        /// The advices rules.
+        /// </value>
+        public IDictionary<ITypeDefOrRef, PointcutRules> AdvicesRules { get; } = new Dictionary<ITypeDefOrRef, PointcutRules>(TypeComparer.Instance);
+
+        /// <summary>
+        /// Gets or sets the type of the <see cref="ExcludePointcutAttribute"/>.
+        /// </summary>
+        /// <value>
+        /// The type of the exclude pointcut attribute.
+        /// </value>
+        public TypeDef ExcludePointcutAttributeType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the <see cref="IncludePointcutAttribute"/>.
+        /// </summary>
+        /// <value>
+        /// The type of the include pointcut attribute.
+        /// </value>
+        public TypeDef IncludePointcutAttributeType { get; set; }
     }
 }

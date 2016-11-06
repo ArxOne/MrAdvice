@@ -13,7 +13,7 @@ namespace ArxOne.MrAdvice.Annotation
     /// Allows to include or exclude namespaces/types/methods/etc. from being advised
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public abstract class Pointcut : Attribute
+    public abstract class PointcutAttribute : Attribute
     {
         /// <summary>
         /// Gets or sets the name matching patterns.
@@ -33,7 +33,7 @@ namespace ArxOne.MrAdvice.Annotation
         public MemberAttributes Attributes { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether this <see cref="Pointcut"/> is include.
+        /// Gets a value indicating whether this <see cref="PointcutAttribute"/> is include.
         /// </summary>
         /// <value>
         ///   <c>true</c> if include; otherwise, <c>false</c>.
@@ -41,17 +41,17 @@ namespace ArxOne.MrAdvice.Annotation
         public abstract bool Include { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Pointcut"/> class.
+        /// Initializes a new instance of the <see cref="PointcutAttribute"/> class.
         /// </summary>
-        protected Pointcut()
+        protected PointcutAttribute()
             : this(new string[0])
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Pointcut"/> class.
+        /// Initializes a new instance of the <see cref="PointcutAttribute"/> class.
         /// </summary>
         /// <param name="names">The names.</param>
-        protected Pointcut(params string[] names)
+        protected PointcutAttribute(params string[] names)
         {
             Names = names;
         }
@@ -163,11 +163,11 @@ namespace ArxOne.MrAdvice.Annotation
     /// Exclusion filters for pointcuts.
     /// This has to be applied on advices
     /// </summary>
-    /// <seealso cref="ArxOne.MrAdvice.Annotation.Pointcut" />
-    public class ExcludePointcut : Pointcut
+    /// <seealso cref="PointcutAttribute" />
+    public sealed class ExcludePointcutAttribute : PointcutAttribute
     {
         /// <summary>
-        /// Gets a value indicating whether this <see cref="Pointcut" /> is include.
+        /// Gets a value indicating whether this <see cref="PointcutAttribute" /> is include.
         /// </summary>
         /// <value>
         ///   <c>true</c> if include; otherwise, <c>false</c>.
@@ -175,17 +175,17 @@ namespace ArxOne.MrAdvice.Annotation
         public override bool Include => false;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExcludePointcut"/> class.
+        /// Initializes a new instance of the <see cref="ExcludePointcutAttribute"/> class.
         /// </summary>
-        public ExcludePointcut()
+        public ExcludePointcutAttribute()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExcludePointcut"/> class.
+        /// Initializes a new instance of the <see cref="ExcludePointcutAttribute"/> class.
         /// </summary>
         /// <param name="names">The names.</param>
-        public ExcludePointcut(params string[] names)
+        public ExcludePointcutAttribute(params string[] names)
             : base(names)
         { }
     }
@@ -194,11 +194,11 @@ namespace ArxOne.MrAdvice.Annotation
     /// Exclusion filters for pointcuts.
     /// This has to be applied on advices
     /// </summary>
-    /// <seealso cref="ArxOne.MrAdvice.Annotation.Pointcut" />
-    public class IncludePointcut : Pointcut
+    /// <seealso cref="PointcutAttribute" />
+    public sealed class IncludePointcutAttribute : PointcutAttribute
     {
         /// <summary>
-        /// Gets a value indicating whether this <see cref="Pointcut" /> is include.
+        /// Gets a value indicating whether this <see cref="PointcutAttribute" /> is include.
         /// </summary>
         /// <value>
         ///   <c>true</c> if include; otherwise, <c>false</c>.
@@ -206,17 +206,17 @@ namespace ArxOne.MrAdvice.Annotation
         public override bool Include => true;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IncludePointcut"/> class.
+        /// Initializes a new instance of the <see cref="IncludePointcutAttribute"/> class.
         /// </summary>
-        public IncludePointcut()
+        public IncludePointcutAttribute()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IncludePointcut"/> class.
+        /// Initializes a new instance of the <see cref="IncludePointcutAttribute"/> class.
         /// </summary>
         /// <param name="names">The names.</param>
-        public IncludePointcut(params string[] names)
+        public IncludePointcutAttribute(params string[] names)
             : base(names)
         { }
     }
@@ -226,7 +226,7 @@ namespace ArxOne.MrAdvice.Annotation
     /// </summary>
     /// <seealso cref="System.Attribute" />
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public class ExcludeAdvices : Attribute
+    public sealed class ExcludeAdvicesAttribute : Attribute
     {
         /// <summary>
         /// Gets or sets the name matching patterns.
@@ -238,17 +238,17 @@ namespace ArxOne.MrAdvice.Annotation
         public string[] Names { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExcludeAdvices"/> class.
+        /// Initializes a new instance of the <see cref="ExcludeAdvicesAttribute"/> class.
         /// </summary>
-        protected ExcludeAdvices()
+        public ExcludeAdvicesAttribute()
             : this(new string[0])
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExcludeAdvices"/> class.
+        /// Initializes a new instance of the <see cref="ExcludeAdvicesAttribute"/> class.
         /// </summary>
         /// <param name="names">The names.</param>
-        protected ExcludeAdvices(params string[] names)
+        public ExcludeAdvicesAttribute(params string[] names)
         {
             Names = names;
         }

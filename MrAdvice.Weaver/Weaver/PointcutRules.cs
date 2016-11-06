@@ -26,5 +26,29 @@ namespace ArxOne.MrAdvice.Weaver
             // now check that no rule applies
             return ExcludeRules.All(r => !r.Match(node));
         }
+
+        public static PointcutRules NoRules = new PointcutRules();
+
+        /// <summary>
+        /// Implements the operator +.
+        /// </summary>
+        /// <param name="a">a.</param>
+        /// <param name="b">The b.</param>
+        /// <returns>
+        /// The result of the operator.
+        /// </returns>
+        public static PointcutRules operator +(PointcutRules a, PointcutRules b)
+        {
+            if (a.IncludeRules.Count == 0 && a.ExcludeRules.Count == 0)
+                return b;
+            if (b.IncludeRules.Count == 0 && b.ExcludeRules.Count == 0)
+                return a;
+            var c = new PointcutRules();
+            c.IncludeRules.AddRange(a.IncludeRules);
+            c.IncludeRules.AddRange(b.IncludeRules);
+            c.ExcludeRules.AddRange(a.ExcludeRules);
+            c.ExcludeRules.AddRange(b.ExcludeRules);
+            return c;
+        }
     }
 }
