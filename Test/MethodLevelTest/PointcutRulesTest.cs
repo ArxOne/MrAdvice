@@ -24,12 +24,30 @@ namespace MethodLevelTest
             }
         }
 
+        public class AnyAdvice : Attribute, IMethodAdvice
+        {
+            public void Advise(MethodAdviceContext context)
+            {
+                context.Proceed();
+            }
+        }
+
         [SetterAdvice]
         public class SetterAdvisedType
         {
             public void SetA() { }
             public void ZetA() { }
             public void SetB() { }
+        }
+
+        [AnyAdvice]
+        public class AnyAdvisedType
+        {
+            public void F() { }
+            public void G() { }
+
+            [ExcludeAdvices("*+AnyAdvice")]
+            public void H() { }
         }
 
         [TestMethod]
@@ -41,6 +59,17 @@ namespace MethodLevelTest
             Assert.IsNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.ZetA))));
             Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.SetA))));
             Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.SetB))));
+        }
+
+        [TestMethod]
+        [TestCategory("Pointcut selection")]
+        public void ExcludeAdviceTest()
+        {
+            var t = typeof(AnyAdvisedType);
+            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetConstructor(new Type[0])));
+            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.F))));
+            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.G))));
+            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.H))));
         }
     }
 }

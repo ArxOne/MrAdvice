@@ -7,10 +7,12 @@
 
 namespace ArxOne.MrAdvice.Weaver
 {
-    using System.Reflection;
+    using dnlib.DotNet;
     using Pointcut;
     using Reflection.Groups;
     using Utility;
+    using MethodAttributes = System.Reflection.MethodAttributes;
+    using TypeAttributes = System.Reflection.TypeAttributes;
 
     /// <summary>
     /// Extensions to <see cref="PointcutSelector"/>, to ease use from weaver
@@ -21,13 +23,17 @@ namespace ArxOne.MrAdvice.Weaver
         /// Indicates whether the specified node has to be selected for advice
         /// </summary>
         /// <param name="pointcutSelector">The pointcut selector.</param>
-        /// <param name="reflectionNode">The reflection node.</param>
+        /// <param name="method">The method.</param>
         /// <returns></returns>
-        public static bool Select(this PointcutSelector pointcutSelector, ReflectionNode reflectionNode)
+        public static bool Select(this PointcutSelector pointcutSelector, MethodDef method)
         {
-            var method = reflectionNode.Method;
-            var name = $"{method.DeclaringType.FullName}.{method.Name}";
+            var name = $"{method.DeclaringType.FullName}.{method.Name}".Replace('/', '+');
             return pointcutSelector.Select(name, ((MethodAttributes)method.Attributes).ToMemberAttributes() | ((TypeAttributes)method.DeclaringType.Attributes).ToMemberAttributes());
+        }
+        public static bool Select(this PointcutSelector pointcutSelector, ITypeDefOrRef type)
+        {
+            var name = type.FullName.Replace('/', '+');
+            return pointcutSelector.Select(name, null);
         }
     }
 }
