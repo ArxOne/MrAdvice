@@ -46,6 +46,8 @@ namespace ArxOne.MrAdvice.Pointcut
             if (IncludeRules.Count > 0 && !IncludeRules.Any(r => r.Select(reflectionName, memberAttributes)))
                 return false;
             // now check that no rule applies
+            if (ExcludeRules.Count == 0)
+                return true;
             return ExcludeRules.All(r => !r.Select(reflectionName, memberAttributes));
         }
 

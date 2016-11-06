@@ -30,7 +30,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// <value>
         /// The definitions.
         /// </value>
-        public MarkerDefinition[] Definitions { get; }
+        public List<MarkerDefinition> Definitions { get; }
 
         /// <summary>
         /// Gets a value indicating whether markers at this node will abstract it (remove its execution point)d.
@@ -43,7 +43,7 @@ namespace ArxOne.MrAdvice.Annotation
         public MarkedNode(ReflectionNode node, IEnumerable<MarkerDefinition> definitions)
         {
             Node = node;
-            Definitions = definitions.ToArray();
+            Definitions = definitions.ToList();
         }
     }
 }

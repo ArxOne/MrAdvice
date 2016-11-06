@@ -28,6 +28,35 @@ namespace ArxOne.MrAdvice
         }
 
         /// <summary>
+        /// Gets the exclude selector.
+        /// </summary>
+        /// <param name="methodBase">The method base.</param>
+        /// <returns></returns>
+        private static PointcutSelector GetAdviceSelector(MethodBase methodBase)
+        {
+            var pointcutSelector = new PointcutSelector();
+            // 1. some special case, avoid type from advising it self
+            if (typeof(IAdvice).IsAssignableFrom(methodBase.DeclaringType))
+                pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(methodBase.DeclaringType.FullName));
+            // 2. get from method
+            foreach (ExcludeAdvicesAttribute methodExclude in methodBase.GetCustomAttributes(typeof(ExcludeAdvicesAttribute), true))
+                pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(methodExclude.AdvicesTypes));
+            // 3. from property, if any
+            var propertyInfo = GetPropertyInfo(methodBase);
+            if (propertyInfo != null)
+                foreach (ExcludeAdvicesAttribute propertyExclude in propertyInfo.Item1.GetCustomAttributes(typeof(ExcludeAdvicesAttribute), true))
+                    pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(propertyExclude.AdvicesTypes));
+            // 4. from type and outer types
+            for (var type = methodBase.DeclaringType; type != null; type = type.DeclaringType)
+                foreach (ExcludeAdvicesAttribute typeExclude in type.GetCustomAttributes(typeof(ExcludeAdvicesAttribute), true))
+                    pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(typeExclude.AdvicesTypes));
+            // 5. from assembly
+            foreach (ExcludeAdvicesAttribute assemblyExclude in methodBase.DeclaringType.Assembly.GetCustomAttributes(typeof(ExcludeAdvicesAttribute), true))
+                pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(assemblyExclude.AdvicesTypes));
+            return pointcutSelector;
+        }
+
+        /// <summary>
         /// Gets the <see cref="PointcutSelector"/> related to given advice attribute type.
         /// </summary>
         /// <param name="adviceType">Type of the advice.</param>

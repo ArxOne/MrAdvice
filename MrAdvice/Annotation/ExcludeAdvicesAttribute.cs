@@ -23,7 +23,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// <value>
         /// The name.
         /// </value>
-        public string[] Names { get; set; }
+        public string[] AdvicesTypes { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExcludeAdvicesAttribute"/> class.
@@ -33,12 +33,12 @@ namespace ArxOne.MrAdvice.Annotation
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExcludeAdvicesAttribute"/> class.
+        /// Initializes a new instance of the <see cref="ExcludeAdvicesAttribute" /> class.
         /// </summary>
-        /// <param name="names">The names.</param>
-        public ExcludeAdvicesAttribute(params string[] names)
+        /// <param name="advicesTypes">The types.</param>
+        public ExcludeAdvicesAttribute(params string[] advicesTypes)
         {
-            Names = names;
+            AdvicesTypes = advicesTypes;
         }
     }
 }

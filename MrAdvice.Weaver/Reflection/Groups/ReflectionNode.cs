@@ -9,8 +9,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Annotation;
     using dnlib.DotNet;
+    using Pointcut;
 
     /// <summary>
     /// Represents a reflection group.
@@ -90,7 +90,15 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// The method.
         /// </value>
         public virtual MethodDef Method => null;
-        
+
+        /// <summary>
+        /// Gets or sets the advice selector.
+        /// </summary>
+        /// <value>
+        /// The advice selector.
+        /// </value>
+        public PointcutSelector AdviceSelector { get; set; }
+
         /// <summary>
         /// Gets the self and ancestors.
         /// </summary>

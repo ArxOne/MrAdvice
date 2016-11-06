@@ -105,5 +105,13 @@ namespace ArxOne.MrAdvice.Weaver
         /// The type of the include pointcut attribute.
         /// </value>
         public TypeDef IncludePointcutAttributeType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the exclude advice attribute.
+        /// </summary>
+        /// <value>
+        /// The type of the exclude advice attribute.
+        /// </value>
+        public TypeDef ExcludeAdviceAttributeType { get; set; }
     }
 }

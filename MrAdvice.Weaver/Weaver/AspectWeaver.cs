@@ -77,6 +77,7 @@ namespace ArxOne.MrAdvice.Weaver
 
                 ExcludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludePointcutAttribute)),
                 IncludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(IncludePointcutAttribute)),
+                ExcludeAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludeAdvicesAttribute)),
             };
             // runtime check
             auditTimer.NewZone("Runtime check");
@@ -311,19 +312,47 @@ namespace ArxOne.MrAdvice.Weaver
         private IEnumerable<MarkedNode> GetMarkedMethods(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, WeavingContext context)
         {
             var ancestorsToChildren = reflectionNode.GetAncestorsToChildren().ToArray();
-            return ancestorsToChildren
-                .Where(n => n.Method != null)
-                .Select(n => new MarkedNode(n, GetAllMarkers(n, markerInterface, context)))
-                .Where(m => m.Definitions.Length > 0)
-                .Where(m => IsIncludedByPointcut(m, context));
+            return from node in ancestorsToChildren
+                   where node.Method != null
+                   let allMakersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context))
+                   where allMakersNode.Definitions.Any() && IsIncludedByPointcut(allMakersNode, context)
+                   let includedMarkersNode = new MarkedNode(node, allMakersNode.Definitions.Where(d => IsIncludedByNode(d, node, context)))
+                   where includedMarkersNode.Definitions.Any()
+                   select includedMarkersNode;
         }
 
+        /// <summary>
+        /// Determines whether the <see cref="MarkedNode"/> is included by pointcut
+        /// </summary>
+        /// <param name="markedNode">The marked node.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>
+        ///   <c>true</c> if [is included by pointcut] [the specified marked node]; otherwise, <c>false</c>.
+        /// </returns>
         private bool IsIncludedByPointcut(MarkedNode markedNode, WeavingContext context)
         {
-            var isIncludedByPointcut = GetPointcutRules(markedNode, context).Select(markedNode.Node);
+            var isIncludedByPointcut = GetPointcutSelector(markedNode, context).Select(markedNode.Node);
             if (!isIncludedByPointcut)
                 Logging.WriteDebug("Excluding method '{0}' according to pointcut rules", markedNode.Node.Method.FullName);
             return isIncludedByPointcut;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="ReflectionNode"/> allows the given <see cref="MarkerDefinition"/>.
+        /// </summary>
+        /// <param name="markerDefinition">The marker definition.</param>
+        /// <param name="node">The node.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>
+        ///   <c>true</c> if [is included by node] [the specified node]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsIncludedByNode(MarkerDefinition markerDefinition, ReflectionNode node, WeavingContext context)
+        {
+            var adviceSelector = GetAdviceSelector(node, context);
+            var isIncluded = adviceSelector.Select(markerDefinition.Type.FullName, null);
+            if (!isIncluded)
+                Logging.WriteDebug("Method '{0}' excluded advice '{1}'", node.Method.FullName, markerDefinition.Type.FullName);
+            return isIncluded;
         }
 
         /// <summary>

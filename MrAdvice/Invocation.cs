@@ -13,6 +13,7 @@ namespace ArxOne.MrAdvice
     using System.Threading.Tasks;
     using Advice;
     using Aspect;
+    using Pointcut;
     using Threading;
     using Utility;
 
@@ -341,8 +342,20 @@ namespace ArxOne.MrAdvice
         internal static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
             where TAdvice : class, IAdvice
         {
+            // first of all, get all advices that should apply here
             var allAdvices = GetAllAdvices<TAdvice>(targetMethod, out relatedPropertyInfo);
-            return allAdvices.Where(a => Select(targetMethod, a));
+            // then, keep only selected advices (by their declaring pointcuts)
+            var selectedAdvices = allAdvices.Where(a => Select(targetMethod, a));
+            // if method declares an exclusion, use it
+            var adviceSelector = GetAdviceSelector(targetMethod);
+            // remaining advices
+            var advices = selectedAdvices.Where(a => SelectAdvice(a, adviceSelector));
+            return advices;
+        }
+
+        private static bool SelectAdvice(AdviceInfo adviceInfo, PointcutSelector exclusionRules)
+        {
+            return exclusionRules.Select(adviceInfo.Advice.GetType().FullName, null);
         }
 
         private static AdviceInfo CreateAdvice<TAdvice>(TAdvice advice)

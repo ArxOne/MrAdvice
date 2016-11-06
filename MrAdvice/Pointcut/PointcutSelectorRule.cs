@@ -37,6 +37,20 @@ namespace ArxOne.MrAdvice.Pointcut
         public MemberAttributes Attributes { get; set; } = MemberAttributes.Any;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="PointcutSelectorRule"/> class.
+        /// </summary>
+        public PointcutSelectorRule() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PointcutSelectorRule"/> class.
+        /// </summary>
+        /// <param name="names">The names.</param>
+        public PointcutSelectorRule(params string[] names)
+        {
+            Names.AddRange(names);
+        }
+
+        /// <summary>
         /// Tells if the given string matches the given wildcard.
         /// Two wildcards are allowed: '*' and '?'
         /// '*' matches 0 or more characters
