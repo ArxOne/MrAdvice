@@ -108,8 +108,7 @@ namespace ArxOne.MrAdvice
             var rule = new PointcutSelectorRule();
             if (pointcutAttribute.Names != null)
                 rule.Names.AddRange(pointcutAttribute.Names);
-            if (pointcutAttribute.Attributes.HasValue)
-                rule.Attributes = pointcutAttribute.Attributes.Value;
+            rule.Attributes = pointcutAttribute.Attributes;
             return rule;
         }
     }

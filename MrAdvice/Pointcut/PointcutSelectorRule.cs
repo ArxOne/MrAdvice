@@ -153,6 +153,8 @@ namespace ArxOne.MrAdvice.Pointcut
         /// <returns></returns>
         public bool Select(string reflectionName)
         {
+            if (Names.Count == 0)
+                return true;
             return Names.Any(n => MatchName(n, reflectionName));
         }
 
@@ -165,7 +167,7 @@ namespace ArxOne.MrAdvice.Pointcut
         {
             if (!memberAttributes.HasValue)
                 return true;
-            return (memberAttributes.Value & memberAttributes) != 0;
+            return (memberAttributes.Value & Attributes) != 0;
         }
 
         /// <summary>

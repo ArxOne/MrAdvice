@@ -30,7 +30,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// <value>
         /// The attributes.
         /// </value>
-        public MemberAttributes? Attributes { get; set; }
+        public MemberAttributes Attributes { get; set; } = MemberAttributes.Any;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PointcutAttribute"/> class.
