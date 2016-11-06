@@ -76,7 +76,11 @@
     <Compile Include="Advice\SyncAdviceContext.cs" />
     <Compile Include="Advice\WeavingContext.cs" />
     <Compile Include="Annotation\AbstractTargetAttribute.cs" />
+    <Compile Include="Annotation\ExcludeAdvicesAttribute.cs" />
+    <Compile Include="Annotation\ExcludePointcutAttribute.cs" />
     <Compile Include="Annotation\ExecutionPointAttribute.cs" />
+    <Compile Include="Annotation\IncludePointcutAttribute.cs" />
+    <Compile Include="Annotation\MemberAttributes.cs" />
     <Compile Include="Annotation\PointcutAttribute.cs" />
     <Compile Include="Aspect\AdviceInfo.cs" />
     <Compile Include="Advice\AdviceContext.cs" />

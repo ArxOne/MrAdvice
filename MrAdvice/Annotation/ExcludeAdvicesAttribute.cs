@@ -10,10 +10,11 @@ namespace ArxOne.MrAdvice.Annotation
     using System;
 
     /// <summary>
-    /// Allows to include or exclude namespaces/types/methods/etc. from being advised
+    /// Allows a class to be advice-proof, by specifying which advices won't apply
     /// </summary>
+    /// <seealso cref="System.Attribute" />
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public abstract class PointcutAttribute : Attribute
+    public sealed class ExcludeAdvicesAttribute : Attribute
     {
         /// <summary>
         /// Gets or sets the name matching patterns.
@@ -25,33 +26,17 @@ namespace ArxOne.MrAdvice.Annotation
         public string[] Names { get; set; }
 
         /// <summary>
-        /// Gets or sets the attributes to match.
+        /// Initializes a new instance of the <see cref="ExcludeAdvicesAttribute"/> class.
         /// </summary>
-        /// <value>
-        /// The attributes.
-        /// </value>
-        public MemberAttributes Attributes { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether this <see cref="PointcutAttribute"/> is include.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if include; otherwise, <c>false</c>.
-        /// </value>
-        public abstract bool Include { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PointcutAttribute"/> class.
-        /// </summary>
-        protected PointcutAttribute()
+        public ExcludeAdvicesAttribute()
             : this(new string[0])
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PointcutAttribute"/> class.
+        /// Initializes a new instance of the <see cref="ExcludeAdvicesAttribute"/> class.
         /// </summary>
         /// <param name="names">The names.</param>
-        protected PointcutAttribute(params string[] names)
+        public ExcludeAdvicesAttribute(params string[] names)
         {
             Names = names;
         }
