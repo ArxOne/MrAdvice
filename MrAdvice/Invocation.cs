@@ -294,15 +294,19 @@ namespace ArxOne.MrAdvice
         /// <param name="targetMethod">The target method.</param>
         /// <param name="relatedPropertyInfo">The related property information.</param>
         /// <returns></returns>
-        internal static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
+        internal static IEnumerable<AdviceInfo> GetAllAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
             where TAdvice : class, IAdvice
         {
-            var typeAndParents = targetMethod.DeclaringType.GetSelfAndParents().ToArray();
+            // inheritance hierarchy
+            var typeAndParents = targetMethod.DeclaringType.GetSelfAndEnclosing().SelectMany(t => t.GetSelfAndParents()).Distinct().ToArray();
+            // assemblies
             var assemblyAndParents = typeAndParents.Select(t => t.Assembly).Distinct();
 
             // advices down to method
-            var allAdvices = assemblyAndParents.SelectMany(GetAttributes<TAdvice>).Union(typeAndParents.SelectMany(GetAttributes<TAdvice>))
-                .Union(GetAttributes<TAdvice>(targetMethod)).Select(CreateAdvice);
+            IEnumerable<AdviceInfo> allAdvices = assemblyAndParents.SelectMany(GetAttributes<TAdvice>)
+                .Union(typeAndParents.SelectMany(GetAttributes<TAdvice>))
+                .Union(GetAttributes<TAdvice>(targetMethod)).Select(CreateAdvice)
+                .ToArray();
 
             // optional from property
             relatedPropertyInfo = GetPropertyInfo(targetMethod);
@@ -332,6 +336,13 @@ namespace ArxOne.MrAdvice
             }
 
             return allAdvices;
+        }
+
+        internal static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
+            where TAdvice : class, IAdvice
+        {
+            var allAdvices = GetAllAdvices<TAdvice>(targetMethod, out relatedPropertyInfo);
+            return allAdvices.Where(a => Select(targetMethod, a));
         }
 
         private static AdviceInfo CreateAdvice<TAdvice>(TAdvice advice)

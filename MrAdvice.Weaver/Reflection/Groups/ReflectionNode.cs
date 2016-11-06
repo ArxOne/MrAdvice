@@ -90,23 +90,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// The method.
         /// </value>
         public virtual MethodDef Method => null;
-
-        /// <summary>
-        /// Gets the attributes.
-        /// </summary>
-        /// <value>
-        /// The attributes.
-        /// </value>
-        public virtual MemberAttributes? Attributes => null;
-
-        /// <summary>
-        /// Gets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public virtual string Name => null;
-
+        
         /// <summary>
         /// Gets the self and ancestors.
         /// </summary>

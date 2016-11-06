@@ -18,68 +18,87 @@ namespace ArxOne.MrAdvice.Annotation
         /// <summary>
         /// Public type
         /// </summary>
-        PublicType = 0x01,
+        PublicGlobalType = 0x0001,
+        /// <summary>
+        /// Public nested type
+        /// </summary>
+        PublicNestedType = 0x0002,
         /// <summary>
         /// Public member
         /// </summary>
-        PublicMember = 0x02,
+        PublicMember = 0x0008,
         /// <summary>
-        /// Anything public
+        /// Any public type
         /// </summary>
-        Public = PublicType | PublicMember,
+        PublicType = PublicGlobalType | PublicNestedType,
 
+        /// <summary>
+        /// Family nested type
+        /// </summary>
+        FamilyNestedType = 0x0020,
         /// <summary>
         /// Member is accessible only from type and inherited types
         /// Yes, that's "protected"
         /// </summary>
-        FamilyMember = 0x04,
+        FamilyMember = 0x0080,
+
         /// <summary>
-        /// Type is accessible only from type and inherited types
+        /// Family type
         /// </summary>
-        FamilyType = 0x08,
+        FamilyType = FamilyNestedType,
 
         /// <summary>
         /// Type is private to assembly
         /// Yes, that's "assembly"
         /// </summary>
-        PrivateType = 0x10,
+        PrivateGlobalType = 0x0100,
+        /// <summary>
+        /// Private nested type
+        /// </summary>
+        PrivateNestedType = 0x0200,
         /// <summary>
         /// Private member
         /// </summary>
-        PrivateMember = 0x20,
+        PrivateMember = 0x0800,
         /// <summary>
         /// Anything private (that won't go out of the assembly)
         /// </summary>
-        Private = PrivateType | PrivateMember,
+        PrivateType = PrivateGlobalType | PrivateNestedType,
+
+        /// <summary>
+        /// The assembly nested type
+        /// A nested type accessible from everywhere in assembly
+        /// </summary>
+        AssemblyNestedType = 0x1000,
 
         /// <summary>
         /// The assembly member
         /// (A member accessible from anywhere in assembly)
         /// </summary>
-        AssemblyMember = 0x40,
+        AssemblyMember = 0x2000,
 
         /// <summary>
         /// The family or assembly member
         /// </summary>
-        FamilyOrAssemblyMember = 0x100,
+        FamilyOrAssemblyMember = 0x10000,
         /// <summary>
         /// The family or assembly type
         /// </summary>
-        FamilyOrAssemblyType = 0x200,
+        FamilyOrAssemblyType = 0x20000,
 
         /// <summary>
         /// The family and assembly member
         /// </summary>
-        FamilyAndAssemblyMember = 0x1000,
+        FamilyAndAssemblyMember = 0x100000,
         /// <summary>
         /// The family and assembly type
         /// </summary>
-        FamilyAndAssemblyType = 0x1000,
+        FamilyAndAssemblyType = 0x200000,
 
         /// <summary>
         /// Matches any type visibility
         /// </summary>
-        AnyType = PublicType | PrivateType | FamilyType | FamilyAndAssemblyType | FamilyOrAssemblyType,
+        AnyType = PublicType | FamilyType | PrivateType | AssemblyNestedType | FamilyOrAssemblyType | FamilyAndAssemblyType,
         /// <summary>
         /// Matches any member visibility
         /// </summary>
@@ -88,7 +107,12 @@ namespace ArxOne.MrAdvice.Annotation
         /// <summary>
         /// Any visiblity
         /// </summary>
-        AnyVisiblity = AnyType | AnyMember,
+        AnyAccessibility = AnyType | AnyMember,
+
+        /// <summary>
+        /// Any attribute. ANY. ANY!
+        /// </summary>
+        Any = AnyAccessibility,
 
         /// <summary>
         /// Protected (for C# familiars)
@@ -103,7 +127,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// <summary>
         /// Internal type (for C# dudes)
         /// </summary>
-        InternalType = PrivateType,
+        InternalType = PrivateGlobalType,
 
         /// <summary>
         /// Protected internal (for C# friends)

@@ -102,6 +102,7 @@
     <Compile Include="Aspect\AspectInfo.cs" />
     <Compile Include="Collection\ArraySpan.cs" />
     <Compile Include="Advice\IPropertyInfoAdvice.cs" />
+    <Compile Include="Invocation.Pointcuts.cs" />
     <Compile Include="Introduction\IntroducedField.cs" />
     <Compile Include="Introduction\IntroducedFieldAttribute.cs" />
     <Compile Include="Introduction\IntroductionRules.cs" />
@@ -109,6 +110,8 @@
     <Compile Include="Advice\IAdvice.cs" />
     <Compile Include="Advice\IMethodAdvice.cs" />
     <Compile Include="Invocation.Introduction.cs" />
+    <Compile Include="Pointcut\PointcutSelectorRule.cs" />
+    <Compile Include="Pointcut\PointcutSelector.cs" />
     <Compile Include="Properties\ProductInfo.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -122,7 +125,9 @@
     <Compile Include="Threading\TaskExtensions.cs" />
     <Compile Include="Threading\Tasks.cs" />
     <Compile Include="Utility\ExceptionExtensions.cs" />
+    <Compile Include="Utility\MemberAttributesUtility.cs" />
     <Compile Include="Utility\MemberInfoExtensions.cs" />
+    <Compile Include="Utility\MethodInfoExtensions.cs" />
     <Compile Include="Utility\TypeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

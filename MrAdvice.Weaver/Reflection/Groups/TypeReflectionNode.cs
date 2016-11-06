@@ -57,41 +57,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <c>true</c> if this instance is generic; otherwise, <c>false</c>.
         /// </value>
         public override bool IsGeneric => _typeDefinition.HasGenericParameters;
-
-        public override MemberAttributes? Attributes
-        {
-            get
-            {
-                // For convenience, we ignore the nested idea... The day someone needs it --> https://github.com/ArxOne/MrAdvice/issues/new
-                switch (_typeDefinition.Attributes & TypeAttributes.VisibilityMask)
-                {
-                    case TypeAttributes.Public:// = 1,
-                    case TypeAttributes.NestedPublic:// = 2,
-                        return MemberAttributes.PublicType;
-                    case TypeAttributes.NestedPrivate:// = NestedPublic | Public = 3,
-                        return MemberAttributes.PrivateType;
-                    case TypeAttributes.NestedFamily:// = 4,
-                        return MemberAttributes.FamilyType;
-                    case TypeAttributes.NestedAssembly:// = NestedFamily | Public = 5,
-                        return MemberAttributes.PrivateType;
-                    case TypeAttributes.NestedFamANDAssem:// = NestedFamily | NestedPublic = 6,
-                        return MemberAttributes.FamilyAndAssemblyType;
-                    case TypeAttributes.NestedFamORAssem: // = NestedFamANDAssem | Public = 7,
-                        return MemberAttributes.FamilyOrAssemblyType;
-                    default:
-                        return 0;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public override string Name => _typeDefinition.FullName;
-
+        
         private string DebugString => $"Type {_typeDefinition.FullName}";
 
         /// <summary>

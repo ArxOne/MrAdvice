@@ -47,14 +47,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public override IEnumerable<CustomAttribute> CustomAttributes => _propertyDefinition.CustomAttributes;
 
-        /// <summary>
-        /// Gets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public override string Name => $"{_propertyDefinition.DeclaringType.FullName}.{_propertyDefinition.Name}";
-
         private string DebugString => $"Property {_propertyDefinition.FullName}";
 
         /// <summary>

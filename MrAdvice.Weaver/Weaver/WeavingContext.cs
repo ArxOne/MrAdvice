@@ -13,6 +13,7 @@ namespace ArxOne.MrAdvice.Weaver
     using Advice;
     using Annotation;
     using dnlib.DotNet;
+    using Pointcut;
     using Utility;
 
     /// <summary>
@@ -87,7 +88,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <value>
         /// The advices rules.
         /// </value>
-        public IDictionary<ITypeDefOrRef, PointcutRules> AdvicesRules { get; } = new Dictionary<ITypeDefOrRef, PointcutRules>(TypeComparer.Instance);
+        public IDictionary<ITypeDefOrRef, PointcutSelector> AdvicesRules { get; } = new Dictionary<ITypeDefOrRef, PointcutSelector>(TypeComparer.Instance);
 
         /// <summary>
         /// Gets or sets the type of the <see cref="ExcludePointcutAttribute"/>.

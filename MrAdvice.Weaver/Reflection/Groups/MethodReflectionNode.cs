@@ -66,45 +66,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
                 return customAttributes;
             }
         }
-
-        /// <summary>
-        /// Gets the attributes.
-        /// </summary>
-        /// <value>
-        /// The attributes.
-        /// </value>
-        public override MemberAttributes? Attributes
-        {
-            get
-            {
-                switch (_methodDefinition.Attributes & MethodAttributes.MemberAccessMask)
-                {
-                    case MethodAttributes.Private: // 1
-                        return MemberAttributes.PrivateMember;
-                    case MethodAttributes.FamANDAssem://2
-                        return MemberAttributes.FamilyAndAssemblyMember;
-                    case MethodAttributes.Assembly://3
-                        return MemberAttributes.AssemblyMember;
-                    case MethodAttributes.Family://4
-                        return MemberAttributes.FamilyMember;
-                    case MethodAttributes.FamORAssem://5
-                        return MemberAttributes.FamilyOrAssemblyMember;
-                    case MethodAttributes.Public://6
-                        return MemberAttributes.PublicMember;
-                    default:
-                        return 0; // WTF?
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the name.
-        /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        public override string Name => $"{_methodDefinition.DeclaringType.FullName}.{_methodDefinition.Name}";
-
+        
         /// <summary>
         /// Gets a value indicating whether this instance is generic.
         /// </summary>

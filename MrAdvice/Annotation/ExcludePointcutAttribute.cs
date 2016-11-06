@@ -15,14 +15,6 @@ namespace ArxOne.MrAdvice.Annotation
     public sealed class ExcludePointcutAttribute : PointcutAttribute
     {
         /// <summary>
-        /// Gets a value indicating whether this <see cref="PointcutAttribute" /> is include.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if include; otherwise, <c>false</c>.
-        /// </value>
-        public override bool Include => false;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ExcludePointcutAttribute"/> class.
         /// </summary>
         public ExcludePointcutAttribute()

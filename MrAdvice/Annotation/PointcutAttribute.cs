@@ -30,15 +30,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// <value>
         /// The attributes.
         /// </value>
-        public MemberAttributes Attributes { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether this <see cref="PointcutAttribute"/> is include.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if include; otherwise, <c>false</c>.
-        /// </value>
-        public abstract bool Include { get; }
+        public MemberAttributes? Attributes { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PointcutAttribute"/> class.

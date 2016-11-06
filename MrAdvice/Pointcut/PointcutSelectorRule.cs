@@ -5,15 +5,20 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
-namespace ArxOne.MrAdvice.Weaver
+namespace ArxOne.MrAdvice.Pointcut
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
     using Annotation;
-    using Reflection.Groups;
 
-    public class PointcutRule
+    /// <summary>
+    /// Represents a simple rule of pointcut
+    /// It contains: 
+    /// - one or more name matching rules
+    /// - an attribute matching rule
+    /// </summary>
+    public class PointcutSelectorRule
     {
         /// <summary>
         /// Gets the names.
@@ -23,7 +28,13 @@ namespace ArxOne.MrAdvice.Weaver
         /// </value>
         public List<string> Names { get; } = new List<string>();
 
-        public MemberAttributes Attributes { get; set; } = MemberAttributes.AnyVisiblity;
+        /// <summary>
+        /// Gets or sets the attributes to match.
+        /// </summary>
+        /// <value>
+        /// The attributes.
+        /// </value>
+        public MemberAttributes Attributes { get; set; } = MemberAttributes.Any;
 
         /// <summary>
         /// Tells if the given string matches the given wildcard.
@@ -92,6 +103,12 @@ namespace ArxOne.MrAdvice.Weaver
             }
         }
 
+        /// <summary>
+        /// Indicates whether the specified value matches the given rule.
+        /// </summary>
+        /// <param name="rule">The rule.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
         public static bool Match(string rule, string value)
         {
             if (rule.StartsWith("^") || rule.EndsWith("$"))
@@ -102,31 +119,50 @@ namespace ArxOne.MrAdvice.Weaver
             return WildcardMatch(rule, value);
         }
 
-        public static bool MatchAttributes(MemberAttributes memberAttributes, ReflectionNode node)
+        /// <summary>
+        /// Matches the name given the rule.
+        /// </summary>
+        /// <param name="rule">The rule.</param>
+        /// <param name="reflectionName">Name of the reflection.</param>
+        /// <returns></returns>
+        private bool MatchName(string rule, string reflectionName)
         {
-            var nodeAttributes = node.Attributes;
-            if (!nodeAttributes.HasValue)
+            if (reflectionName == null)
                 return true;
-            return (nodeAttributes.Value & memberAttributes) != 0;
+            return Match(rule, reflectionName);
         }
-
-        public bool MatchAttributes(ReflectionNode node) => MatchAttributes(Attributes, node);
-
-        public bool MatchName(string rule, ReflectionNode node)
-        {
-            var nodeName = node.Name;
-            if (nodeName == null)
-                return true;
-            return Match(rule, nodeName);
-        }
-
-        public bool MatchName(ReflectionNode node) => Names.Any(n => MatchName(n, node));
 
         /// <summary>
-        /// Indicates whether this rule matches the given node.
+        /// Indicates whether the name must be selected for advice.
         /// </summary>
-        /// <param name="node">The node.</param>
+        /// <param name="reflectionName">Name of the reflection.</param>
         /// <returns></returns>
-        public bool Match(ReflectionNode node) => MatchAttributes(node) && MatchName(node);
+        public bool Select(string reflectionName)
+        {
+            return Names.Any(n => MatchName(n, reflectionName));
+        }
+
+        /// <summary>
+        /// Indicates whether the attributes must be selected for advice.
+        /// </summary>
+        /// <param name="memberAttributes">The member attributes.</param>
+        /// <returns></returns>
+        public bool Select(MemberAttributes? memberAttributes)
+        {
+            if (!memberAttributes.HasValue)
+                return true;
+            return (memberAttributes.Value & memberAttributes) != 0;
+        }
+
+        /// <summary>
+        /// Indicates if the pair [name, attribute] have to be selected for advice
+        /// </summary>
+        /// <param name="reflectionName">Name of the reflection.</param>
+        /// <param name="memberAttributes">The member attributes.</param>
+        /// <returns></returns>
+        public bool Select(string reflectionName, MemberAttributes? memberAttributes)
+        {
+            return Select(memberAttributes) && Select(reflectionName);
+        }
     }
 }

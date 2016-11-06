@@ -7,6 +7,7 @@
 
 namespace IntegrityTest
 {
+    using ArxOne.MrAdvice.Pointcut;
     using ArxOne.MrAdvice.Weaver;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -17,63 +18,63 @@ namespace IntegrityTest
         [TestCategory("WildcardMatch")]
         public void SimpleEquals()
         {
-            Assert.IsTrue(PointcutRule.WildcardMatch("abc", "abc"));
+            Assert.IsTrue(PointcutSelectorRule.WildcardMatch("abc", "abc"));
         }
 
         [TestMethod]
         [TestCategory("WildcardMatch")]
         public void SimpleNotEquals()
         {
-            Assert.IsFalse(PointcutRule.WildcardMatch("def", "ghi"));
+            Assert.IsFalse(PointcutSelectorRule.WildcardMatch("def", "ghi"));
         }
 
         [TestMethod]
         [TestCategory("WildcardMatch")]
         public void QuestionMark()
         {
-            Assert.IsTrue(PointcutRule.WildcardMatch("jk?", "jkl"));
+            Assert.IsTrue(PointcutSelectorRule.WildcardMatch("jk?", "jkl"));
         }
 
         [TestMethod]
         [TestCategory("WildcardMatch")]
         public void Asterisk()
         {
-            Assert.IsTrue(PointcutRule.WildcardMatch("m*", "mno"));
+            Assert.IsTrue(PointcutSelectorRule.WildcardMatch("m*", "mno"));
         }
 
         [TestMethod]
         [TestCategory("WildcardMatch")]
         public void Arobase()
         {
-            Assert.IsTrue(PointcutRule.WildcardMatch("p@r", "pqr"));
+            Assert.IsTrue(PointcutSelectorRule.WildcardMatch("p@r", "pqr"));
         }
 
         [TestMethod]
         [TestCategory("WildcardMatch")]
         public void ArobaseAndDot()
         {
-            Assert.IsFalse(PointcutRule.WildcardMatch("p@", "p.r"));
+            Assert.IsFalse(PointcutSelectorRule.WildcardMatch("p@", "p.r"));
         }
 
         [TestMethod]
         [TestCategory("WildcardMatch")]
         public void ArobaseAndFinalDot()
         {
-            Assert.IsFalse(PointcutRule.WildcardMatch("p@", "pq."));
+            Assert.IsFalse(PointcutSelectorRule.WildcardMatch("p@", "pq."));
         }
 
         [TestMethod]
         [TestCategory("WildcardMatch")]
         public void ExclamationMark()
         {
-            Assert.IsTrue(PointcutRule.WildcardMatch("st!", "stu"));
+            Assert.IsTrue(PointcutSelectorRule.WildcardMatch("st!", "stu"));
         }
 
         [TestMethod]
         [TestCategory("WildcardMatch")]
         public void ExclamationMarkAndDot()
         {
-            Assert.IsFalse(PointcutRule.WildcardMatch("st!", "st."));
+            Assert.IsFalse(PointcutSelectorRule.WildcardMatch("st!", "st."));
         }
     }
 }
