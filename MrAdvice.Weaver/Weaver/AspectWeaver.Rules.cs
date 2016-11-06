@@ -45,6 +45,12 @@ namespace ArxOne.MrAdvice.Weaver
             return pointcutRules;
         }
 
+        /// <summary>
+        /// Creates the pointcut rules for a given advice.
+        /// </summary>
+        /// <param name="adviceType">Type of the advice.</param>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
         private PointcutRules CreatePointcutRules(ITypeDefOrRef adviceType, WeavingContext context)
         {
             var adviceTypeDef = TypeResolver.Resolve(adviceType);
@@ -54,6 +60,14 @@ namespace ArxOne.MrAdvice.Weaver
             return rules;
         }
 
+        /// <summary>
+        /// Creates the pointcut rules from an advice attribute.
+        /// The custom attribute provided has to be either <see cref="ExcludePointcutAttribute"/> or <see cref="IncludePointcutAttribute"/>
+        /// If not the return <see cref="PointcutRules"/> are empty
+        /// </summary>
+        /// <param name="customAttribute">The custom attribute.</param>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
         private PointcutRules CreatePointcutRules(CustomAttribute customAttribute, WeavingContext context)
         {
             var rules = new PointcutRules();
@@ -62,29 +76,43 @@ namespace ArxOne.MrAdvice.Weaver
             return rules;
         }
 
+        /// <summary>
+        /// Creates the pointcut rule from the given custom attribute of the the given type.
+        /// </summary>
+        /// <param name="customAttribute">The custom attribute.</param>
+        /// <param name="pointcutAttributeType">Type of the pointcut attribute.</param>
+        /// <returns></returns>
         private IEnumerable<PointcutRule> CreatePointcutRule(CustomAttribute customAttribute, ITypeDefOrRef pointcutAttributeType)
         {
-            if (customAttribute.AttributeType.SafeEquivalent(pointcutAttributeType))
+            if (!customAttribute.AttributeType.SafeEquivalent(pointcutAttributeType))
+                yield break;
+
+            var rule = new PointcutRule();
+            // full names wildcards
+            if (customAttribute.ConstructorArguments.Count == 1)
+                rule.Names.AddRange(GetStrings(customAttribute.ConstructorArguments[0].Value));
+
+            // then named properties
+            foreach (var namedArgument in customAttribute.NamedArguments)
             {
-                var rule = new PointcutRule();
-                // full names wildcards
-                if (customAttribute.ConstructorArguments.Count == 1)
-                {
-                    rule.Names.AddRange(((IEnumerable<CAArgument>)customAttribute.ConstructorArguments[0].Value).Select(a => (string)(UTF8String)a.Value));
-                }
-                foreach (var namedArgument in customAttribute.NamedArguments)
-                {
-                    if (namedArgument.Name == nameof(PointcutAttribute.Names))
-                    {
-                        rule.Names.AddRange(((IEnumerable<CAArgument>)namedArgument.Value).Select(a => (string)(UTF8String)a.Value));
-                    }
-                    if (namedArgument.Name == nameof(PointcutAttribute.Attributes))
-                    {
-                        rule.Attributes = (MemberAttributes)namedArgument.Value;
-                    }
-                }
-                yield return rule;
+                // names (which should usually not happen)
+                if (namedArgument.Name == nameof(PointcutAttribute.Names))
+                    rule.Names.AddRange(GetStrings(namedArgument.Value));
+                // attributes
+                if (namedArgument.Name == nameof(PointcutAttribute.Attributes))
+                    rule.Attributes = (MemberAttributes)namedArgument.Value;
             }
+            yield return rule;
+        }
+
+        /// <summary>
+        /// Gets the strings from a dnlib custom attribute argument.
+        /// </summary>
+        /// <param name="caArgumentValue">The ca argument value.</param>
+        /// <returns></returns>
+        private static IEnumerable<string> GetStrings(object caArgumentValue)
+        {
+            return ((IEnumerable<CAArgument>)caArgumentValue).Select(a => (string)(UTF8String)a.Value);
         }
     }
 }

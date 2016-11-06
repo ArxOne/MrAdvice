@@ -314,8 +314,16 @@ namespace ArxOne.MrAdvice.Weaver
             return ancestorsToChildren
                 .Where(n => n.Method != null)
                 .Select(n => new MarkedNode(n, GetAllMarkers(n, markerInterface, context)))
-                .Where(m => GetPointcutRules(m, context).Match(m.Node))
-                .Where(m => m.Definitions.Length > 0);
+                .Where(m => m.Definitions.Length > 0)
+                .Where(m => IsIncludedByPointcut(m, context));
+        }
+
+        private bool IsIncludedByPointcut(MarkedNode markedNode, WeavingContext context)
+        {
+            var isIncludedByPointcut = GetPointcutRules(markedNode, context).Match(markedNode.Node);
+            if (!isIncludedByPointcut)
+                Logging.WriteDebug("Excluding method '{0}' according to pointcut rules", markedNode.Node.Method.FullName);
+            return isIncludedByPointcut;
         }
 
         /// <summary>
