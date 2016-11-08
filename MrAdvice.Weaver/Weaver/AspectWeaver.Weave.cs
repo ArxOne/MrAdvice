@@ -149,7 +149,7 @@ namespace ArxOne.MrAdvice.Weaver
                     method.Body = new CilBody();
                 }
 
-                AddGeneratedAttribute(innerMethod, moduleDefinition, context);
+                AddGeneratedAttribute(innerMethod, context);
 
                 WritePointcutBody(method, innerMethod, false, context);
                 lock (method.DeclaringType)
@@ -157,7 +157,7 @@ namespace ArxOne.MrAdvice.Weaver
             }
         }
 
-        private static void AddGeneratedAttribute(MethodDefUser innerMethod, ModuleDefMD moduleDefinition, WeavingContext context)
+        private static void AddGeneratedAttribute(MethodDefUser innerMethod, WeavingContext context)
         {
             var generatedAttribute = new CustomAttribute(context.ExecutionPointAttributeDefaultCtor);
             innerMethod.CustomAttributes.Add(generatedAttribute);
@@ -486,13 +486,12 @@ namespace ArxOne.MrAdvice.Weaver
         /// Introduces members as requested by aspects
         /// </summary>
         /// <param name="method">The method.</param>
-        /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="context">The context.</param>
-        private void WeaveIntroductions(MethodDef method, TypeDef adviceInterface, ModuleDef moduleDefinition, WeavingContext context)
+        private void WeaveIntroductions(MethodDef method, ModuleDef moduleDefinition, WeavingContext context)
         {
             var typeDefinition = method.DeclaringType;
-            var advices = GetAllMarkers(new MethodReflectionNode(method, null), adviceInterface, context);
+            var advices = GetAllMarkers(new MethodReflectionNode(method, null), context.AdviceInterfaceType, context);
             var markerAttributeCtor = moduleDefinition.SafeImport(TypeResolver.Resolve(moduleDefinition, typeof(IntroducedFieldAttribute)).FindConstructors().Single());
             var markerAttributeCtorDef = new MemberRefUser(markerAttributeCtor.Module, markerAttributeCtor.Name, markerAttributeCtor.MethodSig, markerAttributeCtor.DeclaringType);
             foreach (var advice in advices)
@@ -526,15 +525,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="markedMethod">The marked method.</param>
-        /// <param name="adviceInterface">The advice interface.</param>
         /// <param name="context">The context.</param>
-        private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, TypeDef adviceInterface, WeavingContext context)
+        private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
             try
             {
                 WeaveAdvices(markedMethod, context);
-                WeaveIntroductions(method, adviceInterface, moduleDefinition, context);
+                WeaveIntroductions(method, moduleDefinition, context);
             }
             catch (Exception e)
             {

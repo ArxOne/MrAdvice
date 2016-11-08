@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
 
     /// <summary>
@@ -28,12 +29,20 @@ namespace ArxOne.MrAdvice
             {
                 if (_stopwatch == null)
                 {
-                    _stopwatch=new Stopwatch();
+                    _stopwatch = new Stopwatch();
                     _stopwatch.Start();
                 }
                 return _stopwatch;
             }
         }
+
+        /// <summary>
+        /// Gets the name of the current zone.
+        /// </summary>
+        /// <value>
+        /// The name of the current zone.
+        /// </value>
+        public string CurrentZoneName => GetCurrentZone().LastOrDefault()?.Item1;
 
         /// <summary>
         /// Starts a new measuring zone.

@@ -47,8 +47,7 @@ namespace ArxOne.MrAdvice
                 AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
                 BlobberHelper.Setup();
 
-                aspectWeaver.Weave(context.Module);
-                return true;
+                return aspectWeaver.Weave(context.Module);
             }
             catch (Exception e)
             {

@@ -49,6 +49,14 @@ namespace ArxOne.MrAdvice.Weaver
         public ITypeDefOrRef AbstractTargetAttributeType { get; set; }
 
         /// <summary>
+        /// Gets or sets the type of the <see cref="IAdvice"/>.
+        /// </summary>
+        /// <value>
+        /// The type of the weaving advice attribute.
+        /// </value>
+        public ITypeDefOrRef AdviceInterfaceType { get; set; }
+
+        /// <summary>
         /// Gets or sets the type of the <see cref="IWeavingAdvice"/>.
         /// </summary>
         /// <value>
