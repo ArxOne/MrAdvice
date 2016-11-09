@@ -11,7 +11,7 @@
     <authors><#=Company#></authors>
     <owners><#=Company#></owners>
     <licenseUrl><#=LicenseUrl#></licenseUrl>
-    <projectUrl>http://mradvice.arxone.com</projectUrl>
+    <projectUrl>https://github.com/ArxOne/MrAdvice</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/ArxOne/MrAdvice/master/Icon/MrAdvice.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>.NET build step aspect weaver</summary>
