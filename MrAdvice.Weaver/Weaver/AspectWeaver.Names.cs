@@ -8,8 +8,10 @@ namespace ArxOne.MrAdvice.Weaver
 {
     partial class AspectWeaver
     {
-        //private const string Marker = "\u200B";
-        private const string Marker = "\u02B9";
+        // \u200B was the best choice ever. However as a space, it was trimmed from names,
+        // (VS generate fake assemblies for example), causing a problem.
+        // This one is a "not so bad, but not as good"...
+        private const string Marker = "\u2032";
 
         /// <summary>
         /// Gets the name of the property.

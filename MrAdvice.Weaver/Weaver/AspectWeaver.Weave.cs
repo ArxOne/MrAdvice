@@ -327,6 +327,7 @@ namespace ArxOne.MrAdvice.Weaver
                 shortcutType = new TypeDefUser("ArxOne.MrAdvice", "\u26A1Invocation")
                 {
                     BaseType = module.Import(module.CorLibTypes.Object).ToTypeDefOrRef(),
+                    // Abstract + Sealed is Static class
                     Attributes = TypeAttributes.NotPublic | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed
                 };
                 module.Types.Add(shortcutType);
