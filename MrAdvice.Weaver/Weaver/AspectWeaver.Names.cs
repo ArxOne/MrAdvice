@@ -8,6 +8,9 @@ namespace ArxOne.MrAdvice.Weaver
 {
     partial class AspectWeaver
     {
+        //private const string Marker = "\u200B";
+        private const string Marker = "\u02B9";
+
         /// <summary>
         /// Gets the name of the property.
         /// </summary>
@@ -25,17 +28,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private static string GetPropertyInnerGetterName(string propertyName)
         {
-            return string.Format("\u200B{0}.get", propertyName);
-        }
-
-        /// <summary>
-        /// Gets the name of the implementation type.
-        /// </summary>
-        /// <param name="interfaceName">Name of the interface.</param>
-        /// <returns></returns>
-        private static string GetImplementationTypeName(string interfaceName)
-        {
-            return string.Format("{0}\u200B", interfaceName);
+            return $"{propertyName}.get{Marker}";
         }
 
         /// <summary>
@@ -45,7 +38,17 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private static string GetPropertyInnerSetterName(string propertyName)
         {
-            return string.Format("\u200B{0}.set", propertyName);
+            return $"{propertyName}.set{Marker}";
+        }
+
+        /// <summary>
+        /// Gets the name of the implementation type.
+        /// </summary>
+        /// <param name="interfaceName">Name of the interface.</param>
+        /// <returns></returns>
+        private static string GetImplementationTypeName(string interfaceName)
+        {
+            return $"{interfaceName}{Marker}";
         }
 
         /// <summary>
@@ -55,7 +58,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private static string GetInnerMethodName(string methodName)
         {
-            return string.Format("{0}\u200B", methodName);
+            return $"{methodName}{Marker}";
         }
     }
 }
