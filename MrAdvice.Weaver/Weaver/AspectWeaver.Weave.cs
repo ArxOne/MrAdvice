@@ -49,23 +49,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return;
             }
 
-            // the cctor needs to be called after all initialization (in case some info advices collect data)
-            infoAdvisedType.Attributes &= ~TypeAttributes.BeforeFieldInit;
-
-            const string cctorMethodName = ".cctor";
-            var staticCtor = infoAdvisedType.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
-            var newStaticCtor = staticCtor == null;
-            if (newStaticCtor)
-            {
-                staticCtor = new MethodDefUser(cctorMethodName, MethodSig.CreateStatic(moduleDefinition.CorLibTypes.Void),
-                    (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
-                    | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
-                staticCtor.Body = new CilBody();
-                infoAdvisedType.Methods.Add(staticCtor);
-            }
-
-            var instructions = new Instructions(staticCtor.Body.Instructions, staticCtor.Module);
-
+            var instructions = InsertCctorInstructions(infoAdvisedType);
             var proceedMethod = moduleDefinition.SafeImport(proceedRuntimeInitializersReference);
 
             if (useWholeAssembly)
@@ -78,9 +62,30 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(getTypeFromHandleMethodInfo));
             }
             instructions.Emit(OpCodes.Call, proceedMethod);
-            // ret is only emitted if the method is new
-            if (newStaticCtor)
-                instructions.Emit(OpCodes.Ret);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Instructions"/> allowing to insert code in type .cctor.
+        /// </summary>
+        /// <param name="typeDef">The type definition.</param>
+        /// <returns></returns>
+        private Instructions InsertCctorInstructions(TypeDef typeDef)
+        {
+            var moduleDefinition = typeDef.Module;
+            const string cctorMethodName = ".cctor";
+            var staticCtor = typeDef.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
+            if (staticCtor == null)
+            {
+                // the cctor needs to be called after all initialization (in case some info advices collect data)
+                typeDef.Attributes &= ~TypeAttributes.BeforeFieldInit;
+                var methodAttributes = (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
+                                       | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
+                staticCtor = new MethodDefUser(cctorMethodName, MethodSig.CreateStatic(moduleDefinition.CorLibTypes.Void), methodAttributes) { Body = new CilBody() };
+                typeDef.Methods.Add(staticCtor);
+                staticCtor.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+            }
+
+            return new Instructions(staticCtor.Body.Instructions, staticCtor.Module);
         }
 
         /// <summary>
