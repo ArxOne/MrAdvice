@@ -49,7 +49,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return;
             }
 
-            var instructions = InsertCctorInstructions(infoAdvisedType);
+            var instructions = GetCctorInstructions(infoAdvisedType);
             var proceedMethod = moduleDefinition.SafeImport(proceedRuntimeInitializersReference);
 
             if (useWholeAssembly)
@@ -69,7 +69,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="typeDef">The type definition.</param>
         /// <returns></returns>
-        private Instructions InsertCctorInstructions(TypeDef typeDef)
+        private Instructions GetCctorInstructions(TypeDef typeDef)
         {
             var moduleDefinition = typeDef.Module;
             const string cctorMethodName = ".cctor";
