@@ -8,7 +8,6 @@
 namespace IntegrityTest
 {
     using ArxOne.MrAdvice.Pointcut;
-    using ArxOne.MrAdvice.Weaver;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]

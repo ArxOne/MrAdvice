@@ -43,8 +43,10 @@ namespace ArxOne.MrAdvice
                 var typeResolver = new TypeResolver { Logging = _logging, AssemblyResolver = assemblyResolver };
                 var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
-                // TODO: use blobber's resolution (WTF?)
-                AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+
+                Assembly.Load("System, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, Retargetable=Yes");
+                Assembly.Load("System.Core, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, Retargetable=Yes");
+
                 BlobberHelper.Setup();
 
                 return aspectWeaver.Weave(context.Module);
@@ -83,24 +85,6 @@ namespace ArxOne.MrAdvice
             if (!File.Exists(path))
                 return DateTime.MinValue;
             return new FileInfo(path).LastWriteTimeUtc;
-        }
-
-        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args) => LoadAssembly(new AssemblyName(args.Name).Name);
-
-        private Assembly LoadAssembly(string assemblyName)
-        {
-            // because versions may differ, we'll pretend they're all the same
-            if (assemblyName == "MrAdvice")
-                return GetType().Assembly;
-
-
-            // otherwise fallback to embedded resources,
-            // which for some fucking reason are not resolved by Blobber!
-            var assemblyData = ResolveAssembly(assemblyName);
-            if (assemblyData == null)
-                return null;
-
-            return Assembly.Load(assemblyData);
         }
 
         /// <summary>

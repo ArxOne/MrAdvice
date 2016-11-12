@@ -1,4 +1,4 @@
 ﻿#(Debug)*: none
 #(Release)*: embed
 *: merge
-#MrAdvice: embed
+MrAdvice: embed
