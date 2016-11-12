@@ -35,7 +35,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The parameters.
         /// </value>
-        public object[] Arguments { get; private set; }
+        public object[] Arguments { get; }
         /// <summary>
         /// Gets or sets the return value.
         /// </summary>

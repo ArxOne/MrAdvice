@@ -21,7 +21,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The target method.
         /// </value>
-        public PropertyInfo TargetProperty { get; private set; }
+        public PropertyInfo TargetProperty { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyInfoAdviceContext"/> class.

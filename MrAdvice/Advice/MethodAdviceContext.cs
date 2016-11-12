@@ -62,6 +62,8 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The return value.
         /// </value>
+        /// <exception cref="InvalidOperationException" accessor="get">Method has no ReturnValue</exception>
+        /// <exception cref="InvalidOperationException" accessor="set">Method has no ReturnValue</exception>
         public object ReturnValue
         {
             get

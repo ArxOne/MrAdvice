@@ -21,7 +21,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The target method.
         /// </value>
-        public MethodBase TargetMethod { get; private set; }
+        public MethodBase TargetMethod { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodInfoAdviceContext"/> class.

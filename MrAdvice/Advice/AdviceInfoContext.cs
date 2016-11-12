@@ -19,7 +19,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The target.
         /// </value>
-        public object Target { get { return null; } }
+        public object Target => null;
 
         /// <summary>
         /// Gets the type of the target.
@@ -27,6 +27,6 @@ namespace ArxOne.MrAdvice.Advice
         /// <value>
         /// The type of the target.
         /// </value>
-        public Type TargetType { get { return null; } }
+        public Type TargetType => null;
     }
 }
