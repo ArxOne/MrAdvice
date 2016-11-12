@@ -325,7 +325,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private IEnumerable<MarkedNode> GetMarkedMethods(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, WeavingContext context)
         {
-            var ancestorsToChildren = reflectionNode.GetAncestorsToChildren().ToArray();
+            var ancestorsToChildren = reflectionNode.GetAncestorsToDescendants().ToArray();
             return from node in ancestorsToChildren
                    where node.Method != null
                    let allMakersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context))
@@ -378,7 +378,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, WeavingContext context)
         {
-            var markers = reflectionNode.GetAncestorsToChildren()
+            var markers = reflectionNode.GetAncestorsToDescendants()
                 .SelectMany(n => n.CustomAttributes
                     .Where(a => !a.AttributeType.DefinitionAssembly.IsSystem())
                     .SelectMany(a => TypeResolver.Resolve(a.AttributeType).GetSelfAndParents())

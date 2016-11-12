@@ -113,17 +113,17 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// Gets all the children (recursively).
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<ReflectionNode> GetAllChildren()
+        public IEnumerable<ReflectionNode> GetDescendants()
         {
             var children = Children.ToArray();
-            return children.Concat(children.SelectMany(c => c.GetAllChildren()));
+            return children.Concat(children.SelectMany(c => c.GetDescendants()));
         }
 
         /// <summary>
         /// Gets the ancestors to all children (recursively).
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<ReflectionNode> GetAncestorsToChildren() => GetSelfAndAncestors().Reverse().Concat(GetAllChildren());
+        public IEnumerable<ReflectionNode> GetAncestorsToDescendants() => GetSelfAndAncestors().Reverse().Concat(GetDescendants());
 
         /// <summary>
         /// Determines whether this member is in a generic tree.
