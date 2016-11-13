@@ -188,3 +188,5 @@ MrAdvice.Fody/MrAdvice.nuspec
 *.debug
 
 .vs/
+*.lock.json
+*.nuget.targets

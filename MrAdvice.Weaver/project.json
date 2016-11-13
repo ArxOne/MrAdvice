@@ -1,0 +1,13 @@
+﻿{
+  "dependencies": {
+    "Blobber": "0.7.0",
+    "Clarius.TransformOnBuild": "1.1.12",
+    "StitcherBoy": "0.15.2"
+  },
+  "frameworks": {
+    "net45": {}
+  },
+  "runtimes": {
+    "win": {}
+  }
+}

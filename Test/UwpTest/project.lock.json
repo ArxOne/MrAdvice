@@ -3,6 +3,7 @@
   "version": 1,
   "targets": {
     "UAP,Version=v10.0": {
+      "Clarius.TransformOnBuild/1.1.12": {},
       "Microsoft.CSharp/4.0.1": {
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -2033,6 +2034,7 @@
       }
     },
     "UAP,Version=v10.0/win10-arm": {
+      "Clarius.TransformOnBuild/1.1.12": {},
       "Microsoft.CSharp/4.0.1": {
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -4143,6 +4145,7 @@
       }
     },
     "UAP,Version=v10.0/win10-arm-aot": {
+      "Clarius.TransformOnBuild/1.1.12": {},
       "Microsoft.CSharp/4.0.1": {
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -6292,6 +6295,7 @@
       }
     },
     "UAP,Version=v10.0/win10-x64": {
+      "Clarius.TransformOnBuild/1.1.12": {},
       "Microsoft.CSharp/4.0.1": {
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -8411,6 +8415,7 @@
       }
     },
     "UAP,Version=v10.0/win10-x64-aot": {
+      "Clarius.TransformOnBuild/1.1.12": {},
       "Microsoft.CSharp/4.0.1": {
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -10569,6 +10574,7 @@
       }
     },
     "UAP,Version=v10.0/win10-x86": {
+      "Clarius.TransformOnBuild/1.1.12": {},
       "Microsoft.CSharp/4.0.1": {
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -12688,6 +12694,7 @@
       }
     },
     "UAP,Version=v10.0/win10-x86-aot": {
+      "Clarius.TransformOnBuild/1.1.12": {},
       "Microsoft.CSharp/4.0.1": {
         "dependencies": {
           "System.Collections": "4.0.11",
@@ -14847,6 +14854,17 @@
     }
   },
   "libraries": {
+    "Clarius.TransformOnBuild/1.1.12": {
+      "sha512": "IXQPVeqMJT3/t0Waa6BGGpCwbB+jIuoJaTK842VvfgEKLQlQxOGvCirDFm7FIY6EWWkW5hVPsD2pJOKIX5yS+g==",
+      "type": "package",
+      "path": "Clarius.TransformOnBuild/1.1.12",
+      "files": [
+        "Clarius.TransformOnBuild.1.1.12.nupkg.sha512",
+        "Clarius.TransformOnBuild.nuspec",
+        "Readme.txt",
+        "build/Clarius.TransformOnBuild.targets"
+      ]
+    },
     "Microsoft.CSharp/4.0.1": {
       "sha512": "17h8b5mXa87XYKrrVqdgZ38JefSUqLChUQpXgSnpzsM0nDOhE40FTeNWOJ/YmySGV6tG6T8+hjz6vxbknHJr6A==",
       "type": "package",
