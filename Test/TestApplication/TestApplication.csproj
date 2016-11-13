@@ -49,9 +49,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj">
-      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
-      <Name>MrAdvice</Name>
+    <ProjectReference Include="..\..\MrAdvice.Net40\MrAdvice.Net40.csproj">
+      <Project>{D8AA6017-594D-4616-907B-B450A5D2FCB9}</Project>
+      <Name>MrAdvice.Net40</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

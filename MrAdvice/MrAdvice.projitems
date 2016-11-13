@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>e62b50b0-4a7d-4173-9ab8-9cfd5f4dd7c3</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>MrAdvice</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Advices.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\AdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\AdviceExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\AdviceInfoContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\AdviceValues.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\AdvisedInterface.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IAdviceContextTarget.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IInfoAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IMethodAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IMethodAsyncAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IMethodInfoAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IMethodWeavingAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\InnerMethodContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IParameterAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IPropertyAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IPropertyInfoAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IWeavingAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\MethodAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\MethodAsyncAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\MethodInfoAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\MethodWeavingContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\ParameterAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\PropertyAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\PropertyInfoAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\SyncAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\WeavingContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\AbstractTargetAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\ExcludeAdvicesAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\ExcludePointcutAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\ExecutionPointAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\IncludePointcutAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\MemberAttributes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\PointcutAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\PriorityAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Aspect\AdviceInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Aspect\AspectInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collection\ArraySpan.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroducedField.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroducedFieldAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroductionRules.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Invocation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Invocation.Introduction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Invocation.Pointcuts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pointcut\PointcutSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pointcut\PointcutSelectorRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\TaskAccessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\TaskCompletionSource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\TaskCompletionSourceImplementation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\TaskContinuer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\TaskExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Threading\Tasks.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\ExceptionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\MemberAttributesUtility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\MemberInfoExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\MethodInfoExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\TypeExtensions.cs" />
+  </ItemGroup>
+</Project>

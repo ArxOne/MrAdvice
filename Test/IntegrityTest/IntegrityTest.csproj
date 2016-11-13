@@ -59,10 +59,6 @@
       <Project>{2CCCBE1D-9CC5-40A9-A816-484F98B10774}</Project>
       <Name>MrAdvice.Weaver</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj">
-      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
-      <Name>MrAdvice</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
