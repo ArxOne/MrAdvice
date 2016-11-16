@@ -93,7 +93,7 @@ namespace ArxOne.MrAdvice
             var returnType = advisedMethodInfo?.ReturnType;
             // no Task means aspect was sync, so everything already ended
             // TODO: this is actually not true, since an async method can be void :frown:
-            if (adviceTask == null || returnType == null || !typeof(Task).IsAssignableFrom(returnType))
+            if (adviceTask == null || returnType == null || !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
             {
                 adviceTask?.Wait();
                 return adviceValues.ReturnValue;
@@ -212,11 +212,11 @@ namespace ArxOne.MrAdvice
         public static void ProcessInfoAdvices(Type type)
         {
             const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-            foreach (var methodInfo in type.GetMethods(bindingFlags))
+            foreach (var methodInfo in type.GetMembersReader().GetMethods(bindingFlags))
                 ProcessMethodInfoAdvices(methodInfo);
-            foreach (var constructorInfo in type.GetConstructors(bindingFlags))
+            foreach (var constructorInfo in type.GetMembersReader().GetConstructors(bindingFlags))
                 ProcessMethodInfoAdvices(constructorInfo);
-            foreach (var propertyInfo in type.GetProperties(bindingFlags))
+            foreach (var propertyInfo in type.GetMembersReader().GetProperties(bindingFlags))
             {
                 ProcessMethodInfoAdvices(propertyInfo.GetGetMethod());
                 ProcessMethodInfoAdvices(propertyInfo.GetSetMethod());
@@ -232,7 +232,7 @@ namespace ArxOne.MrAdvice
         {
             if (methodInfo == null)
                 return;
-            var methodInfoAdvices = GetAttributes<IMethodInfoAdvice>(methodInfo);
+            var methodInfoAdvices = methodInfo.GetAttributes<IMethodInfoAdvice>();
             foreach (var methodInfoAdvice in methodInfoAdvices)
             {
                 // actually, introducing fields does not make sense here, until we introduce static fields
@@ -247,7 +247,7 @@ namespace ArxOne.MrAdvice
         /// <param name="propertyInfo">The property information.</param>
         private static void ProcessPropertyInfoAdvices(PropertyInfo propertyInfo)
         {
-            var propertyInfoAdvices = GetAttributes<IPropertyInfoAdvice>(propertyInfo);
+            var propertyInfoAdvices = propertyInfo.GetAttributes<IPropertyInfoAdvice>();
             foreach (var propertyInfoAdvice in propertyInfoAdvices)
             {
                 SafeInjectIntroducedFields(propertyInfoAdvice as IAdvice, propertyInfo.DeclaringType);
@@ -282,9 +282,9 @@ namespace ArxOne.MrAdvice
         {
             // GetInterfaceMap is unfortunately unavailable in PCL :'(
             // ReSharper disable once PossibleNullReferenceException
-            var i = implementationMethodBase.DeclaringType.GetInterfaces().SingleOrDefault();
+            var i = implementationMethodBase.DeclaringType.GetAssignmentReader().GetInterfaces().SingleOrDefault();
             var parameterInfos = implementationMethodBase.GetParameters();
-            var m = i.GetMethod(implementationMethodBase.Name, parameterInfos.Select(p => p.ParameterType).ToArray());
+            var m = i.GetMembersReader().GetMethod(implementationMethodBase.Name, parameterInfos.Select(p => p.ParameterType).ToArray());
             return m;
         }
 
@@ -301,18 +301,18 @@ namespace ArxOne.MrAdvice
             // inheritance hierarchy
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndEnclosing().SelectMany(t => t.GetSelfAndParents()).Distinct().ToArray();
             // assemblies
-            var assemblyAndParents = typeAndParents.Select(t => t.Assembly).Distinct();
+            var assemblyAndParents = typeAndParents.Select(t => t.GetInformationReader().Assembly).Distinct();
 
             // advices down to method
-            IEnumerable<AdviceInfo> allAdvices = assemblyAndParents.SelectMany(GetAttributes<TAdvice>)
-                .Union(typeAndParents.SelectMany(GetAttributes<TAdvice>))
-                .Union(GetAttributes<TAdvice>(targetMethod)).Select(CreateAdvice)
+            IEnumerable<AdviceInfo> allAdvices = assemblyAndParents.SelectMany(a => a.GetAttributes<TAdvice>())
+                .Union(typeAndParents.SelectMany(t => t.GetAttributes<TAdvice>()))
+                .Union(targetMethod.GetAttributes<TAdvice>()).Select(CreateAdvice)
                 .ToArray();
 
             // optional from property
             relatedPropertyInfo = GetPropertyInfo(targetMethod);
             if (relatedPropertyInfo != null)
-                allAdvices = allAdvices.Union(GetAttributes<TAdvice>(relatedPropertyInfo.Item1).Select(CreateAdvice)).ToArray();
+                allAdvices = allAdvices.Union(relatedPropertyInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
             // now separate parameters
             var parameterAdvices = allAdvices.Where(a => a.Advice is IParameterAdvice).ToArray();
             allAdvices = allAdvices.Where(a => !(a.Advice is IParameterAdvice)).ToArray();
@@ -324,7 +324,7 @@ namespace ArxOne.MrAdvice
             {
                 var index = parameterIndex;
                 allAdvices = allAdvices.Concat(parameterAdvices.Select(p => CreateAdviceIndex(p.Advice, parameterIndex)))
-                    .Concat(GetAttributes<TAdvice>(parameters[parameterIndex]).Select(a => CreateAdviceIndex(a, index)));
+                    .Concat(parameters[parameterIndex].GetAttributes<TAdvice>().Select(a => CreateAdviceIndex(a, index)));
                 // evaluate now
                 allAdvices = allAdvices.ToArray();
             }
@@ -333,7 +333,7 @@ namespace ArxOne.MrAdvice
             if (methodInfo != null)
             {
                 allAdvices = allAdvices.Concat(parameterAdvices.Select(p => CreateAdviceIndex(p.Advice, -1)))
-                    .Concat(GetAttributes<TAdvice>(methodInfo.ReturnParameter).Select(a => CreateAdviceIndex(a, -1)));
+                    .Concat(methodInfo.ReturnParameter.GetAttributes<TAdvice>().Select(a => CreateAdviceIndex(a, -1)));
             }
 
             return allAdvices;
@@ -371,46 +371,6 @@ namespace ArxOne.MrAdvice
         }
 
         /// <summary>
-        /// Gets the advices at assembly level.
-        /// </summary>
-        /// <param name="provider">The provider.</param>
-        /// <returns></returns>
-        private static IEnumerable<TAttribute> GetAttributes<TAttribute>(Assembly provider)
-        {
-            return provider.GetCustomAttributes(false).OfType<TAttribute>();
-        }
-
-        /// <summary>
-        /// Gets the advices at type level.
-        /// </summary>
-        /// <param name="provider">The provider.</param>
-        /// <returns></returns>
-        private static IEnumerable<TAttribute> GetAttributes<TAttribute>(Type provider)
-        {
-            return provider.GetCustomAttributes(false).OfType<TAttribute>();
-        }
-
-        /// <summary>
-        /// Gets the advices at method level.
-        /// </summary>
-        /// <param name="provider">The provider.</param>
-        /// <returns></returns>
-        private static IEnumerable<TAttribute> GetAttributes<TAttribute>(MemberInfo provider)
-        {
-            return provider.GetCustomAttributes(false).OfType<TAttribute>();
-        }
-
-        /// <summary>
-        /// Gets the advices at parameter level.
-        /// </summary>
-        /// <param name="provider">The provider.</param>
-        /// <returns></returns>
-        private static IEnumerable<TAttribute> GetAttributes<TAttribute>(ParameterInfo provider)
-        {
-            return provider.GetCustomAttributes(false).OfType<TAttribute>();
-        }
-
-        /// <summary>
         /// Gets the PropertyInfo, related to a method.
         /// </summary>
         /// <param name="memberInfo">The member information.</param>
@@ -428,7 +388,7 @@ namespace ArxOne.MrAdvice
 
             // now try to find the property
             // ReSharper disable once PossibleNullReferenceException
-            var propertyInfo = methodInfo.DeclaringType.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+            var propertyInfo = methodInfo.DeclaringType.GetMembersReader().GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                 .SingleOrDefault(p => p.GetGetMethod(true) == methodInfo || p.GetSetMethod(true) == methodInfo);
             if (propertyInfo == null)
                 return null; // this should never happen

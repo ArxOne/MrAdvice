@@ -27,7 +27,7 @@ namespace ArxOne.MrAdvice.Utility
             while (type != null)
             {
                 yield return type;
-                type = type.BaseType;
+                type = type.GetInformationReader().BaseType;
             }
         }
 
@@ -53,7 +53,8 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static IEnumerable<MemberInfo> GetFieldsAndProperties(this Type type, BindingFlags bindingFlags)
         {
-            return type.GetFields(bindingFlags).Cast<MemberInfo>().Concat(type.GetProperties(bindingFlags));
+            return type.GetMembersReader().GetFields(bindingFlags).Cast<MemberInfo>()
+                .Concat(type.GetMembersReader().GetProperties(bindingFlags));
         }
 
         /// <summary>
@@ -61,7 +62,10 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns></returns>
-        public static MemberAttributes GetMemberAttributes(this Type type) => type.Attributes.ToMemberAttributes();
+        public static MemberAttributes GetMemberAttributes(this Type type)
+        {
+            return type.GetInformationReader().Attributes.ToMemberAttributes();
+        }
 
         /// <summary>
         /// Converts the type attributes to member attributes.

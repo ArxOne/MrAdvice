@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice.Advice
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     /// <summary>
     /// Extensions to IAdvice (one extension, actually)
@@ -55,9 +56,9 @@ namespace ArxOne.MrAdvice.Advice
                 if (Types.TryGetValue(interfaceType, out implementationType))
                     return implementationType;
 
-                implementationType = (from t in interfaceType.Assembly.GetTypes()
-                                      where t.BaseType == typeof(AdvisedInterface)
-                                      let i = t.GetInterfaces()
+                implementationType = (from t in interfaceType.GetInformationReader().Assembly.GetTypes()
+                                      where t.GetInformationReader().BaseType == typeof(AdvisedInterface)
+                                      let i = t.GetAssignmentReader().GetInterfaces()
                                       where i.Contains(interfaceType)
                                       select t).FirstOrDefault();
                 if (implementationType == null)

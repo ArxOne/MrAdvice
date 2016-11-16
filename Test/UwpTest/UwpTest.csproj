@@ -130,6 +130,12 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MrAdvice.Uwp10\MrAdvice.Uwp10.csproj">
+      <Project>{D14F6AB2-9420-44EF-9DCD-4DBA104742DB}</Project>
+      <Name>MrAdvice.Uwp10</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

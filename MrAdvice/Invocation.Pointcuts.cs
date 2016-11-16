@@ -23,7 +23,8 @@ namespace ArxOne.MrAdvice
         private static bool Select(MethodBase targetMethod, AdviceInfo advice)
         {
             var reflectionName = $"{targetMethod.DeclaringType.FullName}.{targetMethod.Name}";
-            var memberAttributes = targetMethod.Attributes.ToMemberAttributes() | targetMethod.DeclaringType.Attributes.ToMemberAttributes();
+            var memberAttributes = targetMethod.Attributes.ToMemberAttributes()
+                | targetMethod.DeclaringType.GetInformationReader().Attributes.ToMemberAttributes();
             return GetPointcutSelector(advice.Advice.GetType()).Select(reflectionName, memberAttributes);
         }
 
@@ -36,22 +37,22 @@ namespace ArxOne.MrAdvice
         {
             var pointcutSelector = new PointcutSelector();
             // 1. some special case, avoid type from advising it self
-            if (typeof(IAdvice).IsAssignableFrom(methodBase.DeclaringType))
+            if (typeof(IAdvice).GetAssignmentReader().IsAssignableFrom(methodBase.DeclaringType))
                 pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(methodBase.DeclaringType.FullName));
             // 2. get from method
-            foreach (ExcludeAdvicesAttribute methodExclude in methodBase.GetCustomAttributes(typeof(ExcludeAdvicesAttribute), true))
+            foreach (var methodExclude in methodBase.GetAttributes<ExcludeAdvicesAttribute>())
                 pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(methodExclude.AdvicesTypes));
             // 3. from property, if any
             var propertyInfo = GetPropertyInfo(methodBase);
             if (propertyInfo != null)
-                foreach (ExcludeAdvicesAttribute propertyExclude in propertyInfo.Item1.GetCustomAttributes(typeof(ExcludeAdvicesAttribute), true))
+                foreach (var propertyExclude in propertyInfo.Item1.GetAttributes<ExcludeAdvicesAttribute>())
                     pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(propertyExclude.AdvicesTypes));
             // 4. from type and outer types
             for (var type = methodBase.DeclaringType; type != null; type = type.DeclaringType)
-                foreach (ExcludeAdvicesAttribute typeExclude in type.GetCustomAttributes(typeof(ExcludeAdvicesAttribute), true))
+                foreach (var typeExclude in type.GetInformationReader().GetAttributes<ExcludeAdvicesAttribute>())
                     pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(typeExclude.AdvicesTypes));
             // 5. from assembly
-            foreach (ExcludeAdvicesAttribute assemblyExclude in methodBase.DeclaringType.Assembly.GetCustomAttributes(typeof(ExcludeAdvicesAttribute), true))
+            foreach (var assemblyExclude in methodBase.DeclaringType.GetInformationReader().Assembly.GetAttributes<ExcludeAdvicesAttribute>())
                 pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(assemblyExclude.AdvicesTypes));
             return pointcutSelector;
         }
@@ -82,7 +83,7 @@ namespace ArxOne.MrAdvice
         private static PointcutSelector CreatePointcutSelector(Type adviceType)
         {
             var pointcutSelector = new PointcutSelector();
-            foreach (PointcutAttribute pointcutAttribute in adviceType.GetCustomAttributes(typeof(PointcutAttribute), true))
+            foreach (PointcutAttribute pointcutAttribute in adviceType.GetInformationReader().GetCustomAttributes(typeof(PointcutAttribute), true))
             {
                 var includeRule = CreatePointcutSelectorRule(typeof(IncludePointcutAttribute), pointcutAttribute);
                 if (includeRule != null)
@@ -102,7 +103,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         private static PointcutSelectorRule CreatePointcutSelectorRule(Type pointcutAttributeType, PointcutAttribute pointcutAttribute)
         {
-            if (!pointcutAttributeType.IsInstanceOfType(pointcutAttribute))
+            if (!pointcutAttributeType.GetAssignmentReader().IsInstanceOfType(pointcutAttribute))
                 return null;
 
             var rule = new PointcutSelectorRule();

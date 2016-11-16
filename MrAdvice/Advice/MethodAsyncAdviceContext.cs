@@ -89,7 +89,7 @@
         /// <value>
         /// <c>true</c> if the target method is asynchronous; otherwise, <c>false</c>.
         /// </value>
-        public bool IsTargetMethodAsync => typeof(Task).IsAssignableFrom((TargetMethod as MethodInfo)?.ReturnType);
+        public bool IsTargetMethodAsync => typeof(Task).GetAssignmentReader().IsAssignableFrom((TargetMethod as MethodInfo)?.ReturnType);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodAdviceContext" /> class.

@@ -124,13 +124,13 @@ namespace ArxOne.MrAdvice.Aspect
             // first, the type
             var declaringType = methodBase.DeclaringType;
             // ReSharper disable once PossibleNullReferenceException
-            if (declaringType.IsGenericTypeDefinition)
+            if (declaringType.GetInformationReader().IsGenericTypeDefinition)
             {
-                var typeGenericArguments = genericArguments.Take(typeGenericParametersCount = declaringType.GetGenericArguments().Length).ToArray();
+                var typeGenericArguments = genericArguments.Take(typeGenericParametersCount = declaringType.GetAssignmentReader().GetGenericArguments().Length).ToArray();
                 declaringType = declaringType.MakeGenericType(typeGenericArguments);
                 // method needs to be discovered again.
                 // Fortunately, it can be found by its handle.
-                methodBase = MethodBase.GetMethodFromHandle(methodBase.MethodHandle, declaringType.TypeHandle);
+                methodBase = MethodBase.GetMethodFromHandle(methodBase.GetMethodHandle(), declaringType.TypeHandle);
             }
             // then, the method
             if (!methodBase.IsGenericMethodDefinition)

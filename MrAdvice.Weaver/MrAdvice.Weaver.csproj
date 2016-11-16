@@ -112,16 +112,16 @@
     <Compile Include="Weaver\Instructions.cs" />
     <Compile Include="Utility\TypeReferenceExtensions.cs" />
     <Compile Include="Weaver\WeaverMethodWeavingContext.cs" />
+    <None Include="MrAdvice.nuspec">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MrAdvice.tt</DependentUpon>
+    </None>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
       <Link>Properties\MrAdvice.snk</Link>
-    </None>
-    <None Include="MrAdvice.nuspec">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MrAdvice.tt</DependentUpon>
     </None>
     <None Include="MrAdvice.targets">
       <SubType>Designer</SubType>
@@ -130,6 +130,7 @@
   <ItemGroup>
     <None Include="MrAdvice.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>MrAdvice.nuspec</LastGenOutput>
     </None>
   </ItemGroup>
