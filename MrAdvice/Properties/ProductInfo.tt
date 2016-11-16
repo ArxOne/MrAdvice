@@ -21,7 +21,7 @@ using ArxOne.MrAdvice.Properties;
 [assembly: NeutralResourcesLanguage("en")]
 
 [assembly: AssemblyVersion("<#=VersionMajor#>")]
-[assembly: AssemblyFileVersion("<#=Version#>")]
+[assembly: AssemblyFileVersion("<#=Version#>")] // <#=PreVersion#>
 
 namespace ArxOne.MrAdvice.Properties
 {
