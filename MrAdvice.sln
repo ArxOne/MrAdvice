@@ -82,10 +82,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Portable", "MrAdvi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Silverlight5", "MrAdvice.Silverlight5\MrAdvice.Silverlight5.csproj", "{C61ED77D-01B3-478A-9161-9EE20191EBFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.NetStandard16", "MrAdvice.NetStandard16\MrAdvice.NetStandard16.csproj", "{E01DD569-32A6-46F7-8FB8-C5FF4378369E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D8AA6017-594D-4616-907B-B450A5D2FCB9} = {D8AA6017-594D-4616-907B-B450A5D2FCB9}
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.NetStandard", "MrAdvice.NetStandard\MrAdvice.NetStandard.csproj", "{E01DD569-32A6-46F7-8FB8-C5FF4378369E}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
