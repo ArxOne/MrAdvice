@@ -32,18 +32,14 @@
     <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.dll" target="lib\uap10.0"/>
     <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.xml" target="lib\uap10.0"/>
     <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\uap10.0"/>
-    <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.Portable.dll" target="lib\uap10.0"/>
-    <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.Portable.pdb" target="lib\uap10.0"/>
     <!-- Silverlight 5.0 -->
     <file src="..\MrAdvice.Silverlight5\bin\$ConfigurationName$\MrAdvice.dll" target="lib\sl5"/>
     <file src="..\MrAdvice.Silverlight5\bin\$ConfigurationName$\MrAdvice.xml" target="lib\sl5"/>
     <file src="..\MrAdvice.Silverlight5\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\sl5"/>
     <!-- .NET Standard 1.6 -->
-    <file src="..\MrAdvice.NetStandard16\bin\$ConfigurationName$\MrAdvice.dll" target="lib\netstandard16"/>
-    <file src="..\MrAdvice.NetStandard16\bin\$ConfigurationName$\MrAdvice.xml" target="lib\netstandard16"/>
-    <file src="..\MrAdvice.NetStandard16\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\netstandard16"/>
-    <file src="..\MrAdvice.NetStandard16\bin\$ConfigurationName$\MrAdvice.Portable.dll" target="lib\netstandard16"/>
-    <file src="..\MrAdvice.NetStandard16\bin\$ConfigurationName$\MrAdvice.Portable.pdb" target="lib\netstandard16"/>
+    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.dll" target="lib\netstandard16"/>
+    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.xml" target="lib\netstandard16"/>
+    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\netstandard16"/>
     <file src="..\MrAdvice\**\*.cs" target="src"/>
   </files>
 </package>

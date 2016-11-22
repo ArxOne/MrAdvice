@@ -50,7 +50,7 @@ namespace ArxOne.MrAdvice
             var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
             var innerMethod = innerMethodHandle != methodHandle ? GetMethodFromHandle(innerMethodHandle, typeHandle) : null;
 
-            var aspectInfo = GetAspectInfo(methodBase, innerMethod, abstractedTarget, genericArguments);
+            var aspectInfo = GetAspectInfo(methodBase, methodHandle, innerMethod, innerMethodHandle, abstractedTarget, genericArguments);
 
             // this is the case with auto implemented interface
             var advisedInterface = target as AdvisedInterface;
@@ -160,20 +160,22 @@ namespace ArxOne.MrAdvice
         /// <summary>
         /// Gets the aspect information.
         /// </summary>
-        /// <param name="methodBase">The method base.</param>
+        /// <param name="method">The method base.</param>
+        /// <param name="methodHandle">The method handle.</param>
         /// <param name="innerMethod">The inner method.</param>
+        /// <param name="innerMethodHandle">The inner method handle.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="genericArguments">The generic arguments.</param>
         /// <returns></returns>
-        private static AspectInfo GetAspectInfo(MethodBase methodBase, MethodBase innerMethod, bool abstractedTarget, Type[] genericArguments)
+        private static AspectInfo GetAspectInfo(MethodBase method, RuntimeMethodHandle methodHandle, MethodBase innerMethod, RuntimeMethodHandle innerMethodHandle, bool abstractedTarget, Type[] genericArguments)
         {
             AspectInfo aspectInfo;
             lock (AspectInfos)
             {
-                if (!AspectInfos.TryGetValue(methodBase, out aspectInfo))
+                if (!AspectInfos.TryGetValue(method, out aspectInfo))
                 {
                     // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    AspectInfos[methodBase] = aspectInfo = CreateAspectInfo(methodBase, (MethodInfo)innerMethod, abstractedTarget);
+                    AspectInfos[method] = aspectInfo = CreateAspectInfo(method, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, abstractedTarget);
                 }
             }
 
@@ -258,19 +260,21 @@ namespace ArxOne.MrAdvice
         /// <summary>
         /// Creates the method call context, given a calling method and the inner method name.
         /// </summary>
-        /// <param name="methodBase">The method information.</param>
+        /// <param name="method">The method information.</param>
+        /// <param name="methodHandle">The method handle.</param>
         /// <param name="innerMethod">Name of the inner method.</param>
+        /// <param name="innerMethodHandle">The inner method handle.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <returns></returns>
-        private static AspectInfo CreateAspectInfo(MethodBase methodBase, MethodInfo innerMethod, bool abstractedTarget)
+        private static AspectInfo CreateAspectInfo(MethodBase method, RuntimeMethodHandle methodHandle, MethodInfo innerMethod, RuntimeMethodHandle innerMethodHandle, bool abstractedTarget)
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
             if (innerMethod == null && !abstractedTarget)
-                methodBase = FindInterfaceMethod(methodBase);
-            var advices = GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
+                method = FindInterfaceMethod(method);
+            var advices = GetAdvices<IAdvice>(method, out relatedPropertyInfo);
             if (relatedPropertyInfo == null)
-                return new AspectInfo(advices, innerMethod, methodBase);
-            return new AspectInfo(advices, innerMethod, methodBase, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
+                return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle);
+            return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
         }
 
         /// <summary>

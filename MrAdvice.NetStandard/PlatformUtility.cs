@@ -67,15 +67,5 @@ namespace ArxOne.MrAdvice
         {
             return attributeProvider.GetCustomAttributes(typeof(TAttribute), false).Cast<TAttribute>();
         }
-
-        /// <summary>
-        /// Gets the method handle.
-        /// </summary>
-        /// <param name="methodBase">The method base.</param>
-        /// <returns></returns>
-        public static RuntimeMethodHandle GetMethodHandle(this MethodBase methodBase)
-        {
-            return ReflectionUtility.GetPortableMethodHandle(methodBase);
-        }
     }
 }

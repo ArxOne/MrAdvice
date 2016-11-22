@@ -61,12 +61,6 @@
     </Compile>
     <Compile Include="PlatformUtility.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MrAdvice.Portable\MrAdvice.Portable.csproj">
-      <Project>{969EA8CD-881E-4B7F-9C05-84301FE8E045}</Project>
-      <Name>MrAdvice.Portable</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="..\MrAdvice\MrAdvice.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
