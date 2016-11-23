@@ -55,6 +55,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Invocation.Pointcuts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pointcut\PointcutSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pointcut\PointcutSelectorRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Threading\TaskAccessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Threading\TaskCompletionSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Threading\TaskCompletionSourceImplementation.cs" />
@@ -66,5 +67,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utility\MemberInfoExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\MethodInfoExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\TypeExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Properties\ProductInfo.tt" />
+    <None Include="$(MSBuildThisFileDirectory)Properties\ProductInfoValues.tt" />
   </ItemGroup>
 </Project>
