@@ -39,11 +39,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Icon", "Icon", "{C24CF080-E
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Weaver", "MrAdvice.Weaver\MrAdvice.Weaver.csproj", "{2CCCBE1D-9CC5-40A9-A816-484F98B10774}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E01DD569-32A6-46F7-8FB8-C5FF4378369E} = {E01DD569-32A6-46F7-8FB8-C5FF4378369E}
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE} = {C61ED77D-01B3-478A-9161-9EE20191EBFE}
-		{D14F6AB2-9420-44EF-9DCD-4DBA104742DB} = {D14F6AB2-9420-44EF-9DCD-4DBA104742DB}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F3046528-416E-49F1-8FC5-72E442B64DAE}"
 	ProjectSection(SolutionItems) = preProject
@@ -75,10 +70,19 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MrAdvice", "MrAdvice\MrAdvice.shproj", "{E62B50B0-4A7D-4173-9AB8-9CFD5F4DD7C3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Net40", "MrAdvice.Net40\MrAdvice.Net40.csproj", "{D8AA6017-594D-4616-907B-B450A5D2FCB9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E01DD569-32A6-46F7-8FB8-C5FF4378369E} = {E01DD569-32A6-46F7-8FB8-C5FF4378369E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Uwp10", "MrAdvice.Uwp10\MrAdvice.Uwp10.csproj", "{D14F6AB2-9420-44EF-9DCD-4DBA104742DB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E01DD569-32A6-46F7-8FB8-C5FF4378369E} = {E01DD569-32A6-46F7-8FB8-C5FF4378369E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Silverlight5", "MrAdvice.Silverlight5\MrAdvice.Silverlight5.csproj", "{C61ED77D-01B3-478A-9161-9EE20191EBFE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E01DD569-32A6-46F7-8FB8-C5FF4378369E} = {E01DD569-32A6-46F7-8FB8-C5FF4378369E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.NetStandard", "MrAdvice.NetStandard\MrAdvice.NetStandard.csproj", "{E01DD569-32A6-46F7-8FB8-C5FF4378369E}"
 EndProject

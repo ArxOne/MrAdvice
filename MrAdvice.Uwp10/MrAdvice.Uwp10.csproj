@@ -127,21 +127,8 @@
     </Compile>
     <Compile Include="..\MrAdvice\Properties\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ProductInfo.tt</DependentUpon>
     </Compile>
     <Compile Include="PlatformUtility.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\MrAdvice\Properties\ProductInfo.tt">
-      <Link>Properties\ProductInfo.tt</Link>
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ProductInfo.cs</LastGenOutput>
-    </None>
-    <None Include="..\MrAdvice\Properties\ProductInfoValues.tt">
-      <Link>Properties\ProductInfoValues.tt</Link>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

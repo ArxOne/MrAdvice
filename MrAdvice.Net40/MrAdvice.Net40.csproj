@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-	<OutputPath>.</OutputPath>
+    <OutputPath>.</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,29 +49,16 @@
     <Compile Include="..\MrAdvice\Properties\AssemblyInfo.cs">
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="PlatformUtility.cs" />
-    <None Include="..\MrAdvice\Properties\ProductInfo.cs">
+    <Compile Include="..\MrAdvice\Properties\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ProductInfo.tt</DependentUpon>
-    </None>
+    </Compile>
+    <Compile Include="PlatformUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
       <Link>Properties\MrAdvice.snk</Link>
     </None>
     <None Include="project.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\MrAdvice\Properties\ProductInfo.tt">
-      <Link>Properties\ProductInfo.tt</Link>
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ProductInfo.cs</LastGenOutput>
-    </None>
-    <None Include="..\MrAdvice\Properties\ProductInfoValues.tt">
-      <Link>Properties\ProductInfoValues.tt</Link>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

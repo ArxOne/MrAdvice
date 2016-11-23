@@ -73,27 +73,14 @@
     <Compile Include="..\MrAdvice\Properties\AssemblyInfo.cs">
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
-    <None Include="..\MrAdvice\Properties\ProductInfo.cs">
+    <Compile Include="..\MrAdvice\Properties\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
-      <DependentUpon>ProductInfo.tt</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </None>
+    </Compile>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
-      <Link>MrAdvice.snk</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\MrAdvice\Properties\ProductInfo.tt">
-      <Link>Properties\ProductInfo.tt</Link>
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ProductInfo.cs</LastGenOutput>
-    </None>
-    <None Include="..\MrAdvice\Properties\ProductInfoValues.tt">
-      <Link>Properties\ProductInfoValues.tt</Link>
+      <Link>Properties\MrAdvice.snk</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
