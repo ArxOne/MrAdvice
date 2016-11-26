@@ -25,5 +25,6 @@
     <developmentDependency>false</developmentDependency>
   </metadata>
   <files>
+    <file src="bin\$ConfigurationName$\MrAdvice.Fody.dll" target="."/>
   </files>
 </package>
