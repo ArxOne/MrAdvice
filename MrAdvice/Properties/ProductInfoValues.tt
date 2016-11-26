@@ -1,9 +1,9 @@
 ﻿<#
 // all common data between assembly information and nuspec package are stored here
-var Version = "1.3.3";
+var Version = "2.0.0";
 var Title = "Mr. Advice";
 var Company = "Arx One";
 var LicenseUrl = "http://opensource.org/licenses/mit-license.php";
-var Description = "MrAdvice allows to weave aspects at build-time (just like PostSharp, but free as in free beer). "
+var Description = "Obsolete! Use https://www.nuget.org/packages/MrAdvice/ instead! MrAdvice allows to weave aspects at build-time (just like PostSharp, but free as in free beer). "
 + "Write your own aspects in the form of attributes and apply them to target methods or properties.";
 #>

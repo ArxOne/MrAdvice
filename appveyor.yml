@@ -5,6 +5,7 @@ version: '{branch}-{build}'
 branches:
   only:
     - fody
+    - fody-opd
     - dnlib
 
 before_build:
