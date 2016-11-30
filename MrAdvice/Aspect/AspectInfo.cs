@@ -32,12 +32,26 @@ namespace ArxOne.MrAdvice.Aspect
         /// </value>
         public MethodBase AdvisedMethod { get; }
         /// <summary>
+        /// Gets the advised method handle.
+        /// </summary>
+        /// <value>
+        /// The advised method handle.
+        /// </value>
+        public RuntimeMethodHandle AdvisedMethodHandle { get; }
+        /// <summary>
         /// Gets the pointcut method.
         /// </summary>
         /// <value>
         /// The pointcut method.
         /// </value>
         public MethodInfo PointcutMethod { get; }
+        /// <summary>
+        /// Gets the pointcut method handle.
+        /// </summary>
+        /// <value>
+        /// The pointcut method handle.
+        /// </value>
+        public RuntimeMethodHandle PointcutMethodHandle { get; }
         /// <summary>
         /// Gets the pointcut property, if any (if method is related to property).
         /// </summary>
@@ -58,11 +72,13 @@ namespace ArxOne.MrAdvice.Aspect
         /// </summary>
         /// <param name="advices">The advices.</param>
         /// <param name="pointcutMethod">The pointcut method.</param>
+        /// <param name="pointcutMethodHandle">The pointcut method handle.</param>
         /// <param name="advisedMethod">The advised method.</param>
+        /// <param name="advisedMethodHandle">The advised method handle.</param>
         /// <param name="pointcutProperty">The pointcut property.</param>
         /// <param name="isPointcutPropertySetter">if set to <c>true</c> [is pointcut property setter].</param>
-        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, MethodBase advisedMethod, PropertyInfo pointcutProperty, bool isPointcutPropertySetter)
-            : this(advices, pointcutMethod, advisedMethod)
+        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, RuntimeMethodHandle pointcutMethodHandle, MethodBase advisedMethod, RuntimeMethodHandle advisedMethodHandle, PropertyInfo pointcutProperty, bool isPointcutPropertySetter)
+            : this(advices, pointcutMethod, pointcutMethodHandle, advisedMethod, advisedMethodHandle)
         {
             PointcutProperty = pointcutProperty;
             IsPointcutPropertySetter = isPointcutPropertySetter;
@@ -73,12 +89,16 @@ namespace ArxOne.MrAdvice.Aspect
         /// </summary>
         /// <param name="advices">The advices.</param>
         /// <param name="pointcutMethod">The pointcut method.</param>
+        /// <param name="pointcutMethodHandle">The pointcut method handle.</param>
         /// <param name="advisedMethod">The advised method.</param>
-        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, MethodBase advisedMethod)
+        /// <param name="advisedMethodHandle">The advised method handle.</param>
+        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, RuntimeMethodHandle pointcutMethodHandle, MethodBase advisedMethod, RuntimeMethodHandle advisedMethodHandle)
         {
             Advices = advices.OrderByDescending(a => PriorityAttribute.GetLevel(a.Advice)).ToArray();
             PointcutMethod = pointcutMethod;
+            PointcutMethodHandle = pointcutMethodHandle;
             AdvisedMethod = advisedMethod;
+            AdvisedMethodHandle = advisedMethodHandle;
         }
 
         /// <summary>
@@ -88,7 +108,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// <returns></returns>
         public AspectInfo AddAdvice(AdviceInfo adviceInfo)
         {
-            return new AspectInfo(Advices.Concat(new[] { adviceInfo }), PointcutMethod, AdvisedMethod, PointcutProperty, IsPointcutPropertySetter);
+            return new AspectInfo(Advices.Concat(new[] { adviceInfo }), PointcutMethod, PointcutMethodHandle, AdvisedMethod, AdvisedMethodHandle, PointcutProperty, IsPointcutPropertySetter);
         }
 
         /// <summary>
@@ -103,17 +123,18 @@ namespace ArxOne.MrAdvice.Aspect
 
             // cast here is safe, because we have generic parameters, meaning we're not in a ctor
             return new AspectInfo(Advices,
-                (MethodInfo)MakeGenericMethod(PointcutMethod, genericArguments),
-                MakeGenericMethod(AdvisedMethod, genericArguments), PointcutProperty, IsPointcutPropertySetter);
+                (MethodInfo)MakeGenericMethod(PointcutMethod, PointcutMethodHandle, genericArguments), PointcutMethodHandle,
+                MakeGenericMethod(AdvisedMethod, AdvisedMethodHandle, genericArguments), AdvisedMethodHandle, PointcutProperty, IsPointcutPropertySetter);
         }
 
         /// <summary>
         /// Makes a method from generic definition (type and method).
         /// </summary>
         /// <param name="methodBase">The method information.</param>
+        /// <param name="methodHandle">The method handle.</param>
         /// <param name="genericArguments">The generic arguments.</param>
         /// <returns></returns>
-        private static MethodBase MakeGenericMethod(MethodBase methodBase, Type[] genericArguments)
+        private static MethodBase MakeGenericMethod(MethodBase methodBase, RuntimeMethodHandle methodHandle, Type[] genericArguments)
         {
             // two steps in this method.
             // 1. make generic type
@@ -124,13 +145,13 @@ namespace ArxOne.MrAdvice.Aspect
             // first, the type
             var declaringType = methodBase.DeclaringType;
             // ReSharper disable once PossibleNullReferenceException
-            if (declaringType.IsGenericTypeDefinition)
+            if (declaringType.GetInformationReader().IsGenericTypeDefinition)
             {
-                var typeGenericArguments = genericArguments.Take(typeGenericParametersCount = declaringType.GetGenericArguments().Length).ToArray();
+                var typeGenericArguments = genericArguments.Take(typeGenericParametersCount = declaringType.GetAssignmentReader().GetGenericArguments().Length).ToArray();
                 declaringType = declaringType.MakeGenericType(typeGenericArguments);
                 // method needs to be discovered again.
                 // Fortunately, it can be found by its handle.
-                methodBase = MethodBase.GetMethodFromHandle(methodBase.MethodHandle, declaringType.TypeHandle);
+                methodBase = MethodBase.GetMethodFromHandle(methodHandle, declaringType.TypeHandle);
             }
             // then, the method
             if (!methodBase.IsGenericMethodDefinition)

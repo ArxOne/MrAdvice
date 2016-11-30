@@ -128,13 +128,13 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj">
-      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
-      <Name>MrAdvice</Name>
-    </ProjectReference>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <ProjectReference Include="..\..\MrAdvice.Uwp10\MrAdvice.Uwp10.csproj">
+      <Project>{D14F6AB2-9420-44EF-9DCD-4DBA104742DB}</Project>
+      <Name>MrAdvice.Uwp10</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

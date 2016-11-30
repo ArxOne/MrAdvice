@@ -32,9 +32,9 @@ namespace ArxOne.MrAdvice.Threading
         /// <returns></returns>
         public static Type GetTaskType(this Type type)
         {
-            if (!type.IsGenericType)
+            if (!type.GetInformationReader().IsGenericType)
                 return null;
-            var arguments = type.GetGenericArguments();
+            var arguments = type.GetAssignmentReader().GetGenericArguments();
             if (arguments.Length != 1)
                 return null;
             return arguments[0];

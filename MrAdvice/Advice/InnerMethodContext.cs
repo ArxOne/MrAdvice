@@ -51,7 +51,7 @@ namespace ArxOne.MrAdvice.Advice
             try
             {
                 AdviceValues.ReturnValue = _innerMethod.Invoke(AdviceValues.Target, AdviceValues.Arguments);
-                if (typeof(Task).IsAssignableFrom(_innerMethod.ReturnType))
+                if (typeof(Task).GetAssignmentReader().IsAssignableFrom(_innerMethod.ReturnType))
                     return (Task)AdviceValues.ReturnValue;
                 return Tasks.Void();
             }

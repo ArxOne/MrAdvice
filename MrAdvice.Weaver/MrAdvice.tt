@@ -24,9 +24,22 @@
   <files>
     <file src="MrAdvice.targets" target="build"/>
     <file src="bin\$ConfigurationName$\MrAdvice.Weaver.exe" target="build"/>
-    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.dll" target="lib\portable-net40+sl5+wp8+uap10.0"/>
-    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.xml" target="lib\portable-net40+sl5+wp8+uap10.0"/>
-    <file src="..\MrAdvice\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\portable-net40+sl5+wp8+uap10.0"/>
+    <!-- .Net 4.0 client -->
+    <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.dll" target="lib\net40-client"/>
+    <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.xml" target="lib\net40-client"/>
+    <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\net40-client"/>
+    <!-- UAP 1.0 -->
+    <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.dll" target="lib\uap10.0"/>
+    <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.xml" target="lib\uap10.0"/>
+    <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\uap10.0"/>
+    <!-- Silverlight 5.0 -->
+    <file src="..\MrAdvice.Silverlight5\bin\$ConfigurationName$\MrAdvice.dll" target="lib\sl5"/>
+    <file src="..\MrAdvice.Silverlight5\bin\$ConfigurationName$\MrAdvice.xml" target="lib\sl5"/>
+    <file src="..\MrAdvice.Silverlight5\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\sl5"/>
+    <!-- .NET Standard 1.6 -->
+    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.dll" target="lib\netstandard16"/>
+    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.xml" target="lib\netstandard16"/>
+    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\netstandard16"/>
     <file src="..\MrAdvice\**\*.cs" target="src"/>
   </files>
 </package>

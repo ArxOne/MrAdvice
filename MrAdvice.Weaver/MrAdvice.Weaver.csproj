@@ -18,7 +18,7 @@
     </NuGetPackageImportStamp>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-	<OutputPath>.</OutputPath>
+    <OutputPath>.</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -112,16 +112,16 @@
     <Compile Include="Weaver\Instructions.cs" />
     <Compile Include="Utility\TypeReferenceExtensions.cs" />
     <Compile Include="Weaver\WeaverMethodWeavingContext.cs" />
+    <None Include="MrAdvice.nuspec">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MrAdvice.tt</DependentUpon>
+    </None>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
       <Link>Properties\MrAdvice.snk</Link>
-    </None>
-    <None Include="MrAdvice.nuspec">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MrAdvice.tt</DependentUpon>
     </None>
     <None Include="MrAdvice.targets">
       <SubType>Designer</SubType>
@@ -130,6 +130,7 @@
   <ItemGroup>
     <None Include="MrAdvice.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>MrAdvice.nuspec</LastGenOutput>
     </None>
   </ItemGroup>
@@ -140,9 +141,9 @@
     <None Include="Debug.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MrAdvice\MrAdvice.csproj">
-      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
-      <Name>MrAdvice</Name>
+    <ProjectReference Include="..\MrAdvice.Net40\MrAdvice.Net40.csproj">
+      <Project>{D8AA6017-594D-4616-907B-B450A5D2FCB9}</Project>
+      <Name>MrAdvice.Net40</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

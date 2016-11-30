@@ -7,7 +7,6 @@
 
 namespace ArxOne.MrAdvice.Weaver
 {
-    using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Advice;
@@ -22,8 +21,6 @@ namespace ArxOne.MrAdvice.Weaver
     /// </summary>
     internal class WeavingContext
     {
-        private readonly TypeResolver _typeResolver;
-
         /// <summary>
         /// Gets or sets the type of the <see cref="CompilerGeneratedAttribute"/>.
         /// </summary>

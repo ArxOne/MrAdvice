@@ -3,7 +3,7 @@
     "Clarius.TransformOnBuild": "1.1.12"
   },
   "frameworks": {
-    "portable40-net40+sl5+win8": {}
+    "net40-client": {}
   },
   "runtimes": {
     "win": {}

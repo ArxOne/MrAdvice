@@ -93,6 +93,7 @@ namespace ArxOne.MrAdvice.Utility
             throw new NotSupportedException(string.Format("Type {0} not supported", memberInfo.GetType()));
         }
 
+#if !WINDOWS_UWP
         /// <summary>
         /// Gets a signel custom attribute (or null).
         /// </summary>
@@ -104,5 +105,6 @@ namespace ArxOne.MrAdvice.Utility
         {
             return memberInfo.GetCustomAttributes(typeof(TAttribute), false).Cast<TAttribute>().SingleOrDefault();
         }
+#endif
     }
 }

@@ -70,9 +70,9 @@
     <Compile Include="ExternalTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj">
-      <Project>{3C764938-4C4A-4128-B20F-97EF2ED4A49B}</Project>
-      <Name>MrAdvice</Name>
+    <ProjectReference Include="..\..\MrAdvice.Net40\MrAdvice.Net40.csproj">
+      <Project>{d8aa6017-594d-4616-907b-b450a5d2fcb9}</Project>
+      <Name>MrAdvice.Net40</Name>
     </ProjectReference>
     <ProjectReference Include="..\ExternalAdvices\ExternalAdvices.csproj">
       <Project>{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}</Project>
