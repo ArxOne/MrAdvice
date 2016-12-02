@@ -8,9 +8,9 @@
 // Because multiple packages may depend on MrAdvice, the Assembly Version will only hold the Major version
 var VersionMajor = "2";
 var VersionMinor = "4";
-var VersionPatch = "0";
+var VersionPatch = "1";
 var Version = VersionMajor + "." + VersionMinor + "." + VersionPatch;
-var PreVersion = "";
+var PreVersion = "-test1";
 
 var Title = "Mr. Advice";
 var Company = "Arx One";
