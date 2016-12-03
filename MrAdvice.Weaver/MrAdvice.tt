@@ -18,7 +18,7 @@
     <description><#=Description#></description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2015-2016 Arx One</copyright>
-    <tags>weaver aspect advice pointcut .net attributes injection pcl portable windows silverlight phone sl5 wp8</tags>
+    <tags>weaver aspect advice pointcut aop .net attributes injection netstandard windows silverlight sl5 postsharp</tags>
     <developmentDependency>false</developmentDependency>
   </metadata>
   <files>
