@@ -29,6 +29,8 @@ namespace ArxOne.MrAdvice
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
+        private static readonly AdviceInfo[] NoAdvice = new AdviceInfo[0];
+
         /// <summary>
         /// Runs a method interception.
         /// We use a static method here, if one day we want to reuse Invocations or change mecanism,
@@ -174,6 +176,12 @@ namespace ArxOne.MrAdvice
             {
                 if (!AspectInfos.TryGetValue(method, out aspectInfo))
                 {
+                    // this is to handle one special case:
+                    // when an assembly advice is applied at assembly level, its ctor is also advised
+                    // and getting its attributes, it creates an infinite loop
+                    // so since an advice won't advise itself anyway
+                    // we create an empty AspectInfo
+                    AspectInfos[method] = new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, method, methodHandle);
                     // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
                     AspectInfos[method] = aspectInfo = CreateAspectInfo(method, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, abstractedTarget);
                 }

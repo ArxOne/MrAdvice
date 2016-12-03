@@ -8,7 +8,6 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Diagnostics;
     using System.Linq;
     using System.Runtime.CompilerServices;
@@ -464,7 +463,7 @@ namespace ArxOne.MrAdvice.Weaver
                     return false;
                 var interfaces = typeDef.Interfaces;
                 _isMarker[key] = isMarker = typeReference.SafeEquivalent(markerInterface)
-                                               || interfaces.Any(i => IsMarker(i.Interface, markerInterface));
+                                            || interfaces.Any(i => IsMarker(i.Interface, markerInterface));
                 return isMarker;
             }
         }
