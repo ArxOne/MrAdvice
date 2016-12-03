@@ -11,6 +11,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Diagnostics;
     using System.Linq;
     using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using System.Runtime.Versioning;
     using Advice;
     using Annotation;
@@ -222,7 +223,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <returns></returns>
-        private IEnumerable<ITypeDefOrRef> GetAdviceHandledInterfaces(ModuleDef moduleDefinition)
+        private IEnumerable<TypeDef> GetAdviceHandledInterfaces(ModuleDef moduleDefinition)
         {
             // the first method to look for in the final AdviceExtensions.Handle<>() method
             var adviceExtensionsType = TypeResolver.Resolve(moduleDefinition, typeof(AdviceExtensions));
@@ -244,21 +245,38 @@ namespace ArxOne.MrAdvice.Weaver
                         if (!methodsSearched.Contains(t.Item2))
                         {
                             // ReSharper disable once AccessToForEachVariableInClosure
-                            var parameterIndex = t.Item2.GenericParameters.IndexOf(p => p.Name == t.Item1.TypeName);
+                            var parameterIndex = t.Item2.GenericParameters.IndexOf(p => p.Name == ((ITypeDefOrRef)t.Item1).TypeName);
                             methodsSearched.Add(t.Item2);
                             methodsToSearch.Add(Tuple.Create(t.Item2, parameterIndex));
                             Logging.WriteDebug("Now looking for references to '{0} [{1}]'", methodToSearch, parameterIndex);
                         }
                     }
                     // only interfaces are processed by now
-                    else if (TypeResolver.Resolve(t.Item1).IsInterface)
+                    else
                     {
-                        // otherwise, this is a direct call, keep the injected interface name
-                        if (!foundHandledInterfaces.Contains(t.Item1))
+                        var interfaceDef = t.Item1 as TypeDef;
+                        if (interfaceDef == null)
                         {
-                            foundHandledInterfaces.Add(t.Item1);
-                            yield return t.Item1;
+                            var interfaceRef = t.Item1 as TypeRef;
+                            if (interfaceRef != null)
+                                interfaceDef = TypeResolver.Resolve(interfaceRef);
                         }
+                        if (interfaceDef == null)
+                        {
+                            Logging.WriteError("Can not identify {0} as valid weavable interface. If you feel this is unfair --> https://github.com/ArxOne/MrAdvice/issues/new", t.Item1.ToString());
+                            continue;
+                        }
+                        if (interfaceDef.IsInterface)
+                        {
+                            // otherwise, this is a direct call, keep the injected interface name
+                            if (!foundHandledInterfaces.Contains(t.Item1))
+                            {
+                                foundHandledInterfaces.Add(t.Item1);
+                                yield return interfaceDef;
+                            }
+                        }
+                        else
+                            Logging.WriteError("Only interfaces can be weaved with Handle<>() extension method and {0} it not an interface (but I'm glad you asked)", interfaceDef.FullName);
                     }
                 }
             }
@@ -272,7 +290,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="invokedMethod">The invoked method.</param>
         /// <param name="genericParameterIndex">Index of the generic parameter.</param>
         /// <returns></returns>
-        private static IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(ModuleDef moduleDefinition,
+        private IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(ModuleDef moduleDefinition,
             IMethodDefOrRef invokedMethod, int genericParameterIndex)
         {
             return moduleDefinition.GetTypes().SelectMany(t => t.Methods.Where(m => m.HasBody)
@@ -287,7 +305,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="invokedMethod">The invoked method.</param>
         /// <param name="genericParameterIndex">Index of the generic parameter.</param>
         /// <returns></returns>
-        private static IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(MethodDef methodDefinition, IMethodDefOrRef invokedMethod, int genericParameterIndex)
+        private IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(MethodDef methodDefinition, IMethodDefOrRef invokedMethod, int genericParameterIndex)
         {
             foreach (var instruction in methodDefinition.Body.Instructions)
             {
@@ -380,11 +398,30 @@ namespace ArxOne.MrAdvice.Weaver
             var markers = reflectionNode.GetAncestorsToDescendants()
                 .SelectMany(n => n.CustomAttributes
                     .Where(a => !a.AttributeType.DefinitionAssembly.IsSystem())
-                    .SelectMany(a => TypeResolver.Resolve(a.AttributeType).GetSelfAndParents())
+                    .SelectMany(a => ResolveTypeOrGenericDefinition(a.AttributeType).GetSelfAndParents())
                     .Where(t => IsMarker(t, markerInterface)))
                 .Distinct()
                 .Select(t => GetMarkerDefinition(t, context));
             return markers;
+        }
+
+        private TypeDef ResolveTypeOrGenericDefinition(ITypeDefOrRef typeDefOrRef)
+        {
+            var typeDef = typeDefOrRef as TypeDef;
+            if (typeDef != null)
+                return typeDef;
+
+            var typeRef = typeDefOrRef as TypeRef;
+            if (typeRef != null)
+                return TypeResolver.Resolve(typeRef);
+
+            // tricky part here: assuming this a generic type
+            var typeSpec = (TypeSpec)typeDefOrRef;
+            var genericType = typeSpec.TryGetGenericInstSig();
+            if (genericType != null)
+                return genericType.GenericType.TypeDef;
+
+            return null;
         }
 
         private readonly IDictionary<TypeDef, MarkerDefinition> _markerDefinitions = new Dictionary<TypeDef, MarkerDefinition>();
@@ -458,7 +495,7 @@ namespace ArxOne.MrAdvice.Weaver
                     return isMarker;
 
                 // otherwise look for type or implemented interfaces (recursively)
-                var typeDef = TypeResolver.Resolve(typeReference);
+                var typeDef = ResolveTypeOrGenericDefinition(typeReference);
                 if (typeDef == null)
                     return false;
                 var interfaces = typeDef.Interfaces;

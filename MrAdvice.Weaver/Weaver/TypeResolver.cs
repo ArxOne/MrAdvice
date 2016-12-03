@@ -73,7 +73,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="fullName">The full name.</param>
         /// <param name="ignoreSystem">if set to <c>true</c> [ignore system].</param>
         /// <param name="depth">The depth.</param>
-        /// <param name="logging">The logging.</param>
         /// <returns></returns>
         private TypeDef Resolve(ModuleDef moduleDefinition, string fullName, bool ignoreSystem, int depth)
         {
@@ -117,13 +116,13 @@ namespace ArxOne.MrAdvice.Weaver
         }
 
         /// <summary>
-        /// Resolves the specified type definition or reference.
+        /// Resolves the specified type reference.
         /// </summary>
-        /// <param name="typeDefOrRef">The type definition or reference.</param>
+        /// <param name="typeRef">The type definition or reference.</param>
         /// <returns></returns>
-        public TypeDef Resolve(ITypeDefOrRef typeDefOrRef)
+        public TypeDef Resolve(TypeRef typeRef)
         {
-            if (typeDefOrRef == null)
+            if (typeRef == null)
             {
                 Logging.WriteWarning("null typeDefOrRef provided for resolution");
                 return null;
@@ -131,8 +130,8 @@ namespace ArxOne.MrAdvice.Weaver
             lock (_resolvedTypesByName)
             {
                 TypeDef typeDef;
-                if (!_resolvedTypesByName.TryGetValue(typeDefOrRef.AssemblyQualifiedName, out typeDef))
-                    _resolvedTypesByName[typeDefOrRef.AssemblyQualifiedName] = typeDef = DoResolve(typeDefOrRef);
+                if (!_resolvedTypesByName.TryGetValue(typeRef.AssemblyQualifiedName, out typeDef))
+                    _resolvedTypesByName[typeRef.AssemblyQualifiedName] = typeDef = DoResolve(typeRef);
                 return typeDef;
             }
         }

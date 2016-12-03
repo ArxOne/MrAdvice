@@ -78,4 +78,12 @@ namespace MethodLevelTest
             // do other things here
         }
     }
+
+    public interface ISomething<TValue>
+    {
+    }
+
+    [MyProudAdvice]
+    public class Something : ISomething<int>
+    { }
 }

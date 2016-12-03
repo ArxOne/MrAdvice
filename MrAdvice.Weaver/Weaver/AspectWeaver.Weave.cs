@@ -502,7 +502,7 @@ namespace ArxOne.MrAdvice.Weaver
             var markerAttributeCtorDef = new MemberRefUser(markerAttributeCtor.Module, markerAttributeCtor.Name, markerAttributeCtor.MethodSig, markerAttributeCtor.DeclaringType);
             foreach (var advice in advices)
             {
-                var adviceDefinition = TypeResolver.Resolve(advice.Type);
+                var adviceDefinition = advice.Type;
                 foreach (var field in adviceDefinition.Fields.Where(f => f.IsPublic))
                     IntroduceMember(method.Module, field.Name, field.FieldType.ToTypeDefOrRef(), field.IsStatic, advice.Type, typeDefinition, markerAttributeCtorDef);
                 foreach (var property in adviceDefinition.Properties.Where(p => p.HasAnyPublic()))
@@ -556,7 +556,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="interfaceType">Type of the interface.</param>
         /// <param name="context">The context.</param>
-        private void WeaveInterface(ModuleDef moduleDefinition, ITypeDefOrRef interfaceType, WeavingContext context)
+        private void WeaveInterface(ModuleDef moduleDefinition, TypeDef interfaceType, WeavingContext context)
         {
             Logging.WriteDebug("Weaving interface '{0}'", interfaceType.FullName);
             TypeDef implementationType;
@@ -571,20 +571,19 @@ namespace ArxOne.MrAdvice.Weaver
                     return;
 
                 // now, create the implementation type
-                interfaceTypeDefinition = TypeResolver.Resolve(interfaceType);
                 var typeAttributes = (InjectAsPrivate ? TypeAttributes.NotPublic : TypeAttributes.Public) | TypeAttributes.Class | TypeAttributes.BeforeFieldInit;
                 advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(AdvisedInterface));
                 // TODO: this should work using TypeImporter.Import
                 var advisedInterfaceTypeReference = moduleDefinition.Import(advisedInterfaceType);
                 implementationType = new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) { Attributes = typeAttributes };
-                implementationType.Interfaces.Add(new InterfaceImplUser(interfaceTypeDefinition));
+                implementationType.Interfaces.Add(new InterfaceImplUser(interfaceType));
 
                 lock (moduleDefinition)
                     moduleDefinition.Types.Add(implementationType);
             }
 
             // create empty .ctor. This .NET mofo wants it!
-            var baseEmptyConstructor = moduleDefinition.SafeImport(TypeResolver.Resolve(advisedInterfaceType).FindConstructors().Single());
+            var baseEmptyConstructor = moduleDefinition.SafeImport(advisedInterfaceType.FindConstructors().Single());
             const MethodAttributes ctorAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
             var method = new MethodDefUser(".ctor", baseEmptyConstructor.MethodSig, ctorAttributes);
             method.Body = new CilBody();
@@ -594,11 +593,11 @@ namespace ArxOne.MrAdvice.Weaver
             implementationType.Methods.Add(method);
 
             // create implementation methods
-            foreach (var interfaceMethod in interfaceTypeDefinition.Methods.Where(m => !m.IsSpecialName))
+            foreach (var interfaceMethod in interfaceType.Methods.Where(m => !m.IsSpecialName))
                 WeaveInterfaceMethod(interfaceMethod, implementationType, true, context);
 
             // create implementation properties
-            foreach (var interfaceProperty in interfaceTypeDefinition.Properties)
+            foreach (var interfaceProperty in interfaceType.Properties)
             {
                 var implementationProperty = new PropertyDefUser(interfaceProperty.Name, interfaceProperty.PropertySig);
                 implementationType.Properties.Add(implementationProperty);
@@ -609,7 +608,7 @@ namespace ArxOne.MrAdvice.Weaver
             }
 
             // create implementation events
-            foreach (var interfaceEvent in interfaceTypeDefinition.Events)
+            foreach (var interfaceEvent in interfaceType.Events)
             {
                 var implementationEvent = new EventDefUser(interfaceEvent.Name, interfaceEvent.EventType);
                 implementationType.Events.Add(implementationEvent);

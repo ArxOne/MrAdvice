@@ -77,7 +77,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="adviceType">Type of the advice.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private PointcutSelector GetPointcutSelector(ITypeDefOrRef adviceType, WeavingContext context)
+        private PointcutSelector GetPointcutSelector(TypeDef adviceType, WeavingContext context)
         {
             PointcutSelector pointcutRules;
             if (context.AdvicesRules.TryGetValue(adviceType, out pointcutRules))
@@ -89,12 +89,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// <summary>
         /// Creates the pointcut rules for a given advice.
         /// </summary>
-        /// <param name="adviceType">Type of the advice.</param>
+        /// <param name="adviceTypeDef">The advice type definition.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private PointcutSelector CreatePointcutSelector(ITypeDefOrRef adviceType, WeavingContext context)
+        private PointcutSelector CreatePointcutSelector(TypeDef adviceTypeDef, WeavingContext context)
         {
-            var adviceTypeDef = TypeResolver.Resolve(adviceType);
             var rules = new PointcutSelector();
             foreach (var customAttribute in adviceTypeDef.CustomAttributes)
                 rules += CreatePointcutSelector(customAttribute, context);
