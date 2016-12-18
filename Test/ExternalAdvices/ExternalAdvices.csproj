@@ -42,8 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractMethodAdvice.cs" />
     <Compile Include="AssemblyAdvice.cs" />
     <Compile Include="ExternalClass.cs" />
+    <Compile Include="ExternalConcreteMethodAdvice.cs" />
     <Compile Include="ExternalEmptyAdvice.cs" />
     <Compile Include="AddProperty.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -9,6 +9,7 @@ namespace MethodLevelTest
     using System;
     using System.Runtime.InteropServices;
     using ArxOne.MrAdvice.Advice;
+    using ExternalAdvices;
 
     // https://github.com/ArxOne/MrAdvice/issues/32
     public class Test
@@ -86,4 +87,23 @@ namespace MethodLevelTest
     [MyProudAdvice]
     public class Something : ISomething<int>
     { }
+
+    public class ConcreteMethodAdvice : AbstractMethodAdvice
+    {
+        public override void Advise(MethodAdviceContext context)
+        {
+            context.Proceed();
+        }
+    }
+
+    public class ConcreteWeavedClass
+    {
+        [ConcreteMethodAdvice]
+        public void AdvisedMethod()
+        { }
+
+        [ExternalConcreteMethodAdvice]
+        public void ExternalAdvisedMethod()
+        { }
+    }
 }
