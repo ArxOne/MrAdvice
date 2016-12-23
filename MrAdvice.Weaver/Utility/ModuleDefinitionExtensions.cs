@@ -28,9 +28,10 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="ignoreSystem">if set to <c>true</c> [ignore system].</param>
         /// <param name="maximumDepth">The maximum depth (or -1 to search all).</param>
         /// <param name="logging">The logging.</param>
+        /// <param name="isMainModule">if set to <c>true</c> [is main module].</param>
         /// <returns></returns>
         public static IEnumerable<ModuleDef> GetSelfAndReferences(this ModuleDef moduleDefinition, IAssemblyResolver assemblyResolver,
-            bool ignoreSystem, int maximumDepth, ILogging logging)
+            bool ignoreSystem, int maximumDepth, ILogging logging, bool isMainModule)
         {
             var remainingModules = new List<Tuple<ModuleDef, int>> { Tuple.Create(moduleDefinition, maximumDepth) };
             var discoveredNames = new HashSet<string> { moduleDefinition.FullName };
@@ -45,7 +46,7 @@ namespace ArxOne.MrAdvice.Utility
                 // now, recurse
                 if (depth > 0)
                 {
-                    foreach (var referencedModule in thisModule.GetReferencedModules(assemblyResolver, ignoreSystem, logging))
+                    foreach (var referencedModule in thisModule.GetReferencedModules(assemblyResolver, ignoreSystem, logging, isMainModule))
                     {
                         var fullyQualifiedName = referencedModule.FullName;
                         if (!discoveredNames.Contains(fullyQualifiedName))
@@ -54,6 +55,7 @@ namespace ArxOne.MrAdvice.Utility
                             discoveredNames.Add(fullyQualifiedName);
                         }
                     }
+                    isMainModule = false;
                 }
             }
         }
@@ -65,12 +67,13 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="assemblyResolver">The assembly resolver.</param>
         /// <param name="ignoreSystem">if set to <c>true</c> [ignore system].</param>
         /// <param name="logging">The logging.</param>
+        /// <param name="isMainModule">if set to <c>true</c> [is main module].</param>
         /// <returns></returns>
-        private static IEnumerable<ModuleDef> GetReferencedModules(this ModuleDef moduleDefinition, IAssemblyResolver assemblyResolver, bool ignoreSystem, ILogging logging)
+        private static IEnumerable<ModuleDef> GetReferencedModules(this ModuleDef moduleDefinition, IAssemblyResolver assemblyResolver, bool ignoreSystem, ILogging logging, bool isMainModule)
         {
             var assemblyDefinitions = moduleDefinition.GetAssemblyRefs()
                 .Where(ar => !ignoreSystem || !IsSystem(ar))
-                .Select(r => TryResolve(assemblyResolver, r, moduleDefinition, logging)).Where(a => a != null);
+                .Select(r => TryResolve(assemblyResolver, r, moduleDefinition, logging, isMainModule)).Where(a => a != null);
             return assemblyDefinitions.Select(a => a.GetMainModule());
         }
 
@@ -97,8 +100,9 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="assemblyNameReference">The assembly name reference.</param>
         /// <param name="source">The source.</param>
         /// <param name="logging">The logging.</param>
+        /// <param name="directReference">if set to <c>true</c> [direct reference].</param>
         /// <returns></returns>
-        private static AssemblyDef TryResolve(IAssemblyResolver assemblyResolver, AssemblyRef assemblyNameReference, ModuleDef source, ILogging logging)
+        private static AssemblyDef TryResolve(IAssemblyResolver assemblyResolver, AssemblyRef assemblyNameReference, ModuleDef source, ILogging logging, bool directReference)
         {
             lock (ResolutionCache)
             {
@@ -106,7 +110,7 @@ namespace ArxOne.MrAdvice.Utility
                 if (ResolutionCache.TryGetValue(assemblyNameReference, out assemblyDefinition))
                     return assemblyDefinition;
 
-                ResolutionCache[assemblyNameReference] = assemblyDefinition = TryLoad(assemblyResolver, assemblyNameReference, source, logging);
+                ResolutionCache[assemblyNameReference] = assemblyDefinition = TryLoad(assemblyResolver, assemblyNameReference, source, logging, directReference);
                 return assemblyDefinition;
             }
         }
@@ -118,14 +122,15 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="assemblyNameReference">The assembly name reference.</param>
         /// <param name="source">The source.</param>
         /// <param name="logging">The logging.</param>
+        /// <param name="directReference">if set to <c>true</c> [direct reference].</param>
         /// <returns></returns>
-        private static AssemblyDef TryLoad(IAssemblyResolver assemblyResolver, AssemblyRef assemblyNameReference, ModuleDef source, ILogging logging)
+        private static AssemblyDef TryLoad(IAssemblyResolver assemblyResolver, AssemblyRef assemblyNameReference, ModuleDef source, ILogging logging, bool directReference)
         {
             try
             {
                 logging.WriteDebug("TryLoad '{0}' from '{1}'", assemblyNameReference.FullName, source.FullName);
                 var assemblyDef = assemblyResolver.Resolve(assemblyNameReference, source);
-                if (assemblyDef == null)
+                if (assemblyDef == null && directReference)
                     logging.WriteWarning("Can't load '{0}'", assemblyNameReference.FullName);
                 return assemblyDef;
             }
