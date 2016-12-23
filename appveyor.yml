@@ -7,6 +7,7 @@ branches:
     - fody
     - master
     - netstandard
+    - fix-warning-cant-load
 
 before_build:
   nuget restore MrAdvice.sln
