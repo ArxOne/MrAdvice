@@ -40,7 +40,7 @@ namespace ArxOne.MrAdvice
                 // instances are created here
                 // please also note poor man's dependency injection (which is enough for us here)
                 var assemblyResolver = context.AssemblyResolver;
-                var typeResolver = new TypeResolver { Logging = _logging, AssemblyResolver = assemblyResolver };
+                var typeResolver = new TypeResolver(context.Module) { Logging = _logging, AssemblyResolver = assemblyResolver };
                 var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
 

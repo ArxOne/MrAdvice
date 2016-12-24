@@ -41,6 +41,17 @@ namespace ArxOne.MrAdvice.Weaver
         private readonly IDictionary<string, TypeDef> _resolvedTypesByName = new Dictionary<string, TypeDef>();
         private IAssemblyResolver _assemblyResolver;
         private IResolver _resolver;
+        private readonly ModuleDef _mainModule;
+
+        public TypeResolver(ModuleDef mainModule)
+        {
+            _mainModule = mainModule;
+        }
+
+        private bool IsMainModule(ModuleDef module)
+        {
+            return module == _mainModule;
+        }
 
         /// <summary>
         /// Resolves the full name to a type definiton.
@@ -93,7 +104,7 @@ namespace ArxOne.MrAdvice.Weaver
             //}
             lock (_resolvedTypesByName)
             {
-                var selfAndReferences = moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth, Logging);
+                var selfAndReferences = moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth, Logging, IsMainModule(moduleDefinition));
                 return selfAndReferences.SelectMany(referencedModule => referencedModule.GetTypes()).FirstOrDefault(t => Matches(t, fullName));
             }
         }
@@ -158,7 +169,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             // this method is actually never called...
             // TODO: remove
-            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue, Logging))
+            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue, Logging, IsMainModule(typeDefOrRef.Module)))
             {
                 var typeDef = reference.Find(typeDefOrRef);
                 if (typeDef != null)

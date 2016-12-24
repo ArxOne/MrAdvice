@@ -77,6 +77,7 @@ namespace ArxOne.MrAdvice.Utility
             return a.DeclaringType.FullName == b.DeclaringType.FullName && a.Name == b.Name;
         }
 
+#if NO
         /// <summary>
         /// Resolves the specified assembly resolver.
         /// </summary>
@@ -99,5 +100,6 @@ namespace ArxOne.MrAdvice.Utility
 
             return null;
         }
+#endif
     }
 }
