@@ -23,12 +23,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="markedNode">The marked node.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private PointcutSelector GetPointcutSelector(MarkedNode markedNode, WeavingContext context)
+        private IEnumerable<PointcutSelector> GetPointcutSelectors(MarkedNode markedNode, WeavingContext context)
         {
-            var rules = PointcutSelector.EmptySelector;
-            foreach (var markerDefinition in markedNode.Definitions)
-                rules += GetPointcutSelector(markerDefinition.Type, context);
-            return rules;
+            return markedNode.Definitions.Select(d => GetPointcutSelector(d.Type, context));
         }
 
         private PointcutSelector GetAdviceSelector(ReflectionNode node, WeavingContext context)
@@ -94,26 +91,26 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private PointcutSelector CreatePointcutSelector(TypeDef adviceTypeDef, WeavingContext context)
         {
-            var rules = new PointcutSelector();
+            var pointcutSelector = new PointcutSelector();
             foreach (var customAttribute in adviceTypeDef.CustomAttributes)
-                rules += CreatePointcutSelector(customAttribute, context);
-            return rules;
+                pointcutSelector += CreatePointcutSelector(customAttribute, context);
+            return pointcutSelector;
         }
 
         /// <summary>
         /// Creates the pointcut rules from an advice attribute.
         /// The custom attribute provided has to be either <see cref="ExcludePointcutAttribute"/> or <see cref="IncludePointcutAttribute"/>
-        /// If not the return <see cref="PointcutSelector"/> are empty
+        /// If not the returned <see cref="PointcutSelector"/> is empty
         /// </summary>
         /// <param name="customAttribute">The custom attribute.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
         private PointcutSelector CreatePointcutSelector(CustomAttribute customAttribute, WeavingContext context)
         {
-            var rules = new PointcutSelector();
-            rules.IncludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.IncludePointcutAttributeType));
-            rules.ExcludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.ExcludePointcutAttributeType));
-            return rules;
+            var pointcutSelector = new PointcutSelector();
+            pointcutSelector.IncludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.IncludePointcutAttributeType));
+            pointcutSelector.ExcludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.ExcludePointcutAttributeType));
+            return pointcutSelector;
         }
 
         /// <summary>

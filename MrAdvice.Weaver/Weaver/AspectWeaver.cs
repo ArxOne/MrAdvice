@@ -362,7 +362,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </returns>
         private bool IsIncludedByPointcut(MarkedNode markedNode, WeavingContext context)
         {
-            var isIncludedByPointcut = GetPointcutSelector(markedNode, context).Select(markedNode.Node.Method);
+            var isIncludedByPointcut = GetPointcutSelectors(markedNode, context).Any(s => s.Select(markedNode.Node.Method));
             if (!isIncludedByPointcut)
                 Logging.WriteDebug("Excluding method '{0}' according to pointcut rules", markedNode.Node.Method.FullName);
             return isIncludedByPointcut;

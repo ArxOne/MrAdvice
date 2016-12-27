@@ -20,7 +20,7 @@ namespace ArxOne.MrAdvice.Introduction
         /// <returns></returns>
         public static string GetName(string adviceNamespace, string adviceName, string adviceMemberName)
         {
-            return string.Format(".{0}.{1}.{2}", adviceNamespace, adviceName, adviceMemberName);
+            return $".{adviceNamespace}.{adviceName}.{adviceMemberName}";
         }
     }
 }

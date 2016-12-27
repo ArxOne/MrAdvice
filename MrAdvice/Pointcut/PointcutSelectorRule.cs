@@ -106,6 +106,8 @@ namespace ArxOne.MrAdvice.Pointcut
                         return Enumerable.Range(sIndex, nextDotIndex).Any(i => WildcardMatch(wildcard, s, wildcardIndex + 1, i, ignoreCase));
                     default:
                         var cc = ignoreCase ? char.ToLower(c) : c;
+                        if (sIndex >= s.Length)
+                            return false;
                         var sc = ignoreCase ? char.ToLower(s[sIndex]) : s[sIndex];
                         if (cc != sc)
                             return false;

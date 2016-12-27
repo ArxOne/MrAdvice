@@ -9,7 +9,6 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using dnlib.DotNet;
     using Pointcut;
-    using Reflection.Groups;
     using Utility;
     using MethodAttributes = System.Reflection.MethodAttributes;
     using TypeAttributes = System.Reflection.TypeAttributes;

@@ -99,6 +99,7 @@
     <Compile Include="InterfaceTest.cs" />
     <Compile Include="IntroducedClass.cs" />
     <Compile Include="IntroductionTest.cs" />
+    <Compile Include="OppositePointcutsTest.cs" />
     <Compile Include="OverloadedIndexerAdvisedClass.cs" />
     <Compile Include="ParametersTest.cs" />
     <Compile Include="PointcutRulesTest.cs" />
