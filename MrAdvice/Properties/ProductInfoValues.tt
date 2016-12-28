@@ -8,7 +8,7 @@
 // Because multiple packages may depend on MrAdvice, the Assembly Version will only hold the Major version
 var VersionMajor = "2";
 var VersionMinor = "4";
-var VersionPatch = "4";
+var VersionPatch = "5";
 var Version = VersionMajor + "." + VersionMinor + "." + VersionPatch;
 var PreVersion = "";
 

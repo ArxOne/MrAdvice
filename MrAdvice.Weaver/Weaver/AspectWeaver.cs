@@ -126,7 +126,7 @@ namespace ArxOne.MrAdvice.Weaver
             }
         }
 
-        private WeavingContext CreateWeavingContext(ModuleDefMD moduleDefinition)
+        private WeavingContext CreateWeavingContext(ModuleDef moduleDefinition)
         {
             var context = new WeavingContext
             {
@@ -135,11 +135,22 @@ namespace ArxOne.MrAdvice.Weaver
                 AbstractTargetAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(AbstractTargetAttribute)),
                 AdviceInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(IAdvice)),
                 WeavingAdviceInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(IWeavingAdvice)),
-                ExecutionPointAttributeDefaultCtor = moduleDefinition.Import(TypeResolver.Resolve(moduleDefinition, typeof(ExecutionPointAttribute)).FindDefaultConstructor()),
+                ExecutionPointAttributeDefaultCtor = moduleDefinition.Import(TypeResolver.Resolve(moduleDefinition, typeof(ExecutionPointAttribute))?.FindDefaultConstructor()),
                 ExcludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludePointcutAttribute)),
                 IncludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(IncludePointcutAttribute)),
                 ExcludeAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludeAdvicesAttribute)),
             };
+
+            if (context.ExecutionPointAttributeDefaultCtor == null)
+                Logging.WriteError("ExecutionPointAttribute default ctor was not found");
+
+            if (context.ExcludePointcutAttributeType == null)
+                Logging.WriteError("ExcludePointcutAttributeType was not found");
+            if (context.IncludePointcutAttributeType == null)
+                Logging.WriteError("IncludePointcutAttributeType was not found");
+            if (context.ExcludeAdviceAttributeType == null)
+                Logging.WriteError("ExcludeAdviceAttributeType was not found");
+
             return context;
         }
 

@@ -164,6 +164,9 @@ namespace ArxOne.MrAdvice.Weaver
 
         private static void AddGeneratedAttribute(MethodDefUser innerMethod, WeavingContext context)
         {
+            // does this happen? Not sure.
+            if (context.ExecutionPointAttributeDefaultCtor == null)
+                return;
             var generatedAttribute = new CustomAttribute(context.ExecutionPointAttributeDefaultCtor);
             innerMethod.CustomAttributes.Add(generatedAttribute);
         }

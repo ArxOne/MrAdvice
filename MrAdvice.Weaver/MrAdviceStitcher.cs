@@ -29,12 +29,19 @@ namespace ArxOne.MrAdvice
             if (AlreadyProcessed(context))
                 return false;
 
+
 #if DEBUG
             _logging = new MultiLogging(new DefaultLogging(Logging), new FileLogging("MrAdvice.log"));
             _logging.WriteDebug("Start");
 #else
             _logging = Logging;
 #endif
+            if (context.Module == null)
+            {
+                _logging.WriteError("Target assembly {0} could not be loaded", context.AssemblyPath);
+                return false;
+            }
+
             try
             {
                 // instances are created here

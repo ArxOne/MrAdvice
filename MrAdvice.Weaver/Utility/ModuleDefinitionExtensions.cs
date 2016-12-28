@@ -169,7 +169,7 @@ namespace ArxOne.MrAdvice.Utility
             lock (moduleDefinition)
                 return moduleDefinition.Import(type).ToTypeSig().TryGetTypeRef();
         }
-
+        
         public static CustomAttribute CreateCustomAttribute(this ModuleDef moduleDefinition, TypeRef customAttributeType, TypeResolver typeResolver)
         {
             var constructor = typeResolver.Resolve(customAttributeType).FindConstructors().Single();

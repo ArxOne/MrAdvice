@@ -123,6 +123,11 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public TypeDef Resolve(ModuleDef moduleDefinition, Type type)
         {
+            if (type == null)
+            {
+                Logging.WriteWarning("null type provided for resolution");
+                return null;
+            }
             return Resolve(moduleDefinition, type.FullName);
         }
 
@@ -135,7 +140,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             if (typeRef == null)
             {
-                Logging.WriteWarning("null typeDefOrRef provided for resolution");
+                Logging.WriteWarning("null typeRef provided for resolution");
                 return null;
             }
             lock (_resolvedTypesByName)

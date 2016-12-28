@@ -46,22 +46,25 @@ namespace ArxOne.MrAdvice.Weaver
                 Logging.WriteDebug("Excluding {0} from itself", typeReflectionNode.TypeDefinition.FullName);
                 adviceSelector.ExcludeRules.Add(new PointcutSelectorRule(typeReflectionNode.TypeDefinition.FullName));
             }
-            var excludeAdviceAttributes = node.CustomAttributes.Where(ca => ca.AttributeType.SafeEquivalent(context.ExcludeAdviceAttributeType));
-            foreach (var excludeAdviceAttribute in excludeAdviceAttributes)
+            if (context.ExcludeAdviceAttributeType != null)
             {
-                var rule = new PointcutSelectorRule();
-                // full names wildcards
-                if (excludeAdviceAttribute.ConstructorArguments.Count == 1)
-                    rule.Names.AddRange(GetStrings(excludeAdviceAttribute.ConstructorArguments[0].Value));
-
-                // then named properties
-                foreach (var namedArgument in excludeAdviceAttribute.NamedArguments)
+                var excludeAdviceAttributes = node.CustomAttributes.Where(ca => ca.AttributeType.SafeEquivalent(context.ExcludeAdviceAttributeType));
+                foreach (var excludeAdviceAttribute in excludeAdviceAttributes)
                 {
-                    // names (which should usually not happen)
-                    if (namedArgument.Name == nameof(ExcludeAdvicesAttribute.AdvicesTypes))
-                        rule.Names.AddRange(GetStrings(namedArgument.Value));
+                    var rule = new PointcutSelectorRule();
+                    // full names wildcards
+                    if (excludeAdviceAttribute.ConstructorArguments.Count == 1)
+                        rule.Names.AddRange(GetStrings(excludeAdviceAttribute.ConstructorArguments[0].Value));
+
+                    // then named properties
+                    foreach (var namedArgument in excludeAdviceAttribute.NamedArguments)
+                    {
+                        // names (which should usually not happen)
+                        if (namedArgument.Name == nameof(ExcludeAdvicesAttribute.AdvicesTypes))
+                            rule.Names.AddRange(GetStrings(namedArgument.Value));
+                    }
+                    adviceSelector.ExcludeRules.Add(rule);
                 }
-                adviceSelector.ExcludeRules.Add(rule);
             }
             if (node.Parent != null)
                 adviceSelector = GetAdviceSelector(node.Parent, context) + adviceSelector;
@@ -108,8 +111,10 @@ namespace ArxOne.MrAdvice.Weaver
         private PointcutSelector CreatePointcutSelector(CustomAttribute customAttribute, WeavingContext context)
         {
             var pointcutSelector = new PointcutSelector();
-            pointcutSelector.IncludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.IncludePointcutAttributeType));
-            pointcutSelector.ExcludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.ExcludePointcutAttributeType));
+            if (context.IncludePointcutAttributeType != null)
+                pointcutSelector.IncludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.IncludePointcutAttributeType));
+            if (context.ExcludePointcutAttributeType != null)
+                pointcutSelector.ExcludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.ExcludePointcutAttributeType));
             return pointcutSelector;
         }
 
