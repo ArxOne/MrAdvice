@@ -20,7 +20,7 @@ namespace ArxOne.MrAdvice.Weaver
     {
         public ILogging Logging { get; set; }
 
-        private const int Depth = 2;
+        private const int Depth = 3;
 
         /// <summary>
         /// Gets or sets the assembly resolver.

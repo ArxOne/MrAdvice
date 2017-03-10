@@ -141,7 +141,7 @@ namespace ArxOne.MrAdvice.Weaver
                 ExcludeAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludeAdvicesAttribute)),
             };
 
-            if (context.AdviceInterfaceType!=null)
+            if (context.AdviceInterfaceType != null)
             {
                 if (context.ExecutionPointAttributeDefaultCtor == null)
                     Logging.WriteError("ExecutionPointAttribute default ctor was not found");
