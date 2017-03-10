@@ -7,10 +7,11 @@
 
 namespace ArxOne.MrAdvice.Annotation
 {
+    using System;
     /// <summary>
     /// Applied to generated inner methods
     /// </summary>
-    public class ExecutionPointAttribute
+    public class ExecutionPointAttribute: Attribute
     {
     }
 }
