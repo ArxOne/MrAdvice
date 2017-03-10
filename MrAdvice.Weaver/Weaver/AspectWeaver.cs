@@ -141,15 +141,18 @@ namespace ArxOne.MrAdvice.Weaver
                 ExcludeAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludeAdvicesAttribute)),
             };
 
-            if (context.ExecutionPointAttributeDefaultCtor == null)
-                Logging.WriteError("ExecutionPointAttribute default ctor was not found");
+            if (context.AdviceInterfaceType!=null)
+            {
+                if (context.ExecutionPointAttributeDefaultCtor == null)
+                    Logging.WriteError("ExecutionPointAttribute default ctor was not found");
 
-            if (context.ExcludePointcutAttributeType == null)
-                Logging.WriteError("ExcludePointcutAttributeType was not found");
-            if (context.IncludePointcutAttributeType == null)
-                Logging.WriteError("IncludePointcutAttributeType was not found");
-            if (context.ExcludeAdviceAttributeType == null)
-                Logging.WriteError("ExcludeAdviceAttributeType was not found");
+                if (context.ExcludePointcutAttributeType == null)
+                    Logging.WriteError("ExcludePointcutAttributeType was not found");
+                if (context.IncludePointcutAttributeType == null)
+                    Logging.WriteError("IncludePointcutAttributeType was not found");
+                if (context.ExcludeAdviceAttributeType == null)
+                    Logging.WriteError("ExcludeAdviceAttributeType was not found");
+            }
 
             return context;
         }
