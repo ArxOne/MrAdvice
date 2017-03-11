@@ -197,6 +197,18 @@ namespace ArxOne.MrAdvice.Utility
         }
 
         /// <summary>
+        /// Determines whether the given method is part of an event (add/remove).
+        /// </summary>
+        /// <param name="methodDefinition">The method definition.</param>
+        /// <returns></returns>
+        internal static bool IsEventMethod(this MethodDef methodDefinition)
+        {
+            if (!methodDefinition.IsSpecialName)
+                return false;
+            return methodDefinition.Name.StartsWith("add_") || methodDefinition.Name.StartsWith("remove_");
+        }
+
+        /// <summary>
         /// Gets the name of the property.
         /// </summary>
         /// <param name="methodName">Name of the method.</param>

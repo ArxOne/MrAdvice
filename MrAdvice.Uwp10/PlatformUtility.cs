@@ -110,11 +110,21 @@ namespace ArxOne.MrAdvice
         }
 
         /// <summary>
-        /// Gets the advices at method level.
+        /// Gets the advices at property level.
         /// </summary>
         /// <param name="provider">The provider.</param>
         /// <returns></returns>
         public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this PropertyInfo provider)
+        {
+            return provider.GetCustomAttributes(false).OfType<TAttribute>();
+        }
+
+        /// <summary>
+        /// Gets the advices at event level.
+        /// </summary>
+        /// <param name="provider">The provider.</param>
+        /// <returns></returns>
+        public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this EventInfo provider)
         {
             return provider.GetCustomAttributes(false).OfType<TAttribute>();
         }

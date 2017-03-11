@@ -9,7 +9,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Annotation;
     using dnlib.DotNet;
     using Utility;
 
@@ -20,6 +19,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
     {
         private readonly MethodDef _methodDefinition;
         private PropertyDef _propertyDefinition;
+        private EventDef _eventDefinition;
 
         /// <summary>
         /// Gets the parent.
@@ -31,12 +31,19 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         {
             if (_propertyDefinition != null)
                 return new PropertyReflectionNode(_propertyDefinition, null);
+            if (_eventDefinition != null)
+                return new EventReflectionNode(_eventDefinition, null);
             // a bit tricky here, since a method can belong to a property
             var declaringType = _methodDefinition.DeclaringType;
             if (_methodDefinition.IsPropertyMethod())
             {
                 _propertyDefinition = declaringType.Properties.Single(p => p.GetMethod == _methodDefinition || p.SetMethod == _methodDefinition);
                 return new PropertyReflectionNode(_propertyDefinition, null);
+            }
+            if (_methodDefinition.IsEventMethod())
+            {
+                _eventDefinition = declaringType.Events.Single(p => p.AddMethod == _methodDefinition || p.RemoveMethod == _methodDefinition);
+                return new EventReflectionNode(_eventDefinition, null);
             }
             return new TypeReflectionNode(declaringType, null);
         }
@@ -103,6 +110,13 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         {
             _methodDefinition = methodDefinition;
             _propertyDefinition = propertyDefinition;
+            Parent = parent;
+        }
+
+        public MethodReflectionNode(MethodDef methodDefinition, ReflectionNode parent, EventDef eventDefinition)
+        {
+            _methodDefinition = methodDefinition;
+            _eventDefinition = eventDefinition;
             Parent = parent;
         }
 

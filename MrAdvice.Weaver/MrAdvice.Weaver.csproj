@@ -70,6 +70,7 @@
     <Compile Include="Annotation\MarkerDefinition.cs" />
     <Compile Include="AuditTimer.cs" />
     <Compile Include="IO\DefaultLogging.cs" />
+    <Compile Include="Reflection\Groups\EventReflectionNode.cs" />
     <Compile Include="Utility\SequenceEqualityComparer.cs" />
     <Compile Include="Utility\TypeComparer.cs" />
     <Compile Include="Weaver\AspectWeaver.Select.cs" />

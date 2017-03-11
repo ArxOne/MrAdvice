@@ -68,6 +68,22 @@ namespace ArxOne.MrAdvice.Aspect
         public bool IsPointcutPropertySetter { get; }
 
         /// <summary>
+        /// Gets the pointcut event.
+        /// </summary>
+        /// <value>
+        /// The pointcut event.
+        /// </value>
+        public EventInfo PointcutEvent { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is pointcut event adder.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is pointcut event adder; otherwise (remover), <c>false</c>.
+        /// </value>
+        public bool IsPointcutEventAdder { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AspectInfo" /> class.
         /// </summary>
         /// <param name="advices">The advices.</param>
@@ -82,6 +98,44 @@ namespace ArxOne.MrAdvice.Aspect
         {
             PointcutProperty = pointcutProperty;
             IsPointcutPropertySetter = isPointcutPropertySetter;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AspectInfo" /> class.
+        /// </summary>
+        /// <param name="advices">The advices.</param>
+        /// <param name="pointcutMethod">The pointcut method.</param>
+        /// <param name="pointcutMethodHandle">The pointcut method handle.</param>
+        /// <param name="advisedMethod">The advised method.</param>
+        /// <param name="advisedMethodHandle">The advised method handle.</param>
+        /// <param name="pointcutEvent">The pointcut event.</param>
+        /// <param name="isPointcutEventAdder">if set to <c>true</c> [is pointcut event adder].</param>
+        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, RuntimeMethodHandle pointcutMethodHandle, MethodBase advisedMethod, RuntimeMethodHandle advisedMethodHandle, EventInfo pointcutEvent, bool isPointcutEventAdder)
+            : this(advices, pointcutMethod, pointcutMethodHandle, advisedMethod, advisedMethodHandle)
+        {
+            PointcutEvent = pointcutEvent;
+            IsPointcutEventAdder = isPointcutEventAdder;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AspectInfo" /> class.
+        /// </summary>
+        /// <param name="advices">The advices.</param>
+        /// <param name="pointcutMethod">The pointcut method.</param>
+        /// <param name="pointcutMethodHandle">The pointcut method handle.</param>
+        /// <param name="advisedMethod">The advised method.</param>
+        /// <param name="advisedMethodHandle">The advised method handle.</param>
+        /// <param name="pointcutProperty">The pointcut property.</param>
+        /// <param name="isPointcutPropertySetter">if set to <c>true</c> [is pointcut property setter].</param>
+        /// <param name="pointcutEvent">The pointcut event.</param>
+        /// <param name="isPointcutEventAdder">if set to <c>true</c> [is pointcut event adder].</param>
+        public AspectInfo(IEnumerable<AdviceInfo> advices, MethodInfo pointcutMethod, RuntimeMethodHandle pointcutMethodHandle, MethodBase advisedMethod, RuntimeMethodHandle advisedMethodHandle, PropertyInfo pointcutProperty, bool isPointcutPropertySetter, EventInfo pointcutEvent, bool isPointcutEventAdder)
+            : this(advices, pointcutMethod, pointcutMethodHandle, advisedMethod, advisedMethodHandle)
+        {
+            PointcutProperty = pointcutProperty;
+            IsPointcutPropertySetter = isPointcutPropertySetter;
+            PointcutEvent = pointcutEvent;
+            IsPointcutEventAdder = isPointcutEventAdder;
         }
 
         /// <summary>
@@ -108,7 +162,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// <returns></returns>
         public AspectInfo AddAdvice(AdviceInfo adviceInfo)
         {
-            return new AspectInfo(Advices.Concat(new[] { adviceInfo }), PointcutMethod, PointcutMethodHandle, AdvisedMethod, AdvisedMethodHandle, PointcutProperty, IsPointcutPropertySetter);
+            return new AspectInfo(Advices.Concat(new[] { adviceInfo }), PointcutMethod, PointcutMethodHandle, AdvisedMethod, AdvisedMethodHandle, PointcutProperty, IsPointcutPropertySetter, PointcutEvent, IsPointcutEventAdder);
         }
 
         /// <summary>
@@ -124,7 +178,7 @@ namespace ArxOne.MrAdvice.Aspect
             // cast here is safe, because we have generic parameters, meaning we're not in a ctor
             return new AspectInfo(Advices,
                 (MethodInfo)MakeGenericMethod(PointcutMethod, PointcutMethodHandle, genericArguments), PointcutMethodHandle,
-                MakeGenericMethod(AdvisedMethod, AdvisedMethodHandle, genericArguments), AdvisedMethodHandle, PointcutProperty, IsPointcutPropertySetter);
+                MakeGenericMethod(AdvisedMethod, AdvisedMethodHandle, genericArguments), AdvisedMethodHandle, PointcutProperty, IsPointcutPropertySetter, PointcutEvent, IsPointcutEventAdder);
         }
 
         /// <summary>

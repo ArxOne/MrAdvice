@@ -8,7 +8,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Annotation;
     using dnlib.DotNet;
 
     /// <summary>
@@ -40,6 +39,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         protected override IEnumerable<ReflectionNode> LoadChildren()
         {
+            foreach (var eventDefinition in TypeDefinition.Events.OrderBy(p => p.Name))
+                yield return new EventReflectionNode(eventDefinition, this);
             foreach (var propertyDefinition in TypeDefinition.Properties.OrderBy(p => p.Name))
                 yield return new PropertyReflectionNode(propertyDefinition, this);
             foreach (var constructorMethodDefinition in TypeDefinition.FindConstructors())

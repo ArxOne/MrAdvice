@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Advice\IMethodWeavingAdvice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\InnerMethodContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\IParameterAdvice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\IEventAdvice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\IPropertyAdvice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\IPropertyInfoAdvice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\IWeavingAdvice.cs" />
@@ -32,6 +33,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Advice\MethodInfoAdviceContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\MethodWeavingContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\ParameterAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\EventAdviceContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\PropertyAdviceContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\PropertyInfoAdviceContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\SyncAdviceContext.cs" />

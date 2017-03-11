@@ -41,7 +41,8 @@ namespace ArxOne.MrAdvice
 
             // then, the slow way, create it
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
-            var advices = Invocation.GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo);
+            Tuple<EventInfo, bool> relatedEventInfo;
+            var advices = Invocation.GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo, out relatedEventInfo);
             return GetAdvices(advices);
         }
 

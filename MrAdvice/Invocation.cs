@@ -85,6 +85,9 @@ namespace ArxOne.MrAdvice
                 // 1. as property
                 if (advice.PropertyAdvice != null && aspectInfo.PointcutProperty != null)
                     adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
+                // 1b. as event
+                if (advice.EventAdvice != null && aspectInfo.PointcutEvent != null)
+                    adviceContext = new EventAdviceContext(advice.EventAdvice, aspectInfo.PointcutEvent, aspectInfo.IsPointcutEventAdder, adviceValues, adviceContext);
             }
 
             // if the method is no task, then we return immediately
@@ -277,12 +280,15 @@ namespace ArxOne.MrAdvice
         private static AspectInfo CreateAspectInfo(MethodBase method, RuntimeMethodHandle methodHandle, MethodInfo innerMethod, RuntimeMethodHandle innerMethodHandle, bool abstractedTarget)
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
+            Tuple<EventInfo, bool> relatedEventInfo;
             if (innerMethod == null && !abstractedTarget)
                 method = FindInterfaceMethod(method);
-            var advices = GetAdvices<IAdvice>(method, out relatedPropertyInfo);
-            if (relatedPropertyInfo == null)
-                return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle);
-            return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
+            var advices = GetAdvices<IAdvice>(method, out relatedPropertyInfo, out relatedEventInfo);
+            if (relatedPropertyInfo != null)
+                return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
+            if (relatedEventInfo != null)
+                return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle, relatedEventInfo.Item1, relatedEventInfo.Item2);
+            return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle);
         }
 
         /// <summary>
@@ -306,8 +312,10 @@ namespace ArxOne.MrAdvice
         /// <typeparam name="TAdvice">The type of the advice.</typeparam>
         /// <param name="targetMethod">The target method.</param>
         /// <param name="relatedPropertyInfo">The related property information.</param>
+        /// <param name="relatedEventInfo">The related event information.</param>
         /// <returns></returns>
-        internal static IEnumerable<AdviceInfo> GetAllAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
+        internal static IEnumerable<AdviceInfo> GetAllAdvices<TAdvice>(MethodBase targetMethod,
+            out Tuple<PropertyInfo, bool> relatedPropertyInfo, out Tuple<EventInfo, bool> relatedEventInfo)
             where TAdvice : class, IAdvice
         {
             // inheritance hierarchy
@@ -325,6 +333,12 @@ namespace ArxOne.MrAdvice
             relatedPropertyInfo = GetPropertyInfo(targetMethod);
             if (relatedPropertyInfo != null)
                 allAdvices = allAdvices.Union(relatedPropertyInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
+
+            // optional from event
+            relatedEventInfo = GetEventInfo(targetMethod);
+            if (relatedEventInfo != null)
+                allAdvices = allAdvices.Union(relatedEventInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
+
             // now separate parameters
             var parameterAdvices = allAdvices.Where(a => a.Advice is IParameterAdvice).ToArray();
             allAdvices = allAdvices.Where(a => !(a.Advice is IParameterAdvice)).ToArray();
@@ -351,11 +365,12 @@ namespace ArxOne.MrAdvice
             return allAdvices;
         }
 
-        internal static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod, out Tuple<PropertyInfo, bool> relatedPropertyInfo)
+        internal static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod,
+            out Tuple<PropertyInfo, bool> relatedPropertyInfo, out Tuple<EventInfo, bool> relatedEventInfo)
             where TAdvice : class, IAdvice
         {
             // first of all, get all advices that should apply here
-            var allAdvices = GetAllAdvices<TAdvice>(targetMethod, out relatedPropertyInfo);
+            var allAdvices = GetAllAdvices<TAdvice>(targetMethod, out relatedPropertyInfo, out relatedEventInfo);
             // then, keep only selected advices (by their declaring pointcuts)
             var selectedAdvices = allAdvices.Where(a => Select(targetMethod, a));
             // if method declares an exclusion, use it
@@ -406,6 +421,32 @@ namespace ArxOne.MrAdvice
                 return null; // this should never happen
 
             return Tuple.Create(propertyInfo, isSetter);
+        }
+
+        /// <summary>
+        /// Gets the EventInfo, related to a method.
+        /// </summary>
+        /// <param name="memberInfo">The member information.</param>
+        /// <returns>A tuple with the PropertyInfo and true is method is a setter (false for a getter)</returns>
+        private static Tuple<EventInfo, bool> GetEventInfo(MemberInfo memberInfo)
+        {
+            var methodInfo = memberInfo as MethodInfo;
+            if (methodInfo == null || !methodInfo.IsSpecialName)
+                return null;
+
+            var isAdder = methodInfo.Name.StartsWith("add_");
+            var isRemover = methodInfo.Name.StartsWith("remove_");
+            if (!isAdder && !isRemover)
+                return null;
+
+            // now try to find the property
+            // ReSharper disable once PossibleNullReferenceException
+            var eventInfo = methodInfo.DeclaringType.GetMembersReader().GetEvents(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                .SingleOrDefault(p => p.GetAddMethod(true) == methodInfo || p.GetRemoveMethod(true) == methodInfo);
+            if (eventInfo == null)
+                return null; // this should never happen
+
+            return Tuple.Create(eventInfo, isAdder);
         }
     }
 }

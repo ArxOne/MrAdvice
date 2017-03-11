@@ -43,6 +43,14 @@ namespace ArxOne.MrAdvice.Aspect
         public IPropertyAdvice PropertyAdvice => Advice as IPropertyAdvice;
 
         /// <summary>
+        /// Gets the event advice.
+        /// </summary>
+        /// <value>
+        /// The event advice.
+        /// </value>
+        public IEventAdvice EventAdvice => Advice as IEventAdvice;
+
+        /// <summary>
         /// Gets the parameter advice, or null if none.
         /// </summary>
         /// <value>

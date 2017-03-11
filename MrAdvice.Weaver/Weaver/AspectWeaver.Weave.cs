@@ -131,9 +131,13 @@ namespace ArxOne.MrAdvice.Weaver
                                             (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public);
                 string innerMethodName;
                 if (method.IsGetter)
-                    innerMethodName = GetPropertyInnerGetterName(GetPropertyName(methodName));
+                    innerMethodName = GetPropertyInnerGetterName(GetSpecialOwnerName(methodName));
                 else if (method.IsSetter)
-                    innerMethodName = GetPropertyInnerSetterName(GetPropertyName(methodName));
+                    innerMethodName = GetPropertyInnerSetterName(GetSpecialOwnerName(methodName));
+                else if (method.IsAddOn)
+                    innerMethodName = GetEventInnerAdderName(GetSpecialOwnerName(methodName));
+                else if (method.IsRemoveOn)
+                    innerMethodName = GetEventInnerRemoverName(GetSpecialOwnerName(methodName));
                 else
                     innerMethodName = GetInnerMethodName(methodName);
                 var innerMethod = new MethodDefUser(innerMethodName, method.MethodSig, innerMethodAttributes);

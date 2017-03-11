@@ -1,9 +1,12 @@
 ﻿#region Mr. Advice
+
 // Mr. Advice
 // A simple post build weaving package
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
+
 #endregion
+
 namespace ArxOne.MrAdvice.Weaver
 {
     partial class AspectWeaver
@@ -14,13 +17,13 @@ namespace ArxOne.MrAdvice.Weaver
         private const string Marker = "\u2032";
 
         /// <summary>
-        /// Gets the name of the property.
+        /// Gets the special owner name.
         /// </summary>
         /// <param name="methodName">Name of the method.</param>
         /// <returns></returns>
-        private static string GetPropertyName(string methodName)
+        private static string GetSpecialOwnerName(string methodName)
         {
-            return methodName.Substring(4);
+            return methodName.Split(new[] {'_'}, 2)[1];
         }
 
         /// <summary>
@@ -41,6 +44,26 @@ namespace ArxOne.MrAdvice.Weaver
         private static string GetPropertyInnerSetterName(string propertyName)
         {
             return $"{propertyName}.set{Marker}";
+        }
+
+        /// <summary>
+        /// Gets the name of the event adder.
+        /// </summary>
+        /// <param name="eventName">Name of the event.</param>
+        /// <returns></returns>
+        private static string GetEventInnerAdderName(string eventName)
+        {
+            return $"{eventName}.add{Marker}";
+        }
+
+        /// <summary>
+        /// Gets the name of the event removed.
+        /// </summary>
+        /// <param name="eventName">Name of the event.</param>
+        /// <returns></returns>
+        private static string GetEventInnerRemoverName(string eventName)
+        {
+            return $"{eventName}.remove{Marker}";
         }
 
         /// <summary>
