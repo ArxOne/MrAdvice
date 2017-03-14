@@ -7,9 +7,11 @@
 namespace ArxOne.MrAdvice
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using Advice;
+    using Aspect;
     using Introduction;
     using Utility;
 
@@ -26,7 +28,17 @@ namespace ArxOne.MrAdvice
             // shame, but easy here
             if (advice == null)
                 return;
-            InjectIntroducedFields(advice, advisedType);
+            InjectIntroducedFields(advice, advisedType, null);
+        }
+
+        /// <summary>
+        /// Injects the introduced fields.
+        /// </summary>
+        /// <param name="adviceInfo">The advice information.</param>
+        /// <param name="advisedType">Type of the advised.</param>
+        private static void InjectIntroducedFields(AdviceInfo adviceInfo, Type advisedType)
+        {
+            InjectIntroducedFields(adviceInfo.Advice, advisedType, adviceInfo.IntroducedFields);
         }
 
         /// <summary>
@@ -34,13 +46,12 @@ namespace ArxOne.MrAdvice
         /// </summary>
         /// <param name="advice">The advice.</param>
         /// <param name="advisedType">Type of the advised.</param>
-        private static void InjectIntroducedFields(IAdvice advice, Type advisedType)
+        /// <param name="introducedFields">The introduced fields.</param>
+        private static void InjectIntroducedFields(IAdvice advice, Type advisedType, IEnumerable<MemberInfo> introducedFields)
         {
-            // shame, but easy here
-            if (advice == null)
-                return;
-            const BindingFlags adviceMembersBindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-            foreach (var memberInfo in advice.GetType().GetFieldsAndProperties(adviceMembersBindingFlags).Where(IsIntroduction))
+            if (introducedFields == null)
+                introducedFields = AdviceInfo.GetIntroducedFields(advice);
+            foreach (var memberInfo in introducedFields)
             {
                 var memberValue = memberInfo.GetValue(advice);
                 if (memberValue == null)

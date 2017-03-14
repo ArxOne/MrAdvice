@@ -6,7 +6,14 @@
 #endregion
 namespace ArxOne.MrAdvice.Aspect
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
     using Advice;
+    using Introduction;
+    using Utility;
 
     internal class AdviceInfo
     {
@@ -67,12 +74,21 @@ namespace ArxOne.MrAdvice.Aspect
         public int? ParameterIndex { get; }
 
         /// <summary>
+        /// Gets the introduced fields.
+        /// </summary>
+        /// <value>
+        /// The introduced fields.
+        /// </value>
+        public IEnumerable<MemberInfo> IntroducedFields { get; } 
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AdviceInfo"/> class.
         /// </summary>
         /// <param name="advice">The advice.</param>
         public AdviceInfo(IAdvice advice)
         {
             Advice = advice;
+            IntroducedFields = GetIntroducedFields(advice);
         }
 
         /// <summary>
@@ -84,6 +100,36 @@ namespace ArxOne.MrAdvice.Aspect
         {
             Advice = advice;
             ParameterIndex = parameterIndex;
+            IntroducedFields = GetIntroducedFields(advice);
+        }
+
+        public static IList<MemberInfo> GetIntroducedFields(IAdvice advice)
+        {
+            const BindingFlags adviceMembersBindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+            return advice.GetType().GetFieldsAndProperties(adviceMembersBindingFlags).Where(IsIntroduction).ToArray();
+        }
+
+        /// <summary>
+        /// Determines whether the specified member type is introduction.
+        /// </summary>
+        /// <param name="memberInfo">The member information.</param>
+        /// <returns></returns>
+        private static bool IsIntroduction(MemberInfo memberInfo)
+        {
+            return GetIntroducedType(memberInfo) != null;
+        }
+
+        /// <summary>
+        /// Determines whether the specified member type is introduction.
+        /// </summary>
+        /// <param name="memberInfo">The member information.</param>
+        /// <returns></returns>
+        private static Type GetIntroducedType(MemberInfo memberInfo)
+        {
+            var memberType = memberInfo.GetMemberType();
+            if (!memberType.GetInformationReader().IsGenericType || memberType.GetAssignmentReader().GetGenericTypeDefinition() != typeof(IntroducedField<>))
+                return null;
+            return memberType.GetAssignmentReader().GetGenericArguments()[0];
         }
     }
 }

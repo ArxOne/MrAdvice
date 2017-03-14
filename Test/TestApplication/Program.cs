@@ -8,6 +8,8 @@
 namespace TestApplication
 {
     using System;
+    using System.Diagnostics;
+    using System.IO;
     using ArxOne.MrAdvice.Advice;
 
     public class PublicClass
@@ -37,8 +39,13 @@ namespace TestApplication
         public static void Main(string[] args)
         {
             var b = new Benchmark();
+            var t1 = DateTime.UtcNow;
             for (int i = 0; i < 1000000; i++)
                 b.Value++;
+            var dt = DateTime.UtcNow - t1;
+            Console.WriteLine($"Elapsed time={dt}");
+            using (var ts = File.AppendText("Timings.txt"))
+                ts.WriteLine($"Elapsed time={dt}");
 
             //var sc = new SomeClass();
             //var c = sc.Add(2, 3);
