@@ -66,28 +66,34 @@ namespace ArxOne.MrAdvice
             var adviceValues = new AdviceValues(target, aspectInfo.AdvisedMethod.DeclaringType, parameters);
             // at least there is one context
             AdviceContext adviceContext = new InnerMethodContext(adviceValues, aspectInfo.PointcutMethod);
-            foreach (var advice in aspectInfo.Advices.Reverse())
+            for (var adviceIndex = aspectInfo.Advices.Count - 1; adviceIndex >= 0; adviceIndex--)
             {
+                var advice = aspectInfo.Advices[adviceIndex];
                 // aspects are processed from highest to lowest level, so they are linked here in the opposite order
                 // 3. as parameter
                 if (advice.ParameterAdvice != null && advice.ParameterIndex.HasValue)
                 {
                     var parameterIndex = advice.ParameterIndex.Value;
                     var parameterInfo = GetParameterInfo(aspectInfo.AdvisedMethod, parameterIndex);
-                    adviceContext = new ParameterAdviceContext(advice.ParameterAdvice, parameterInfo, parameterIndex, adviceValues, adviceContext);
+                    adviceContext = new ParameterAdviceContext(advice.ParameterAdvice, parameterInfo, parameterIndex,
+                        adviceValues, adviceContext);
                 }
                 // 2. as method
                 if (advice.MethodAdvice != null)
-                    adviceContext = new MethodAdviceContext(advice.MethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
+                    adviceContext = new MethodAdviceContext(advice.MethodAdvice, aspectInfo.AdvisedMethod, adviceValues,
+                        adviceContext);
                 // 2b. as async method
                 if (advice.AsyncMethodAdvice != null)
-                    adviceContext = new MethodAsyncAdviceContext(advice.AsyncMethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
+                    adviceContext = new MethodAsyncAdviceContext(advice.AsyncMethodAdvice, aspectInfo.AdvisedMethod,
+                        adviceValues, adviceContext);
                 // 1. as property
                 if (advice.PropertyAdvice != null && aspectInfo.PointcutProperty != null)
-                    adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
+                    adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty,
+                        aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
                 // 1b. as event
                 if (advice.EventAdvice != null && aspectInfo.PointcutEvent != null)
-                    adviceContext = new EventAdviceContext(advice.EventAdvice, aspectInfo.PointcutEvent, aspectInfo.IsPointcutEventAdder, adviceValues, adviceContext);
+                    adviceContext = new EventAdviceContext(advice.EventAdvice, aspectInfo.PointcutEvent,
+                        aspectInfo.IsPointcutEventAdder, adviceValues, adviceContext);
             }
 
             // if the method is no task, then we return immediately
