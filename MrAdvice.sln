@@ -71,6 +71,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UwpTest", "Test\UwpTest\Uwp
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "Test\TestApplication\TestApplication.csproj", "{491EF845-625A-4535-932C-BC2B8B15FC94}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
+	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MrAdvice", "MrAdvice\MrAdvice.shproj", "{E62B50B0-4A7D-4173-9AB8-9CFD5F4DD7C3}"
 EndProject
