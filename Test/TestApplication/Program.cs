@@ -23,6 +23,12 @@ namespace TestApplication
         protected internal void ProtectedInternalMethod() { }
     }
 
+    public class Benchmark
+    {
+
+        public int Value { get; [SomeAdvice] set; }
+    }
+
     internal class InternalClass
     { }
 
@@ -30,13 +36,17 @@ namespace TestApplication
     {
         public static void Main(string[] args)
         {
-            var sc = new SomeClass();
-            var c = sc.Add(2, 3);
-            sc.Nop();
+            var b = new Benchmark();
+            for (int i = 0; i < 1000000; i++)
+                b.Value++;
 
-            sc.DoGeneric<int>();
-            var z = new SomeGenericClass<string>();
-            z.Do();
+            //var sc = new SomeClass();
+            //var c = sc.Add(2, 3);
+            //sc.Nop();
+
+            //sc.DoGeneric<int>();
+            //var z = new SomeGenericClass<string>();
+            //z.Do();
         }
     }
 

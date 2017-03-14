@@ -190,3 +190,5 @@ MrAdvice.Fody/MrAdvice.nuspec
 .vs/
 *.lock.json
 *.nuget.targets
+
+*.diagsession
