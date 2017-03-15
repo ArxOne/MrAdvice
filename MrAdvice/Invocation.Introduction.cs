@@ -47,10 +47,12 @@ namespace ArxOne.MrAdvice
         /// <param name="advice">The advice.</param>
         /// <param name="advisedType">Type of the advised.</param>
         /// <param name="introducedFields">The introduced fields.</param>
-        private static void InjectIntroducedFields(IAdvice advice, Type advisedType, IEnumerable<MemberInfo> introducedFields)
+        private static void InjectIntroducedFields(IAdvice advice, Type advisedType, IList<MemberInfo> introducedFields)
         {
             if (introducedFields == null)
                 introducedFields = AdviceInfo.GetIntroducedFields(advice);
+            if (introducedFields.Count == 0)
+                return;
             foreach (var memberInfo in introducedFields)
             {
                 var memberValue = memberInfo.GetValue(advice);

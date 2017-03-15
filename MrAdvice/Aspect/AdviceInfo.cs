@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice.Aspect
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Reflection;
     using Advice;
@@ -79,7 +80,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// <value>
         /// The introduced fields.
         /// </value>
-        public IEnumerable<MemberInfo> IntroducedFields { get; } 
+        public IList<MemberInfo> IntroducedFields { get; } 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdviceInfo"/> class.
@@ -106,7 +107,7 @@ namespace ArxOne.MrAdvice.Aspect
         public static IList<MemberInfo> GetIntroducedFields(IAdvice advice)
         {
             const BindingFlags adviceMembersBindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-            return advice.GetType().GetFieldsAndProperties(adviceMembersBindingFlags).Where(IsIntroduction).ToArray();
+            return new ReadOnlyCollection<MemberInfo>(advice.GetType().GetFieldsAndProperties(adviceMembersBindingFlags).Where(IsIntroduction).ToArray());
         }
 
         /// <summary>
