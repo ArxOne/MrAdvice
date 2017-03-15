@@ -7,6 +7,7 @@
 namespace ArxOne.MrAdvice
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -25,7 +26,8 @@ namespace ArxOne.MrAdvice
     // ReSharper disable once UnusedMember.Global
     public static partial class Invocation
     {
-        internal static readonly IDictionary<Tuple<RuntimeMethodHandle, RuntimeTypeHandle>, AspectInfo> AspectInfos = new Dictionary<Tuple<RuntimeMethodHandle, RuntimeTypeHandle>, AspectInfo>();
+        internal static readonly IDictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>> AspectInfos
+            = new Dictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>();
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
@@ -179,25 +181,46 @@ namespace ArxOne.MrAdvice
             AspectInfo aspectInfo;
             lock (AspectInfos)
             {
-                var methodKey = Tuple.Create(methodHandle, typeHandle);
-                if (!AspectInfos.TryGetValue(methodKey, out aspectInfo))
+                aspectInfo = FindAspectInfo(methodHandle, typeHandle);
+                if (aspectInfo == null)
                 {
                     var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
                     var innerMethod = innerMethodHandle != methodHandle ? GetMethodFromHandle(innerMethodHandle, typeHandle) : null;
-                    
+
                     // this is to handle one special case:
                     // when an assembly advice is applied at assembly level, its ctor is also advised
                     // and getting its attributes, it creates an infinite loop
                     // so since an advice won't advise itself anyway
                     // we create an empty AspectInfo
-                    AspectInfos[methodKey] = new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, methodBase, methodHandle);
+                    SetAspectInfo(methodHandle, typeHandle, new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, methodBase, methodHandle));
                     // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    AspectInfos[methodKey] = aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, abstractedTarget);
+                    aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, abstractedTarget);
+                    SetAspectInfo(methodHandle, typeHandle, aspectInfo);
                 }
             }
 
             aspectInfo = aspectInfo.ApplyGenericParameters(genericArguments);
             return aspectInfo;
+        }
+
+        private static AspectInfo FindAspectInfo(RuntimeMethodHandle methodHandle, RuntimeTypeHandle typeHandle)
+        {
+            IDictionary<RuntimeTypeHandle, AspectInfo> methodsByType;
+            if (!AspectInfos.TryGetValue(methodHandle, out methodsByType))
+                return null;
+
+            AspectInfo aspectInfo;
+            methodsByType.TryGetValue(typeHandle, out aspectInfo);
+            return aspectInfo;
+        }
+
+        private static void SetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeTypeHandle typeHandle,
+            AspectInfo aspectInfo)
+        {
+            IDictionary<RuntimeTypeHandle, AspectInfo> methodsByType;
+            if (!AspectInfos.TryGetValue(methodHandle, out methodsByType))
+                AspectInfos[methodHandle] = methodsByType = new Dictionary<RuntimeTypeHandle, AspectInfo>();
+            methodsByType[typeHandle] = aspectInfo;
         }
 
         /// <summary>

@@ -35,7 +35,7 @@ namespace ArxOne.MrAdvice
 
             // method here is not supposed to change AspectInfos,
             // so just try to read it
-            var aspectInfo = Invocation.AspectInfos.Values.FirstOrDefault(a => Equals(a.PointcutMethod, methodBase));
+            var aspectInfo = Invocation.AspectInfos.Values.SelectMany(v => v.Values).FirstOrDefault(a => Equals(a.PointcutMethod, methodBase));
             if (aspectInfo != null)
                 return GetAdvices(aspectInfo.Advices);
 
