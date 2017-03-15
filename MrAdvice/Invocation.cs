@@ -25,7 +25,7 @@ namespace ArxOne.MrAdvice
     // ReSharper disable once UnusedMember.Global
     public static partial class Invocation
     {
-        internal static readonly IDictionary<MethodBase, AspectInfo> AspectInfos = new Dictionary<MethodBase, AspectInfo>();
+        internal static readonly IDictionary<Tuple<RuntimeMethodHandle, RuntimeTypeHandle>, AspectInfo> AspectInfos = new Dictionary<Tuple<RuntimeMethodHandle, RuntimeTypeHandle>, AspectInfo>();
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
@@ -49,10 +49,7 @@ namespace ArxOne.MrAdvice
         public static object ProceedAdvice(object target, object[] parameters, RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle, RuntimeTypeHandle typeHandle,
             bool abstractedTarget, Type[] genericArguments)
         {
-            var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
-            var innerMethod = innerMethodHandle != methodHandle ? GetMethodFromHandle(innerMethodHandle, typeHandle) : null;
-
-            var aspectInfo = GetAspectInfo(methodBase, methodHandle, innerMethod, innerMethodHandle, abstractedTarget, genericArguments);
+            var aspectInfo = GetAspectInfo(methodHandle, innerMethodHandle, typeHandle, abstractedTarget, genericArguments);
 
             // this is the case with auto implemented interface
             var advisedInterface = target as AdvisedInterface;
@@ -60,7 +57,7 @@ namespace ArxOne.MrAdvice
                 aspectInfo = aspectInfo.AddAdvice(new AdviceInfo(advisedInterface.Advice));
 
             foreach (var advice in aspectInfo.Advices)
-                InjectIntroducedFields(advice, methodBase.DeclaringType);
+                InjectIntroducedFields(advice, aspectInfo.AdvisedMethod.DeclaringType);
 
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
             var adviceValues = new AdviceValues(target, aspectInfo.AdvisedMethod.DeclaringType, parameters);
@@ -171,28 +168,31 @@ namespace ArxOne.MrAdvice
         /// <summary>
         /// Gets the aspect information.
         /// </summary>
-        /// <param name="method">The method base.</param>
         /// <param name="methodHandle">The method handle.</param>
-        /// <param name="innerMethod">The inner method.</param>
         /// <param name="innerMethodHandle">The inner method handle.</param>
+        /// <param name="typeHandle">The type handle.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="genericArguments">The generic arguments.</param>
         /// <returns></returns>
-        private static AspectInfo GetAspectInfo(MethodBase method, RuntimeMethodHandle methodHandle, MethodBase innerMethod, RuntimeMethodHandle innerMethodHandle, bool abstractedTarget, Type[] genericArguments)
+        private static AspectInfo GetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle, RuntimeTypeHandle typeHandle, bool abstractedTarget, Type[] genericArguments)
         {
             AspectInfo aspectInfo;
             lock (AspectInfos)
             {
-                if (!AspectInfos.TryGetValue(method, out aspectInfo))
+                var methodKey = Tuple.Create(methodHandle, typeHandle);
+                if (!AspectInfos.TryGetValue(methodKey, out aspectInfo))
                 {
+                    var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
+                    var innerMethod = innerMethodHandle != methodHandle ? GetMethodFromHandle(innerMethodHandle, typeHandle) : null;
+                    
                     // this is to handle one special case:
                     // when an assembly advice is applied at assembly level, its ctor is also advised
                     // and getting its attributes, it creates an infinite loop
                     // so since an advice won't advise itself anyway
                     // we create an empty AspectInfo
-                    AspectInfos[method] = new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, method, methodHandle);
+                    AspectInfos[methodKey] = new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, methodBase, methodHandle);
                     // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    AspectInfos[method] = aspectInfo = CreateAspectInfo(method, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, abstractedTarget);
+                    AspectInfos[methodKey] = aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, abstractedTarget);
                 }
             }
 
