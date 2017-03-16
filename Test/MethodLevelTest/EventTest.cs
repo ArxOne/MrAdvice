@@ -20,19 +20,10 @@ namespace MethodLevelTest
             //context.Proceed();
         }
     }
-
-    public class EventAdderAdvice : Attribute, IEventAdvice
-    {
-        public void Advise(EventAdviceContext context)
-        {
-            context.Proceed();
-        }
-    }
-
+    
     public class EventClass
     {
         [EventBlockerAdvice]
-        //[EventAdderAdvice]
         public event EventHandler SimpleEvent;
 
         public void OnSimpleEvent()
