@@ -7,6 +7,7 @@
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Text;
@@ -14,6 +15,7 @@ namespace ArxOne.MrAdvice.Weaver
     using Annotation;
     using dnlib.DotNet;
     using dnlib.DotNet.Emit;
+    using dnlib.DotNet.MD;
     using dnlib.DotNet.Pdb;
     using Introduction;
     using Reflection;
@@ -160,10 +162,113 @@ namespace ArxOne.MrAdvice.Weaver
 
                 AddGeneratedAttribute(innerMethod, context);
 
-                WritePointcutBody(method, innerMethod, false, context);
                 lock (method.DeclaringType)
                     method.DeclaringType.Methods.Add(innerMethod);
+
+                WriteDelegateProceeder(innerMethod, new MethodParameters(method), moduleDefinition);
+
+                WritePointcutBody(method, innerMethod, false, context);
             }
+        }
+
+        private MethodDef WriteDelegateProceeder(MethodDef innerMethod, MethodParameters parametersList, ModuleDef module)
+        {
+            var proceederMethodSignature = new MethodSig(CallingConvention.Default, 0, module.CorLibTypes.Object,
+                new TypeSig[] { module.CorLibTypes.Object, new SZArraySig(module.CorLibTypes.Object) });
+            var proceederMethodAttributes = MethodAttributes.Static | MethodAttributes.Private | MethodAttributes.HideBySig;
+            var proceederMethod = new MethodDefUser(innerMethod.Name + innerMethod.DeclaringType.Methods.Count /*"u2261"*//*+Guid.NewGuid().ToString("N")*/, proceederMethodSignature, proceederMethodAttributes);
+            proceederMethod.Body = new CilBody();
+            proceederMethod.GenericParameters.AddRange(innerMethod.GenericParameters.Select(p => p.Clone(innerMethod)));
+
+            // object, object[] -> this, arguments
+            var instructions = new Instructions(proceederMethod.Body.Instructions, module);
+
+            var declaringType = innerMethod.DeclaringType.ToTypeSig();
+            if (innerMethod.DeclaringType.HasGenericParameters)
+            {
+                var genericTypeArgs = new List<TypeSig>();
+                for (int genericTypeParameterIndex = 0; genericTypeParameterIndex < innerMethod.DeclaringType.GenericParameters.Count; genericTypeParameterIndex++)
+                    genericTypeArgs.Add(new GenericVar(genericTypeParameterIndex, innerMethod.DeclaringType));
+                declaringType = new GenericInstSig((ClassOrValueTypeSig)innerMethod.DeclaringType.ToTypeSig(), genericTypeArgs);
+                //instructions.Emit(OpCodes.Castclass, innerMethod.DeclaringType.ToTypeSig()); // arg.0 --> (target type) arg.0
+            }
+
+            if (!innerMethod.IsStatic)
+            {
+                instructions.Emit(OpCodes.Ldarg_0);
+                instructions.Emit(OpCodes.Castclass, declaringType); // arg.0 --> (target type) arg.0
+            }
+            //instructions.Emit(OpCodes.Ldnull);
+
+            var localVariables = new Local[innerMethod.Parameters.Count];
+            for (int parameterIndex = 0; parameterIndex < parametersList.Count; parameterIndex++)
+            {
+                var parameter = parametersList[parameterIndex];
+
+                if (parameter.ParamDef == null)
+                    parameter.CreateParamDef();
+
+                var parameterType = parameter.Type;
+                Local local = null;
+                // the local type for references is the dereferenced type
+                if (parameterType is ByRefSig)
+                {
+                    parameterType = parameterType.Next;
+                    localVariables[parameterIndex] = local = new Local(parameterType);
+                    proceederMethod.Body.Variables.Add(local);
+                }
+
+                // on pure out values we don't care
+                if (!parameter.ParamDef.IsOut)
+                {
+                    instructions.Emit(OpCodes.Ldarg_1); // arguments[]
+                    instructions.EmitLdc(parameterIndex); // index
+                    instructions.Emit(OpCodes.Ldelem_Ref); // get array object
+                    instructions.EmitUnboxOrCastIfNecessary(parameterType);
+
+                    // when there is a local, use it (because we're going to pass the reference)
+                    if (local != null)
+                        instructions.EmitStloc(local);
+                }
+                // in all cases, if there is a local, it means we use it
+                if (local != null)
+                    instructions.Emit(OpCodes.Ldloca_S, local);
+            }
+
+            if (proceederMethod.HasGenericParameters)
+            {
+                var genericArgs = new List<TypeSig>();
+                for (int genericParameterIndex = 0; genericParameterIndex < proceederMethod.GenericParameters.Count; genericParameterIndex++)
+                    genericArgs.Add(new GenericMVar(genericParameterIndex, innerMethod));
+                var genericInnerMethod = new MethodSpecUser(innerMethod, new GenericInstMethodSig(genericArgs));
+                instructions.Emit(OpCodes.Call, genericInnerMethod);
+            }
+            else
+                instructions.Emit(OpCodes.Call, innerMethod);
+
+            // collect ref/output parameters, if any
+            for (int parameterIndex = 0; parameterIndex < innerMethod.Parameters.Count; parameterIndex++)
+            {
+                // when there is a local variable, it was either a ref or an out, so we need to box it again to array
+                var localVariable = localVariables[parameterIndex];
+                if (localVariable == null)
+                    continue;
+                instructions.Emit(OpCodes.Ldarg_1); // array[...]
+                instructions.EmitLdc(parameterIndex); // index
+                instructions.EmitLdloc(localVariable); // result
+                instructions.EmitBoxIfNecessary(localVariable.Type); // box
+                instructions.Emit(OpCodes.Stelem_Ref); // and store
+            }
+
+            if (innerMethod.ReturnType.SafeEquivalent(module.CorLibTypes.Void))
+                instructions.Emit(OpCodes.Ldnull);
+            else
+                instructions.EmitBoxIfNecessary(innerMethod.ReturnType);
+
+            instructions.Emit(OpCodes.Ret);
+
+            innerMethod.DeclaringType.Methods.Add(proceederMethod);
+            return proceederMethod;
         }
 
         private static void AddGeneratedAttribute(MethodDefUser innerMethod, WeavingContext context)
@@ -568,7 +673,6 @@ namespace ArxOne.MrAdvice.Weaver
             Logging.WriteDebug("Weaving interface '{0}'", interfaceType.FullName);
             TypeDef implementationType;
             TypeDef advisedInterfaceType;
-            TypeDef interfaceTypeDefinition;
             lock (moduleDefinition)
             {
                 // ensure we're creating the interface only once
