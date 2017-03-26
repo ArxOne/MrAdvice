@@ -1,7 +1,5 @@
 ﻿{
-  "dependencies": {
-    "Clarius.TransformOnBuild": "1.1.12"
-  },
+  "dependencies": {},
   "frameworks": {
     "net40-client": {}
   },

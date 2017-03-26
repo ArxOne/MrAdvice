@@ -1,6 +1,5 @@
 ﻿{
   "dependencies": {
-    "Clarius.TransformOnBuild": "1.1.12",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2"
   },
   "frameworks": {
