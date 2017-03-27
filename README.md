@@ -73,6 +73,7 @@ Currently, Mr. Advice still exists in two flavors:
 
 NuGet packages:
  * [MrAdvice.MVVM](https://github.com/ArxOne/MrAdvice.MVVM) and its [NuGet package](https://www.nuget.org/packages/MrAdvice.MVVM/), an MVVM implementation using aspects.
+ * [Persistence](https://github.com/ArxOne/Persistence) and its [NuGet package](https://www.nuget.org/packages/ArxOne.Persistence/), a library that helps persisting properties in registry with a simple attribute.
 
 Miscellaneous projects:
 
