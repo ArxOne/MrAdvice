@@ -20,7 +20,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>weaver aspect advice pointcut .net attributes injection pcl portable windows silverlight phone sl5 wp8</tags>
     <dependencies>
-      <dependency id="Fody" />
+      <dependency id="Fody" version="1.29.4"/>
     </dependencies>
     <developmentDependency>false</developmentDependency>
   </metadata>
