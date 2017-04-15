@@ -192,3 +192,5 @@ MrAdvice.Fody/MrAdvice.nuspec
 *.nuget.targets
 
 *.diagsession
+
+ProductInfo.cs
