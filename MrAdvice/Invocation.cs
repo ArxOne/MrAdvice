@@ -10,7 +10,6 @@
 namespace ArxOne.MrAdvice
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -99,25 +98,20 @@ namespace ArxOne.MrAdvice
                 {
                     var parameterIndex = advice.ParameterIndex.Value;
                     var parameterInfo = GetParameterInfo(aspectInfo.AdvisedMethod, parameterIndex);
-                    adviceContext = new ParameterAdviceContext(advice.ParameterAdvice, parameterInfo, parameterIndex,
-                        adviceValues, adviceContext);
+                    adviceContext = new ParameterAdviceContext(advice.ParameterAdvice, parameterInfo, parameterIndex, adviceValues, adviceContext);
                 }
                 // 2. as method
                 if (advice.MethodAdvice != null)
-                    adviceContext = new MethodAdviceContext(advice.MethodAdvice, aspectInfo.AdvisedMethod, adviceValues,
-                        adviceContext);
+                    adviceContext = new MethodAdviceContext(advice.MethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
                 // 2b. as async method
                 if (advice.AsyncMethodAdvice != null)
-                    adviceContext = new MethodAsyncAdviceContext(advice.AsyncMethodAdvice, aspectInfo.AdvisedMethod,
-                        adviceValues, adviceContext);
+                    adviceContext = new MethodAsyncAdviceContext(advice.AsyncMethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
                 // 1. as property
                 if (advice.PropertyAdvice != null && aspectInfo.PointcutProperty != null)
-                    adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty,
-                        aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
+                    adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
                 // 1b. as event
                 if (advice.EventAdvice != null && aspectInfo.PointcutEvent != null)
-                    adviceContext = new EventAdviceContext(advice.EventAdvice, aspectInfo.PointcutEvent,
-                        aspectInfo.IsPointcutEventAdder, adviceValues, adviceContext);
+                    adviceContext = new EventAdviceContext(advice.EventAdvice, aspectInfo.PointcutEvent, aspectInfo.IsPointcutEventAdder, adviceValues, adviceContext);
             }
 
             // if the method is no task, then we return immediately
