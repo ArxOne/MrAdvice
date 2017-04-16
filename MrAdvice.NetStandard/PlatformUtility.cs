@@ -1,8 +1,10 @@
 ﻿#region Mr. Advice
+
 // Mr. Advice
 // A simple post build weaving package
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
+
 #endregion
 
 namespace ArxOne.MrAdvice
@@ -77,7 +79,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         public static TDelegate CreateDelegate<TDelegate>(MethodInfo methodInfo)
         {
-            return default(TDelegate);
+            return (TDelegate) (object) methodInfo.CreateDelegate(typeof(TDelegate));
         }
     }
 }

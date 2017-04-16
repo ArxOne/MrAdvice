@@ -148,7 +148,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         public static TDelegate CreateDelegate<TDelegate>(MethodInfo methodInfo)
         {
-            return default(TDelegate);
+            return (TDelegate)(object)methodInfo.CreateDelegate(typeof(TDelegate));
         }
     }
 }
