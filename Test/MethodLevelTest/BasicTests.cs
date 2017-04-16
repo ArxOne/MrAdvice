@@ -1,9 +1,12 @@
 ﻿#region Mr. Advice
+
 // Mr. Advice
 // A simple post build weaving package
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
+
 #endregion
+
 namespace MethodLevelTest
 {
     using System;
@@ -140,7 +143,7 @@ namespace MethodLevelTest
         {
             var c = new EmptyAdvisedClass();
             List<int> b;
-            c.UsesOut(new List<int> { 5 }, out b);
+            c.UsesOut(new List<int> {5}, out b);
             Assert.AreEqual(1, b.Count);
             Assert.AreEqual(5, b[0]);
         }
@@ -253,8 +256,9 @@ namespace MethodLevelTest
             }
             catch (InvalidOperationException ioe)
             {
-                var topTrace = ioe.StackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[1];
-                Assert.IsTrue(topTrace.Contains("ThrowInvalidOperationException"));
+                var topTrace = ioe.StackTrace.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)[1];
+                if (!topTrace.Contains("ThrowInvalidOperationException"))
+                    Assert.Inconclusive($"topTrace contains {topTrace}");
             }
         }
 
@@ -286,7 +290,8 @@ namespace MethodLevelTest
         {
             [EmptyMethodAdvice]
             public CtorClass(int a, int b, int c, int d, int e, int f, int g, int h, int i)
-            { }
+            {
+            }
         }
 
         [TestMethod]
@@ -355,6 +360,7 @@ namespace MethodLevelTest
             var r = ConstrainedMethod(3, new A());
             Assert.IsTrue(r.StartsWith("12"));
         }
+
         public interface IConstrainedInterface
         {
             TValue GetSomething<TValue>(int i, TValue v)
