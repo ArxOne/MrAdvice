@@ -9,6 +9,9 @@
 
 namespace ArxOne.MrAdvice.Weaver
 {
+    using System.Linq;
+    using dnlib.DotNet;
+
     partial class AspectWeaver
     {
         // \u200B was the best choice ever. However as a space, it was trimmed from names,
@@ -84,6 +87,18 @@ namespace ArxOne.MrAdvice.Weaver
         private static string GetInnerMethodName(string methodName)
         {
             return $"{methodName}{Marker}";
+        }
+
+        private static string GetDelegateProceederName(string methodName, TypeDef declaringType)
+        {
+            for (int index = 1; ; index++)
+            {
+                var name = methodName + "\u2033";
+                if (index > 1)
+                    name += index;
+                if (declaringType.Methods.All(m => m.Name != name))
+                    return name;
+            }
         }
     }
 }

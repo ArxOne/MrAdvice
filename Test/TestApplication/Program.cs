@@ -1,8 +1,10 @@
 ﻿#region Mr. Advice
+
 // Mr. Advice
 // A simple post build weaving package
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
+
 #endregion
 
 namespace TestApplication
@@ -11,28 +13,64 @@ namespace TestApplication
     using System.Diagnostics;
     using System.IO;
     using ArxOne.MrAdvice.Advice;
+    using MrAdvice.Advice;
 
     public class PublicClass
     {
-        public void PublicMethod() { }
+        public void PublicMethod()
+        {
+        }
 
-        protected void ProtectedMethod() { }
+        protected void ProtectedMethod()
+        {
+        }
 
-        private void PrivateMethod() { }
+        private void PrivateMethod()
+        {
+        }
 
-        internal void InternalMethod() { }
+        internal void InternalMethod()
+        {
+        }
 
-        protected internal void ProtectedInternalMethod() { }
+        protected internal void ProtectedInternalMethod()
+        {
+        }
     }
 
     public class Benchmark
     {
-
         public int Value { get; [SomeAdvice] set; }
     }
 
     internal class InternalClass
-    { }
+    {
+    }
+
+    public class Toot
+    {
+        public static object F(object i, object[] p)
+        {
+            return i;
+        }
+
+        public void G()
+        {
+            ProceedDelegate f = F;
+        }
+    }
+
+    //public class G1<T1>
+    //{
+    //    public void F1<T2>()
+    //    {
+    //    }
+
+    //    public void Z<T3>()
+    //    {
+    //        ProceedDelegate d = new ProceedDelegate(F1<T3>);
+    //    }
+    //}
 
     public static class Program
     {
@@ -78,7 +116,8 @@ namespace TestApplication
         }
 
         private void F(object c)
-        { }
+        {
+        }
 
         [SomeOtherAdvice]
         public void DoGeneric<TAnything>()

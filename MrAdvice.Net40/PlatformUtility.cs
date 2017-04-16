@@ -67,5 +67,16 @@ namespace ArxOne.MrAdvice
         {
             return attributeProvider.GetCustomAttributes(false).OfType<TAttribute>();
         }
+
+        /// <summary>
+        /// Creates a delegate from a given method.
+        /// </summary>
+        /// <typeparam name="TDelegate">The type of the delegate.</typeparam>
+        /// <param name="methodInfo">The method information.</param>
+        /// <returns></returns>
+        public static TDelegate CreateDelegate<TDelegate>(MethodInfo methodInfo)
+        {
+            return (TDelegate)(object)Delegate.CreateDelegate(typeof(TDelegate), methodInfo);
+        }
     }
 }

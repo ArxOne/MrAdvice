@@ -11,6 +11,7 @@ namespace ArxOne.MrAdvice
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using global::MrAdvice.Advice;
 
     /// <summary>
     /// Utility for platform
@@ -66,6 +67,17 @@ namespace ArxOne.MrAdvice
         public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this ICustomAttributeProvider attributeProvider)
         {
             return attributeProvider.GetCustomAttributes(false).OfType<TAttribute>();
+        }
+
+        /// <summary>
+        /// Creates a delegate from a given method.
+        /// </summary>
+        /// <typeparam name="TDelegate">The type of the delegate.</typeparam>
+        /// <param name="methodInfo">The method information.</param>
+        /// <returns></returns>
+        public static TDelegate CreateDelegate<TDelegate>(MethodInfo methodInfo)
+        {
+            return default(TDelegate);
         }
     }
 }

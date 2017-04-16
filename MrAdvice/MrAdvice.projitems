@@ -34,6 +34,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Advice\MethodWeavingContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\ParameterAdviceContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\EventAdviceContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Advice\ProceedDelegate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\PropertyAdviceContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\PropertyInfoAdviceContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\SyncAdviceContext.cs" />

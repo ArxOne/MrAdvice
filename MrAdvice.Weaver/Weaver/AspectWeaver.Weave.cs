@@ -165,18 +165,24 @@ namespace ArxOne.MrAdvice.Weaver
                 lock (method.DeclaringType)
                     method.DeclaringType.Methods.Add(innerMethod);
 
-                WriteDelegateProceeder(innerMethod, new MethodParameters(method), moduleDefinition);
-
                 WritePointcutBody(method, innerMethod, false, context);
             }
         }
 
-        private MethodDef WriteDelegateProceeder(MethodDef innerMethod, MethodParameters parametersList, ModuleDef module)
+        private MethodDef WriteDelegateProceeder(MethodDef innerMethod, string methodName, MethodParameters parametersList, ModuleDef module)
         {
+            if (innerMethod == null)
+                return null;
+            // currently, this is unsupported
+            // (since I have no idea how it works)
+            if (innerMethod.DeclaringType.HasGenericParameters || innerMethod.HasGenericParameters)
+                return null;
+
             var proceederMethodSignature = new MethodSig(CallingConvention.Default, 0, module.CorLibTypes.Object,
                 new TypeSig[] { module.CorLibTypes.Object, new SZArraySig(module.CorLibTypes.Object) });
             var proceederMethodAttributes = MethodAttributes.Static | MethodAttributes.Private | MethodAttributes.HideBySig;
-            var proceederMethod = new MethodDefUser(innerMethod.Name + innerMethod.DeclaringType.Methods.Count /*"u2261"*//*+Guid.NewGuid().ToString("N")*/, proceederMethodSignature, proceederMethodAttributes);
+            var proceederMethod = new MethodDefUser(GetDelegateProceederName(methodName, innerMethod.DeclaringType), 
+                proceederMethodSignature, proceederMethodAttributes);
             proceederMethod.Body = new CilBody();
             proceederMethod.GenericParameters.AddRange(innerMethod.GenericParameters.Select(p => p.Clone(innerMethod)));
 
@@ -337,8 +343,9 @@ namespace ArxOne.MrAdvice.Weaver
             var typeArgument = GetTypeArgument(method);
             var abstractedArgument = GetAbstractedArgument(abstractedTarget);
             var genericParametersArgument = GetGenericParametersArgument(method);
+            var innerMethodDelegateArgument = GetInnerMethodDelegateArgument(innerMethod, method);
 
-            WriteProceedCall(instructions, context, targetArgument, parametersArgument, methodArgument, innerMethodArgument, typeArgument, abstractedArgument, genericParametersArgument);
+            WriteProceedCall(instructions, context, targetArgument, parametersArgument, methodArgument, innerMethodArgument, innerMethodDelegateArgument, typeArgument, abstractedArgument, genericParametersArgument);
 
             // get return value
             if (!method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
@@ -427,7 +434,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var invocationType = TypeResolver.Resolve(module, typeof(Invocation));
                 if (invocationType == null)
                     throw new InvalidOperationException();
-                var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice));
+                var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice2));
                 if (proceedMethodReference == null)
                     throw new InvalidOperationException();
                 context.InvocationProceedMethod = module.SafeImport(proceedMethodReference);
@@ -597,6 +604,14 @@ namespace ArxOne.MrAdvice.Weaver
                     }
                     instructions.EmitLdloc(genericParametersVariable);
                 }, instructions => instructions.Emit(OpCodes.Ldnull));
+        }
+
+        private InvocationArgument GetInnerMethodDelegateArgument(MethodDef innerMethod, MethodDef method)
+        {
+            var innerMethodDelegate = WriteDelegateProceeder(innerMethod, method.Name, new MethodParameters(method), method.Module);
+            return new InvocationArgument("InnerMethodDelegate",innerMethodDelegate!=null,
+                instructions => instructions.Emit(OpCodes.Ldtoken, innerMethodDelegate),
+                instructions => instructions.Emit(OpCodes.Dup));
         }
 
         /// <summary>

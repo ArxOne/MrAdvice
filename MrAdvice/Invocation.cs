@@ -1,9 +1,12 @@
 ﻿#region Mr. Advice
+
 // Mr. Advice
 // A simple post build weaving package
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
+
 #endregion
+
 namespace ArxOne.MrAdvice
 {
     using System;
@@ -14,6 +17,7 @@ namespace ArxOne.MrAdvice
     using System.Threading.Tasks;
     using Advice;
     using Aspect;
+    using global::MrAdvice.Advice;
     using Pointcut;
     using Threading;
     using Utility;
@@ -26,12 +30,32 @@ namespace ArxOne.MrAdvice
     // ReSharper disable once UnusedMember.Global
     public static partial class Invocation
     {
-        internal static readonly IDictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>> AspectInfos
-            = new Dictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>();
+        internal static readonly IDictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>
+            AspectInfos
+                = new Dictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>();
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
         private static readonly AdviceInfo[] NoAdvice = new AdviceInfo[0];
+
+        /// <summary>
+        /// Runs a method interception.
+        /// This version is kept for compatibility, the new method to be colled is <see cref="ProceedAdvice2"/>
+        /// it will be easier from C# code
+        /// </summary>
+        /// <param name="target">The target.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="methodHandle">The method handle.</param>
+        /// <param name="innerMethodHandle">The inner method handle.</param>
+        /// <param name="typeHandle">The type handle.</param>
+        /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
+        /// <param name="genericArguments">The generic arguments.</param>
+        /// <returns></returns>
+        public static object ProceedAdvice(object target, object[] parameters, RuntimeMethodHandle methodHandle,
+            RuntimeMethodHandle innerMethodHandle, RuntimeTypeHandle typeHandle, bool abstractedTarget, Type[] genericArguments)
+        {
+            return ProceedAdvice2(target, parameters, methodHandle, innerMethodHandle, methodHandle, typeHandle, abstractedTarget, genericArguments);
+        }
 
         /// <summary>
         /// Runs a method interception.
@@ -42,16 +66,17 @@ namespace ArxOne.MrAdvice
         /// <param name="parameters">The parameters.</param>
         /// <param name="methodHandle">The method handle.</param>
         /// <param name="innerMethodHandle">The inner method handle.</param>
+        /// <param name="delegatableMethodHandle">The delegatable method handle.</param>
         /// <param name="typeHandle">The type handle.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="genericArguments">The generic arguments (to static type and/or method) in a single array.</param>
         /// <returns></returns>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedMethodReturnValue.Global
-        public static object ProceedAdvice(object target, object[] parameters, RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle, RuntimeTypeHandle typeHandle,
-            bool abstractedTarget, Type[] genericArguments)
+        public static object ProceedAdvice2(object target, object[] parameters, RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle,
+            RuntimeMethodHandle delegatableMethodHandle, RuntimeTypeHandle typeHandle, bool abstractedTarget, Type[] genericArguments)
         {
-            var aspectInfo = GetAspectInfo(methodHandle, innerMethodHandle, typeHandle, abstractedTarget, genericArguments);
+            var aspectInfo = GetAspectInfo(methodHandle, innerMethodHandle, delegatableMethodHandle, typeHandle, abstractedTarget, genericArguments);
 
             // this is the case with auto implemented interface
             var advisedInterface = target as AdvisedInterface;
@@ -64,7 +89,7 @@ namespace ArxOne.MrAdvice
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
             var adviceValues = new AdviceValues(target, aspectInfo.AdvisedMethod.DeclaringType, parameters);
             // at least there is one context
-            AdviceContext adviceContext = new InnerMethodContext(adviceValues, aspectInfo.PointcutMethod);
+            AdviceContext adviceContext = new InnerMethodContext(adviceValues, aspectInfo.PointcutMethod, aspectInfo.PointcutMethodDelegate);
             for (var adviceIndex = aspectInfo.Advices.Count - 1; adviceIndex >= 0; adviceIndex--)
             {
                 var advice = aspectInfo.Advices[adviceIndex];
@@ -103,7 +128,8 @@ namespace ArxOne.MrAdvice
             var returnType = advisedMethodInfo?.ReturnType;
             // no Task means aspect was sync, so everything already ended
             // TODO: this is actually not true, since an async method can be void :frown:
-            if (adviceTask == null || returnType == null || !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
+            if (adviceTask == null || returnType == null ||
+                !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
             {
                 adviceTask?.Wait();
                 return adviceValues.ReturnValue;
@@ -148,7 +174,7 @@ namespace ArxOne.MrAdvice
                 throw FlattenException(advisedTask.Exception).PreserveStackTrace();
 
             // otherwise check inner value
-            var returnValue = (Task)adviceValues.ReturnValue;
+            var returnValue = (Task) adviceValues.ReturnValue;
             if (returnValue.IsFaulted)
                 throw FlattenException(returnValue.Exception).PreserveStackTrace();
             return returnValue.GetResult();
@@ -172,11 +198,13 @@ namespace ArxOne.MrAdvice
         /// </summary>
         /// <param name="methodHandle">The method handle.</param>
         /// <param name="innerMethodHandle">The inner method handle.</param>
+        /// <param name="delegatableMethodHandle">The delegatable method handle.</param>
         /// <param name="typeHandle">The type handle.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="genericArguments">The generic arguments.</param>
         /// <returns></returns>
-        private static AspectInfo GetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle, RuntimeTypeHandle typeHandle, bool abstractedTarget, Type[] genericArguments)
+        private static AspectInfo GetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle,
+            RuntimeMethodHandle delegatableMethodHandle, RuntimeTypeHandle typeHandle, bool abstractedTarget, Type[] genericArguments)
         {
             AspectInfo aspectInfo;
             lock (AspectInfos)
@@ -185,16 +213,21 @@ namespace ArxOne.MrAdvice
                 if (aspectInfo == null)
                 {
                     var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
-                    var innerMethod = innerMethodHandle != methodHandle ? GetMethodFromHandle(innerMethodHandle, typeHandle) : null;
-
+                    var innerMethod = innerMethodHandle != methodHandle
+                        ? GetMethodFromHandle(innerMethodHandle, typeHandle)
+                        : null;
+                    var delegateMethod = delegatableMethodHandle != innerMethodHandle
+                        ? PlatformUtility.CreateDelegate<ProceedDelegate>((MethodInfo) GetMethodFromHandle(delegatableMethodHandle, typeHandle))
+                        : null;
                     // this is to handle one special case:
                     // when an assembly advice is applied at assembly level, its ctor is also advised
                     // and getting its attributes, it creates an infinite loop
                     // so since an advice won't advise itself anyway
                     // we create an empty AspectInfo
-                    SetAspectInfo(methodHandle, typeHandle, new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, methodBase, methodHandle));
+                    SetAspectInfo(methodHandle, typeHandle,
+                        new AspectInfo(NoAdvice, (MethodInfo) innerMethod, innerMethodHandle, delegateMethod, methodBase, methodHandle));
                     // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, abstractedTarget);
+                    aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo) innerMethod, innerMethodHandle, delegateMethod, abstractedTarget);
                     SetAspectInfo(methodHandle, typeHandle, aspectInfo);
                 }
             }
@@ -214,8 +247,7 @@ namespace ArxOne.MrAdvice
             return aspectInfo;
         }
 
-        private static void SetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeTypeHandle typeHandle,
-            AspectInfo aspectInfo)
+        private static void SetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeTypeHandle typeHandle, AspectInfo aspectInfo)
         {
             IDictionary<RuntimeTypeHandle, AspectInfo> methodsByType;
             if (!AspectInfos.TryGetValue(methodHandle, out methodsByType))
@@ -233,7 +265,7 @@ namespace ArxOne.MrAdvice
         {
             if (parameterIndex >= 0)
                 return methodBase.GetParameters()[parameterIndex];
-            return ((MethodInfo)methodBase).ReturnParameter;
+            return ((MethodInfo) methodBase).ReturnParameter;
         }
 
         /// <summary>
@@ -253,7 +285,8 @@ namespace ArxOne.MrAdvice
         /// <param name="type">The type.</param>
         public static void ProcessInfoAdvices(Type type)
         {
-            const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+            const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
+                                              BindingFlags.Static;
             foreach (var methodInfo in type.GetMembersReader().GetMethods(bindingFlags))
                 ProcessMethodInfoAdvices(methodInfo);
             foreach (var constructorInfo in type.GetMembersReader().GetConstructors(bindingFlags))
@@ -304,9 +337,10 @@ namespace ArxOne.MrAdvice
         /// <param name="methodHandle">The method handle.</param>
         /// <param name="innerMethod">Name of the inner method.</param>
         /// <param name="innerMethodHandle">The inner method handle.</param>
+        /// <param name="innerMethodDelegate"></param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <returns></returns>
-        private static AspectInfo CreateAspectInfo(MethodBase method, RuntimeMethodHandle methodHandle, MethodInfo innerMethod, RuntimeMethodHandle innerMethodHandle, bool abstractedTarget)
+        private static AspectInfo CreateAspectInfo(MethodBase method, RuntimeMethodHandle methodHandle, MethodInfo innerMethod, RuntimeMethodHandle innerMethodHandle, ProceedDelegate innerMethodDelegate, bool abstractedTarget)
         {
             Tuple<PropertyInfo, bool> relatedPropertyInfo;
             Tuple<EventInfo, bool> relatedEventInfo;
@@ -314,10 +348,10 @@ namespace ArxOne.MrAdvice
                 method = FindInterfaceMethod(method);
             var advices = GetAdvices<IAdvice>(method, out relatedPropertyInfo, out relatedEventInfo);
             if (relatedPropertyInfo != null)
-                return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
+                return new AspectInfo(advices, innerMethod, innerMethodHandle, innerMethodDelegate, method, methodHandle, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
             if (relatedEventInfo != null)
-                return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle, relatedEventInfo.Item1, relatedEventInfo.Item2);
-            return new AspectInfo(advices, innerMethod, innerMethodHandle, method, methodHandle);
+                return new AspectInfo(advices, innerMethod, innerMethodHandle, innerMethodDelegate, method, methodHandle, relatedEventInfo.Item1, relatedEventInfo.Item2);
+            return new AspectInfo(advices, innerMethod, innerMethodHandle, innerMethodDelegate, method, methodHandle);
         }
 
         /// <summary>
@@ -331,7 +365,8 @@ namespace ArxOne.MrAdvice
             // ReSharper disable once PossibleNullReferenceException
             var i = implementationMethodBase.DeclaringType.GetAssignmentReader().GetInterfaces().SingleOrDefault();
             var parameterInfos = implementationMethodBase.GetParameters();
-            var m = i.GetMembersReader().GetMethod(implementationMethodBase.Name, parameterInfos.Select(p => p.ParameterType).ToArray());
+            var m = i.GetMembersReader()
+                .GetMethod(implementationMethodBase.Name, parameterInfos.Select(p => p.ParameterType).ToArray());
             return m;
         }
 
@@ -348,25 +383,31 @@ namespace ArxOne.MrAdvice
             where TAdvice : class, IAdvice
         {
             // inheritance hierarchy
-            var typeAndParents = targetMethod.DeclaringType.GetSelfAndEnclosing().SelectMany(t => t.GetSelfAndParents()).Distinct().ToArray();
+            var typeAndParents = targetMethod.DeclaringType.GetSelfAndEnclosing()
+                .SelectMany(t => t.GetSelfAndParents())
+                .Distinct()
+                .ToArray();
             // assemblies
             var assemblyAndParents = typeAndParents.Select(t => t.GetInformationReader().Assembly).Distinct();
 
             // advices down to method
             IEnumerable<AdviceInfo> allAdvices = assemblyAndParents.SelectMany(a => a.GetAttributes<TAdvice>())
                 .Union(typeAndParents.SelectMany(t => t.GetAttributes<TAdvice>()))
-                .Union(targetMethod.GetAttributes<TAdvice>()).Select(CreateAdvice)
+                .Union(targetMethod.GetAttributes<TAdvice>())
+                .Select(CreateAdvice)
                 .ToArray();
 
             // optional from property
             relatedPropertyInfo = GetPropertyInfo(targetMethod);
             if (relatedPropertyInfo != null)
-                allAdvices = allAdvices.Union(relatedPropertyInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
+                allAdvices = allAdvices.Union(relatedPropertyInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice))
+                    .ToArray();
 
             // optional from event
             relatedEventInfo = GetEventInfo(targetMethod);
             if (relatedEventInfo != null)
-                allAdvices = allAdvices.Union(relatedEventInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
+                allAdvices = allAdvices.Union(relatedEventInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice))
+                    .ToArray();
 
             // now separate parameters
             var parameterAdvices = allAdvices.Where(a => a.Advice is IParameterAdvice).ToArray();
@@ -378,8 +419,10 @@ namespace ArxOne.MrAdvice
             for (int parameterIndex = 0; parameterIndex < parameters.Length; parameterIndex++)
             {
                 var index = parameterIndex;
-                allAdvices = allAdvices.Concat(parameterAdvices.Select(p => CreateAdviceIndex(p.Advice, parameterIndex)))
-                    .Concat(parameters[parameterIndex].GetAttributes<TAdvice>().Select(a => CreateAdviceIndex(a, index)));
+                allAdvices = allAdvices
+                    .Concat(parameterAdvices.Select(p => CreateAdviceIndex(p.Advice, parameterIndex)))
+                    .Concat(
+                        parameters[parameterIndex].GetAttributes<TAdvice>().Select(a => CreateAdviceIndex(a, index)));
                 // evaluate now
                 allAdvices = allAdvices.ToArray();
             }
@@ -444,7 +487,9 @@ namespace ArxOne.MrAdvice
 
             // now try to find the property
             // ReSharper disable once PossibleNullReferenceException
-            var propertyInfo = methodInfo.DeclaringType.GetMembersReader().GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+            var propertyInfo = methodInfo.DeclaringType.GetMembersReader()
+                .GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public |
+                               BindingFlags.NonPublic)
                 .SingleOrDefault(p => p.GetGetMethod(true) == methodInfo || p.GetSetMethod(true) == methodInfo);
             if (propertyInfo == null)
                 return null; // this should never happen
@@ -470,7 +515,8 @@ namespace ArxOne.MrAdvice
 
             // now try to find the property
             // ReSharper disable once PossibleNullReferenceException
-            var eventInfo = methodInfo.DeclaringType.GetMembersReader().GetEvents(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+            var eventInfo = methodInfo.DeclaringType.GetMembersReader()
+                .GetEvents(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                 .SingleOrDefault(p => p.GetAddMethod(true) == methodInfo || p.GetRemoveMethod(true) == methodInfo);
             if (eventInfo == null)
                 return null; // this should never happen
