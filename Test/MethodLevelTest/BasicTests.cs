@@ -258,7 +258,7 @@ namespace MethodLevelTest
             {
                 var topTrace = ioe.StackTrace.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)[1];
                 if (!topTrace.Contains("ThrowInvalidOperationException"))
-                    Assert.Inconclusive($"topTrace contains {topTrace}");
+                    Assert.Inconclusive($"stack trace contains {ioe.StackTrace}");
             }
         }
 
