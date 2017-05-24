@@ -415,5 +415,72 @@ namespace MethodLevelTest
             na.F<string>();
         }
 #endif
+
+        [EmptyMethodAdvice]
+        public void F(byte? a)
+        {
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void InNullableByteTest()
+        {
+            F(1);
+        }
+
+        [EmptyMethodAdvice]
+        public void FR(ref byte? a)
+        {
+            if (a.HasValue)
+                a++;
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void RefNullableByteTest()
+        {
+            byte? a = 12;
+            FR(ref a);
+            Assert.AreEqual((byte?) 13, a);
+        }
+
+        [EmptyMethodAdvice]
+        public void FO(out byte? a)
+        {
+            a = 34;
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void OutNullableByteTest()
+        {
+            byte? a;
+            FO(out a);
+            Assert.AreEqual((byte?) 34, a);
+        }
+
+        //public void Z1()
+        //{
+        //    byte a = 1;
+        //    var o = new object[] {a};
+        //}
+
+        //public void Z2()
+        //{
+        //    byte? a = 1;
+        //    var o = new object[] {a};
+        //}
+
+        //public void Z3()
+        //{
+        //    var o = new object[1] {(byte) 2};
+        //    var a = (byte) o[0];
+        //}
+
+        //public void Z4()
+        //{
+        //    var o = new object[1] {(byte) 2};
+        //    var a = (byte?) o[0];
+        //}
     }
 }

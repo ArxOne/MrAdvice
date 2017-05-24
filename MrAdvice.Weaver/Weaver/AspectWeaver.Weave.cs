@@ -376,6 +376,7 @@ namespace ArxOne.MrAdvice.Weaver
                     //    var referenceParameterType = (ByReferenceType)parameter.ParameterType;
                     //    parameterElementType = (GenericInstanceType)referenceParameterType.ElementType;
                     //}
+
                     instructions.EmitUnboxOrCastIfNecessary(parameterElementType);
                     instructions.EmitStind(parameterElementType); // result is stored in ref parameter
                 }

@@ -1,14 +1,16 @@
 ﻿#region Mr. Advice
+
 // Mr. Advice
 // A simple post build weaving package
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
+
 #endregion
+
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Reflection;
     using dnlib.DotNet;
     using dnlib.DotNet.Emit;
@@ -250,7 +252,7 @@ namespace ArxOne.MrAdvice.Weaver
                     return Emit(OpCodes.Ldc_I4_8);
                 default:
                     if (value < 128)
-                        return Emit(OpCodes.Ldc_I4_S, (sbyte)value);
+                        return Emit(OpCodes.Ldc_I4_S, (sbyte) value);
                     return Emit(OpCodes.Ldc_I4, value);
             }
         }
@@ -289,11 +291,18 @@ namespace ArxOne.MrAdvice.Weaver
             return this;
         }
 
-        private static bool MustBox(TypeSig targetTypeSig)
+        private bool MustBox(TypeSig targetTypeSig)
         {
             // for generics and some unknown reason, an unbox_any is needed
-            if (targetTypeSig.IsGenericParameter || targetTypeSig.IsGenericInstanceType)
+            if (targetTypeSig.IsGenericParameter)
+            {
+                // TODO: not sure at all!
                 return true;
+            }
+            if (targetTypeSig.IsGenericInstanceType)
+                return MustBox(((GenericInstSig) targetTypeSig).GenericType);
+            //if (targetTypeSig.SafeEquivalent(Module.ImportAsTypeSig(typeof(Nullable<>))))
+            //    return false;
             if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive)
                 return true;
             return false;
@@ -332,7 +341,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return Emit(OpCodes.Ldind_R4);
             if (typeSig == corLibTypes.Double)
                 return Emit(OpCodes.Ldind_R8);
-            if (typeSig.IsPrimitive)
+            if (typeSig.IsPrimitive || typeSig.IsValueType)
                 return Emit(OpCodes.Ldobj, Module.SafeImport(typeSig));
             return Emit(OpCodes.Ldind_Ref);
         }
@@ -357,7 +366,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return Emit(OpCodes.Stind_R4);
             if (typeSig == corLibTypes.Double)
                 return Emit(OpCodes.Stind_R8);
-            if (typeSig.IsPrimitive)
+            if (typeSig.IsPrimitive || typeSig.IsValueType)
                 return Emit(OpCodes.Stobj, Module.SafeImport(typeSig));
             return Emit(OpCodes.Stind_Ref);
         }
