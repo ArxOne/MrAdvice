@@ -143,7 +143,7 @@ namespace MethodLevelTest
         {
             var c = new EmptyAdvisedClass();
             List<int> b;
-            c.UsesOut(new List<int> {5}, out b);
+            c.UsesOut(new List<int> { 5 }, out b);
             Assert.AreEqual(1, b.Count);
             Assert.AreEqual(5, b[0]);
         }
@@ -256,7 +256,7 @@ namespace MethodLevelTest
             }
             catch (InvalidOperationException ioe)
             {
-                var topTrace = ioe.StackTrace.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)[1];
+                var topTrace = ioe.StackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[1];
                 if (!topTrace.Contains("ThrowInvalidOperationException"))
                     Assert.Inconclusive($"stack trace contains {ioe.StackTrace}");
             }
@@ -441,7 +441,7 @@ namespace MethodLevelTest
         {
             byte? a = 12;
             FR(ref a);
-            Assert.AreEqual((byte?) 13, a);
+            Assert.AreEqual((byte?)13, a);
         }
 
         [EmptyMethodAdvice]
@@ -456,7 +456,7 @@ namespace MethodLevelTest
         {
             byte? a;
             FO(out a);
-            Assert.AreEqual((byte?) 34, a);
+            Assert.AreEqual((byte?)34, a);
         }
 
         //public void Z1()
@@ -497,6 +497,27 @@ namespace MethodLevelTest
         public void NonNullCtorParameterTest()
         {
             var c = new Ctor(new object());
+        }
+
+        public struct TestStruct
+        {
+            [EmptyMethodAdvice]
+            public int N { get; set; }
+
+            public void F()
+            {
+                var o = (object) this;
+
+                var z = (TestStruct) o;
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void StructSetterTest()
+        {
+            var r = new TestStruct();
+            r.N = 1;
         }
     }
 }
