@@ -504,11 +504,13 @@ namespace MethodLevelTest
             [EmptyMethodAdvice]
             public int N { get; set; }
 
+            public int I;
+
             public void F()
             {
-                var o = (object) this;
+                var o = (object)this;
 
-                var z = (TestStruct) o;
+                var z = (TestStruct)o;
             }
         }
 
@@ -518,6 +520,22 @@ namespace MethodLevelTest
         {
             var r = new TestStruct();
             r.N = 1;
+        }
+
+        [EmptyMethodAdvice]
+        public void UseStruct(TestStruct a)
+        {
+            Assert.AreEqual(1, a.I);
+            a.I = 2;
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void UseStructTest()
+        {
+            var s = new TestStruct { I = 1 };
+            UseStruct(s);
+            Assert.AreEqual(1, s.I);
         }
     }
 }
