@@ -75,5 +75,12 @@ namespace IntegrityTest
         {
             Assert.IsFalse(PointcutSelectorRule.WildcardMatch("st!", "st."));
         }
+
+        [TestMethod]
+        [TestCategory("WildcardMatch")]
+        public void MatchCase1()
+        {
+            Assert.IsTrue(PointcutSelectorRule.WildcardMatch("*.<@>d@.@", "TestAsync.Program.Test.<<StartTask>b__0_0>d.MoveNext″"));
+        }
     }
 }

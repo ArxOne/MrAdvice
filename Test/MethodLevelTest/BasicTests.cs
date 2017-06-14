@@ -482,5 +482,21 @@ namespace MethodLevelTest
         //    var o = new object[1] {(byte) 2};
         //    var a = (byte?) o[0];
         //}
+
+        [EmptyMethodAdvice]
+        public class Ctor
+        {
+            public Ctor(object o)
+            {
+                Assert.IsNotNull(o);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void NonNullCtorParameterTest()
+        {
+            var c = new Ctor(new object());
+        }
     }
 }
