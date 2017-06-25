@@ -41,7 +41,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Weaver", "MrAdvice.Weaver\MrAdvice.Weaver.csproj", "{2CCCBE1D-9CC5-40A9-A816-484F98B10774}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E01DD569-32A6-46F7-8FB8-C5FF4378369E} = {E01DD569-32A6-46F7-8FB8-C5FF4378369E}
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE} = {C61ED77D-01B3-478A-9161-9EE20191EBFE}
 		{D14F6AB2-9420-44EF-9DCD-4DBA104742DB} = {D14F6AB2-9420-44EF-9DCD-4DBA104742DB}
 	EndProjectSection
 EndProject
@@ -87,11 +86,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Uwp10", "MrAdvice.
 		{E01DD569-32A6-46F7-8FB8-C5FF4378369E} = {E01DD569-32A6-46F7-8FB8-C5FF4378369E}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Silverlight5", "MrAdvice.Silverlight5\MrAdvice.Silverlight5.csproj", "{C61ED77D-01B3-478A-9161-9EE20191EBFE}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E01DD569-32A6-46F7-8FB8-C5FF4378369E} = {E01DD569-32A6-46F7-8FB8-C5FF4378369E}
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.NetStandard", "MrAdvice.NetStandard\MrAdvice.NetStandard.csproj", "{E01DD569-32A6-46F7-8FB8-C5FF4378369E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfTest", "Test\WpfTest\WpfTest.csproj", "{6EC087B5-B17C-45A7-BF50-3F936B210A41}"
@@ -106,7 +100,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		MrAdvice\MrAdvice.projitems*{c61ed77d-01b3-478a-9161-9ee20191ebfe}*SharedItemsImports = 4
 		MrAdvice\MrAdvice.projitems*{d14f6ab2-9420-44ef-9dcd-4dba104742db}*SharedItemsImports = 4
 		MrAdvice\MrAdvice.projitems*{d8aa6017-594d-4616-907b-b450a5d2fcb9}*SharedItemsImports = 4
 		MrAdvice\MrAdvice.projitems*{e01dd569-32a6-46f7-8fb8-c5ff4378369e}*SharedItemsImports = 4
@@ -305,22 +298,6 @@ Global
 		{D14F6AB2-9420-44EF-9DCD-4DBA104742DB}.Release|x64.Build.0 = Release|x64
 		{D14F6AB2-9420-44EF-9DCD-4DBA104742DB}.Release|x86.ActiveCfg = Release|x86
 		{D14F6AB2-9420-44EF-9DCD-4DBA104742DB}.Release|x86.Build.0 = Release|x86
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Debug|ARM.Build.0 = Debug|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Debug|x64.Build.0 = Debug|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Debug|x86.Build.0 = Debug|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Release|ARM.ActiveCfg = Release|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Release|ARM.Build.0 = Release|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Release|x64.ActiveCfg = Release|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Release|x64.Build.0 = Release|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Release|x86.ActiveCfg = Release|Any CPU
-		{C61ED77D-01B3-478A-9161-9EE20191EBFE}.Release|x86.Build.0 = Release|Any CPU
 		{E01DD569-32A6-46F7-8FB8-C5FF4378369E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E01DD569-32A6-46F7-8FB8-C5FF4378369E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E01DD569-32A6-46F7-8FB8-C5FF4378369E}.Debug|ARM.ActiveCfg = Debug|Any CPU
