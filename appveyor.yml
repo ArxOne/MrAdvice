@@ -1,6 +1,7 @@
 # Mr. Advice appveyor.yml script
 
 version: '{branch}-{build}'
+image: Visual Studio 2017
 
 branches:
   only:
