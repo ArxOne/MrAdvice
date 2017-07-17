@@ -9,7 +9,6 @@ namespace ArxOne.MrAdvice
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
 
@@ -20,21 +19,6 @@ namespace ArxOne.MrAdvice
     internal class AuditTimer
     {
         private readonly IDictionary<int, IList<Tuple<string, long>>> _zones = new Dictionary<int, IList<Tuple<string, long>>>();
-
-        [ThreadStatic]
-        private static Stopwatch _stopwatch;
-        private static Stopwatch Stopwatch
-        {
-            get
-            {
-                if (_stopwatch == null)
-                {
-                    _stopwatch = new Stopwatch();
-                    _stopwatch.Start();
-                }
-                return _stopwatch;
-            }
-        }
 
         /// <summary>
         /// Gets the name of the current zone.
@@ -50,7 +34,7 @@ namespace ArxOne.MrAdvice
         /// <param name="name">The name.</param>
         public void NewZone(string name)
         {
-            GetCurrentZone().Add(Tuple.Create(name, Stopwatch.ElapsedTicks));
+            GetCurrentZone().Add(Tuple.Create(name, DateTime.UtcNow.Ticks));
         }
 
         /// <summary>
