@@ -160,13 +160,15 @@ namespace ArxOne.MrAdvice.Reflection
         private static string GetLiteralVersion(Version version, int minimumNumbers = 1)
         {
             var literalBuilder = new StringBuilder();
-            var values = new[] { version.Major, version.Minor, version.MajorRevision, version.MinorRevision };
-            for (int index = 0; index < values.Length; index++)
+            var values = new[] { version.Major, version.Minor, version.Build, version.Revision };
+            for (int index = 0; index < values.Length;)
             {
                 if (literalBuilder.Length > 0)
                     literalBuilder.Append('.');
                 literalBuilder.Append(values[index]);
-                if (index >= minimumNumbers - 1 && values.Skip(index).All(v => v <= 0))
+                if (++index < minimumNumbers)
+                    continue;
+                if (values.Skip(index).All(v => v <= 0))
                     break;
             }
             return literalBuilder.ToString();

@@ -32,5 +32,13 @@ namespace IntegrityTest
             Assert.AreEqual(new Version(5, 0), t.Silverlight);
             Assert.IsNull(t.WindowsPhone);
         }
+
+        [TestMethod]
+        [TestCategory("Integrity")]
+        public void Literal45()
+        {
+            var t = new TargetFramework(".NETFramework,Version=v4.5");
+            Assert.AreEqual(t.ToString(), ".NET 4.5");
+        }
     }
 }
