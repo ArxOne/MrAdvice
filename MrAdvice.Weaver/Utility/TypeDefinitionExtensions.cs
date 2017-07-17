@@ -23,8 +23,9 @@ namespace ArxOne.MrAdvice.Utility
         /// Gets the self and parents.
         /// </summary>
         /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="typeResolver">The type resolver.</param>
         /// <returns></returns>
-        public static IEnumerable<TypeDef> GetSelfAndParents(this TypeDef typeDefinition)
+        public static IEnumerable<TypeDef> GetSelfAndParents(this TypeDef typeDefinition, TypeResolver typeResolver = null)
         {
             while (typeDefinition != null)
             {
@@ -32,7 +33,10 @@ namespace ArxOne.MrAdvice.Utility
                 var baseType = typeDefinition.BaseType;
                 if (baseType == null)
                     break;
-                typeDefinition = baseType.ResolveTypeDef();
+                if (typeResolver == null)
+                    typeDefinition = baseType.ResolveTypeDef();
+                else
+                    typeDefinition = typeResolver.Resolve(baseType);
             }
         }
 

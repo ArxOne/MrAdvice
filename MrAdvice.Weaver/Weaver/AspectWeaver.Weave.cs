@@ -42,12 +42,12 @@ namespace ArxOne.MrAdvice.Weaver
             if (invocationType == null)
                 return;
             var proceedRuntimeInitializersReference = (from m in invocationType.Methods
-                where m.IsStatic && m.Name == nameof(Invocation.ProcessInfoAdvices)
-                let parameters = m.Parameters
-                where parameters.Count == 1
-                      && parameters[0].Type.SafeEquivalent(
-                          moduleDefinition.SafeImport(useWholeAssembly ? typeof(Assembly) : typeof(Type)).ToTypeSig())
-                select m).SingleOrDefault();
+                                                       where m.IsStatic && m.Name == nameof(Invocation.ProcessInfoAdvices)
+                                                       let parameters = m.Parameters
+                                                       where parameters.Count == 1
+                                                             && parameters[0].Type.SafeEquivalent(
+                                                                 moduleDefinition.SafeImport(useWholeAssembly ? typeof(Assembly) : typeof(Type)).ToTypeSig())
+                                                       select m).SingleOrDefault();
             if (proceedRuntimeInitializersReference == null)
             {
                 Logging.WriteWarning("Info advice method not found");
@@ -86,7 +86,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var methodAttributes = (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
                                        | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
                 staticCtor =
-                    new MethodDefUser(cctorMethodName, MethodSig.CreateStatic(moduleDefinition.CorLibTypes.Void), methodAttributes) {Body = new CilBody()};
+                    new MethodDefUser(cctorMethodName, MethodSig.CreateStatic(moduleDefinition.CorLibTypes.Void), methodAttributes) { Body = new CilBody() };
                 typeDef.Methods.Add(staticCtor);
                 staticCtor.Body.Instructions.Add(new Instruction(OpCodes.Ret));
             }
@@ -104,7 +104,7 @@ namespace ArxOne.MrAdvice.Weaver
             var method = markedMethod.Node.Method;
 
             // sanity check
-            var moduleDefinition = (ModuleDefMD) method.Module;
+            var moduleDefinition = (ModuleDefMD)method.Module;
             if (method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
             {
                 var customAttributes = method.CustomAttributes;
@@ -184,7 +184,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return null;
 
             var proceederMethodSignature = new MethodSig(CallingConvention.Default, 0, module.CorLibTypes.Object,
-                new TypeSig[] {module.CorLibTypes.Object, new SZArraySig(module.CorLibTypes.Object)});
+                new TypeSig[] { module.CorLibTypes.Object, new SZArraySig(module.CorLibTypes.Object) });
             var proceederMethodAttributes = MethodAttributes.Static | MethodAttributes.Private | MethodAttributes.HideBySig;
             var proceederMethod = new MethodDefUser(GetDelegateProceederName(methodName, innerMethod.DeclaringType),
                 proceederMethodSignature, proceederMethodAttributes);
@@ -202,7 +202,7 @@ namespace ArxOne.MrAdvice.Weaver
                     genericTypeParameterIndex < innerMethod.DeclaringType.GenericParameters.Count;
                     genericTypeParameterIndex++)
                     genericTypeArgs.Add(new GenericVar(genericTypeParameterIndex, innerMethod.DeclaringType));
-                declaringType = new GenericInstSig((ClassOrValueTypeSig) innerMethod.DeclaringType.ToTypeSig(), genericTypeArgs);
+                declaringType = new GenericInstSig((ClassOrValueTypeSig)innerMethod.DeclaringType.ToTypeSig(), genericTypeArgs);
                 //instructions.Emit(OpCodes.Castclass, innerMethod.DeclaringType.ToTypeSig()); // arg.0 --> (target type) arg.0
             }
 
@@ -315,7 +315,7 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 Logging.WriteDebug("Weaving method '{0}' using weaving advice '{1}'", method.FullName, weavingAdviceMarker.Type.FullName);
                 var weavingAdviceType = TypeLoader.GetType(weavingAdviceMarker.Type);
-                var weavingAdvice = (IWeavingAdvice) Activator.CreateInstance(weavingAdviceType);
+                var weavingAdvice = (IWeavingAdvice)Activator.CreateInstance(weavingAdviceType);
                 var methodWeavingAdvice = weavingAdvice as IMethodWeavingAdvice;
                 if (methodWeavingAdvice != null && !method.IsGetter && !method.IsSetter)
                     methodWeavingAdvice.Advise(weaverMethodWeavingContext);
@@ -396,8 +396,8 @@ namespace ArxOne.MrAdvice.Weaver
             // and return
             instructions.Emit(OpCodes.Ret);
 
-            method.Body.Scope = new PdbScope {Start = method.Body.Instructions[0]};
-            method.Body.Scope.Scopes.Add(new PdbScope {Start = method.Body.Instructions[0]});
+            method.Body.PdbMethod = new PdbMethod { Scope = new PdbScope { Start = method.Body.Instructions[0] } };
+            method.Body.PdbMethod.Scope.Scopes.Add(new PdbScope { Start = method.Body.Instructions[0] });
         }
 
         /// <summary>
@@ -473,7 +473,7 @@ namespace ArxOne.MrAdvice.Weaver
             // create the method
             var nameBuilder = new StringBuilder("ProceedAspect");
             var argumentIndex = 0;
-            var methodSig = new MethodSig {RetType = module.CorLibTypes.Object, HasThis = false};
+            var methodSig = new MethodSig { RetType = module.CorLibTypes.Object, HasThis = false };
             var defaultProceedMethod = GetDefaultProceedMethod(module, context);
             foreach (var argument in arguments)
             {
@@ -512,7 +512,7 @@ namespace ArxOne.MrAdvice.Weaver
         private InvocationArgument GetTargetArgument(MethodDef method)
         {
             var isStatic = method.IsStatic;
-            return new InvocationArgument("This", !isStatic, delegate(Instructions i)
+            return new InvocationArgument("This", !isStatic, delegate (Instructions i)
             {
                 i.Emit(OpCodes.Ldarg_0);
                 if (method.DeclaringType.IsValueType)
@@ -532,9 +532,9 @@ namespace ArxOne.MrAdvice.Weaver
             var methodParameters = new MethodParameters(method);
             var hasParameters = methodParameters.Count > 0;
             var localParametersVariable = parametersVariable =
-                hasParameters ? new Local(new SZArraySig(method.Module.CorLibTypes.Object)) {Name = "parameters"} : null;
+                hasParameters ? new Local(new SZArraySig(method.Module.CorLibTypes.Object)) { Name = "parameters" } : null;
             return new InvocationArgument("Parameters", hasParameters,
-                delegate(Instructions instructions)
+                delegate (Instructions instructions)
                 {
                     method.Body.Variables.Add(localParametersVariable);
 
@@ -599,10 +599,10 @@ namespace ArxOne.MrAdvice.Weaver
             var hasGeneric = typeGenericParametersCount > 0 || method.HasGenericParameters;
             // if method has generic parameters, we also pass them to Proceed method
             var genericParametersVariable = hasGeneric
-                ? new Local(new SZArraySig(method.Module.SafeImport(typeof(Type)).ToTypeSig())) {Name = "genericParameters"}
+                ? new Local(new SZArraySig(method.Module.SafeImport(typeof(Type)).ToTypeSig())) { Name = "genericParameters" }
                 : null;
             return new InvocationArgument("GenericArguments", hasGeneric,
-                delegate(Instructions instructions)
+                delegate (Instructions instructions)
                 {
                     //IL_0001: ldtoken !!T
                     //IL_0006: call class [mscorlib]System.Type [mscorlib]System.Type::GetTypeFromHandle(valuetype [mscorlib]System.RuntimeTypeHandle)
@@ -734,7 +734,7 @@ namespace ArxOne.MrAdvice.Weaver
                 // TODO: this should work using TypeImporter.Import
                 var advisedInterfaceTypeReference = moduleDefinition.Import(advisedInterfaceType);
                 implementationType =
-                    new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) {Attributes = typeAttributes};
+                    new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) { Attributes = typeAttributes };
                 implementationType.Interfaces.Add(new InterfaceImplUser(interfaceType));
 
                 lock (moduleDefinition)

@@ -16,7 +16,7 @@ namespace ArxOne.MrAdvice.Weaver
     /// <summary>
     /// Type resolver allows to find a TypeDefinition given a full name
     /// </summary>
-    internal class TypeResolver
+    public class TypeResolver
     {
         public ILogging Logging { get; set; }
 
@@ -136,7 +136,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="typeRef">The type definition or reference.</param>
         /// <returns></returns>
-        public TypeDef Resolve(TypeRef typeRef)
+        public TypeDef Resolve(ITypeDefOrRef typeRef)
         {
             if (typeRef == null)
             {
@@ -145,9 +145,9 @@ namespace ArxOne.MrAdvice.Weaver
             }
             lock (_resolvedTypesByName)
             {
-                TypeDef typeDef;
-                if (!_resolvedTypesByName.TryGetValue(typeRef.AssemblyQualifiedName, out typeDef))
-                    _resolvedTypesByName[typeRef.AssemblyQualifiedName] = typeDef = DoResolve(typeRef);
+                var key = $"{typeRef.Namespace}.{typeRef.Name},{typeRef.Module.Name},{typeRef.Module.Assembly.Version}";
+                if (!_resolvedTypesByName.TryGetValue(key, out TypeDef typeDef))
+                    _resolvedTypesByName[key] = typeDef = DoResolve(typeRef);
                 return typeDef;
             }
         }

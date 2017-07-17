@@ -11,7 +11,6 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Diagnostics;
     using System.Linq;
     using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
     using System.Runtime.Versioning;
     using Advice;
     using Annotation;
@@ -56,9 +55,6 @@ namespace ArxOne.MrAdvice.Weaver
             var auditTimer = new AuditTimer();
             try
             {
-                var stopwatch = new Stopwatch();
-                stopwatch.Start();
-
                 // sanity check
                 auditTimer.NewZone("Types import");
                 // context
@@ -115,7 +111,7 @@ namespace ArxOne.MrAdvice.Weaver
                 Logging.WriteDebug("--------------------------------------");
 
                 Logging.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
-                    moduleDefinition.Assembly.FullName, (int)stopwatch.ElapsedMilliseconds, targetFramework.ToString(), Product.Version);
+                    moduleDefinition.Assembly.FullName, (int)report.Sum(r => r.Value.TotalMilliseconds), targetFramework.ToString(), Product.Version);
                 return true;
             }
             catch (Exception e)
@@ -412,7 +408,7 @@ namespace ArxOne.MrAdvice.Weaver
             var markers = reflectionNode.GetAncestorsToDescendants()
                 .SelectMany(n => n.CustomAttributes
                     .Where(a => !a.AttributeType.DefinitionAssembly.IsSystem())
-                    .SelectMany(a => ResolveTypeOrGenericDefinition(a.AttributeType).GetSelfAndParents())
+                    .SelectMany(a => ResolveTypeOrGenericDefinition(a.AttributeType).GetSelfAndParents(TypeResolver))
                     .Where(t => IsMarker(t, markerInterface)))
                 .Distinct()
                 .Select(t => GetMarkerDefinition(t, context));
