@@ -180,11 +180,6 @@ namespace MethodLevelTest
         }
 
 
-        private void Z(Delegate d)
-        {
-            Invocation.ProcessInfoAdvices(typeof(BasicTests));
-        }
-
         [TestMethod]
         [TestCategory("Weaving")]
         public void MethodFromGenericClassTest()

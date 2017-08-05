@@ -168,7 +168,7 @@ namespace ArxOne.MrAdvice
                 throw FlattenException(advisedTask.Exception).PreserveStackTrace();
 
             // otherwise check inner value
-            var returnValue = (Task) adviceValues.ReturnValue;
+            var returnValue = (Task)adviceValues.ReturnValue;
             if (returnValue.IsFaulted)
                 throw FlattenException(returnValue.Exception).PreserveStackTrace();
             return returnValue.GetResult();
@@ -211,7 +211,7 @@ namespace ArxOne.MrAdvice
                         ? GetMethodFromHandle(innerMethodHandle, typeHandle)
                         : null;
                     var delegateMethod = delegatableMethodHandle != innerMethodHandle
-                        ? PlatformUtility.CreateDelegate<ProceedDelegate>((MethodInfo) GetMethodFromHandle(delegatableMethodHandle, typeHandle))
+                        ? PlatformUtility.CreateDelegate<ProceedDelegate>((MethodInfo)GetMethodFromHandle(delegatableMethodHandle, typeHandle))
                         : null;
                     // this is to handle one special case:
                     // when an assembly advice is applied at assembly level, its ctor is also advised
@@ -219,9 +219,9 @@ namespace ArxOne.MrAdvice
                     // so since an advice won't advise itself anyway
                     // we create an empty AspectInfo
                     SetAspectInfo(methodHandle, typeHandle,
-                        new AspectInfo(NoAdvice, (MethodInfo) innerMethod, innerMethodHandle, delegateMethod, methodBase, methodHandle));
+                        new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, delegateMethod, methodBase, methodHandle));
                     // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo) innerMethod, innerMethodHandle, delegateMethod, abstractedTarget);
+                    aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, delegateMethod, abstractedTarget);
                     SetAspectInfo(methodHandle, typeHandle, aspectInfo);
                 }
             }
@@ -259,7 +259,7 @@ namespace ArxOne.MrAdvice
         {
             if (parameterIndex >= 0)
                 return methodBase.GetParameters()[parameterIndex];
-            return ((MethodInfo) methodBase).ReturnParameter;
+            return ((MethodInfo)methodBase).ReturnParameter;
         }
 
         /// <summary>
@@ -281,14 +281,16 @@ namespace ArxOne.MrAdvice
         {
             const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
                                               BindingFlags.Static;
+            var typeAndAssemblyAdvices = type.GetAssembly().GetAttributes<IMethodInfoAdvice>()
+                .Union(type.GetAttributes<IMethodInfoAdvice>()).ToArray();
             foreach (var methodInfo in type.GetMembersReader().GetMethods(bindingFlags))
-                ProcessMethodInfoAdvices(methodInfo);
+                ProcessMethodInfoAdvices(methodInfo, typeAndAssemblyAdvices);
             foreach (var constructorInfo in type.GetMembersReader().GetConstructors(bindingFlags))
-                ProcessMethodInfoAdvices(constructorInfo);
+                ProcessMethodInfoAdvices(constructorInfo, typeAndAssemblyAdvices);
             foreach (var propertyInfo in type.GetMembersReader().GetProperties(bindingFlags))
             {
-                ProcessMethodInfoAdvices(propertyInfo.GetGetMethod());
-                ProcessMethodInfoAdvices(propertyInfo.GetSetMethod());
+                ProcessMethodInfoAdvices(propertyInfo.GetGetMethod(), typeAndAssemblyAdvices);
+                ProcessMethodInfoAdvices(propertyInfo.GetSetMethod(), typeAndAssemblyAdvices);
                 ProcessPropertyInfoAdvices(propertyInfo);
             }
         }
@@ -297,11 +299,12 @@ namespace ArxOne.MrAdvice
         /// Processes the info advices for MethodInfo.
         /// </summary>
         /// <param name="methodInfo">The method information.</param>
-        private static void ProcessMethodInfoAdvices(MethodBase methodInfo)
+        /// <param name="typeAndAssemblyMethodInfoAdvices">The type and assembly method information advices.</param>
+        private static void ProcessMethodInfoAdvices(MethodBase methodInfo, IEnumerable<IMethodInfoAdvice> typeAndAssemblyMethodInfoAdvices)
         {
             if (methodInfo == null)
                 return;
-            var methodInfoAdvices = methodInfo.GetAttributes<IMethodInfoAdvice>();
+            var methodInfoAdvices = typeAndAssemblyMethodInfoAdvices.Union(methodInfo.GetAttributes<IMethodInfoAdvice>());
             foreach (var methodInfoAdvice in methodInfoAdvices)
             {
                 // actually, introducing fields does not make sense here, until we introduce static fields

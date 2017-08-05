@@ -5,9 +5,11 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using AssemblyLevelTest;
 using ExternalAdvices;
 
 [assembly: AssemblyAdvice]
+[assembly: MethodInfoAdvice]
 
 namespace AssemblyLevelTest
 {

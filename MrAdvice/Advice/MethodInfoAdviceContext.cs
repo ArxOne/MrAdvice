@@ -12,7 +12,7 @@ namespace ArxOne.MrAdvice.Advice
     /// <summary>
     /// Info context for MethodBase
     /// </summary>
-    [DebuggerDisplay("MethodInfo {TargetMethod}")]
+    [DebuggerDisplay("MethodInfo {" + nameof(TargetMethod) + "}")]
     public class MethodInfoAdviceContext : AdviceInfoContext
     {
         /// <summary>

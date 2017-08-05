@@ -81,5 +81,15 @@ namespace ArxOne.MrAdvice
         {
             return (TDelegate) (object) methodInfo.CreateDelegate(typeof(TDelegate));
         }
+
+        /// <summary>
+        /// Gets the assembly.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        public static Assembly GetAssembly(this Type type)
+        {
+            return type.GetTypeInfo().Assembly;
+        }
     }
 }
