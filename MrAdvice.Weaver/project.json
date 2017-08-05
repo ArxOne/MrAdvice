@@ -1,8 +1,8 @@
 ﻿{
   "dependencies": {
-    "Blobber": "0.7.0",
+    "Blobber": "0.7.4",
     "Clarius.TransformOnBuild": "1.1.12",
-    "StitcherBoy": "0.16.5"
+    "StitcherBoy": "0.16.7"
   },
   "frameworks": {
     "net45": {}
