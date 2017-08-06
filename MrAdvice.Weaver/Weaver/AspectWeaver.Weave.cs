@@ -1,10 +1,8 @@
 ﻿#region Mr. Advice
-
 // Mr. Advice
 // A simple post build weaving package
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
-
 #endregion
 
 namespace ArxOne.MrAdvice.Weaver
@@ -18,7 +16,6 @@ namespace ArxOne.MrAdvice.Weaver
     using Annotation;
     using dnlib.DotNet;
     using dnlib.DotNet.Emit;
-    using dnlib.DotNet.MD;
     using dnlib.DotNet.Pdb;
     using Introduction;
     using Reflection;

@@ -71,8 +71,9 @@ namespace ArxOne.MrAdvice.Weaver
 
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
-                var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(IsWeavable).ToArray();
-                var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(IsWeavable).ToArray();
+                Func<MarkedNode, bool> isWeavable = n => IsWeavable(n) && !IsFromComputerGeneratedType(n);
+                var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(isWeavable).ToArray();
+                var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(isWeavable).ToArray();
                 auditTimer.NewZone("Abstract targets");
                 var generatedFieldsToBeRemoved = new List<FieldDef>();
                 var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
@@ -341,6 +342,24 @@ namespace ArxOne.MrAdvice.Weaver
         private static bool IsWeavable(MarkedNode markedMethod)
         {
             return markedMethod.Node.Method.HasBody || markedMethod.Node.Method.IsPinvokeImpl;
+        }
+
+        /// <summary>
+        /// Indicates if the node belongs to a computer-generated type
+        /// </summary>
+        /// <param name="markedMethod">The marked method.</param>
+        /// <returns>
+        ///   <c>true</c> if [is from computer generated type] [the specified marked method]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsFromComputerGeneratedType(MarkedNode markedMethod)
+        {
+            var parentType = markedMethod.Node.GetSelfAndAncestors().OfType<TypeReflectionNode>().FirstOrDefault();
+            if (parentType == null)
+                return false;
+            var isFromComputerGeneratedType = parentType.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
+            if (isFromComputerGeneratedType)
+                Logging.WriteDebug("Not weaving method '{0}' (from generated type)", markedMethod.Node.Method);
+            return isFromComputerGeneratedType;
         }
 
         /// <summary>
