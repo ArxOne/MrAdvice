@@ -376,18 +376,6 @@ namespace ArxOne.MrAdvice.Weaver
                     instructions.EmitLdc(parameterIndex); // array index
                     instructions.Emit(OpCodes.Ldelem_Ref); // now we have boxed out/ref value
                     var parameterElementType = parameter.Type.Next;
-                    // TODO reimplement
-                    if (parameterElementType.IsGenericInstanceType)
-                    {
-                        //var z = (GenericInstSig) parameterElementType;
-                        //parameterElementType = z.GenericType;
-                    }
-                    //if (parameterElementType.IsGenericInstanceType) // a generic type requires the correct inner type
-                    //{
-                    //    var referenceParameterType = (ByReferenceType)parameter.ParameterType;
-                    //    parameterElementType = (GenericInstanceType)referenceParameterType.ElementType;
-                    //}
-
                     instructions.EmitUnboxOrCastIfNecessary(parameterElementType);
                     instructions.EmitStind(parameterElementType); // result is stored in ref parameter
                 }
