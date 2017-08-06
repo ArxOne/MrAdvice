@@ -26,9 +26,10 @@ namespace ArxOne.MrAdvice
 
         protected override bool Process(AssemblyStitcherContext context)
         {
+            BlobberHelper.Setup();
+
             if (AlreadyProcessed(context))
                 return false;
-
 
 #if DEBUG
             _logging = new MultiLogging(new DefaultLogging(Logging), new FileLogging("MrAdvice.log"));
@@ -44,6 +45,18 @@ namespace ArxOne.MrAdvice
 
             try
             {
+                try
+                {
+                    Assembly.Load("MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8");
+                }
+                catch (FileNotFoundException)
+                {
+                    _logging.WriteError("Can't load MrAdvice assembly (WTF?), exiting");
+                    foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                        _logging.Write("Assembly in AppDomain: {0}", assembly.GetName());
+                    return false;
+                }
+
                 // instances are created here
                 // please also note poor man's dependency injection (which is enough for us here)
                 var assemblyResolver = context.AssemblyResolver;
@@ -54,12 +67,6 @@ namespace ArxOne.MrAdvice
                 // second chance: someone had the marker file missing
                 if (aspectWeaver.FindShortcutType(context.Module) != null)
                     return false;
-
-                BlobberHelper.Setup();
-
-                //Assembly.Load("System, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, Retargetable=Yes");
-                //Assembly.Load("System.Core, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, Retargetable=Yes");
-                Assembly.Load("MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8");
 
                 return aspectWeaver.Weave(context.Module);
             }
