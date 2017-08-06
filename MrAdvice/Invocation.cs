@@ -121,7 +121,7 @@ namespace ArxOne.MrAdvice
             var advisedMethodInfo = aspectInfo.AdvisedMethod as MethodInfo;
             var returnType = advisedMethodInfo?.ReturnType;
             // no Task means aspect was sync, so everything already ended
-            // TODO: this is actually not true, since an async method can be void :frown:
+            // or it may also been an async void, meaning that we don't care about it
             if (adviceTask == null || returnType == null ||
                 !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
             {

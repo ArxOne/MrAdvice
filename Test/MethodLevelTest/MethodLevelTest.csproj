@@ -94,6 +94,7 @@
     <Compile Include="ComplexIntroducedClass.cs" />
     <Compile Include="EmptyAdvisedClass.cs" />
     <Compile Include="EventTest.cs" />
+    <Compile Include="ExceptionTest.cs" />
     <Compile Include="GenericEmptyAdvisedClass.cs" />
     <Compile Include="IAdvisedInterface.cs" />
     <Compile Include="IIndirectAdvisedInterface.cs" />
