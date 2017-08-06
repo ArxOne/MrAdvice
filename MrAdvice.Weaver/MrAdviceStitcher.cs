@@ -51,6 +51,10 @@ namespace ArxOne.MrAdvice
                 var typeLoader = new TypeLoader(() => LoadWeavedAssembly(context, assemblyResolver));
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
 
+                // second chance: someone had the marker file missing
+                if (aspectWeaver.FindShortcutType(context.Module) != null)
+                    return false;
+
                 BlobberHelper.Setup();
 
                 //Assembly.Load("System, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, Retargetable=Yes");

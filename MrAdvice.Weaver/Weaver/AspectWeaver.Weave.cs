@@ -30,6 +30,9 @@ namespace ArxOne.MrAdvice.Weaver
 
     partial class AspectWeaver
     {
+        private const string ShortcutTypeNamespace = "ArxOne.MrAdvice";
+        private const string ShortcutTypeName = "\u26A1Invocation";
+
         /// <summary>
         /// Weaves the info advices for the given type.
         /// </summary>
@@ -442,13 +445,23 @@ namespace ArxOne.MrAdvice.Weaver
             return context.InvocationProceedMethod;
         }
 
-        private IMethod CreateProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
+        /// <summary>
+        /// Finds the type of the shortcut.
+        /// </summary>
+        /// <param name="module">The module.</param>
+        /// <returns></returns>
+        public TypeDef FindShortcutType(ModuleDef module)
+        {
+            return module.Find($"{ShortcutTypeNamespace}.{ShortcutTypeName}", true);
+        }
+
+        private IMethod CreateProceedMethod(IReadOnlyList<InvocationArgument> arguments, ModuleDef module, WeavingContext context)
         {
             // get the class from shortcuts
             var shortcutType = context.ShortcutClass;
             if (shortcutType == null)
             {
-                shortcutType = new TypeDefUser("ArxOne.MrAdvice", "\u26A1Invocation")
+                shortcutType = new TypeDefUser(ShortcutTypeNamespace, ShortcutTypeName)
                 {
                     BaseType = module.Import(module.CorLibTypes.Object).ToTypeDefOrRef(),
                     // Abstract + Sealed is Static class
