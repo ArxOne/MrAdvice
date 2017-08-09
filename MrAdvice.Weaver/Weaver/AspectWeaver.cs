@@ -358,7 +358,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return false;
             var isFromComputerGeneratedType = parentType.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
             if (isFromComputerGeneratedType)
-                Logging.WriteDebug("Not weaving method '{0}' (from generated type)", markedMethod.Node.Method);
+                Logging.WriteDebug("Not weaving method '{0}' (from generated type)", markedMethod.Node.Method.FullName);
             return isFromComputerGeneratedType;
         }
 
