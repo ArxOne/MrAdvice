@@ -170,6 +170,20 @@ namespace ArxOne.MrAdvice.Weaver
                 lock (method.DeclaringType)
                     method.DeclaringType.Methods.Add(innerMethod);
 
+                var stepInfos = innerMethod.Body?.PdbMethod?.AsyncMethod?.StepInfos;
+                if (stepInfos != null)
+                    for (var stepInfoIndex = 0; stepInfoIndex < stepInfos.Count; stepInfoIndex++)
+                    {
+                        var stepInfo = stepInfos[stepInfoIndex];
+                        Logging.WriteDebug("Found stepInfo for '{0}'", stepInfo.BreakpointMethod);
+                        if (stepInfo.BreakpointMethod.SafeEquivalent(method))
+                        {
+                            Logging.WriteDebug("Replacing '{0}' with '{1}'", stepInfo.BreakpointMethod.ToString(), innerMethod.ToString());
+                            stepInfo.BreakpointMethod = innerMethod;
+                            stepInfos[stepInfoIndex] = stepInfo;
+                        }
+                    }
+
                 WritePointcutBody(method, innerMethod, false, context);
             }
         }
@@ -346,8 +360,7 @@ namespace ArxOne.MrAdvice.Weaver
             var instructions = new Instructions(method.Body.Instructions, method.Module);
 
             var targetArgument = GetTargetArgument(method);
-            Local parametersVariable;
-            var parametersArgument = GetParametersArgument(method, out parametersVariable);
+            var parametersArgument = GetParametersArgument(method, out var parametersVariable);
             var methodArgument = GetMethodArgument(method);
             var innerMethodArgument = GetInnerMethodArgument(innerMethod);
             var typeArgument = GetTypeArgument(method);
