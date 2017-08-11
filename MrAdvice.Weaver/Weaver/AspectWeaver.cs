@@ -353,7 +353,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// </returns>
         private bool IsFromComputerGeneratedType(MarkedNode markedMethod)
         {
-            return false;
             var parentType = markedMethod.Node.GetSelfAndAncestors().OfType<TypeReflectionNode>().FirstOrDefault();
             if (parentType == null)
                 return false;
