@@ -109,8 +109,7 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 var customAttributes = method.CustomAttributes;
                 if (customAttributes.Any(c => c.AttributeType.Name == "AsyncStateMachineAttribute"))
-                    Logging.WriteWarning("Advising async void method '{0}' could confuse async advices. Consider switching its return type to async Task.",
-                        method.FullName);
+                    Logging.WriteWarning("Advising async void method '{0}' could confuse async advices. Consider switching its return type to async Task.", method.FullName);
             }
 
             if (method.IsAbstract)
@@ -175,7 +174,7 @@ namespace ArxOne.MrAdvice.Weaver
                     for (var stepInfoIndex = 0; stepInfoIndex < stepInfos.Count; stepInfoIndex++)
                     {
                         var stepInfo = stepInfos[stepInfoIndex];
-                        Logging.WriteDebug("Found stepInfo for '{0}'", stepInfo.BreakpointMethod);
+                        Logging.WriteDebug("Found stepInfo for '{0}'", stepInfo.BreakpointMethod.ToString());
                         if (stepInfo.BreakpointMethod.SafeEquivalent(method))
                         {
                             Logging.WriteDebug("Replacing '{0}' with '{1}'", stepInfo.BreakpointMethod.ToString(), innerMethod.ToString());

@@ -256,10 +256,10 @@ namespace ArxOne.MrAdvice.Weaver
                         if (!methodsSearched.Contains(t.Item2))
                         {
                             // ReSharper disable once AccessToForEachVariableInClosure
-                            var parameterIndex = t.Item2.GenericParameters.IndexOf(p => p.Name == ((ITypeDefOrRef)t.Item1).TypeName);
+                            var parameterIndex = t.Item2.GenericParameters.IndexOf(p => p.Name == t.Item1.TypeName);
                             methodsSearched.Add(t.Item2);
                             methodsToSearch.Add(Tuple.Create(t.Item2, parameterIndex));
-                            Logging.WriteDebug("Now looking for references to '{0} [{1}]'", methodToSearch, parameterIndex);
+                            Logging.WriteDebug("Now looking for references to '{0} [{1}]'", methodToSearch.Item1.ToString(), parameterIndex);
                         }
                     }
                     // only interfaces are processed by now
