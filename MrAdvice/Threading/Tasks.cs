@@ -26,9 +26,9 @@ namespace ArxOne.MrAdvice.Threading
         {
             if (_void == null)
             {
-                var @void = new Task(() => { });
-                @void.Start();
-                _void = @void;
+                var tcsVoid = new TaskCompletionSource<object>();
+                tcsVoid.SetResult(null);
+                _void = tcsVoid.Task;
             }
             return _void;
         }
