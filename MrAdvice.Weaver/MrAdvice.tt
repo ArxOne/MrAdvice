@@ -24,6 +24,7 @@
   <files>
     <file src="MrAdvice.targets" target="build"/>
     <file src="bin\$ConfigurationName$\MrAdvice.Weaver.exe" target="build"/>
+    <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.dll" target="build"/>
     <!-- .Net 4.0 client -->
     <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.dll" target="lib\net40-client"/>
     <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.xml" target="lib\net40-client"/>

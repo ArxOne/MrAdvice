@@ -47,7 +47,8 @@ namespace ArxOne.MrAdvice
             {
                 try
                 {
-                    Assembly.Load("MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8");
+                    var mrAdviceAssemblyName = new AssemblyName("MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8");
+                    Assembly.Load(mrAdviceAssemblyName);
                 }
                 catch (FileNotFoundException)
                 {
