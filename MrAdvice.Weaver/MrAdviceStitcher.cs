@@ -47,8 +47,9 @@ namespace ArxOne.MrAdvice
             {
                 try
                 {
-                    var mrAdviceAssemblyName = new AssemblyName("MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8");
-                    Assembly.Load(mrAdviceAssemblyName);
+                    var mrAdviceAssemblyName = "MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8";
+                    //Assembly.Load(mrAdviceAssemblyName);
+                    LoadEmbeddedAssembly(mrAdviceAssemblyName);
                 }
                 catch (FileNotFoundException)
                 {
@@ -107,14 +108,23 @@ namespace ArxOne.MrAdvice
             return new FileInfo(path).LastWriteTimeUtc;
         }
 
+        private Assembly LoadEmbeddedAssembly(string assemblyName)
+        {
+            var existingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName);
+            if (existingAssembly != null)
+                return existingAssembly;
+            var assemblyBytes = GetEmbeddedAssembly(assemblyName);
+            return Assembly.Load(assemblyBytes);
+        }
+
         /// <summary>
         /// Resolves the assembly.
         /// </summary>
         /// <param name="assemblyName">Name of the assembly.</param>
         /// <returns></returns>
-        private static byte[] ResolveAssembly(string assemblyName)
+        private static byte[] GetEmbeddedAssembly(string assemblyName)
         {
-            var resourceName = $"blobber:embedded.gz:{assemblyName}";
+            var resourceName = $"⌂.gz:{assemblyName}";
 
             using (var resourceStream = typeof(MrAdviceStitcher).Assembly.GetManifestResourceStream(resourceName))
             {
