@@ -368,6 +368,8 @@ namespace ArxOne.MrAdvice.Weaver
                 return Emit(OpCodes.Stind_R8);
             if (typeSig.IsPrimitive || typeSig.IsValueType)
                 return Emit(OpCodes.Stobj, Module.SafeImport(typeSig));
+            if (typeSig.IsGenericParameter)
+                return Emit(OpCodes.Stobj, Module.SafeImport(typeSig));
             return Emit(OpCodes.Stind_Ref);
         }
     }
