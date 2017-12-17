@@ -47,9 +47,13 @@ namespace ArxOne.MrAdvice
             {
                 try
                 {
-                    var mrAdviceAssemblyName = "MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8";
-                    //Assembly.Load(mrAdviceAssemblyName);
-                    LoadEmbeddedAssembly(mrAdviceAssemblyName);
+                    const string mrAdviceAssemblyName = "MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8";
+                    var mrAdviceAssembly = LoadEmbeddedAssembly(mrAdviceAssemblyName);
+                    if (mrAdviceAssembly == null)
+                    {
+                        _logging.WriteError("Can't find/load embedded MrAdvice assembly (WTF?), exiting");
+                        return false;
+                    }
                 }
                 catch (FileNotFoundException)
                 {
@@ -113,30 +117,7 @@ namespace ArxOne.MrAdvice
             var existingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName);
             if (existingAssembly != null)
                 return existingAssembly;
-            var assemblyBytes = GetEmbeddedAssembly(assemblyName);
-            return Assembly.Load(assemblyBytes);
-        }
-
-        /// <summary>
-        /// Resolves the assembly.
-        /// </summary>
-        /// <param name="assemblyName">Name of the assembly.</param>
-        /// <returns></returns>
-        private static byte[] GetEmbeddedAssembly(string assemblyName)
-        {
-            var resourceName = $"⌂.gz:{assemblyName}";
-
-            using (var resourceStream = typeof(MrAdviceStitcher).Assembly.GetManifestResourceStream(resourceName))
-            {
-                if (resourceStream == null)
-                    return null;
-                using (var gzipStream = new GZipStream(resourceStream, CompressionMode.Decompress))
-                using (var memoryStream = new MemoryStream())
-                {
-                    gzipStream.CopyTo(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
+            return BlobberHelper.LoadAssembly(GetType().Assembly, assemblyName);
         }
 
         /// <summary>
