@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0D80F141-D37F-4354-959F-15C3AF0FF701}"
 EndProject
@@ -46,9 +46,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.Weaver", "MrAdvice
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F3046528-416E-49F1-8FC5-72E442B64DAE}"
 	ProjectSection(SolutionItems) = preProject
-		.gitattributes = .gitattributes
-		.gitignore = .gitignore
-		appveyor.yml = appveyor.yml
 		Tools\peverify.bat = Tools\peverify.bat
 	EndProjectSection
 EndProject
