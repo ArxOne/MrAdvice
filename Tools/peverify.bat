@@ -18,6 +18,7 @@ goto noverify
 rem muted errors as follow (not sure muting them is good, but they are no valid errors)
 rem 0x801318BF because an advised ctor can call the base class ctor
 rem 0x80131859 warning of 'this' being unitialized in ctor
+rem 0x80131266 because it occurs with AppVeyor (WTF?)
 
 if exist "%1" "%peverify%" /nologo /hresult /ignore=0x801318BF,0x80131859,0x80131266 %1
 
