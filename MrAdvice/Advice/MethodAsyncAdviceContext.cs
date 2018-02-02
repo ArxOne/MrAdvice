@@ -122,6 +122,7 @@
         /// <summary>
         /// Proceeds to the next advice, asynchronously
         /// </summary>
+        [DebuggerStepThrough]
         public virtual Task ProceedAsync() => InvokeNext() ?? Tasks.Void();
 
         /// <summary>
