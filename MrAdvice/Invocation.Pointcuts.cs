@@ -66,8 +66,7 @@ namespace ArxOne.MrAdvice
         {
             lock (PointcutSelectors)
             {
-                PointcutSelector pointcutSelector;
-                if (PointcutSelectors.TryGetValue(adviceType, out pointcutSelector))
+                if (PointcutSelectors.TryGetValue(adviceType, out var pointcutSelector))
                     return pointcutSelector;
 
                 PointcutSelectors[adviceType] = pointcutSelector = CreatePointcutSelector(adviceType);

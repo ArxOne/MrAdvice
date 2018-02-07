@@ -9,8 +9,10 @@ namespace MethodLevelTest
     using System;
     using System.Runtime.InteropServices;
     using System.Threading.Tasks;
+    using ArxOne.MrAdvice;
     using ArxOne.MrAdvice.Advice;
     using ExternalAdvices;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     // https://github.com/ArxOne/MrAdvice/issues/32
     public class Test
@@ -106,5 +108,81 @@ namespace MethodLevelTest
         [ExternalConcreteMethodAdvice]
         public void ExternalAdvisedMethod()
         { }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+    public class InheritableAdvice : Attribute, IMethodAdvice
+    {
+        public void Advise(MethodAdviceContext context)
+        {
+            context.Proceed();
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    public class NonInheritableAdvice : Attribute, IMethodAdvice
+    {
+        public void Advise(MethodAdviceContext context)
+        {
+            context.Proceed();
+        }
+    }
+
+    [InheritableAdvice]
+    public class InheritableTestClass
+    {
+        public virtual void VF()
+        { }
+    }
+
+    public class InheritableDerivedTestClass : InheritableTestClass
+    {
+        public override void VF()
+        {
+        }
+    }
+
+    [NonInheritableAdvice]
+    public class NonInheritableTestClass
+    {
+        public virtual void VF()
+        { }
+    }
+
+    public class NonInheritableDerivedTestClass : NonInheritableTestClass
+    {
+        public override void VF()
+        {
+        }
+    }
+
+    [TestClass]
+    public class InheritanceTest
+    {
+        [TestMethod]
+        public void InheritedTest()
+        {
+            var m = typeof(InheritableDerivedTestClass).GetMethod("VF");
+            var advices = ArxOne.MrAdvice.Advices.Get(m);
+            Assert.IsNotNull(advices);
+            Assert.AreEqual(1, advices.Length);
+        }
+
+        [TestMethod]
+        public void NotInheritedBaseTest()
+        {
+            var m = typeof(NonInheritableTestClass).GetMethod("VF");
+            var advices = ArxOne.MrAdvice.Advices.Get(m);
+            Assert.IsNotNull(advices);
+            Assert.AreEqual(1, advices.Length);
+        }
+
+        [TestMethod]
+        public void NotInheritedTest()
+        {
+            var m = typeof(NonInheritableDerivedTestClass).GetMethod("VF");
+            var advices = ArxOne.MrAdvice.Advices.Get(m);
+            Assert.IsNull(advices);
+        }
     }
 }

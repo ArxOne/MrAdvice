@@ -29,9 +29,8 @@ namespace ArxOne.MrAdvice
     // ReSharper disable once UnusedMember.Global
     public static partial class Invocation
     {
-        internal static readonly IDictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>
-            AspectInfos
-                = new Dictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>();
+        internal static readonly IDictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>> AspectInfos
+            = new Dictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>();
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
@@ -78,8 +77,7 @@ namespace ArxOne.MrAdvice
             var aspectInfo = GetAspectInfo(methodHandle, innerMethodHandle, delegatableMethodHandle, typeHandle, abstractedTarget, genericArguments);
 
             // this is the case with auto implemented interface
-            var advisedInterface = target as AdvisedInterface;
-            if (advisedInterface != null)
+            if (target is AdvisedInterface advisedInterface)
                 aspectInfo = aspectInfo.AddAdvice(new AdviceInfo(advisedInterface.Advice));
 
             foreach (var advice in aspectInfo.Advices)
@@ -181,8 +179,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         private static Exception FlattenException(Exception e)
         {
-            var a = e as AggregateException;
-            if (a == null)
+            if (!(e is AggregateException a))
                 return e;
             return a.InnerException;
         }
@@ -232,19 +229,16 @@ namespace ArxOne.MrAdvice
 
         private static AspectInfo FindAspectInfo(RuntimeMethodHandle methodHandle, RuntimeTypeHandle typeHandle)
         {
-            IDictionary<RuntimeTypeHandle, AspectInfo> methodsByType;
-            if (!AspectInfos.TryGetValue(methodHandle, out methodsByType))
+            if (!AspectInfos.TryGetValue(methodHandle, out var methodsByType))
                 return null;
 
-            AspectInfo aspectInfo;
-            methodsByType.TryGetValue(typeHandle, out aspectInfo);
+            methodsByType.TryGetValue(typeHandle, out var aspectInfo);
             return aspectInfo;
         }
 
         private static void SetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeTypeHandle typeHandle, AspectInfo aspectInfo)
         {
-            IDictionary<RuntimeTypeHandle, AspectInfo> methodsByType;
-            if (!AspectInfos.TryGetValue(methodHandle, out methodsByType))
+            if (!AspectInfos.TryGetValue(methodHandle, out var methodsByType))
                 AspectInfos[methodHandle] = methodsByType = new Dictionary<RuntimeTypeHandle, AspectInfo>();
             methodsByType[typeHandle] = aspectInfo;
         }
@@ -339,11 +333,9 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         private static AspectInfo CreateAspectInfo(MethodBase method, RuntimeMethodHandle methodHandle, MethodInfo innerMethod, RuntimeMethodHandle innerMethodHandle, ProceedDelegate innerMethodDelegate, bool abstractedTarget)
         {
-            Tuple<PropertyInfo, bool> relatedPropertyInfo;
-            Tuple<EventInfo, bool> relatedEventInfo;
             if (innerMethod == null && !abstractedTarget)
                 method = FindInterfaceMethod(method);
-            var advices = GetAdvices<IAdvice>(method, out relatedPropertyInfo, out relatedEventInfo);
+            var advices = GetAdvices<IAdvice>(method, out var relatedPropertyInfo, out var relatedEventInfo);
             if (relatedPropertyInfo != null)
                 return new AspectInfo(advices, innerMethod, innerMethodHandle, innerMethodDelegate, method, methodHandle, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
             if (relatedEventInfo != null)
@@ -389,7 +381,7 @@ namespace ArxOne.MrAdvice
 
             // advices down to method
             IEnumerable<AdviceInfo> allAdvices = assemblyAndParents.SelectMany(a => a.GetAttributes<TAdvice>())
-                .Union(typeAndParents.SelectMany(t => t.GetAttributes<TAdvice>()))
+                .Union(GetTypeAndParentAdvices<TAdvice>(targetMethod.DeclaringType))
                 .Union(targetMethod.GetAttributes<TAdvice>())
                 .Select(CreateAdvice)
                 .ToArray();
@@ -397,14 +389,12 @@ namespace ArxOne.MrAdvice
             // optional from property
             relatedPropertyInfo = GetPropertyInfo(targetMethod);
             if (relatedPropertyInfo != null)
-                allAdvices = allAdvices.Union(relatedPropertyInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice))
-                    .ToArray();
+                allAdvices = allAdvices.Union(relatedPropertyInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
 
             // optional from event
             relatedEventInfo = GetEventInfo(targetMethod);
             if (relatedEventInfo != null)
-                allAdvices = allAdvices.Union(relatedEventInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice))
-                    .ToArray();
+                allAdvices = allAdvices.Union(relatedEventInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
 
             // now separate parameters
             var parameterAdvices = allAdvices.Where(a => a.Advice is IParameterAdvice).ToArray();
@@ -418,8 +408,7 @@ namespace ArxOne.MrAdvice
                 var index = parameterIndex;
                 allAdvices = allAdvices
                     .Concat(parameterAdvices.Select(p => CreateAdviceIndex(p.Advice, parameterIndex)))
-                    .Concat(
-                        parameters[parameterIndex].GetAttributes<TAdvice>().Select(a => CreateAdviceIndex(a, index)));
+                    .Concat(parameters[parameterIndex].GetAttributes<TAdvice>().Select(a => CreateAdviceIndex(a, index)));
                 // evaluate now
                 allAdvices = allAdvices.ToArray();
             }
@@ -432,6 +421,44 @@ namespace ArxOne.MrAdvice
             }
 
             return allAdvices;
+        }
+
+        /// <summary>
+        /// Gets advices applied to type and parent, regarding the <see cref="AttributeUsageAttribute.Inherited"/> flag for parent types.
+        /// </summary>
+        /// <typeparam name="TAdvice">The type of the advice.</typeparam>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        private static IEnumerable<TAdvice> GetTypeAndParentAdvices<TAdvice>(Type type)
+            where TAdvice : class, IAdvice
+        {
+            bool typeItSelf = true;
+            foreach (var typeAncestor in type.GetSelfAndParents())
+            {
+                var typeAttributes = typeAncestor.GetAttributes<TAdvice>();
+                foreach (var typeAttribute in typeAttributes)
+                {
+                    if (typeItSelf || IsInheritable(typeAttribute))
+                        yield return typeAttribute;
+                }
+
+                typeItSelf = false;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the specified attribute is inheritable.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified attribute is inheritable; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool IsInheritable(object attribute)
+        {
+            var attributeUsage = attribute.GetType().GetAttributes<AttributeUsageAttribute>().FirstOrDefault();
+            if (attributeUsage == null)
+                return true;
+            return attributeUsage.Inherited;
         }
 
         internal static IEnumerable<AdviceInfo> GetAdvices<TAdvice>(MethodBase targetMethod,

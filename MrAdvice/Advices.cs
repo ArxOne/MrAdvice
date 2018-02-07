@@ -25,8 +25,8 @@ namespace ArxOne.MrAdvice
         /// </summary>
         /// <param name="methodBase">The method base.</param>
         /// <returns>Either:
-        /// - a list of Advices applied to method, 
-        /// - an empty array from within a weaved method body (because the tools to tell are not here yet), 
+        /// - a list of Advices applied to method,
+        /// - an empty array from within a weaved method body (because the tools to tell are not here yet),
         /// - null if method is not advised</returns>
         public static IAdvice[] Get(MethodBase methodBase)
         {
@@ -40,9 +40,7 @@ namespace ArxOne.MrAdvice
                 return GetAdvices(aspectInfo.Advices);
 
             // then, the slow way, create it
-            Tuple<PropertyInfo, bool> relatedPropertyInfo;
-            Tuple<EventInfo, bool> relatedEventInfo;
-            var advices = Invocation.GetAdvices<IAdvice>(methodBase, out relatedPropertyInfo, out relatedEventInfo);
+            var advices = Invocation.GetAdvices<IAdvice>(methodBase, out _, out _);
             return GetAdvices(advices);
         }
 
