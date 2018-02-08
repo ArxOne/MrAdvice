@@ -46,6 +46,14 @@ namespace ArxOne.MrAdvice.Advice
         public Type TargetType => AdviceValues.TargetType;
 
         /// <summary>
+        /// Gets the name of the target.
+        /// </summary>
+        /// <value>
+        /// The name of the target.
+        /// </value>
+        public abstract string TargetName { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AdviceContext" /> class.
         /// </summary>
         /// <param name="adviceValues">The advice values.</param>

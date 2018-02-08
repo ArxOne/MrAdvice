@@ -120,6 +120,14 @@ namespace ArxOne.MrAdvice.Advice
         /// </value>
         public PropertyInfo TargetProperty { get; }
 
+        /// <summary>
+        /// Gets the name of the target.
+        /// </summary>
+        /// <value>
+        /// The name of the target.
+        /// </value>
+        public override string TargetName => TargetProperty.Name;
+
         private readonly IPropertyAdvice _propertyAdvice;
 
         /// <summary>

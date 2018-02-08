@@ -28,5 +28,13 @@ namespace ArxOne.MrAdvice.Advice
         /// The type of the target.
         /// </value>
         public Type TargetType => null;
+
+        /// <summary>
+        /// Gets the name of the target.
+        /// </summary>
+        /// <value>
+        /// The name of the target.
+        /// </value>
+        public string TargetName => null;
     }
 }

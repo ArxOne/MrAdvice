@@ -84,6 +84,14 @@
         public MethodBase TargetMethod { get; }
 
         /// <summary>
+        /// Gets the name of the target.
+        /// </summary>
+        /// <value>
+        /// The name of the target.
+        /// </value>
+        public override string TargetName => TargetMethod.Name;
+
+        /// <summary>
         /// Gets a value indicating whether the target method is asynchronous.
         /// </summary>
         /// <value>

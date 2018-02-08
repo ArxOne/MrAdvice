@@ -22,7 +22,7 @@ namespace ArxOne.MrAdvice.Introduction
         private readonly IAdvice _ownerAdvice;
         private readonly MemberInfo _ownerMemberInfo;
 
-        private readonly IDictionary<Type, FieldInfo> _fieldInfos = new Dictionary<Type, FieldInfo>();
+        private readonly IDictionary<Tuple<Type, string>, FieldInfo> _fieldInfos = new Dictionary<Tuple<Type, string>, FieldInfo>();
 
         /// <summary>
         /// Gets the introduced field.
@@ -30,19 +30,21 @@ namespace ArxOne.MrAdvice.Introduction
         /// A cache is kept, by target type.
         /// </summary>
         /// <param name="targetType">Type of the target.</param>
+        /// <param name="targetName"></param>
         /// <returns></returns>
-        private FieldInfo GetIntroducedField(Type targetType)
+        private FieldInfo GetIntroducedField(Type targetType, string targetName)
         {
             lock (_fieldInfos)
             {
-                FieldInfo introducedField;
-                if (_fieldInfos.TryGetValue(targetType, out introducedField))
+                var key = Tuple.Create(targetType, targetName);
+                if (_fieldInfos.TryGetValue(key, out var introducedField))
                     return introducedField;
 
-                _fieldInfos[targetType] = introducedField = Invocation.FindIntroducedField(_ownerAdvice, _ownerMemberInfo, targetType);
+                _fieldInfos[key] = introducedField = Invocation.FindIntroducedField(_ownerAdvice, _ownerMemberInfo, targetType, targetName);
                 return introducedField;
             }
         }
+
         /// <summary>
         /// Gets or sets the <see typeparamref="TFieldType"/> with the specified context.
         /// </summary>
@@ -55,12 +57,12 @@ namespace ArxOne.MrAdvice.Introduction
         {
             get
             {
-                var introducedField = GetIntroducedField(context.TargetType);
+                var introducedField = GetIntroducedField(context.TargetType, context.TargetName);
                 return (TFieldType)introducedField.GetValue(context.Target);
             }
             set
             {
-                var introducedField = GetIntroducedField(context.TargetType);
+                var introducedField = GetIntroducedField(context.TargetType, context.TargetName);
                 introducedField.SetValue(context.Target, value);
             }
         }

@@ -43,6 +43,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public override IEnumerable<CustomAttribute> CustomAttributes => _parameterDefinition.CustomAttributes;
 
+        public override string Name => _parameterDefinition.Name;
+
         private string DebugString => $"Parameter {_parameterDefinition.Name}";
 
         /// <summary>

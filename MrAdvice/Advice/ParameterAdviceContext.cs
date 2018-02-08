@@ -29,6 +29,14 @@ namespace ArxOne.MrAdvice.Advice
         public ParameterInfo TargetParameter { get; }
 
         /// <summary>
+        /// Gets the name of the target.
+        /// </summary>
+        /// <value>
+        /// The name of the target.
+        /// </value>
+        public override string TargetName => TargetParameter.Name;
+
+        /// <summary>
         /// Gets the raw type (stripped from ref if any).
         /// </summary>
         /// <value>

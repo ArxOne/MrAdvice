@@ -79,13 +79,14 @@ namespace ArxOne.MrAdvice
         /// <param name="advice">The advice.</param>
         /// <param name="adviceMemberInfo">The advice member information.</param>
         /// <param name="advisedType">Type of the advised.</param>
+        /// <param name="advisedMemberName"></param>
         /// <returns></returns>
         /// <exception cref="System.InvalidOperationException">Internal error, can not find matching introduced field</exception>
-        internal static FieldInfo FindIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType)
+        internal static FieldInfo FindIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType, string advisedMemberName)
         {
             var introducedFieldType = GetIntroducedType(adviceMemberInfo);
             var adviceType = advice.GetType();
-            var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, adviceMemberInfo.Name);
+            var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, advisedMemberName, adviceMemberInfo.Name);
             var linkID = string.Format("{0}:{1}", adviceType.AssemblyQualifiedName, adviceMemberInfo.Name);
             const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             var introducedField = FindIntroducedFieldByName(advisedType, introducedFieldName, linkID, bindingFlags)

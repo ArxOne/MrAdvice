@@ -90,6 +90,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public override MethodDef Method => _methodDefinition;
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public override string Name => _methodDefinition.Name;
+
         private string DebugString => $"Method {_methodDefinition.FullName}";
 
         /// <summary>

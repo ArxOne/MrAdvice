@@ -11,6 +11,9 @@ namespace MethodLevelTest
     public class IntroducedClass
     {
         [IntroductionAdvice]
+        public string AProperty { get; set; }
+
+        [IntroductionAdvice]
         public void AMethod()
         { }
 

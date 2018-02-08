@@ -46,6 +46,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public override IEnumerable<CustomAttribute> CustomAttributes => _eventDefinition.CustomAttributes;
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public override string Name => _eventDefinition.Name;
+
         private string DebugString => $"Event {_eventDefinition.FullName}";
 
         /// <summary>

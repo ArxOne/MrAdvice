@@ -15,7 +15,7 @@ namespace ArxOne.MrAdvice.Advice
     /// <summary>
     /// Method advice context, passed to method advisors
     /// </summary>
-    [DebuggerDisplay("MethodInfo {TargetMethod}")]
+    [DebuggerDisplay("MethodInfo {" + nameof(TargetMethod) + "}")]
     public class MethodAdviceContext : SyncAdviceContext
     {
         private readonly IMethodAdvice _methodAdvice;
@@ -49,8 +49,7 @@ namespace ArxOne.MrAdvice.Advice
         {
             get
             {
-                var methodInfo = TargetMethod as MethodInfo;
-                if (methodInfo == null) // ctor
+                if (!(TargetMethod is MethodInfo methodInfo)) // ctor
                     return false;
                 return methodInfo.ReturnType != typeof(void);
             }
@@ -89,6 +88,14 @@ namespace ArxOne.MrAdvice.Advice
         public MethodBase TargetMethod { get; }
 
         /// <summary>
+        /// Gets the name of the target.
+        /// </summary>
+        /// <value>
+        /// The name of the target.
+        /// </value>
+        public override string TargetName => TargetMethod.Name;
+
+        /// <summary>
         /// Gets a value indicating whether the target method is asynchronous.
         /// </summary>
         /// <value>
@@ -122,6 +129,7 @@ namespace ArxOne.MrAdvice.Advice
         protected MethodAdviceContext(IMethodAdvice methodAdvice, MethodBase targetMethod, object target, Type targetType, object[] parameters, AdviceContext nextAdviceContext)
          : this(methodAdvice, targetMethod, new AdviceValues(target, targetType, parameters), nextAdviceContext)
         { }
+
 
         /// <summary>
         /// Invokes the current aspect (related to this instance).

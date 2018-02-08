@@ -21,6 +21,14 @@ namespace ArxOne.MrAdvice.Advice
         private readonly MethodInfo _innerMethod;
         private readonly ProceedDelegate _innerMethodDelegate;
 
+        /// <summary>
+        /// Gets the name of the target.
+        /// </summary>
+        /// <value>
+        /// The name of the target.
+        /// </value>
+        public override string TargetName => _innerMethod.Name;
+
         internal InnerMethodContext(AdviceValues adviceValues, MethodInfo innerMethod, ProceedDelegate innerMethodDelegate)
             : base(adviceValues, null)
         {

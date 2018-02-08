@@ -41,6 +41,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public override IEnumerable<CustomAttribute> CustomAttributes => _assemblyDefinition.CustomAttributes;
 
+        public override string Name => _assemblyDefinition.FullName;
+
         private string DebugString => $"Assembly {_assemblyDefinition.FullName}";
 
         /// <summary>

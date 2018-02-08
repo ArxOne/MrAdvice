@@ -8,7 +8,6 @@ namespace ArxOne.MrAdvice.Weaver
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Runtime.Versioning;
@@ -198,8 +197,7 @@ namespace ArxOne.MrAdvice.Weaver
             if (targetFrameworkAttribute == null)
             {
                 var literalRuntimeVersion = moduleDefinition.RuntimeVersion;
-                Version runtimeVersion;
-                if (literalRuntimeVersion.StartsWith("v") && Version.TryParse(literalRuntimeVersion.Substring(1), out runtimeVersion))
+                if (literalRuntimeVersion.StartsWith("v") && Version.TryParse(literalRuntimeVersion.Substring(1), out var runtimeVersion))
                     return new TargetFramework(runtimeVersion);
 
                 Logging.WriteError($"Unknown RuntimeVersion: '{literalRuntimeVersion}'");
@@ -268,8 +266,7 @@ namespace ArxOne.MrAdvice.Weaver
                         var interfaceDef = t.Item1 as TypeDef;
                         if (interfaceDef == null)
                         {
-                            var interfaceRef = t.Item1 as TypeRef;
-                            if (interfaceRef != null)
+                            if (t.Item1 is TypeRef interfaceRef)
                                 interfaceDef = TypeResolver.Resolve(interfaceRef);
                         }
                         if (interfaceDef == null)
@@ -374,7 +371,7 @@ namespace ArxOne.MrAdvice.Weaver
             var ancestorsToChildren = reflectionNode.GetAncestorsToDescendants().ToArray();
             return from node in ancestorsToChildren
                    where node.Method != null
-                   let allMakersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context))
+                   let allMakersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context).Select(t => t.Item2))
                    where allMakersNode.Definitions.Any() && IsIncludedByPointcut(allMakersNode, context)
                    let includedMarkersNode = new MarkedNode(node, allMakersNode.Definitions.Where(d => IsIncludedByNode(d, node, context)))
                    where includedMarkersNode.Definitions.Any()
@@ -422,35 +419,30 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="markerInterface">The advice interface.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private IEnumerable<MarkerDefinition> GetAllMarkers(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, WeavingContext context)
+        private IEnumerable<Tuple<ReflectionNode, MarkerDefinition>> GetAllMarkers(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, WeavingContext context)
         {
             var markers = reflectionNode.GetAncestorsToDescendants()
-                .SelectMany(n => n.CustomAttributes
-                    .Where(a => !a.AttributeType.DefinitionAssembly.IsSystem())
-                    .SelectMany(a => ResolveTypeOrGenericDefinition(a.AttributeType).GetSelfAndParents(TypeResolver))
-                    .Where(t => IsMarker(t, markerInterface)))
-                .Distinct()
-                .Select(t => GetMarkerDefinition(t, context));
+                .Select(n => new { Node = n, Attributes = n.CustomAttributes })
+                .SelectMany(n => n.Attributes.Select(a => new { Node = n.Node, Attribute = a })
+                    .Where(a => !a.Attribute.AttributeType.DefinitionAssembly.IsSystem())
+                    .SelectMany(a => ResolveTypeOrGenericDefinition(a.Attribute.AttributeType).GetSelfAndParents(TypeResolver).Select(t => new { Node = a.Node, Type = t }))
+                    .Where(t => IsMarker(t.Type, markerInterface)))
+                .Select(t => Tuple.Create(t.Node, GetMarkerDefinition(t.Type, context)));
             return markers;
         }
 
         private TypeDef ResolveTypeOrGenericDefinition(ITypeDefOrRef typeDefOrRef)
         {
-            var typeDef = typeDefOrRef as TypeDef;
-            if (typeDef != null)
+            if (typeDefOrRef is TypeDef typeDef)
                 return typeDef;
 
-            var typeRef = typeDefOrRef as TypeRef;
-            if (typeRef != null)
+            if (typeDefOrRef is TypeRef typeRef)
                 return TypeResolver.Resolve(typeRef);
 
             // tricky part here: assuming this a generic type
             var typeSpec = (TypeSpec)typeDefOrRef;
             var genericType = typeSpec.TryGetGenericInstSig();
-            if (genericType != null)
-                return genericType.GenericType.TypeDef;
-
-            return null;
+            return genericType?.GenericType.TypeDef;
         }
 
         private readonly IDictionary<TypeDef, MarkerDefinition> _markerDefinitions = new Dictionary<TypeDef, MarkerDefinition>();
@@ -465,8 +457,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             lock (_markerDefinitions)
             {
-                MarkerDefinition markerDefinition;
-                if (_markerDefinitions.TryGetValue(typeDefinition, out markerDefinition))
+                if (_markerDefinitions.TryGetValue(typeDefinition, out var markerDefinition))
                     return markerDefinition;
 
                 markerDefinition = CreateMarkerDefinition(typeDefinition, context);
@@ -519,8 +510,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var key = Tuple.Create(typeReference.FullName, markerInterface.FullName);
                 // there is a cache, because the same attribute may be found several time
                 // and we're in a hurry, the developper is waiting for his program to start!
-                bool isMarker;
-                if (_isMarker.TryGetValue(key, out isMarker))
+                if (_isMarker.TryGetValue(key, out var isMarker))
                     return isMarker;
 
                 // otherwise look for type or implemented interfaces (recursively)

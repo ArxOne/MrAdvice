@@ -65,6 +65,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public override bool IsGeneric => TypeDefinition.HasGenericParameters;
 
+        public override string Name => TypeDefinition.FullName;
+
         private string DebugString => $"Type {TypeDefinition.FullName}";
 
         /// <summary>

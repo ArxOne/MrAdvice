@@ -61,6 +61,14 @@ namespace ArxOne.MrAdvice.Advice
         /// </value>
         public EventInfo TargetEvent { get; }
 
+        /// <summary>
+        /// Gets the name of the target.
+        /// </summary>
+        /// <value>
+        /// The name of the target.
+        /// </value>
+        public override string TargetName => TargetEvent.Name;
+
         private readonly IEventAdvice _eventAdvice;
 
         /// <summary>

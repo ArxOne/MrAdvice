@@ -40,8 +40,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var adviceSelector = new PointcutSelector();
             // Advices should not advise themselves
-            var typeReflectionNode = node as TypeReflectionNode;
-            if (typeReflectionNode != null && IsMarker(typeReflectionNode.TypeDefinition, context.AdviceInterfaceType))
+            if (node is TypeReflectionNode typeReflectionNode && IsMarker(typeReflectionNode.TypeDefinition, context.AdviceInterfaceType))
             {
                 Logging.WriteDebug("Excluding {0} from itself", typeReflectionNode.TypeDefinition.FullName);
                 adviceSelector.ExcludeRules.Add(new PointcutSelectorRule(typeReflectionNode.TypeDefinition.FullName));
@@ -79,8 +78,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private PointcutSelector GetPointcutSelector(TypeDef adviceType, WeavingContext context)
         {
-            PointcutSelector pointcutRules;
-            if (context.AdvicesRules.TryGetValue(adviceType, out pointcutRules))
+            if (context.AdvicesRules.TryGetValue(adviceType, out var pointcutRules))
                 return pointcutRules;
             context.AdvicesRules[adviceType] = pointcutRules = CreatePointcutSelector(adviceType, context);
             return pointcutRules;

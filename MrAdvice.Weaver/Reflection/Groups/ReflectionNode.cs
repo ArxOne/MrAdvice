@@ -92,6 +92,14 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         public virtual MethodDef Method => null;
 
         /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public abstract string Name { get; }
+
+        /// <summary>
         /// Gets or sets the advice selector.
         /// </summary>
         /// <value>
