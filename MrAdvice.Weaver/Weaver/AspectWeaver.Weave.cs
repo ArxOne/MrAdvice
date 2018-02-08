@@ -319,7 +319,7 @@ namespace ArxOne.MrAdvice.Weaver
             var methodName = method.Name;
 
             // our special recipe, with weaving advices
-            var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceInterfaceType, context).Select(t=>t.Item2).ToArray();
+            var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceInterfaceType, context).Select(t => t.Item2).ToArray();
             var typeDefinition = markedMethod.Node.Method.DeclaringType;
             var initialType = TypeLoader.GetType(typeDefinition);
             var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, context, TypeResolver, Logging);
@@ -669,10 +669,10 @@ namespace ArxOne.MrAdvice.Weaver
                 var adviceDefinition = advice.Item2.Type;
                 foreach (var field in adviceDefinition.Fields.Where(f => f.IsPublic))
                     IntroduceMember(method.Module, field.Name, field.FieldType.ToTypeDefOrRef(), field.IsStatic, adviceDefinition, typeDefinition,
-                        markerAttributeCtorDef, advice.Item1.Name);
+                        markerAttributeCtorDef, advice.Item1.Name, field.IsNotSerialized);
                 foreach (var property in adviceDefinition.Properties.Where(p => p.HasAnyPublic()))
                     IntroduceMember(method.Module, property.Name, property.PropertySig.RetType.ToTypeDefOrRef(), !property.PropertySig.HasThis, adviceDefinition,
-                        typeDefinition, markerAttributeCtorDef, advice.Item1.Name);
+                        typeDefinition, markerAttributeCtorDef, advice.Item1.Name, false);
             }
         }
 
@@ -827,9 +827,10 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="adviceType">The advice.</param>
         /// <param name="advisedType">The type definition.</param>
         /// <param name="markerAttribute">The marker attribute ctor.</param>
-        /// <param name="introducedMemberName"></param>
+        /// <param name="introducedMemberName">Name of the introduced member.</param>
+        /// <param name="isNotSerialized">if set to <c>true</c> [is not serialized].</param>
         private void IntroduceMember(ModuleDef moduleDefinition, string memberName, ITypeDefOrRef memberType, bool isStatic,
-            ITypeDefOrRef adviceType, TypeDef advisedType, ICustomAttributeType markerAttribute, string introducedMemberName)
+            ITypeDefOrRef adviceType, TypeDef advisedType, ICustomAttributeType markerAttribute, string introducedMemberName, bool isNotSerialized)
         {
             if (IsIntroduction(memberType, out var introducedFieldType))
             {
@@ -838,7 +839,8 @@ namespace ArxOne.MrAdvice.Weaver
                 {
                     if (advisedType.Fields.All(f => f.Name != introducedFieldName))
                     {
-                        var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public) | FieldAttributes.NotSerialized;
+                        var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public)
+                                              | (isNotSerialized ? FieldAttributes.NotSerialized : 0);
                         if (isStatic)
                             fieldAttributes |= FieldAttributes.Static;
                         Logging.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);

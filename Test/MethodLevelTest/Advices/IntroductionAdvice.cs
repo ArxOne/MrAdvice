@@ -19,6 +19,7 @@ namespace MethodLevelTest.Advices
         public static string LastRandomString;
 
         // ReSharper disable once UnassignedField.Global
+        [NonSerialized]
         public IntroducedField<int> AdvicesCount;
         public IntroducedField<string> RandomString { get; set; }
 
