@@ -99,6 +99,10 @@ namespace ArxOne.MrAdvice.Weaver
             var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
             foreach (var ctor in _typeDefinition.FindConstructors().ToArray())
             {
+                // the initializer is never inserted in cctor
+                if (ctor.IsStaticConstructor)
+                    continue;
+
                 if (once && ctor.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as IMethod, true)))
                     continue;
 
