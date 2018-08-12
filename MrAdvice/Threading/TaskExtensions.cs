@@ -32,12 +32,26 @@ namespace ArxOne.MrAdvice.Threading
         /// <returns></returns>
         public static Type GetTaskType(this Type type)
         {
-            if (!type.GetInformationReader().IsGenericType)
+            var genericTaskType = type.GetGenericTaskType();
+            if (genericTaskType == null)
                 return null;
-            var arguments = type.GetAssignmentReader().GetGenericArguments();
+            var arguments = genericTaskType.GetAssignmentReader().GetGenericArguments();
             if (arguments.Length != 1)
                 return null;
             return arguments[0];
+        }
+
+        private static Type GetGenericTaskType(this Type type)
+        {
+            var typeInformationReader = type.GetInformationReader();
+            // Task: no generic task
+            if (type == typeof(Task))
+                return null;
+            // if parent is Task, then it's a Task<> (hopefully)
+            if (typeInformationReader.BaseType == typeof(Task) && typeInformationReader.IsGenericType)
+                return type;
+            // otherwise, check for parent
+            return GetGenericTaskType(typeInformationReader.BaseType);
         }
 
         /// <summary>
