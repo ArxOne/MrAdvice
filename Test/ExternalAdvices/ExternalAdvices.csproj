@@ -48,6 +48,7 @@
     <Compile Include="ExternalConcreteMethodAdvice.cs" />
     <Compile Include="ExternalEmptyAdvice.cs" />
     <Compile Include="AddProperty.cs" />
+    <Compile Include="IExternalAdvisedInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

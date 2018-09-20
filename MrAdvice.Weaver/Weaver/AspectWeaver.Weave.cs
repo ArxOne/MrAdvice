@@ -535,7 +535,7 @@ namespace ArxOne.MrAdvice.Weaver
             }, i => i.Emit(OpCodes.Ldnull));
         }
 
-        private InvocationArgument GetParametersArgument(MethodDef method, out Local parametersVariable)
+        private static InvocationArgument GetParametersArgument(MethodDef method, out Local parametersVariable)
         {
             var methodParameters = new MethodParameters(method);
             var hasParameters = methodParameters.Count > 0;
@@ -573,33 +573,33 @@ namespace ArxOne.MrAdvice.Weaver
                 }, instructions => instructions.Emit(OpCodes.Ldnull));
         }
 
-        private InvocationArgument GetMethodArgument(MethodDef method)
+        private static InvocationArgument GetMethodArgument(MethodDef method)
         {
             return new InvocationArgument("Method", true, instructions => instructions.Emit(OpCodes.Ldtoken, method), null);
         }
 
-        private InvocationArgument GetInnerMethodArgument(MethodDef innerMethod)
+        private static InvocationArgument GetInnerMethodArgument(MethodDef innerMethod)
         {
             return new InvocationArgument("InnerMethod", innerMethod != null,
                 instructions => instructions.Emit(OpCodes.Ldtoken, innerMethod),
                 instructions => instructions.Emit(OpCodes.Dup));
         }
 
-        private InvocationArgument GetTypeArgument(MethodDef method)
+        private static InvocationArgument GetTypeArgument(MethodDef method)
         {
             return new InvocationArgument("Type", method.DeclaringType.HasGenericParameters,
                 instructions => instructions.Emit(OpCodes.Ldtoken, method.DeclaringType),
                 instructions => instructions.Emit(OpCodes.Ldtoken, method.Module.CorLibTypes.Void));
         }
 
-        private InvocationArgument GetAbstractedArgument(bool abstractedTarget)
+        private static InvocationArgument GetAbstractedArgument(bool abstractedTarget)
         {
             return new InvocationArgument("Abstracted", abstractedTarget,
                 i => i.Emit(OpCodes.Ldc_I4_1),
                 i => i.Emit(OpCodes.Ldc_I4_0));
         }
 
-        private InvocationArgument GetGenericParametersArgument(MethodDef method)
+        private static InvocationArgument GetGenericParametersArgument(MethodDef method)
         {
             // on static methods from generic type, we also record the generic parameters type
             //var typeGenericParametersCount = isStatic ? method.DeclaringType.GenericParameters.Count : 0;
@@ -722,8 +722,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="interfaceType">Type of the interface.</param>
         /// <param name="context">The context.</param>
-        private void WeaveInterface(ModuleDef moduleDefinition, TypeDef interfaceType, WeavingContext context)
+        private void WeaveInterface(ModuleDefMD moduleDefinition, TypeDef interfaceType, WeavingContext context)
         {
+            var importedInterfaceType = moduleDefinition.Import(interfaceType);
             Logging.WriteDebug("Weaving interface '{0}'", interfaceType.FullName);
             TypeDef implementationType;
             TypeDef advisedInterfaceType;
@@ -741,9 +742,8 @@ namespace ArxOne.MrAdvice.Weaver
                 advisedInterfaceType = TypeResolver.Resolve(moduleDefinition, typeof(AdvisedInterface));
                 // TODO: this should work using TypeImporter.Import
                 var advisedInterfaceTypeReference = moduleDefinition.Import(advisedInterfaceType);
-                implementationType =
-                    new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) { Attributes = typeAttributes };
-                implementationType.Interfaces.Add(new InterfaceImplUser(interfaceType));
+                implementationType = new TypeDefUser(implementationTypeNamespace, implementationTypeName, advisedInterfaceTypeReference) { Attributes = typeAttributes };
+                implementationType.Interfaces.Add(new InterfaceImplUser(importedInterfaceType));
 
                 lock (moduleDefinition)
                     moduleDefinition.Types.Add(implementationType);

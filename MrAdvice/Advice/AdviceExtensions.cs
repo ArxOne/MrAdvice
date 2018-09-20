@@ -52,8 +52,7 @@ namespace ArxOne.MrAdvice.Advice
         {
             lock (Types)
             {
-                Type implementationType;
-                if (Types.TryGetValue(interfaceType, out implementationType))
+                if (Types.TryGetValue(interfaceType, out var implementationType))
                     return implementationType;
 
                 implementationType = (from t in interfaceType.GetInformationReader().Assembly.GetTypes()

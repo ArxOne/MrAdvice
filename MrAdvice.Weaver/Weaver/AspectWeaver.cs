@@ -68,6 +68,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var targetFramework = GetTargetFramework(moduleDefinition);
                 InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
 
+
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
                 Func<MarkedNode, bool> isWeavable = n => IsWeavable(n) && !IsFromComputerGeneratedType(n);
@@ -100,7 +101,6 @@ namespace ArxOne.MrAdvice.Weaver
                 auditTimer.NewZone("Abstract targets cleanup");
                 foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
                     generatedFieldToBeRemoved.DeclaringType.Fields.Remove(generatedFieldToBeRemoved);
-
                 auditTimer.LastZone();
 
                 var report = auditTimer.GetReport();
@@ -112,6 +112,7 @@ namespace ArxOne.MrAdvice.Weaver
 
                 Logging.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
                     moduleDefinition.Assembly.FullName, (int)report.Sum(r => r.Value.TotalMilliseconds), targetFramework.ToString(), Product.Version);
+
                 return true;
             }
             catch (Exception e)

@@ -10,11 +10,32 @@ namespace MethodLevelTest
     using System;
     using Advices;
     using ArxOne.MrAdvice.Advice;
+    using ExternalAdvices;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class InterfaceTest
     {
+        public interface IExternalAdvisedInterface2: IExternalAdvisedInterface { }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void WeaveExternalInterfaceTest()
+        {
+            var a = new InterfaceMethodAdvice();
+            var i = a.Handle<IExternalAdvisedInterface>();
+            Assert.IsNotNull(i);
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void WeaveExternalInterface2Test()
+        {
+            var a = new InterfaceMethodAdvice();
+            var i = a.Handle<IExternalAdvisedInterface2>();
+            Assert.IsNotNull(i);
+        }
+
         [TestMethod]
         [TestCategory("Weaving")]
         public void WeaveInterfaceTest()
