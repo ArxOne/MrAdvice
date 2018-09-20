@@ -422,8 +422,7 @@ namespace ArxOne.MrAdvice.Weaver
         private IMethod GetProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
         {
             var values = arguments.Select(a => a.HasValue).ToArray();
-            IMethod proceedMethod;
-            if (!context.ShortcutMethods.TryGetValue(values, out proceedMethod))
+            if (!context.ShortcutMethods.TryGetValue(values, out var proceedMethod))
                 context.ShortcutMethods[values] = proceedMethod = LoadProceedMethod(arguments, module, context);
             return proceedMethod;
         }
@@ -797,21 +796,22 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate, WeavingContext context)
         {
+            var typeImporter = new TypeImporter(implementationType.Module);
             var methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual | (injectAsPrivate ? MethodAttributes.Public : MethodAttributes.Private);
-            //var methodParameters = new MethodParameters(interfaceMethod);
-            //var implementationMethodSig = new MethodSig(interfaceMethod.CallingConvention, (uint)interfaceMethod.GenericParameters.Count, interfaceMethod.ReturnType,
-            //    methodParameters.Select(p => p.Type).ToArray())
-            //{
-            //    HasThis = interfaceMethod.HasThis,
-            //    ExplicitThis = interfaceMethod.ExplicitThis,
-            //    CallingConvention = interfaceMethod.CallingConvention,
-            //};
-            var implementationMethod = new MethodDefUser(interfaceMethod.Name, interfaceMethod.MethodSig /*implementationMethodSig*/, methodAttributes);
-            //implementationMethod.ReturnType = interfaceMethod.ReturnType;
-            implementationType.Methods.Add(implementationMethod);
-            //implementationMethod.IsSpecialName = interfaceMethod.IsSpecialName;
-            //methodParameters.SetParamDefs(implementationMethod);
+            var methodParameters = new MethodParameters(interfaceMethod);
+            var implementationMethodSig = interfaceMethod.MethodSig.Clone();
+            var implementationMethod = new MethodDefUser(interfaceMethod.Name, /*interfaceMethod.MethodSig */implementationMethodSig, methodAttributes);
+#if wip
+            for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
+            {
+                var parameterType = typeImporter.TryRelocateTypeSig(implementationMethod.Parameters[parameterIndex].Type);
+                if (parameterType == null)
+                    Logging.WriteError("Can't relocate type {0}", implementationMethod.Parameters[parameterIndex]?.Type?.GetName() ?? "(null)");
+                implementationMethod.Parameters[parameterIndex].Type = parameterType;
+            }
+#endif
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
+            implementationType.Methods.Add(implementationMethod);
             implementationMethod.Overrides.Add(new MethodOverride(implementationMethod, interfaceMethod));
             WritePointcutBody(implementationMethod, null, false, context);
             return implementationMethod;

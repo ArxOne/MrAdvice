@@ -46,6 +46,7 @@
     <Compile Include="AssemblyAdvice.cs" />
     <Compile Include="ExternalClass.cs" />
     <Compile Include="ExternalConcreteMethodAdvice.cs" />
+    <Compile Include="ExternalData.cs" />
     <Compile Include="ExternalEmptyAdvice.cs" />
     <Compile Include="AddProperty.cs" />
     <Compile Include="IExternalAdvisedInterface.cs" />

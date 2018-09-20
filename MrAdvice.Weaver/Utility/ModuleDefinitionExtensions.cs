@@ -106,8 +106,7 @@ namespace ArxOne.MrAdvice.Utility
         {
             lock (ResolutionCache)
             {
-                AssemblyDef assemblyDefinition;
-                if (ResolutionCache.TryGetValue(assemblyNameReference, out assemblyDefinition))
+                if (ResolutionCache.TryGetValue(assemblyNameReference, out var assemblyDefinition))
                     return assemblyDefinition;
 
                 ResolutionCache[assemblyNameReference] = assemblyDefinition = TryLoad(assemblyResolver, assemblyNameReference, source, logging, directReference);
@@ -169,7 +168,7 @@ namespace ArxOne.MrAdvice.Utility
             lock (moduleDefinition)
                 return moduleDefinition.Import(type).ToTypeSig().TryGetTypeRef();
         }
-        
+
         public static CustomAttribute CreateCustomAttribute(this ModuleDef moduleDefinition, TypeRef customAttributeType, TypeResolver typeResolver)
         {
             var constructor = typeResolver.Resolve(customAttributeType).FindConstructors().Single();
