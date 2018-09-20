@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
 
@@ -159,6 +160,15 @@ namespace ArxOne.MrAdvice
         public static Assembly GetAssembly(this Type type)
         {
             return type.GetTypeInfo().Assembly;
+        }
+
+        /// <summary>
+        /// Gets the calling assembly.
+        /// </summary>
+        /// <returns></returns>
+        public static Assembly GetCallingAssembly()
+        {
+            return null;
         }
     }
 }

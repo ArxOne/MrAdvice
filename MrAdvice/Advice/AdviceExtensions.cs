@@ -8,6 +8,7 @@ namespace ArxOne.MrAdvice.Advice
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
 
@@ -20,13 +21,16 @@ namespace ArxOne.MrAdvice.Advice
 
         /// <summary>
         /// Creates a proxy around the given interface, and injects the given advice at all levels.
+        /// When weaving an interface from another assembly, it is required to specify a reference <see cref="Assembly"/> or <see cref="Type"/>, otherwise MrAdvice won't find it
         /// </summary>
         /// <typeparam name="TInterface">The type of the interface.</typeparam>
         /// <param name="advice">The advice.</param>
+        /// <param name="referenceAssembly">A reference <see cref="Assembly"/> where the implementation is weaved.</param>
+        /// <param name="referenceType">A reference <see cref="Type"/> where the implementation is .</param>
         /// <returns></returns>
-        public static TInterface Handle<TInterface>(this IAdvice advice)
+        public static TInterface Handle<TInterface>(this IAdvice advice, Assembly referenceAssembly = null, Type referenceType = null)
         {
-            return (TInterface)Handle(advice, typeof(TInterface));
+            return (TInterface)Handle(advice, typeof(TInterface), referenceAssembly, referenceType);
         }
 
         /// <summary>
@@ -34,10 +38,12 @@ namespace ArxOne.MrAdvice.Advice
         /// </summary>
         /// <param name="advice">The advice.</param>
         /// <param name="interfaceType">Type of the interface.</param>
+        /// <param name="referenceAssembly">The reference assembly.</param>
+        /// <param name="referenceType">Type of the reference.</param>
         /// <returns></returns>
-        private static object Handle(this IAdvice advice, Type interfaceType)
+        private static object Handle(this IAdvice advice, Type interfaceType, Assembly referenceAssembly, Type referenceType)
         {
-            var implementationType = GetImplementationType(interfaceType);
+            var implementationType = GetImplementationType(interfaceType, referenceAssembly, referenceType);
             var implementation = (AdvisedInterface)Activator.CreateInstance(implementationType);
             implementation.Advice = advice;
             return implementation;
@@ -47,15 +53,22 @@ namespace ArxOne.MrAdvice.Advice
         /// Gets the type of the implementation.
         /// </summary>
         /// <param name="interfaceType">Type of the interface.</param>
+        /// <param name="referenceAssembly">The reference assembly.</param>
+        /// <param name="referenceType">Type of the reference.</param>
         /// <returns></returns>
-        private static Type GetImplementationType(Type interfaceType)
+        /// <exception cref="ArgumentException">Interface implementation was not found. Ensure that the Handle method is called directly (without reflection).</exception>
+        private static Type GetImplementationType(Type interfaceType, Assembly referenceAssembly, Type referenceType)
         {
             lock (Types)
             {
                 if (Types.TryGetValue(interfaceType, out var implementationType))
                     return implementationType;
 
-                implementationType = (from t in interfaceType.GetInformationReader().Assembly.GetTypes()
+                var interfaceAssembly = interfaceType.GetInformationReader().Assembly;
+                var assemblies = new[] { interfaceAssembly, PlatformUtility.GetCallingAssembly(), referenceAssembly, referenceType?.GetInformationReader().Assembly };
+                implementationType = (from assembly in assemblies
+                                      where !(assembly is null)
+                                      from t in assembly.GetTypes()
                                       where t.GetInformationReader().BaseType == typeof(AdvisedInterface)
                                       let i = t.GetAssignmentReader().GetInterfaces()
                                       where i.Contains(interfaceType)

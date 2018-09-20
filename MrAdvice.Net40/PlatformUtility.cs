@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
 
@@ -87,6 +88,20 @@ namespace ArxOne.MrAdvice
         public static Assembly GetAssembly(this Type type)
         {
             return type.Assembly;
+        }
+
+        /// <summary>
+        /// Gets the calling assembly.
+        /// </summary>
+        /// <returns></returns>
+        public static Assembly GetCallingAssembly()
+        {
+            var st = new StackTrace();
+            var thisAssembly = Assembly.GetExecutingAssembly();
+            return (from frame in st.GetFrames()
+                    let assembly = frame.GetMethod().DeclaringType.Assembly
+                    where !assembly.Equals(thisAssembly)
+                    select assembly).FirstOrDefault();
         }
     }
 }
