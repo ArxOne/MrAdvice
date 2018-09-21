@@ -13,6 +13,7 @@ namespace TestApplication
     using System.Diagnostics;
     using System.IO;
     using ArxOne.MrAdvice.Advice;
+    using ExternalAdvices;
     using MrAdvice.Advice;
 
     public class PublicClass
@@ -72,18 +73,23 @@ namespace TestApplication
     //    }
     //}
 
+    public interface IExternalAdvisedInterface2 : IExternalAdvisedInterface { }
+
     public static class Program
     {
         public static void Main(string[] args)
         {
-            var b = new Benchmark();
-            var t1 = DateTime.UtcNow;
-            for (int i = 0; i < 1000000; i++)
-                b.Value++;
-            var dt = DateTime.UtcNow - t1;
-            Console.WriteLine($"Elapsed time={dt}");
-            using (var ts = File.AppendText("Timings.txt"))
-                ts.WriteLine($"Elapsed time={dt}");
+            var a = new SomeAdvice();
+            var ii = a.Handle<IExternalAdvisedInterface2>();
+
+            //var b = new Benchmark();
+            //var t1 = DateTime.UtcNow;
+            //for (int i = 0; i < 1000000; i++)
+            //    b.Value++;
+            //var dt = DateTime.UtcNow - t1;
+            //Console.WriteLine($"Elapsed time={dt}");
+            //using (var ts = File.AppendText("Timings.txt"))
+            //    ts.WriteLine($"Elapsed time={dt}");
 
             //var sc = new SomeClass();
             //var c = sc.Add(2, 3);

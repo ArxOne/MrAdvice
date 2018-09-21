@@ -94,7 +94,7 @@ namespace ArxOne.MrAdvice
                 ModuleWritten += delegate
                 {
                     File.WriteAllText(processFilePath,
-                        "This file is a marker for Mr.Advice to ensure the assembly wan't processed twice (in which case it would be as bad as crossing the streams).");
+                        "This file is a marker for Mr.Advice to ensure the assembly wasn't processed twice (in which case it would be as bad as crossing the streams).");
                 };
             }
             return processed;

@@ -760,29 +760,32 @@ namespace ArxOne.MrAdvice.Weaver
             implementationType.Methods.Add(method);
 
             // create implementation methods
-            foreach (var interfaceMethod in interfaceType.Methods.Where(m => !m.IsSpecialName))
-                WeaveInterfaceMethod(interfaceMethod, implementationType, true, context);
-
-            // create implementation properties
-            foreach (var interfaceProperty in interfaceType.Properties)
+            foreach (var currentInterfaceType in interfaceType.GetAllInterfaces(TypeResolver))
             {
-                var implementationProperty = new PropertyDefUser(interfaceProperty.Name, interfaceProperty.PropertySig);
-                implementationType.Properties.Add(implementationProperty);
-                if (interfaceProperty.GetMethod != null)
-                    implementationProperty.GetMethod = WeaveInterfaceMethod(interfaceProperty.GetMethod, implementationType, InjectAsPrivate, context);
-                if (interfaceProperty.SetMethod != null)
-                    implementationProperty.SetMethod = WeaveInterfaceMethod(interfaceProperty.SetMethod, implementationType, InjectAsPrivate, context);
-            }
+                foreach (var interfaceMethod in currentInterfaceType.Methods.Where(m => !m.IsSpecialName))
+                    WeaveInterfaceMethod(interfaceMethod, implementationType, true, context);
 
-            // create implementation events
-            foreach (var interfaceEvent in interfaceType.Events)
-            {
-                var implementationEvent = new EventDefUser(interfaceEvent.Name, interfaceEvent.EventType);
-                implementationType.Events.Add(implementationEvent);
-                if (interfaceEvent.AddMethod != null)
-                    implementationEvent.AddMethod = WeaveInterfaceMethod(interfaceEvent.AddMethod, implementationType, InjectAsPrivate, context);
-                if (interfaceEvent.RemoveMethod != null)
-                    implementationEvent.RemoveMethod = WeaveInterfaceMethod(interfaceEvent.RemoveMethod, implementationType, InjectAsPrivate, context);
+                // create implementation properties
+                foreach (var interfaceProperty in currentInterfaceType.Properties)
+                {
+                    var implementationProperty = new PropertyDefUser(interfaceProperty.Name, interfaceProperty.PropertySig);
+                    implementationType.Properties.Add(implementationProperty);
+                    if (interfaceProperty.GetMethod != null)
+                        implementationProperty.GetMethod = WeaveInterfaceMethod(interfaceProperty.GetMethod, implementationType, InjectAsPrivate, context);
+                    if (interfaceProperty.SetMethod != null)
+                        implementationProperty.SetMethod = WeaveInterfaceMethod(interfaceProperty.SetMethod, implementationType, InjectAsPrivate, context);
+                }
+
+                // create implementation events
+                foreach (var interfaceEvent in currentInterfaceType.Events)
+                {
+                    var implementationEvent = new EventDefUser(interfaceEvent.Name, interfaceEvent.EventType);
+                    implementationType.Events.Add(implementationEvent);
+                    if (interfaceEvent.AddMethod != null)
+                        implementationEvent.AddMethod = WeaveInterfaceMethod(interfaceEvent.AddMethod, implementationType, InjectAsPrivate, context);
+                    if (interfaceEvent.RemoveMethod != null)
+                        implementationEvent.RemoveMethod = WeaveInterfaceMethod(interfaceEvent.RemoveMethod, implementationType, InjectAsPrivate, context);
+                }
             }
         }
 
@@ -796,23 +799,24 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate, WeavingContext context)
         {
-            var typeImporter = new TypeImporter(implementationType.Module);
+            var module = implementationType.Module;
+            var typeImporter = new TypeImporter(module);
             var methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual | (injectAsPrivate ? MethodAttributes.Public : MethodAttributes.Private);
-            var methodParameters = new MethodParameters(interfaceMethod);
             var implementationMethodSig = interfaceMethod.MethodSig.Clone();
             var implementationMethod = new MethodDefUser(interfaceMethod.Name, /*interfaceMethod.MethodSig */implementationMethodSig, methodAttributes);
-#if wip
-            for (int parameterIndex = 0; parameterIndex < methodParameters.Count; parameterIndex++)
+            for (int parameterIndex = 0; parameterIndex < implementationMethod.Parameters.Count; parameterIndex++)
             {
-                var parameterType = typeImporter.TryRelocateTypeSig(implementationMethod.Parameters[parameterIndex].Type);
-                if (parameterType == null)
-                    Logging.WriteError("Can't relocate type {0}", implementationMethod.Parameters[parameterIndex]?.Type?.GetName() ?? "(null)");
-                implementationMethod.Parameters[parameterIndex].Type = parameterType;
+                var parameterType = implementationMethod.Parameters[parameterIndex].Type;
+                if (parameterType != null)
+                {
+                    var relocatedParameterType = typeImporter.TryRelocateTypeSig(parameterType) ?? parameterType;
+                    implementationMethod.Parameters[parameterIndex].Type = module.Import(relocatedParameterType);
+                }
             }
-#endif
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
             implementationType.Methods.Add(implementationMethod);
-            implementationMethod.Overrides.Add(new MethodOverride(implementationMethod, interfaceMethod));
+            var interfaceMethodRef = module.Import(interfaceMethod);
+            implementationMethod.Overrides.Add(new MethodOverride(implementationMethod, interfaceMethodRef));
             WritePointcutBody(implementationMethod, null, false, context);
             return implementationMethod;
         }

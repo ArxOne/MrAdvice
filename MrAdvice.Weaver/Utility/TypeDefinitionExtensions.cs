@@ -33,11 +33,43 @@ namespace ArxOne.MrAdvice.Utility
                 var baseType = typeDefinition.BaseType;
                 if (baseType == null)
                     break;
-                if (typeResolver == null)
-                    typeDefinition = baseType.ResolveTypeDef();
-                else
-                    typeDefinition = typeResolver.Resolve(baseType);
+                typeDefinition = SafeResolve(typeResolver, baseType);
             }
+        }
+
+        /// <summary>
+        /// Always resolves the type, whether there is a <see cref="TypeResolver"/> or not.
+        /// </summary>
+        /// <param name="typeResolver">The type resolver.</param>
+        /// <param name="typeDefOrRef">Type of the base.</param>
+        /// <returns></returns>
+        public static TypeDef SafeResolve(this TypeResolver typeResolver, ITypeDefOrRef typeDefOrRef)
+        {
+            TypeDef typeDefinition;
+            if (typeResolver == null)
+                typeDefinition = typeDefOrRef.ResolveTypeDef();
+            else
+                typeDefinition = typeResolver.Resolve(typeDefOrRef);
+            return typeDefinition;
+        }
+
+        public static IEnumerable<TypeDef> GetAllInterfaces(this TypeDef typeDefinition, TypeResolver typeResolver = null)
+        {
+            return GetAllInterfacesRaw(typeDefinition, typeResolver).Distinct();
+        }
+
+        private static IEnumerable<TypeDef> GetAllInterfacesRaw(this TypeDef typeDefinition, TypeResolver typeResolver = null)
+        {
+            var allInterfaces = new List<TypeDef>();
+            if (typeDefinition.IsInterface)
+                allInterfaces.Add(typeDefinition);
+            foreach (var parentInterfaceImpl in typeDefinition.Interfaces)
+            {
+                var @interface = typeResolver.SafeResolve(parentInterfaceImpl.Interface);
+                allInterfaces.AddRange(GetAllInterfacesRaw(@interface, typeResolver));
+            }
+
+            return allInterfaces;
         }
 
         /// <summary>

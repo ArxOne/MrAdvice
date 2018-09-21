@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Reflection
     using dnlib.DotNet;
     using StitcherBoy.Reflection;
 
+
     public class TypeImporter : TypeRelocator
     {
         private readonly ModuleDef _moduleDef;

@@ -16,8 +16,6 @@ namespace MethodLevelTest
     [TestClass]
     public class InterfaceTest
     {
-#if wip
-
         public interface IExternalAdvisedInterface2: IExternalAdvisedInterface { }
 
         [TestMethod]
@@ -37,7 +35,7 @@ namespace MethodLevelTest
             var i = a.Handle<IExternalAdvisedInterface2>();
             Assert.IsNotNull(i);
         }
-#endif
+
         [TestMethod]
         [TestCategory("Weaving")]
         public void WeaveInterfaceTest()
