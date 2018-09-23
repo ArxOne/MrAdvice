@@ -12,4 +12,7 @@ namespace ExternalAdvices
     public class ExternalData
     {
     }
+
+    public class ExternalData<T>
+    { }
 }

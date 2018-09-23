@@ -7,9 +7,9 @@
 
 namespace ArxOne.MrAdvice.Reflection
 {
+    using System;
     using dnlib.DotNet;
     using StitcherBoy.Reflection;
-
 
     public class TypeImporter : TypeRelocator
     {
@@ -17,7 +17,10 @@ namespace ArxOne.MrAdvice.Reflection
 
         protected override TypeSig TryRelocateTypeRef(TypeRef typeRef)
         {
-            return _moduleDef.Import(typeRef).ToTypeSig();
+            if (typeRef.DefinitionAssembly.IsCorLib())
+                return null;
+            var importedTypeRef = _moduleDef.Import(typeRef).ToTypeSig();
+            return importedTypeRef;
         }
 
         public TypeImporter(ModuleDef moduleDef)

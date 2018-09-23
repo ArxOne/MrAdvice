@@ -7,8 +7,14 @@
 
 namespace ExternalAdvices
 {
+    using System.Collections.Generic;
+
     public interface IExternalAdvisedInterface
     {
         void F(ExternalData externalData);
+
+        void G(int? a);
+
+        void H(IList<ExternalData> e);
     }
 }
