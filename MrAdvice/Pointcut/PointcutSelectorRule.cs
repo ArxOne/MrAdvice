@@ -11,6 +11,7 @@ namespace ArxOne.MrAdvice.Pointcut
     using System.Linq;
     using System.Text.RegularExpressions;
     using Annotation;
+    using global::MrAdvice.Annotation;
 
     /// <summary>
     /// Represents a simple rule of pointcut
@@ -34,7 +35,15 @@ namespace ArxOne.MrAdvice.Pointcut
         /// <value>
         /// The attributes.
         /// </value>
-        public MemberAttributes Attributes { get; set; } = MemberAttributes.Any;
+        public VisibilityScope Scope { get; set; } = VisibilityScope.Any;
+
+        /// <summary>
+        /// Gets or sets the kind.
+        /// </summary>
+        /// <value>
+        /// The kind.
+        /// </value>
+        public MemberKind Kind { get; set; } = MemberKind.Any;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PointcutSelectorRule"/> class.
@@ -76,7 +85,7 @@ namespace ArxOne.MrAdvice.Pointcut
         /// <returns></returns>
         private static bool WildcardMatch(string wildcard, string s, int wildcardIndex, int sIndex, bool ignoreCase)
         {
-            for (;;)
+            for (; ; )
             {
                 // in the wildcard end, if we are at tested string end, then strings match
                 if (wildcardIndex == wildcard.Length)
@@ -161,26 +170,39 @@ namespace ArxOne.MrAdvice.Pointcut
         }
 
         /// <summary>
-        /// Indicates whether the attributes must be selected for advice.
+        /// Indicates whether the scope must be selected for advice.
         /// </summary>
-        /// <param name="memberAttributes">The member attributes.</param>
+        /// <param name="visibilityScope">The member attributes.</param>
         /// <returns></returns>
-        public bool Select(MemberAttributes? memberAttributes)
+        public bool Select(VisibilityScope? visibilityScope)
         {
-            if (!memberAttributes.HasValue)
+            if (!visibilityScope.HasValue)
                 return true;
-            return (memberAttributes.Value & Attributes) != 0;
+            return (visibilityScope.Value & Scope) != 0;
+        }
+
+        /// <summary>
+        /// Indicates whether the kind must be selected for advice.
+        /// </summary>
+        /// <param name="memberKind">Kind of the member.</param>
+        /// <returns></returns>
+        public bool Select(MemberKind? memberKind)
+        {
+            if (!memberKind.HasValue)
+                return true;
+            return (memberKind.Value & Kind) != 0;
         }
 
         /// <summary>
         /// Indicates if the pair [name, attribute] have to be selected for advice
         /// </summary>
         /// <param name="reflectionName">Name of the reflection.</param>
-        /// <param name="memberAttributes">The member attributes.</param>
+        /// <param name="visibilityScope">The member attributes.</param>
+        /// <param name="memberKind">Kind of the member.</param>
         /// <returns></returns>
-        public bool Select(string reflectionName, MemberAttributes? memberAttributes)
+        public bool Select(string reflectionName, VisibilityScope? visibilityScope, MemberKind? memberKind)
         {
-            return Select(memberAttributes) && Select(reflectionName);
+            return Select(visibilityScope) && Select(memberKind) && Select(reflectionName);
         }
     }
 }

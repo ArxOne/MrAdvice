@@ -8,6 +8,7 @@
 namespace ArxOne.MrAdvice.Annotation
 {
     using System;
+    using global::MrAdvice.Annotation;
 
     /// <summary>
     /// Allows to include or exclude namespaces/types/methods/etc. from being advised
@@ -17,6 +18,9 @@ namespace ArxOne.MrAdvice.Annotation
     {
         /// <summary>
         /// Gets or sets the name matching patterns.
+        /// Wildcards are ? and * (as usual)
+        /// or ! which matches any character but the "." (dot)
+        /// or @ which matches any string until a "." (dot) is met
         /// Default is extended Wildcard, Regex mode is enabled by using ^ at start or $ at end
         /// </summary>
         /// <value>
@@ -25,12 +29,33 @@ namespace ArxOne.MrAdvice.Annotation
         public string[] Names { get; set; }
 
         /// <summary>
+        /// Gets or sets the scope of items where the .
+        /// </summary>
+        /// <value>
+        /// The scope.
+        /// </value>
+        public VisibilityScope Scope { get; set; } = VisibilityScope.Any;
+
+        /// <summary>
+        /// Gets or sets the kind.
+        /// </summary>
+        /// <value>
+        /// The kind.
+        /// </value>
+        public MemberKind Kind { get; set; } = MemberKind.Any;
+
+        /// <summary>
         /// Gets or sets the attributes to match.
         /// </summary>
         /// <value>
         /// The attributes.
         /// </value>
-        public MemberAttributes Attributes { get; set; } = MemberAttributes.Any;
+        [Obsolete("Use Scope property instead")]
+        public VisibilityScope Attributes
+        {
+            get => Scope;
+            set => Scope = value;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PointcutAttribute"/> class.

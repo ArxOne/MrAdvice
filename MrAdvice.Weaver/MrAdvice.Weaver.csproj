@@ -74,6 +74,7 @@
     <Compile Include="Utility\SequenceEqualityComparer.cs" />
     <Compile Include="Utility\TypeComparer.cs" />
     <Compile Include="Weaver\AspectWeaver.Select.cs" />
+    <Compile Include="Weaver\MethodDefExtensions.cs" />
     <Compile Include="Weaver\PointcutSelectorExtensions.cs" />
     <Compile Include="Weaver\WeavingContext.cs" />
     <None Include="Blobber" />

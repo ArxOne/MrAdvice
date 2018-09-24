@@ -62,9 +62,9 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns></returns>
-        public static MemberAttributes GetMemberAttributes(this Type type)
+        public static VisibilityScope GetVisibilityScope(this Type type)
         {
-            return type.GetInformationReader().Attributes.ToMemberAttributes();
+            return type.GetInformationReader().Attributes.ToVisibilityScope();
         }
 
         /// <summary>
@@ -72,26 +72,26 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="typeAttributes">The type attributes.</param>
         /// <returns></returns>
-        public static MemberAttributes ToMemberAttributes(this TypeAttributes typeAttributes)
+        public static VisibilityScope ToVisibilityScope(this TypeAttributes typeAttributes)
         {
             switch (typeAttributes & TypeAttributes.VisibilityMask)
             {
                 case TypeAttributes.NotPublic: // 0
-                    return MemberAttributes.PrivateGlobalType;
+                    return VisibilityScope.PrivateGlobalType;
                 case TypeAttributes.Public: // 1
-                    return MemberAttributes.PublicGlobalType;
+                    return VisibilityScope.PublicGlobalType;
                 case TypeAttributes.NestedPublic: // 2
-                    return MemberAttributes.PublicNestedType;
+                    return VisibilityScope.PublicNestedType;
                 case TypeAttributes.NestedPrivate: // 3
-                    return MemberAttributes.PrivateNestedType;
+                    return VisibilityScope.PrivateNestedType;
                 case TypeAttributes.NestedFamily: // 4
-                    return MemberAttributes.FamilyNestedType;
+                    return VisibilityScope.FamilyNestedType;
                 case TypeAttributes.NestedAssembly: // 5
-                    return MemberAttributes.AssemblyNestedType;
+                    return VisibilityScope.AssemblyNestedType;
                 case TypeAttributes.NestedFamANDAssem: // 6
-                    return MemberAttributes.FamilyAndAssemblyType;
+                    return VisibilityScope.FamilyAndAssemblyType;
                 case TypeAttributes.NestedFamORAssem: // 7
-                    return MemberAttributes.FamilyOrAssemblyType;
+                    return VisibilityScope.FamilyOrAssemblyType;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

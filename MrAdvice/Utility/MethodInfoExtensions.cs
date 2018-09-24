@@ -9,6 +9,7 @@ namespace ArxOne.MrAdvice.Utility
 {
     using System.Reflection;
     using Annotation;
+    using global::MrAdvice.Annotation;
 
     /// <summary>
     /// Extensions for <see cref="MethodBase"/>
@@ -20,32 +21,59 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="methodBase">The method base.</param>
         /// <returns></returns>
-        public static MemberAttributes GetMemberAttributes(this MethodBase methodBase) => ToMemberAttributes(methodBase.Attributes);
+        public static VisibilityScope GetVisibilityScope(this MethodBase methodBase) => ToVisibilityScope(methodBase.Attributes);
 
         /// <summary>
-        /// Converts <see cref="MethodAttributes"/> to <see cref="MemberAttributes"/>.
+        /// Converts <see cref="MethodAttributes"/> to <see cref="VisibilityScope"/>.
         /// </summary>
         /// <param name="methodAttributes">The method attributes.</param>
         /// <returns></returns>
-        public static MemberAttributes ToMemberAttributes(this MethodAttributes methodAttributes)
+        public static VisibilityScope ToVisibilityScope(this MethodAttributes methodAttributes)
         {
             switch (methodAttributes & MethodAttributes.MemberAccessMask)
             {
                 case MethodAttributes.Private: // 1
-                    return MemberAttributes.PrivateMember;
+                    return VisibilityScope.PrivateMember;
                 case MethodAttributes.FamANDAssem: // 2
-                    return MemberAttributes.FamilyAndAssemblyMember;
+                    return VisibilityScope.FamilyAndAssemblyMember;
                 case MethodAttributes.Assembly: // 3
-                    return MemberAttributes.AssemblyMember;
+                    return VisibilityScope.AssemblyMember;
                 case MethodAttributes.Family: // 4
-                    return MemberAttributes.FamilyMember;
+                    return VisibilityScope.FamilyMember;
                 case MethodAttributes.FamORAssem: // 5
-                    return MemberAttributes.FamilyOrAssemblyMember;
+                    return VisibilityScope.FamilyOrAssemblyMember;
                 case MethodAttributes.Public: // 6
-                    return MemberAttributes.PublicMember;
+                    return VisibilityScope.PublicMember;
                 default: // WTF?
                     return 0;
             }
+        }
+
+        /// <summary>
+        /// Gets a <see cref="MemberKind"/> that describes the <see cref="MethodBase"/>.
+        /// </summary>
+        /// <param name="methodBase">The method base.</param>
+        /// <returns></returns>
+        public static MemberKind GetMemberKind(this MethodBase methodBase)
+        {
+            if (methodBase is MethodInfo methodInfo)
+            {
+                if (methodBase.IsSpecialName)
+                {
+                    if (methodInfo.Name.StartsWith("get_"))
+                        return MemberKind.PropertyGet;
+                    if (methodInfo.Name.StartsWith("set_"))
+                        return MemberKind.PropertySet;
+                    if (methodInfo.Name.StartsWith("add_"))
+                        return MemberKind.EventAdd;
+                    if (methodInfo.Name.StartsWith("remove_"))
+                        return MemberKind.EventRemove;
+                }
+
+                return MemberKind.Method;
+            }
+
+            return MemberKind.Constructor;
         }
     }
 }

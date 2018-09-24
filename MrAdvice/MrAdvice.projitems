@@ -44,7 +44,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\ExcludePointcutAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\ExecutionPointAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\IncludePointcutAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Annotation\MemberAttributes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\VisibilityScope.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\MemberKind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\PointcutAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\PriorityAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Aspect\AdviceInfo.cs" />

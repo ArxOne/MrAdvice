@@ -10,6 +10,7 @@ namespace ArxOne.MrAdvice.Pointcut
     using System.Collections.Generic;
     using System.Linq;
     using Annotation;
+    using global::MrAdvice.Annotation;
 
     /// <summary>
     /// Represents a full pointcut selector, with any number of <see cref="PointcutSelectorRule"/>
@@ -36,19 +37,20 @@ namespace ArxOne.MrAdvice.Pointcut
         /// Indicates whether the specified [name, attribute] pair has to be selected for advice
         /// </summary>
         /// <param name="reflectionName">Name of the reflection.</param>
-        /// <param name="memberAttributes">The attributes.</param>
+        /// <param name="visibilityScope">The attributes.</param>
+        /// <param name="memberKind">Kind of the member.</param>
         /// <returns></returns>
-        public bool Select(string reflectionName, MemberAttributes? memberAttributes)
+        public bool Select(string reflectionName, VisibilityScope? visibilityScope, MemberKind? memberKind)
         {
             // first of all: inclusion
             // if no rule, or if any matches, then it's OK
             // below is the opposite :)
-            if (IncludeRules.Count > 0 && !IncludeRules.Any(r => r.Select(reflectionName, memberAttributes)))
+            if (IncludeRules.Count > 0 && !IncludeRules.Any(r => r.Select(reflectionName, visibilityScope, memberKind)))
                 return false;
             // now check that no rule applies
             if (ExcludeRules.Count == 0)
                 return true;
-            return ExcludeRules.All(r => !r.Select(reflectionName, memberAttributes));
+            return ExcludeRules.All(r => !r.Select(reflectionName, visibilityScope, memberKind));
         }
 
         /// <summary>

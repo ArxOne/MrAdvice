@@ -476,9 +476,9 @@ namespace ArxOne.MrAdvice
             return advices;
         }
 
-        private static bool SelectAdvice(AdviceInfo adviceInfo, PointcutSelector exclusionRules)
+        private static bool SelectAdvice(AdviceInfo adviceInfo, PointcutSelector rules)
         {
-            return exclusionRules.Select(adviceInfo.Advice.GetType().FullName, null);
+            return rules.Select(adviceInfo.Advice.GetType().FullName, null, null);
         }
 
         private static AdviceInfo CreateAdvice<TAdvice>(TAdvice advice)

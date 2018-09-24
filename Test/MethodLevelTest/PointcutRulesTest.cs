@@ -33,7 +33,7 @@ namespace MethodLevelTest
             }
         }
 
-        [IncludePointcut(Attributes = MemberAttributes.PublicMember)]
+        [IncludePointcut(Scope = VisibilityScope.PublicMember)]
         public class PublicAdvice : Attribute, IMethodAdvice
         {
             public void Advise(MethodAdviceContext context)

@@ -24,14 +24,13 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         private static MethodInfo GetMethodInfoFromLambda(LambdaExpression lambdaExpression)
         {
-            var methodCallExpression = lambdaExpression.Body as MethodCallExpression;
-            if (methodCallExpression != null)
+            if (lambdaExpression.Body is MethodCallExpression methodCallExpression)
                 return methodCallExpression.Method;
             var memberExpression = lambdaExpression.Body as MemberExpression;
             var propertyInfo = memberExpression?.Member as PropertyInfo;
             if (propertyInfo != null)
                 return propertyInfo.GetGetMethod();
-            throw new ArgumentException("Lambda expression is not correctly formated for MethodInfo extraction");
+            throw new ArgumentException("Lambda expression is not correctly formatted for MethodInfo extraction");
         }
 
         /// <summary>
@@ -84,7 +83,7 @@ namespace ArxOne.MrAdvice.Utility
                 case ExpressionType.MemberAccess:
                     return ((MemberExpression)expression).Member;
                 default:
-                    throw new ArgumentException("Lambda expression is not correctly formated for MemberInfo extraction");
+                    throw new ArgumentException("Lambda expression is not correctly formatted for MemberInfo extraction");
             }
         }
 
@@ -162,10 +161,10 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="value">The value.</param>
         internal static void SetMemberValueInternal(this MemberInfo memberInfo, object instance, object value)
         {
-            if (memberInfo is FieldInfo)
-                ((FieldInfo)memberInfo).SetValue(instance, value);
-            else if (memberInfo is PropertyInfo)
-                ((PropertyInfo)memberInfo).GetSetMethod(true).Invoke(instance, new[] { value });
+            if (memberInfo is FieldInfo fieldInfo)
+                fieldInfo.SetValue(instance, value);
+            else if (memberInfo is PropertyInfo info)
+                info.GetSetMethod(true).Invoke(instance, new[] { value });
             else
                 throw new ArgumentException("memberInfo");
         }
@@ -177,10 +176,10 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         internal static Type GetMemberType(this MemberInfo memberInfo)
         {
-            if (memberInfo is FieldInfo)
-                return ((FieldInfo)memberInfo).FieldType;
-            if (memberInfo is PropertyInfo)
-                return ((PropertyInfo)memberInfo).PropertyType;
+            if (memberInfo is FieldInfo info)
+                return info.FieldType;
+            if (memberInfo is PropertyInfo propertyInfo)
+                return propertyInfo.PropertyType;
             throw new ArgumentException("memberInfo");
         }
 

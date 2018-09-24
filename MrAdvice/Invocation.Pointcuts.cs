@@ -23,9 +23,10 @@ namespace ArxOne.MrAdvice
         private static bool Select(MethodBase targetMethod, AdviceInfo advice)
         {
             var reflectionName = $"{targetMethod.DeclaringType.FullName}.{targetMethod.Name}";
-            var memberAttributes = targetMethod.Attributes.ToMemberAttributes()
-                | targetMethod.DeclaringType.GetInformationReader().Attributes.ToMemberAttributes();
-            return GetPointcutSelector(advice.Advice.GetType()).Select(reflectionName, memberAttributes);
+            var visibilityScope = targetMethod.Attributes.ToVisibilityScope()
+                | targetMethod.DeclaringType.GetInformationReader().Attributes.ToVisibilityScope();
+            var memberKind = targetMethod.GetMemberKind();
+            return GetPointcutSelector(advice.Advice.GetType()).Select(reflectionName, visibilityScope, memberKind);
         }
 
         /// <summary>
@@ -108,7 +109,8 @@ namespace ArxOne.MrAdvice
             var rule = new PointcutSelectorRule();
             if (pointcutAttribute.Names != null)
                 rule.Names.AddRange(pointcutAttribute.Names);
-            rule.Attributes = pointcutAttribute.Attributes;
+            rule.Scope = pointcutAttribute.Scope;
+            rule.Kind = pointcutAttribute.Kind;
             return rule;
         }
     }

@@ -13,7 +13,7 @@ namespace ArxOne.MrAdvice.Annotation
     /// Pointcut member matching attributes
     /// </summary>
     [Flags]
-    public enum MemberAttributes
+    public enum VisibilityScope
     {
         /// <summary>
         /// Public type

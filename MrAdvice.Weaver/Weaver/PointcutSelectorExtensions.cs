@@ -27,12 +27,15 @@ namespace ArxOne.MrAdvice.Weaver
         public static bool Select(this PointcutSelector pointcutSelector, MethodDef method)
         {
             var name = $"{method.DeclaringType.FullName}.{method.Name}".Replace('/', '+');
-            return pointcutSelector.Select(name, ((MethodAttributes)method.Attributes).ToMemberAttributes() | ((TypeAttributes)method.DeclaringType.Attributes).ToMemberAttributes());
+            var visibilityScope = ((MethodAttributes)method.Attributes).ToVisibilityScope() | ((TypeAttributes)method.DeclaringType.Attributes).ToVisibilityScope();
+            var memberKind = method.GetMemberKind();
+            return pointcutSelector.Select(name, visibilityScope, memberKind);
         }
+
         public static bool Select(this PointcutSelector pointcutSelector, ITypeDefOrRef type)
         {
             var name = type.FullName.Replace('/', '+');
-            return pointcutSelector.Select(name, null);
+            return pointcutSelector.Select(name, null, null);
         }
     }
 }

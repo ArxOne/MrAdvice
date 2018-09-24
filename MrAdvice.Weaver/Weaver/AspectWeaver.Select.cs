@@ -11,6 +11,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Linq;
     using Annotation;
     using dnlib.DotNet;
+    using global::MrAdvice.Annotation;
     using Pointcut;
     using Reflection.Groups;
     using Utility;
@@ -139,8 +140,11 @@ namespace ArxOne.MrAdvice.Weaver
                 if (namedArgument.Name == nameof(PointcutAttribute.Names))
                     rule.Names.AddRange(GetStrings(namedArgument.Value));
                 // attributes
-                if (namedArgument.Name == nameof(PointcutAttribute.Attributes))
-                    rule.Attributes = (MemberAttributes)namedArgument.Value;
+                if (namedArgument.Name == "Attributes" || namedArgument.Name == nameof(PointcutAttribute.Scope))
+                    rule.Scope = (VisibilityScope)namedArgument.Value;
+                // kind
+                if (namedArgument.Name == nameof(PointcutAttribute.Kind))
+                    rule.Kind = (MemberKind)namedArgument.Value;
             }
             yield return rule;
         }
