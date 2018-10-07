@@ -95,7 +95,7 @@ namespace ArxOne.MrAdvice.Utility
 
 #if !WINDOWS_UWP
         /// <summary>
-        /// Gets a signel custom attribute (or null).
+        /// Gets a signal custom attribute (or null).
         /// </summary>
         /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
         /// <param name="memberInfo">The member information.</param>
