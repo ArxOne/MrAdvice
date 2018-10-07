@@ -15,7 +15,7 @@ namespace MethodLevelTest.Advices
         [ThreadStatic]
         public static int LastStaticAdvicesCount;
 
-        public static IntroducedField<int> StaticAdvicesCount { get; set; }
+        public static IntroducedField<int> StaticAdvicesCount;
 
         public void Advise(MethodAdviceContext context)
         {
