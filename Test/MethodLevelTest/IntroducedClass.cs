@@ -20,5 +20,9 @@ namespace MethodLevelTest
         [StaticIntroductionAdvice]
         public void BMethod()
         { }
+
+        [StaticIntroductionAdvice]
+        public void B2Method()
+        { }
     }
 }
