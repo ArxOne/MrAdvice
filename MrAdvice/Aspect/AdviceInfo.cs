@@ -25,7 +25,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// The advice.
         /// </value>
         public IAdvice Advice { get; }
-        
+
         /// <summary>
         /// Gets the method advice or null if none.
         /// </summary>
@@ -80,7 +80,7 @@ namespace ArxOne.MrAdvice.Aspect
         /// <value>
         /// The introduced fields.
         /// </value>
-        public IList<MemberInfo> IntroducedFields { get; } 
+        public IList<MemberInfo> IntroducedFields { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdviceInfo"/> class.
@@ -128,9 +128,17 @@ namespace ArxOne.MrAdvice.Aspect
         private static Type GetIntroducedType(MemberInfo memberInfo)
         {
             var memberType = memberInfo.GetMemberType();
-            if (!memberType.GetInformationReader().IsGenericType || memberType.GetAssignmentReader().GetGenericTypeDefinition() != typeof(IntroducedField<>))
-                return null;
-            return memberType.GetAssignmentReader().GetGenericArguments()[0];
+            var introducedFieldType = typeof(IntroducedField<>);
+            foreach (var ancestor in memberType.GetSelfAndAncestors())
+            {
+                if (!ancestor.GetInformationReader().IsGenericType)
+                    continue;
+
+                var genericAncestorDefinition = ancestor.GetAssignmentReader().GetGenericTypeDefinition();
+                if (genericAncestorDefinition == introducedFieldType)
+                    return memberType.GetAssignmentReader().GetGenericArguments()[0];
+            }
+            return null;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns></returns>
-        public static IEnumerable<Type> GetSelfAndParents(this Type type)
+        public static IEnumerable<Type> GetSelfAndAncestors(this Type type)
         {
             while (type != null)
             {
@@ -30,6 +30,14 @@ namespace ArxOne.MrAdvice.Utility
                 type = type.GetInformationReader().BaseType;
             }
         }
+
+        /// <summary>
+        /// Enumerates from type to topmost parent
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        [Obsolete("Use GetSelfAndAncestors() instead")]
+        public static IEnumerable<Type> GetSelfAndParents(this Type type) => GetSelfAndAncestors(type);
 
         /// <summary>
         /// Gets the self and enclosing types.

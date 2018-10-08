@@ -79,23 +79,24 @@ namespace ArxOne.MrAdvice
         /// <param name="advice">The advice.</param>
         /// <param name="adviceMemberInfo">The advice member information.</param>
         /// <param name="advisedType">Type of the advised.</param>
-        /// <param name="advisedMemberName"></param>
+        /// <param name="advisedMemberName">Name of the advised member.</param>
+        /// <param name="isShared">if set to <c>true</c> [is shared].</param>
         /// <returns></returns>
+        /// <exception cref="InvalidOperationException">Internal error, can not find matching introduced field</exception>
         /// <exception cref="System.InvalidOperationException">Internal error, can not find matching introduced field</exception>
-        internal static FieldInfo FindIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType, string advisedMemberName)
+        internal static FieldInfo FindIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType, string advisedMemberName, bool isShared)
         {
             var introducedFieldType = GetIntroducedType(adviceMemberInfo);
             var adviceType = advice.GetType();
-            var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, advisedMemberName, adviceMemberInfo.Name);
-            var linkID = string.Format("{0}:{1}", adviceType.AssemblyQualifiedName, adviceMemberInfo.Name);
+            var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, advisedMemberName, adviceMemberInfo.Name, isShared);
             const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-            var introducedField = FindIntroducedFieldByName(advisedType, introducedFieldName, linkID, bindingFlags)
+            var introducedField = FindIntroducedFieldByName(advisedType, introducedFieldName, introducedFieldName, bindingFlags)
                      ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), null, bindingFlags)
-                     ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), linkID, bindingFlags);
+                     ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), introducedFieldName, bindingFlags);
             if (introducedField == null)
                 throw new InvalidOperationException("Internal error, can not find matching introduced field");
             var introducedFieldAttribute = introducedField.GetAttributes<IntroducedFieldAttribute>().Single();
-            introducedFieldAttribute.LinkID = linkID;
+            introducedFieldAttribute.LinkID = introducedFieldName;
             return introducedField;
         }
 
@@ -138,7 +139,6 @@ namespace ArxOne.MrAdvice
             var introducedFieldAttribute = introducedField.GetAttributes<IntroducedFieldAttribute>().Single();
             if (introducedFieldAttribute.LinkID != null && introducedFieldAttribute.LinkID != linkID)
                 return null;
-            introducedFieldAttribute.LinkID = linkID;
             return introducedField;
         }
 

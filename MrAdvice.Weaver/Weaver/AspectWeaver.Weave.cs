@@ -839,9 +839,9 @@ namespace ArxOne.MrAdvice.Weaver
         private void IntroduceMember(ModuleDef moduleDefinition, string memberName, ITypeDefOrRef memberType, bool isStatic,
             ITypeDefOrRef adviceType, TypeDef advisedType, ICustomAttributeType markerAttribute, string introducedMemberName, bool isNotSerialized, WeavingContext context)
         {
-            if (IsIntroduction(memberType, out var introducedFieldType, context))
+            if (IsIntroduction(memberType, out var introducedFieldType, out var isShared, context))
             {
-                var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, introducedMemberName, memberName);
+                var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, introducedMemberName, memberName, isShared);
                 lock (advisedType.Fields)
                 {
                     if (advisedType.Fields.All(f => f.Name != introducedFieldName))

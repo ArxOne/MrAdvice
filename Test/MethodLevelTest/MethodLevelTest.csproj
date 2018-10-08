@@ -86,6 +86,7 @@
     <Compile Include="Advices\RecordCall.cs" />
     <Compile Include="Advices\RecordProperties.cs" />
     <Compile Include="Advices\RecordMethods.cs" />
+    <Compile Include="Advices\SharedIntroductionAdvice.cs" />
     <Compile Include="Advices\StaticIntroductionAdvice.cs" />
     <Compile Include="AdvisedClass.cs" />
     <Compile Include="AsyncTest.cs" />

@@ -137,6 +137,7 @@ namespace ArxOne.MrAdvice.Weaver
                 IncludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(IncludePointcutAttribute)),
                 ExcludeAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludeAdvicesAttribute)),
                 IntroducedFieldType = TypeResolver.Resolve(moduleDefinition, typeof(IntroducedField<>)),
+                SharedIntroducedFieldType = TypeResolver.Resolve(moduleDefinition, typeof(SharedIntroducedField<>)),
             };
 
             if (context.AdviceInterfaceType != null)
@@ -214,13 +215,15 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="adviceMemberTypeReference">The type reference.</param>
         /// <param name="introducedFieldType">Type of the introduced field.</param>
+        /// <param name="isShared">if set to <c>true</c> the introduced field is shared among advices of the same type.</param>
         /// <param name="context">The context.</param>
         /// <returns>
         ///   <c>true</c> if the specified advice member type reference is introduction; otherwise, <c>false</c>.
         /// </returns>
-        private bool IsIntroduction(ITypeDefOrRef adviceMemberTypeReference, out ITypeDefOrRef introducedFieldType, WeavingContext context)
+        private bool IsIntroduction(ITypeDefOrRef adviceMemberTypeReference, out ITypeDefOrRef introducedFieldType, out bool isShared, WeavingContext context)
         {
             introducedFieldType = null;
+            isShared = false;
             var genericAdviceMemberTypeReference = adviceMemberTypeReference.TryGetGenericInstSig();
             if (genericAdviceMemberTypeReference == null)
                 return false;
@@ -233,6 +236,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return false;
 
             introducedFieldType = genericAdviceMemberTypeReference.GenericArguments[0].ToTypeDefOrRef();
+            isShared = genericAdviceMemberTypeDefinition.ImplementsType(context.SharedIntroducedFieldType, TypeResolver);
             return true;
         }
 

@@ -120,8 +120,7 @@ namespace ArxOne.MrAdvice
             var returnType = advisedMethodInfo?.ReturnType;
             // no Task means aspect was sync, so everything already ended
             // or it may also been an async void, meaning that we don't care about it
-            if (adviceTask == null || returnType == null ||
-                !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
+            if (adviceTask == null || returnType == null || !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
             {
                 adviceTask?.Wait();
                 return adviceValues.ReturnValue;
@@ -373,7 +372,7 @@ namespace ArxOne.MrAdvice
         {
             // inheritance hierarchy
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndEnclosing()
-                .SelectMany(t => t.GetSelfAndParents())
+                .SelectMany(t => t.GetSelfAndAncestors())
                 .Distinct()
                 .ToArray();
             // assemblies
@@ -433,7 +432,7 @@ namespace ArxOne.MrAdvice
             where TAdvice : class, IAdvice
         {
             bool typeItSelf = true;
-            foreach (var typeAncestor in type.GetSelfAndParents())
+            foreach (var typeAncestor in type.GetSelfAndAncestors())
             {
                 var typeAttributes = typeAncestor.GetAttributes<TAdvice>();
                 foreach (var typeAttribute in typeAttributes)

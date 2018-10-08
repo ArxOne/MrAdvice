@@ -21,8 +21,12 @@ namespace MethodLevelTest
         public void BMethod()
         { }
 
-        [StaticIntroductionAdvice]
-        public void B2Method()
+        [SharedIntroductionAdvice]
+        public void CMethod()
+        { }
+
+        [SharedIntroductionAdvice]
+        public void C2Method()
         { }
     }
 }

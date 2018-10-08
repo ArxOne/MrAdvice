@@ -6,7 +6,7 @@
     <SharedGUID>e62b50b0-4a7d-4173-9ab8-9cfd5f4dd7c3</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>MrAdvice</Import_RootNamespace>
+    <Import_RootNamespace>ArxOne.MrAdvice</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Advices.cs" />
@@ -54,6 +54,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroducedField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroducedFieldAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroductionRules.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Introduction\SharedIntroducedField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Invocation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Invocation.Introduction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Invocation.Pointcuts.cs" />

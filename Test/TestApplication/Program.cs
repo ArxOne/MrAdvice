@@ -147,6 +147,7 @@ namespace TestApplication
     {
         public List<int> X;
 
+        public SharedIntroducedField<int> Y;
         public IntroducedField<int> Z;
 
         public void Advise(MethodAdviceContext context)

@@ -154,7 +154,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         private TypeDef DoResolve(ITypeDefOrRef typeDefOrRef)
         {
-            return AsTypeDef(typeDefOrRef) ?? ResolverResolve(typeDefOrRef) ?? FullResolve(typeDefOrRef);
+            return AsTypeDef(typeDefOrRef) ?? AsTypeSpecDef(typeDefOrRef) ?? ResolverResolve(typeDefOrRef) ?? FullResolve(typeDefOrRef);
         }
 
 
@@ -163,11 +163,20 @@ namespace ArxOne.MrAdvice.Weaver
             return typeDefOrRef as TypeDef;
         }
 
+        private TypeDef AsTypeSpecDef(ITypeDefOrRef typeDefOrRef)
+        {
+            return (typeDefOrRef as TypeSpec)?.ResolveTypeDef();
+        }
+
         private TypeDef ResolverResolve(ITypeDefOrRef typeDefOrRef)
         {
-            var typeRef = (TypeRef)typeDefOrRef;
-            var typeDef = _resolver.Resolve(typeRef);
-            return typeDef;
+            if (typeDefOrRef is TypeRef typeRef)
+            {
+                var typeDef = _resolver.Resolve(typeRef);
+                return typeDef;
+            }
+
+            return null;
         }
 
         private TypeDef FullResolve(ITypeDefOrRef typeDefOrRef)

@@ -15,6 +15,8 @@ namespace ArxOne.MrAdvice.Introduction
     /// This class allows to introduce fields in advised type
     /// To use it, declare instances of it in advice,
     /// then use the indexer to access introduced field in advised type instance
+    /// This field (the default) introduces one field per advice. If you advise two methods in the same class, you'll get to introduced fields.
+    /// In order to get one introduced field per class, use <see cref="SharedIntroducedField{TField}"/>
     /// </summary>
     /// <typeparam name="TFieldType">The type of the field type.</typeparam>
     public class IntroducedField<TFieldType>
@@ -40,7 +42,7 @@ namespace ArxOne.MrAdvice.Introduction
                 if (_fieldInfos.TryGetValue(key, out var introducedField))
                     return introducedField;
 
-                _fieldInfos[key] = introducedField = Invocation.FindIntroducedField(_ownerAdvice, _ownerMemberInfo, targetType, targetName);
+                _fieldInfos[key] = introducedField = Invocation.FindIntroducedField(_ownerAdvice, _ownerMemberInfo, targetType, targetName, IsShared);
                 return introducedField;
             }
         }
@@ -66,6 +68,14 @@ namespace ArxOne.MrAdvice.Introduction
                 introducedField.SetValue(context.Target, value);
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the field is shared.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is shared; otherwise, <c>false</c>.
+        /// </value>
+        protected virtual bool IsShared => false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IntroducedField{TFieldType}" /> class.

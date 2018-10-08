@@ -39,6 +39,19 @@ namespace MethodLevelTest
 
         [TestMethod]
         [TestCategory("Introduction")]
+        public void SimpleSharedIntroductionByFieldTest()
+        {
+            var z = SharedIntroductionAdvice.LastSharedAdvicesCount;
+
+            var c1 = new IntroducedClass();
+            c1.CMethod();
+            c1.C2Method();
+
+            Assert.AreEqual(2, SharedIntroductionAdvice.LastSharedAdvicesCount - z);
+        }
+
+        [TestMethod]
+        [TestCategory("Introduction")]
         public void SimpleIntroductionByPropertyTest()
         {
             var c = new IntroducedClass();

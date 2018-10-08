@@ -16,11 +16,14 @@ namespace ArxOne.MrAdvice.Introduction
         /// </summary>
         /// <param name="adviceNamespace">The advice namespace.</param>
         /// <param name="adviceName">Name of the advice.</param>
-        /// <param name="advisedMemberName"></param>
+        /// <param name="advisedMemberName">Name of the advised member.</param>
         /// <param name="adviceMemberName">Name of the advice member.</param>
+        /// <param name="isShared">if set to <c>true</c> [is shared].</param>
         /// <returns></returns>
-        public static string GetName(string adviceNamespace, string adviceName, string advisedMemberName, string adviceMemberName)
+        public static string GetName(string adviceNamespace, string adviceName, string advisedMemberName, string adviceMemberName, bool isShared)
         {
+            if (isShared) // shared advices are not related to an advised member
+                return $".{adviceNamespace}.{adviceName}.{adviceMemberName}";
             return $".{adviceNamespace}.{adviceName}.{advisedMemberName}.{adviceMemberName}";
         }
     }
