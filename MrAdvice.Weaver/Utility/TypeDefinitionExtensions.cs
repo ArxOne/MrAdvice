@@ -96,19 +96,19 @@ namespace ArxOne.MrAdvice.Utility
             typeDefinition.Methods.Add(propertyDefinition.SetMethod);
             var setterParameter = new ParamDefUser("value");
             propertyDefinition.SetMethod.ParamDefs.Add(setterParameter);
-            var setterIntructions = new Instructions(propertyDefinition.SetMethod.Body.Instructions, moduleDefinition);
-            setterIntructions.Emit(OpCodes.Ldarg_0);
-            setterIntructions.Emit(OpCodes.Ldarg_1);
-            setterIntructions.Emit(OpCodes.Stfld, backingFieldDefinition);
-            setterIntructions.Emit(OpCodes.Ret);
+            var setterInstructions = new Instructions(propertyDefinition.SetMethod.Body.Instructions, moduleDefinition);
+            setterInstructions.Emit(OpCodes.Ldarg_0);
+            setterInstructions.Emit(OpCodes.Ldarg_1);
+            setterInstructions.Emit(OpCodes.Stfld, backingFieldDefinition);
+            setterInstructions.Emit(OpCodes.Ret);
             // ...getter
             propertyDefinition.GetMethod = CreatePropertyMethod("get_" + name, typeReference.ToTypeSig());
             propertyDefinition.GetMethod.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute, typeResolver));
             typeDefinition.Methods.Add(propertyDefinition.GetMethod);
-            var getterIntructions = new Instructions(propertyDefinition.GetMethod.Body.Instructions, moduleDefinition);
-            getterIntructions.Emit(OpCodes.Ldarg_0);
-            getterIntructions.Emit(OpCodes.Ldfld, backingFieldDefinition);
-            getterIntructions.Emit(OpCodes.Ret);
+            var getterInstructions = new Instructions(propertyDefinition.GetMethod.Body.Instructions, moduleDefinition);
+            getterInstructions.Emit(OpCodes.Ldarg_0);
+            getterInstructions.Emit(OpCodes.Ldfld, backingFieldDefinition);
+            getterInstructions.Emit(OpCodes.Ret);
         }
 
         /// <summary>
