@@ -118,5 +118,13 @@ namespace ArxOne.MrAdvice.Weaver
         /// The type of the exclude advice attribute.
         /// </value>
         public TypeDef ExcludeAdviceAttributeType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the introduced field.
+        /// </summary>
+        /// <value>
+        /// The type of the introduced field.
+        /// </value>
+        public TypeDef IntroducedFieldType { get; set; }
     }
 }

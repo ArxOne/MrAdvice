@@ -129,5 +129,23 @@ namespace ArxOne.MrAdvice.Utility
             methodDefinition.Body = new CilBody { InitLocals = true };
             return methodDefinition;
         }
+
+        /// <summary>
+        /// Indicates whether the given type implements another (or is the other).
+        /// </summary>
+        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="parent">The parent.</param>
+        /// <param name="typeResolver">The type resolver.</param>
+        /// <returns></returns>
+        public static bool ImplementsType(this TypeDef typeDefinition, ITypeDefOrRef parent, TypeResolver typeResolver = null)
+        {
+            foreach (var ancestorType in typeDefinition.GetSelfAndParents(typeResolver))
+            {
+                if (ancestorType.SafeEquivalent(parent))
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

@@ -24,8 +24,8 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static bool SafeEquivalent(this ITypeDefOrRef a, ITypeDefOrRef b)
         {
-            if (a == null || b == null)
-                return (a == null) == (b == null);
+            if (a is null || b is null)
+                return a is null == b is null;
             return a.FullName == b.FullName;
         }
 
@@ -38,8 +38,8 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static bool SafeEquivalent(this TypeSig a, TypeSig b)
         {
-            if (a == null || b == null)
-                return (a == null) == (b == null);
+            if (a is null || b is null)
+                return a is null == b is null;
             return a.FullName == b.FullName;
         }
 
@@ -53,8 +53,8 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static bool SafeEquivalent(this IMethod a, IMethod b, bool fullCompare = false)
         {
-            if (a == null || b == null)
-                return (a == null) == (b == null);
+            if (a is null || b is null)
+                return a is null == b is null;
             if (fullCompare && a.NumberOfGenericParameters != b.NumberOfGenericParameters)
                 return false;
             return a.DeclaringType.FullName == b.DeclaringType.FullName && a.Name == b.Name;
@@ -70,8 +70,8 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static bool SafeEquivalent(this MethodInfo a, MethodInfo b, bool fullCompare = false)
         {
-            if (a == null || b == null)
-                return (a == null) == (b == null);
+            if (a is null || b is null)
+                return a is null == b is null;
             if (fullCompare && a.GetGenericArguments().Length != b.GetGenericArguments().Length)
                 return false;
             return a.DeclaringType.FullName == b.DeclaringType.FullName && a.Name == b.Name;

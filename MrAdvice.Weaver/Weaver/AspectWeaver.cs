@@ -136,6 +136,7 @@ namespace ArxOne.MrAdvice.Weaver
                 ExcludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludePointcutAttribute)),
                 IncludePointcutAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(IncludePointcutAttribute)),
                 ExcludeAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludeAdvicesAttribute)),
+                IntroducedFieldType = TypeResolver.Resolve(moduleDefinition, typeof(IntroducedField<>)),
             };
 
             if (context.AdviceInterfaceType != null)
@@ -213,15 +214,23 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="adviceMemberTypeReference">The type reference.</param>
         /// <param name="introducedFieldType">Type of the introduced field.</param>
-        /// <returns></returns>
-        private static bool IsIntroduction(ITypeDefOrRef adviceMemberTypeReference, out ITypeDefOrRef introducedFieldType)
+        /// <param name="context">The context.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified advice member type reference is introduction; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsIntroduction(ITypeDefOrRef adviceMemberTypeReference, out ITypeDefOrRef introducedFieldType, WeavingContext context)
         {
+            introducedFieldType = null;
             var genericAdviceMemberTypeReference = adviceMemberTypeReference.TryGetGenericInstSig();
-            if (genericAdviceMemberTypeReference == null || genericAdviceMemberTypeReference.GenericType.FullName != typeof(IntroducedField<>).FullName)
-            {
-                introducedFieldType = null;
+            if (genericAdviceMemberTypeReference == null)
                 return false;
-            }
+
+            var genericAdviceMemberTypeDefinition = TypeResolver.Resolve(genericAdviceMemberTypeReference.GenericType.TypeDefOrRef);
+            if (genericAdviceMemberTypeDefinition == null) // in DEBUG or bogus cases, this may not be resolved. Whatever, this is not our field
+                return false;
+
+            if (!genericAdviceMemberTypeDefinition.ImplementsType(context.IntroducedFieldType, TypeResolver))
+                return false;
 
             introducedFieldType = genericAdviceMemberTypeReference.GenericArguments[0].ToTypeDefOrRef();
             return true;

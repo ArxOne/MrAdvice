@@ -10,9 +10,11 @@
 namespace TestApplication
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using ArxOne.MrAdvice.Advice;
+    using ArxOne.MrAdvice.Introduction;
     using ExternalAdvices;
     using MrAdvice.Advice;
 
@@ -143,6 +145,10 @@ namespace TestApplication
 
     public class SomeAdvice : Attribute, IMethodAdvice
     {
+        public List<int> X;
+
+        public IntroducedField<int> Z;
+
         public void Advise(MethodAdviceContext context)
         {
             context.Proceed();
