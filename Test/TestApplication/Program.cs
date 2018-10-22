@@ -13,6 +13,7 @@ namespace TestApplication
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Threading.Tasks;
     using ArxOne.MrAdvice.Advice;
     using ArxOne.MrAdvice.Introduction;
     using ExternalAdvices;
@@ -75,7 +76,10 @@ namespace TestApplication
     //    }
     //}
 
-    public interface IExternalAdvisedInterface2 : IExternalAdvisedInterface { }
+    public interface IExternalAdvisedInterface2 : IExternalAdvisedInterface
+    {
+        Task<ExternalData[]> I();
+    }
 
     public static class Program
     {

@@ -815,6 +815,11 @@ namespace ArxOne.MrAdvice.Weaver
                     implementationMethod.Parameters[parameterIndex].Type = module.Import(relocatedParameterType);
                 }
             }
+            if (implementationMethod.ReturnType != null && !implementationMethod.ReturnType.SafeEquivalent(module.CorLibTypes.Void))
+            {
+                var relocatedReturnType = typeImporter.TryRelocateTypeSig(implementationMethod.ReturnType) ?? implementationMethod.ReturnType;
+                implementationMethod.ReturnType = relocatedReturnType;
+            }
             implementationMethod.GenericParameters.AddRange(interfaceMethod.GenericParameters);
             implementationType.Methods.Add(implementationMethod);
             var interfaceMethodRef = module.Import(interfaceMethod);

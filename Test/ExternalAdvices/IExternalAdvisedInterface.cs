@@ -8,6 +8,7 @@
 namespace ExternalAdvices
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     public interface IExternalAdvisedInterface
     {
@@ -16,5 +17,7 @@ namespace ExternalAdvices
         void G(int? a);
 
         void H(IList<ExternalData> e);
+
+        Task<ExternalData> Z();
     }
 }
