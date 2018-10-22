@@ -104,8 +104,7 @@ namespace ArxOne.MrAdvice.Weaver
             var method = markedMethod.Node.Method;
 
             // sanity check
-            var moduleDefinition = (ModuleDefMD)method.Module;
-            if (method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
+            if (!method.HasReturnType)
             {
                 var customAttributes = method.CustomAttributes;
                 if (customAttributes.Any(c => c.AttributeType.Name == "AsyncStateMachineAttribute"))
@@ -288,7 +287,7 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Stelem_Ref); // and store
             }
 
-            if (innerMethod.ReturnType.SafeEquivalent(module.CorLibTypes.Void))
+            if (!innerMethod.HasReturnType)
                 instructions.Emit(OpCodes.Ldnull);
             else
                 instructions.EmitBoxIfNecessary(innerMethod.ReturnType);
@@ -345,8 +344,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <exception cref="System.InvalidOperationException"></exception>
         private void WritePointcutBody(MethodDef method, MethodDef innerMethod, bool abstractedTarget, WeavingContext context)
         {
-            var moduleDefinition = method.Module;
-
             // now empty the old one and make it call the inner method...
             if (method.Body == null)
                 method.Body = new CilBody();
@@ -369,7 +366,7 @@ namespace ArxOne.MrAdvice.Weaver
                 typeArgument, abstractedArgument, genericParametersArgument);
 
             // get return value
-            if (!method.ReturnType.SafeEquivalent(moduleDefinition.CorLibTypes.Void))
+            if (method.HasReturnType)
                 instructions.EmitUnboxOrCastIfNecessary(method.ReturnType);
             else
                 instructions.Emit(OpCodes.Pop); // if no return type, ignore Proceed() result
@@ -716,7 +713,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <summary>
         /// Weaves the interface.
         /// What we do here is:
-        /// - creating a class (wich is named after the interface name)
+        /// - creating a class (which is named after the interface name)
         /// - this class implements all interface members
         /// - all members invoke Invocation.ProcessInterfaceMethod
         /// </summary>
@@ -815,7 +812,7 @@ namespace ArxOne.MrAdvice.Weaver
                     implementationMethod.Parameters[parameterIndex].Type = module.Import(relocatedParameterType);
                 }
             }
-            if (implementationMethod.ReturnType != null && !implementationMethod.ReturnType.SafeEquivalent(module.CorLibTypes.Void))
+            if (implementationMethod.HasReturnType)
             {
                 var relocatedReturnType = typeImporter.TryRelocateTypeSig(implementationMethod.ReturnType) ?? implementationMethod.ReturnType;
                 implementationMethod.ReturnType = relocatedReturnType;

@@ -18,6 +18,6 @@ namespace ExternalAdvices
 
         void H(IList<ExternalData> e);
 
-        Task<ExternalData> Z();
+        Task<ExternalData[]> Z();
     }
 }
