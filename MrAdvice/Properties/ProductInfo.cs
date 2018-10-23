@@ -19,7 +19,7 @@ using ArxOne.MrAdvice.Properties;
 [assembly: NeutralResourcesLanguage("en")]
 
 [assembly: AssemblyVersion("2")]
-[assembly: AssemblyFileVersion("2.7.1")] // 
+[assembly: AssemblyFileVersion("2.7.2")] // 
 
 namespace ArxOne.MrAdvice.Properties
 {
@@ -31,6 +31,6 @@ namespace ArxOne.MrAdvice.Properties
         /// <summary>
         /// The version
         /// </summary>
-        public const string Version = "2.7.1";
+        public const string Version = "2.7.2";
     }
 }

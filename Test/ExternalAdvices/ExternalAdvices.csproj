@@ -49,6 +49,7 @@
     <Compile Include="ExternalData.cs" />
     <Compile Include="ExternalEmptyAdvice.cs" />
     <Compile Include="AddProperty.cs" />
+    <Compile Include="ExternalEnum.cs" />
     <Compile Include="IExternalAdvisedInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

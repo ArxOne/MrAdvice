@@ -19,5 +19,8 @@ namespace ExternalAdvices
         void H(IList<ExternalData> e);
 
         Task<ExternalData[]> Z();
+
+        void T(ExternalEnum e);
+        void T2(Task<ExternalEnum> ee);
     }
 }

@@ -15,19 +15,19 @@ namespace ArxOne.MrAdvice.Reflection
     {
         private readonly ModuleDef _moduleDef;
 
-        protected override TypeSig TryRelocateTypeRef(TypeRef typeRef)
+        protected override ITypeDefOrRef TryRelocateTypeRef(TypeRef typeRef)
         {
             if (typeRef.DefinitionAssembly.IsCorLib())
                 return null;
-            var importedTypeRef = _moduleDef.Import(typeRef).ToTypeSig();
+            var importedTypeRef = _moduleDef.Import(typeRef);
             return importedTypeRef;
         }
 
-        protected override TypeSig TryRelocateTypeDef(TypeDef typeDef)
+        protected override ITypeDefOrRef TryRelocateTypeDef(TypeDef typeDef)
         {
             if (typeDef.DefinitionAssembly.IsCorLib())
                 return null;
-            var importedTypeRef = _moduleDef.Import(typeDef).ToTypeSig();
+            var importedTypeRef = _moduleDef.Import(typeDef);
             return importedTypeRef;
         }
 
