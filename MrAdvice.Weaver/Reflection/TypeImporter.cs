@@ -23,6 +23,14 @@ namespace ArxOne.MrAdvice.Reflection
             return importedTypeRef;
         }
 
+        protected override TypeSig TryRelocateTypeDef(TypeDef typeDef)
+        {
+            if (typeDef.DefinitionAssembly.IsCorLib())
+                return null;
+            var importedTypeRef = _moduleDef.Import(typeDef).ToTypeSig();
+            return importedTypeRef;
+        }
+
         public TypeImporter(ModuleDef moduleDef)
         {
             _moduleDef = moduleDef;

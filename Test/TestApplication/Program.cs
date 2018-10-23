@@ -78,7 +78,7 @@ namespace TestApplication
 
     public interface IExternalAdvisedInterface2 : IExternalAdvisedInterface
     {
-        Task<ExternalData[]> I();
+        //Task<ExternalData[]> I();
     }
 
     public static class Program
