@@ -98,6 +98,7 @@
     <Compile Include="ExceptionTest.cs" />
     <Compile Include="GenericEmptyAdvisedClass.cs" />
     <Compile Include="IAdvisedInterface.cs" />
+    <Compile Include="IDynamicHandledInterface.cs" />
     <Compile Include="IIndirectAdvisedInterface.cs" />
     <Compile Include="InterfaceTest.cs" />
     <Compile Include="IntroducedClass.cs" />

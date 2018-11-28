@@ -11,6 +11,7 @@ namespace ArxOne.MrAdvice.Advice
     using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
+    using Annotation;
 
     /// <summary>
     /// Extensions to IAdvice (one extension, actually)
@@ -40,8 +41,8 @@ namespace ArxOne.MrAdvice.Advice
         /// <param name="interfaceType">Type of the interface.</param>
         /// <param name="referenceAssembly">The reference assembly.</param>
         /// <param name="referenceType">Type of the reference.</param>
-        /// <returns></returns>
-        private static object Handle(this IAdvice advice, Type interfaceType, Assembly referenceAssembly, Type referenceType)
+        /// <returns>An object implementing the requested interface</returns>
+        public static object Handle(this IAdvice advice, Type interfaceType, Assembly referenceAssembly = null, Type referenceType = null)
         {
             var implementationType = GetImplementationType(interfaceType, referenceAssembly, referenceType);
             var implementation = (AdvisedInterface)Activator.CreateInstance(implementationType);
@@ -74,7 +75,7 @@ namespace ArxOne.MrAdvice.Advice
                                       where i.Contains(interfaceType)
                                       select t).FirstOrDefault();
                 if (implementationType == null)
-                    throw new ArgumentException("Interface implementation was not found. Ensure that the Handle<> method is called directly (without reflection).");
+                    throw new ArgumentException("Interface implementation was not found. Ensure that the Handle<> method is called directly (without reflection) or that the interface is marked with [" + nameof(DynamicHandleAttribute) + "].");
                 Types[interfaceType] = implementationType;
                 return implementationType;
             }

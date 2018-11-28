@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Advice\SyncAdviceContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Advice\WeavingContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\AbstractTargetAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Annotation\DynamicHandleAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\ExcludeAdvicesAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\ExcludePointcutAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Annotation\ExecutionPointAttribute.cs" />

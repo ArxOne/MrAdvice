@@ -89,7 +89,7 @@ namespace ArxOne.MrAdvice.Weaver
                 weavableMethods.ForAll(m => WeaveMethod(moduleDefinition, m, context));
 
                 auditTimer.NewZone("Weavable interfaces detection");
-                var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).ToArray();
+                var weavableInterfaces = GetAdviceHandledInterfaces(moduleDefinition).Union(GetDynamicHandledInterfaces(moduleDefinition)).ToArray();
                 auditTimer.NewZone("Interface methods weaving");
                 weavableInterfaces.ForAll(i => WeaveInterface(moduleDefinition, i, context));
 
@@ -238,6 +238,16 @@ namespace ArxOne.MrAdvice.Weaver
             introducedFieldType = genericAdviceMemberTypeReference.GenericArguments[0].ToTypeDefOrRef();
             isShared = genericAdviceMemberTypeDefinition.ImplementsType(context.SharedIntroducedFieldType, TypeResolver);
             return true;
+        }
+
+        private IEnumerable<TypeDef> GetDynamicHandledInterfaces(ModuleDef moduleDefinition)
+        {
+            var dynamicHandleAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(DynamicHandleAttribute));
+            foreach (var interfaceDefinition in moduleDefinition.Types.Where(t => t.IsInterface))
+            {
+                if (interfaceDefinition.CustomAttributes.Any(c => c.AttributeType.SafeEquivalent(dynamicHandleAttributeType)))
+                    yield return interfaceDefinition;
+            }
         }
 
         /// <summary>

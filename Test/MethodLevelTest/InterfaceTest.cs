@@ -16,7 +16,7 @@ namespace MethodLevelTest
     [TestClass]
     public class InterfaceTest
     {
-        public interface IExternalAdvisedInterface2: IExternalAdvisedInterface { }
+        public interface IExternalAdvisedInterface2 : IExternalAdvisedInterface { }
 
         [TestMethod]
         [TestCategory("Weaving")]
@@ -118,6 +118,15 @@ namespace MethodLevelTest
             var a = new InterfaceCheckAdvice();
             var i = a.Handle<IAdvisedInterface>();
             i.DoNothing();
+        }
+
+        [TestMethod]
+        [TestCategory("Interface")]
+        public void DynamicHandleTest()
+        {
+            var a = new InterfaceCheckAdvice();
+            var i = (IDynamicHandledInterface)a.Handle(typeof(IDynamicHandledInterface));
+            i.Nop();
         }
     }
 }
