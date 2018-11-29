@@ -80,15 +80,14 @@ namespace ArxOne.MrAdvice
         /// <param name="adviceMemberInfo">The advice member information.</param>
         /// <param name="advisedType">Type of the advised.</param>
         /// <param name="advisedMemberName">Name of the advised member.</param>
-        /// <param name="isShared">if set to <c>true</c> [is shared].</param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException">Internal error, can not find matching introduced field</exception>
         /// <exception cref="System.InvalidOperationException">Internal error, can not find matching introduced field</exception>
-        internal static FieldInfo FindIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType, string advisedMemberName, bool isShared)
+        internal static FieldInfo FindIntroducedField(IAdvice advice, MemberInfo adviceMemberInfo, Type advisedType, string advisedMemberName)
         {
             var introducedFieldType = GetIntroducedType(adviceMemberInfo);
             var adviceType = advice.GetType();
-            var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, advisedMemberName, adviceMemberInfo.Name, isShared);
+            var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, advisedMemberName, adviceMemberInfo.Name);
             const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             var introducedField = FindIntroducedFieldByName(advisedType, introducedFieldName, introducedFieldName, bindingFlags)
                      ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), null, bindingFlags)
@@ -118,9 +117,16 @@ namespace ArxOne.MrAdvice
         private static Type GetIntroducedType(MemberInfo memberInfo)
         {
             var memberType = memberInfo.GetMemberType();
-            if (!memberType.GetInformationReader().IsGenericType || memberType.GetAssignmentReader().GetGenericTypeDefinition() != typeof(IntroducedField<>))
+            // sanity check: it must be generic
+            if (!memberType.GetInformationReader().IsGenericType)
                 return null;
-            return memberType.GetAssignmentReader().GetGenericArguments()[0];
+            // check it inherits from IntroducedField<>
+            var genericArgument = memberType.GetAssignmentReader().GetGenericArguments()[0];
+            var genericIntroducedFieldType = typeof(IntroducedField<>).MakeGenericType(genericArgument);
+            if (!genericIntroducedFieldType.GetAssignmentReader().IsAssignableFrom(memberType))
+                return null;
+
+            return genericArgument;
         }
 
         /// <summary>
@@ -156,7 +162,7 @@ namespace ArxOne.MrAdvice
             return (from fieldInfo in advisedType.GetMembersReader().GetFields(bindingFlags)
                     where fieldInfo.FieldType == fieldType
                           && fieldInfo.IsStatic == isStatic
-                    let introducedFieldAttribute = fieldInfo.GetAttributes<IntroducedFieldAttribute>().Single()
+                    let introducedFieldAttribute = fieldInfo.GetAttributes<IntroducedFieldAttribute>().SingleOrDefault()
                     where introducedFieldAttribute != null
                           && introducedFieldAttribute.LinkID == linkID
                     select fieldInfo).FirstOrDefault();

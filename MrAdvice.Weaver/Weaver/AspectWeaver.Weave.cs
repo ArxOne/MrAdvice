@@ -843,21 +843,30 @@ namespace ArxOne.MrAdvice.Weaver
         {
             if (IsIntroduction(memberType, out var introducedFieldType, out var isShared, context))
             {
-                var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, introducedMemberName, memberName, isShared);
-                lock (advisedType.Fields)
+                var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, isShared ? null : introducedMemberName, memberName);
+                IntroduceMember(moduleDefinition, advisedType, markerAttribute, isStatic, isNotSerialized, introducedFieldName, introducedFieldType.ToTypeSig());
+                // also introduce registry (this is done once anyway)
+                IntroduceMember(moduleDefinition, advisedType, markerAttribute, false, true, IntroductionRules.RegistryName, moduleDefinition.CorLibTypes.Object); // introduced as object by pure laziness
+            }
+        }
+
+        private void IntroduceMember(ModuleDef moduleDefinition, TypeDef advisedType, ICustomAttributeType markerAttribute, bool isStatic, bool isNotSerialized,
+            string introducedFieldName,
+            TypeSig introducedFieldType)
+        {
+            lock (advisedType.Fields)
+            {
+                if (advisedType.Fields.All(f => f.Name != introducedFieldName))
                 {
-                    if (advisedType.Fields.All(f => f.Name != introducedFieldName))
-                    {
-                        var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public)
-                                              | (isNotSerialized ? FieldAttributes.NotSerialized : 0);
-                        if (isStatic)
-                            fieldAttributes |= FieldAttributes.Static;
-                        Logging.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);
-                        var introducedFieldTypeReference = TypeImporter.Import(moduleDefinition, introducedFieldType.ToTypeSig());
-                        var introducedField = new FieldDefUser(introducedFieldName, new FieldSig(introducedFieldTypeReference), fieldAttributes);
-                        introducedField.CustomAttributes.Add(new CustomAttribute(markerAttribute));
-                        advisedType.Fields.Add(introducedField);
-                    }
+                    var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public)
+                                          | (isNotSerialized ? FieldAttributes.NotSerialized : 0);
+                    if (isStatic)
+                        fieldAttributes |= FieldAttributes.Static;
+                    Logging.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);
+                    var introducedFieldTypeReference = TypeImporter.Import(moduleDefinition, introducedFieldType);
+                    var introducedField = new FieldDefUser(introducedFieldName, new FieldSig(introducedFieldTypeReference), fieldAttributes);
+                    introducedField.CustomAttributes.Add(new CustomAttribute(markerAttribute));
+                    advisedType.Fields.Add(introducedField);
                 }
             }
         }
