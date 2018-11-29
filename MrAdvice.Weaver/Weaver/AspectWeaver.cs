@@ -138,6 +138,9 @@ namespace ArxOne.MrAdvice.Weaver
                 ExcludeAdviceAttributeType = TypeResolver.Resolve(moduleDefinition, typeof(ExcludeAdvicesAttribute)),
                 IntroducedFieldType = TypeResolver.Resolve(moduleDefinition, typeof(IntroducedField<>)),
                 SharedIntroducedFieldType = TypeResolver.Resolve(moduleDefinition, typeof(SharedIntroducedField<>)),
+#pragma warning disable 618
+                IntroducedFieldsType = TypeResolver.Resolve(moduleDefinition, typeof(IntroducedFieldsRegistry)),
+#pragma warning restore 618
             };
 
             if (context.AdviceInterfaceType != null)

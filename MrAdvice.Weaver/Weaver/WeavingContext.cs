@@ -134,5 +134,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// The type of the shared introduced field.
         /// </value>
         public TypeDef SharedIntroducedFieldType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the introduced fields.
+        /// </summary>
+        /// <value>
+        /// The type of the introduced fields.
+        /// </value>
+        public ITypeDefOrRef IntroducedFieldsType { get; set; }
+
     }
 }

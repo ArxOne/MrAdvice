@@ -846,7 +846,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, isShared ? null : introducedMemberName, memberName);
                 IntroduceMember(moduleDefinition, advisedType, markerAttribute, isStatic, isNotSerialized, introducedFieldName, introducedFieldType.ToTypeSig());
                 // also introduce registry (this is done once anyway)
-                IntroduceMember(moduleDefinition, advisedType, markerAttribute, false, true, IntroductionRules.RegistryName, moduleDefinition.CorLibTypes.Object); // introduced as object by pure laziness
+                IntroduceMember(moduleDefinition, advisedType, markerAttribute, false, true, IntroductionRules.RegistryName, context.IntroducedFieldsType.ToTypeSig()); // introduced as object by pure laziness
             }
         }
 

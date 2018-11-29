@@ -8,7 +8,9 @@
 namespace ArxOne.MrAdvice.Introduction
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Advice;
 
@@ -17,46 +19,6 @@ namespace ArxOne.MrAdvice.Introduction
     /// </summary>
     public abstract class IntroducedField
     {
-        /// <summary>
-        /// Key for introduced fields mapping
-        /// </summary>
-        protected class Key : IEquatable<Key>
-        {
-            private readonly Type _ownerAdviceType;
-            private readonly MemberInfo _ownerMemberInfo;
-            private readonly string _advisedTargetName;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Key"/> class.
-            /// </summary>
-            /// <param name="ownerAdviceType"></param>
-            /// <param name="ownerMemberInfo">The owner member information.</param>
-            /// <param name="advisedTargetName">Name of the advised target.</param>
-            public Key(Type ownerAdviceType, MemberInfo ownerMemberInfo, string advisedTargetName)
-            {
-                _ownerAdviceType = ownerAdviceType;
-                _ownerMemberInfo = ownerMemberInfo;
-                _advisedTargetName = advisedTargetName;
-            }
-
-            /// <inheritdoc />
-            public bool Equals(Key other)
-            {
-                return ReferenceEquals(_ownerAdviceType, other._ownerAdviceType)
-                       && Equals(_ownerMemberInfo, other._ownerMemberInfo)
-                       && _advisedTargetName == other._advisedTargetName;
-            }
-
-            /// <inheritdoc />
-            public override bool Equals(object obj) => Equals(obj as Key);
-
-            /// <inheritdoc />
-            public override int GetHashCode()
-            {
-                return _ownerAdviceType.GetHashCode() ^ _ownerMemberInfo.GetHashCode() ^ (_advisedTargetName ?? "").GetHashCode();
-            }
-        }
-
         private static readonly object FieldInfosLock = new object();
 
         private readonly IAdvice _ownerAdvice;
@@ -84,24 +46,42 @@ namespace ArxOne.MrAdvice.Introduction
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        protected static IDictionary<Key, FieldInfo> GetIntroducedFieldsRegistry(IAdviceContextTarget context)
+#pragma warning disable 618
+        private IntroducedFieldsRegistry GetIntroducedFieldsRegistry(IAdviceContextTarget context)
         {
-            var registryField = context.TargetType.GetMembersReader().GetField(IntroductionRules.RegistryName, BindingFlags.Instance | BindingFlags.NonPublic);
-            var registry = (IDictionary<Key, FieldInfo>)registryField.GetValue(context.Target);
+            var contextTargetType = context.TargetType;
+            var registryField = GetRegistryField(contextTargetType);
+            var registry = (IntroducedFieldsRegistry)registryField.GetValue(context.Target);
             if (registry is null)
             {
                 lock (FieldInfosLock)
                 {
-                    registry = (IDictionary<Key, FieldInfo>)registryField.GetValue(context.Target);
+                    registry = (IntroducedFieldsRegistry)registryField.GetValue(context.Target);
                     if (registry is null)
                     {
-                        registry = new Dictionary<Key, FieldInfo>();
+                        registry = new IntroducedFieldsRegistry();
                         registryField.SetValue(context.Target, registry);
                     }
                 }
             }
 
             return registry;
+        }
+
+        private readonly IDictionary<Type, FieldInfo> _registryFields = new ConcurrentDictionary<Type, FieldInfo>();
+
+        private FieldInfo GetRegistryField(Type contextTargetType)
+        {
+            if (!_registryFields.TryGetValue(contextTargetType, out var registryFieldInfo))
+                _registryFields[contextTargetType] = registryFieldInfo = LoadRegistryField(contextTargetType);
+            return registryFieldInfo;
+        }
+
+        private static FieldInfo LoadRegistryField(Type contextTargetType)
+        {
+            var registryField = contextTargetType.GetMembersReader().GetField(IntroductionRules.RegistryName, BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? contextTargetType.GetMembersReader().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).FirstOrDefault(f => f.FieldType == typeof(IntroducedFieldsRegistry));
+            return registryField;
         }
 
         /// <summary>
@@ -120,14 +100,15 @@ namespace ArxOne.MrAdvice.Introduction
             lock (fieldInfos)
             {
                 //var key = Tuple.Create(targetType, targetName);
-                var key = new Key(_ownerAdvice.GetType(), _ownerMemberInfo, targetName);
-                if (fieldInfos.TryGetValue(key, out var introducedField))
+                var key = new IntroducedFieldsRegistry.Key(_ownerAdvice.GetType(), _ownerMemberInfo, targetName);
+                if (fieldInfos.Fields.TryGetValue(key, out var introducedField))
                     return introducedField;
 
-                fieldInfos[key] = introducedField = Invocation.FindIntroducedField(_ownerAdvice, _ownerMemberInfo, targetType, targetName);
+                fieldInfos.Fields[key] = introducedField = Invocation.FindIntroducedField(_ownerAdvice, _ownerMemberInfo, targetType, targetName);
                 return introducedField;
             }
         }
+#pragma warning restore 618
     }
 
     /// <summary>

@@ -54,7 +54,7 @@ namespace ArxOne.MrAdvice.Weaver
         }
 
         /// <summary>
-        /// Resolves the full name to a type definiton.
+        /// Resolves the full name to a type definition.
         /// Eventually searches through direct references
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
@@ -64,8 +64,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             lock (_resolvedTypesByName)
             {
-                TypeDef typeDefinition;
-                if (_resolvedTypesByName.TryGetValue(fullName, out typeDefinition))
+                if (_resolvedTypesByName.TryGetValue(fullName, out var typeDefinition))
                     return typeDefinition;
 
                 // 2 levels, because of level of dependency:

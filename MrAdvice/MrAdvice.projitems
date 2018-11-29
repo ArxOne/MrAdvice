@@ -55,6 +55,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroducedField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroducedFieldAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroductionRules.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Introduction\IntroducedFieldsRegistry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Introduction\SharedIntroducedField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Invocation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Invocation.Introduction.cs" />
