@@ -21,7 +21,7 @@ Mr. Advice allows you to:
 
 ## How it works
 
-It is available as a NuGet package (https://www.nuget.org/packages/MrAdvice). There is also an automatic build with tests at appveyor. The current status is [![Build status](https://ci.appveyor.com/api/projects/status/96i8xbxf954x79vw?svg=true)](https://ci.appveyor.com/project/picrap/mradvice)
+It is available as a [![NuGet Status](http://img.shields.io/nuget/v/MrAdvice.svg?style=flat-square)](https://www.nuget.org/packages/MrAdvice) package. There is also an automatic build with tests at appveyor. The current status is [![Build status](https://ci.appveyor.com/api/projects/status/96i8xbxf954x79vw?svg=true)](https://ci.appveyor.com/project/picrap/mradvice)
 
 
 ## Philosophy
