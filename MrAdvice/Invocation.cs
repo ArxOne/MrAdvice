@@ -351,11 +351,17 @@ namespace ArxOne.MrAdvice
         {
             // GetInterfaceMap is unfortunately unavailable in PCL :'(
             // ReSharper disable once PossibleNullReferenceException
-            var i = implementationMethodBase.DeclaringType.GetAssignmentReader().GetInterfaces().SingleOrDefault();
+            var interfaces = implementationMethodBase.DeclaringType.GetAssignmentReader().GetInterfaces();
             var parameterInfos = implementationMethodBase.GetParameters();
-            var m = i.GetMembersReader()
-                .GetMethod(implementationMethodBase.Name, parameterInfos.Select(p => p.ParameterType).ToArray());
-            return m;
+            var parametersTypes = parameterInfos.Select(p => p.ParameterType).ToArray();
+            foreach (var @interface in interfaces)
+            {
+                var method = @interface.GetMembersReader().GetMethod(implementationMethodBase.Name, parametersTypes);
+                if (method != null)
+                    return method;
+            }
+
+            return null;
         }
 
         /// <summary>

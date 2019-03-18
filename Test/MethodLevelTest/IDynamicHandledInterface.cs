@@ -15,4 +15,15 @@ namespace MethodLevelTest
     {
         void Nop();
     }
+
+    public interface IDynamicHandledBaseInterface
+    {
+        void A();
+    }
+
+    [DynamicHandle]
+    public interface IDynamicHandledInheritedInterface: IDynamicHandledBaseInterface
+    {
+        void B();
+    }
 }

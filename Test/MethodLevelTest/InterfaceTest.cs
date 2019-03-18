@@ -128,5 +128,23 @@ namespace MethodLevelTest
             var i = (IDynamicHandledInterface)a.Handle(typeof(IDynamicHandledInterface));
             i.Nop();
         }
+
+        [TestMethod]
+        [TestCategory("Interface")]
+        public void DynamicHandleFromInheritedTest()
+        {
+            var a = new InterfaceCheckAdvice();
+            var i = (IDynamicHandledInheritedInterface)a.Handle(typeof(IDynamicHandledInheritedInterface));
+            i.B();
+        }
+
+        [TestMethod]
+        [TestCategory("Interface")]
+        public void DynamicHandleFromBaseTest()
+        {
+            var a = new InterfaceCheckAdvice();
+            var i = (IDynamicHandledInheritedInterface)a.Handle(typeof(IDynamicHandledInheritedInterface));
+            i.A();
+        }
     }
 }
