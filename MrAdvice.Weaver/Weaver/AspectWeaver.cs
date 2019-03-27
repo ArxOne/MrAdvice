@@ -68,7 +68,6 @@ namespace ArxOne.MrAdvice.Weaver
                 var targetFramework = GetTargetFramework(moduleDefinition);
                 InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
 
-
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
                 Func<MarkedNode, bool> isWeavable = n => IsWeavable(n) && !IsFromComputerGeneratedType(n);
@@ -399,7 +398,7 @@ namespace ArxOne.MrAdvice.Weaver
             return from node in ancestorsToChildren
                    where node.Method != null
                    let allMakersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context).Select(t => t.Item2))
-                   where allMakersNode.Definitions.Any() && IsIncludedByPointcut(allMakersNode, context)
+                   where allMakersNode.Definitions.Any() && IsIncludedByPointcut(allMakersNode, context) && !IsDeclaredByValue(node)
                    let includedMarkersNode = new MarkedNode(node, allMakersNode.Definitions.Where(d => IsIncludedByNode(d, node, context)))
                    where includedMarkersNode.Definitions.Any()
                    select includedMarkersNode;
@@ -419,6 +418,20 @@ namespace ArxOne.MrAdvice.Weaver
             if (!isIncludedByPointcut)
                 Logging.WriteDebug("Excluding method '{0}' according to pointcut rules", markedNode.Node.Method.FullName);
             return isIncludedByPointcut;
+        }
+
+        /// <summary>
+        /// Indicates whether the node belongs to a strut
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool IsDeclaredByValue(ReflectionNode node)
+        {
+            var ownerType = node.GetSelfAndAncestors().OfType<TypeReflectionNode>().First();
+            // this should not happen
+            if (ownerType is null)
+                return false;
+            return !ownerType.TypeDefinition.IsClass;
         }
 
         /// <summary>
