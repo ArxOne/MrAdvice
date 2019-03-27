@@ -13,7 +13,7 @@ namespace ArxOne.MrAdvice.Annotation
     /// <summary>
     /// Allows to include or exclude namespaces/types/methods/etc. from being advised
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
     public abstract class PointcutAttribute : Attribute
     {
         /// <summary>

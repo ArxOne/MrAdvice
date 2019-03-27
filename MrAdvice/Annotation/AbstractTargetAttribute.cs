@@ -12,7 +12,7 @@ namespace ArxOne.MrAdvice.Annotation
     /// <summary>
     /// An advice marked with this attribute will remove the target property/method
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class AbstractTargetAttribute : PriorityAttribute
     {
         /// <summary>

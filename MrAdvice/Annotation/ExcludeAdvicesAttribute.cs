@@ -13,7 +13,7 @@ namespace ArxOne.MrAdvice.Annotation
     /// Allows a class to be advice-proof, by specifying which advices won't apply
     /// </summary>
     /// <seealso cref="System.Attribute" />
-    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public sealed class ExcludeAdvicesAttribute : Attribute
     {
         /// <summary>

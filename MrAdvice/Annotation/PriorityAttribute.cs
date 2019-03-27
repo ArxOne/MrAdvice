@@ -14,9 +14,9 @@ namespace ArxOne.MrAdvice.Annotation
     /// <summary>
     /// Marks an advice with priority.
     /// Advices are sorted from higher to lower (higher are processed first, lower last)
-    /// If no priority is specified, the value is taken from DefaulLevel
+    /// If no priority is specified, the value is taken from DefaultLevel
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class PriorityAttribute : Attribute
     {
         /// <summary>
