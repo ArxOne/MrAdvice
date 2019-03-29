@@ -89,7 +89,8 @@ namespace MethodLevelTest
 
     [MyProudAdvice]
     public class Something : ISomething<int>
-    { }
+    {
+    }
 
     public class ConcreteMethodAdvice : AbstractMethodAdvice
     {
@@ -103,11 +104,13 @@ namespace MethodLevelTest
     {
         [ConcreteMethodAdvice]
         public void AdvisedMethod()
-        { }
+        {
+        }
 
         [ExternalConcreteMethodAdvice]
         public void ExternalAdvisedMethod()
-        { }
+        {
+        }
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
@@ -132,7 +135,8 @@ namespace MethodLevelTest
     public class InheritableTestClass
     {
         public virtual void VF()
-        { }
+        {
+        }
     }
 
     public class InheritableDerivedTestClass : InheritableTestClass
@@ -146,7 +150,8 @@ namespace MethodLevelTest
     public class NonInheritableTestClass
     {
         public virtual void VF()
-        { }
+        {
+        }
     }
 
     public class NonInheritableDerivedTestClass : NonInheritableTestClass
@@ -183,6 +188,80 @@ namespace MethodLevelTest
             var m = typeof(NonInheritableDerivedTestClass).GetMethod("VF");
             var advices = ArxOne.MrAdvice.Advices.Get(m);
             Assert.IsNull(advices);
+        }
+    }
+
+    public struct RawStruct
+    {
+        public int Z { get; set; }
+
+        public RawStruct(int z)
+        {
+            Z = z;
+        }
+    }
+
+    [ExternalEmptyAdvice]
+    public struct EmptyAdvisedStruct
+    {
+        public int Z { get; set; }
+
+        public EmptyAdvisedStruct(int z)
+        {
+            Z = z;
+        }
+    }
+
+    public class CountAccesses : Attribute, IMethodAdvice
+    {
+        public void Advise(MethodAdviceContext context)
+        {
+            dynamic o = context.Target;
+            o.Access++;
+            context.Proceed();
+        }
+    }
+
+
+    public struct CountAdvisedStruct
+    {
+        public int Access;
+
+        public int Z { get; [CountAccesses] set; }
+
+        public CountAdvisedStruct(int z)
+        {
+            Access = 0;
+            Z = z;
+        }
+    }
+
+    [TestClass]
+    public class StructTest
+    {
+        [TestMethod]
+        public void RawMethodTest()
+        {
+            RawStruct s = new RawStruct(10);
+            s.Z++;
+            Assert.AreEqual(11, s.Z);
+        }
+
+        [TestMethod]
+        public void AdvisedMethodTest()
+        {
+            var s = new EmptyAdvisedStruct(20);
+            s.Z++;
+            Assert.AreEqual(21, s.Z);
+        }
+
+        [TestMethod]
+        public void CountAdvisedMethodTest()
+        {
+            var s = new CountAdvisedStruct(30);
+            s.Z++;
+            Assert.AreEqual(31, s.Z);
+            Assert.AreEqual(2, s.Access);
         }
     }
 }

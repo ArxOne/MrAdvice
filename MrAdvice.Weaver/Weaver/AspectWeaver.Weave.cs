@@ -91,7 +91,7 @@ namespace ArxOne.MrAdvice.Weaver
                 staticCtor.Body.Instructions.Add(new Instruction(OpCodes.Ret));
             }
 
-            return new Instructions(staticCtor.Body.Instructions, staticCtor.Module);
+            return new Instructions(staticCtor.Body, staticCtor.Module);
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace ArxOne.MrAdvice.Weaver
             proceederMethod.GenericParameters.AddRange(innerMethod.GenericParameters.Select(p => p.Clone(innerMethod)));
 
             // object, object[] -> this, arguments
-            var instructions = new Instructions(proceederMethod.Body.Instructions, module);
+            var instructions = new Instructions(proceederMethod.Body, module);
 
             var declaringType = innerMethod.DeclaringType.ToTypeSig();
             if (innerMethod.DeclaringType.HasGenericParameters)
@@ -351,9 +351,9 @@ namespace ArxOne.MrAdvice.Weaver
             method.Body.Instructions.Clear();
             method.Body.Variables.Clear();
             method.Body.ExceptionHandlers.Clear();
-            var instructions = new Instructions(method.Body.Instructions, method.Module);
+            var instructions = new Instructions(method.Body, method.Module);
 
-            var targetArgument = GetTargetArgument(method);
+            var targetArgument = GetTargetArgument(method, out var backCopy);
             var parametersArgument = GetParametersArgument(method, out var parametersVariable);
             var methodArgument = GetMethodArgument(method);
             var innerMethodArgument = GetInnerMethodArgument(innerMethod);
@@ -362,8 +362,10 @@ namespace ArxOne.MrAdvice.Weaver
             var genericParametersArgument = GetGenericParametersArgument(method);
             var innerMethodDelegateArgument = GetInnerMethodDelegateArgument(innerMethod, method);
 
-            WriteProceedCall(instructions, context, targetArgument, parametersArgument, methodArgument, innerMethodArgument, innerMethodDelegateArgument,
+            WriteProceedCall(method.DeclaringType, instructions, context, targetArgument, parametersArgument, methodArgument, innerMethodArgument, innerMethodDelegateArgument,
                 typeArgument, abstractedArgument, genericParametersArgument);
+
+            backCopy(instructions);
 
             // get return value
             if (method.HasReturnType)
@@ -398,26 +400,30 @@ namespace ArxOne.MrAdvice.Weaver
         /// <summary>
         /// Writes the invocation call.
         /// </summary>
+        /// <param name="methodDeclaringType"></param>
         /// <param name="instructions">The instructions.</param>
         /// <param name="context">The context.</param>
         /// <param name="arguments">The arguments.</param>
         /// <exception cref="InvalidOperationException">
         /// </exception>
-        private void WriteProceedCall(Instructions instructions, WeavingContext context, params InvocationArgument[] arguments)
+        private void WriteProceedCall(TypeDef methodDeclaringType, Instructions instructions, WeavingContext context, params InvocationArgument[] arguments)
         {
-            var proceedMethod = GetProceedMethod(arguments, instructions.Module, context);
+            var proceedMethod = GetProceedMethod(methodDeclaringType, arguments, instructions.Module, context);
 
             foreach (var argument in arguments)
             {
-                if (argument.HasValue)
+                if (argument.HasValue || methodDeclaringType.IsValueType)
                     argument.Emit(instructions);
             }
 
             instructions.Emit(OpCodes.Call, proceedMethod);
         }
 
-        private IMethod GetProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
+        private IMethod GetProceedMethod(TypeDef methodDeclaringType, InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
         {
+            if (methodDeclaringType.IsValueType)
+                return GetDefaultProceedMethod(module, context);
+
             var values = arguments.Select(a => a.HasValue).ToArray();
             if (!context.ShortcutMethods.TryGetValue(values, out var proceedMethod))
                 context.ShortcutMethods[values] = proceedMethod = LoadProceedMethod(arguments, module, context);
@@ -492,7 +498,7 @@ namespace ArxOne.MrAdvice.Weaver
                 Attributes = MethodAttributes.Public | MethodAttributes.Static
             };
             shortcutType.Methods.Add(method);
-            var instructions = new Instructions(method.Body.Instructions, module);
+            var instructions = new Instructions(method.Body, module);
 
             // now, either get value from given arguments or from default
             argumentIndex = 0;
@@ -513,17 +519,40 @@ namespace ArxOne.MrAdvice.Weaver
             return method;
         }
 
-        private InvocationArgument GetTargetArgument(MethodDef method)
+        private static InvocationArgument GetTargetArgument(MethodDef method, out Action<Instructions> backCopy)
         {
             var isStatic = method.IsStatic;
+            var boxed = new Local(method.Module.CorLibTypes.Object, "boxed");
+            var declaringTypeSig = method.DeclaringType.ToTypeSig();
+            // for value types, the this is boxed to be advised (good luck managing this anyway)
+            // so the boxed value content needs to be copied back to current instance
+            var boxUnboxValue = method.DeclaringType.IsValueType;
+            if (boxUnboxValue)
+            {
+                // this unboxes and copies back to this (generates a "this=(TValue)boxed")
+                backCopy = delegate(Instructions i)
+                {
+                    i.Emit(OpCodes.Ldarg_0);
+                    i.EmitLdloc(boxed);
+                    i.Emit(OpCodes.Unbox_Any, declaringTypeSig);
+                    i.Emit(OpCodes.Stobj, declaringTypeSig);
+                };
+            }
+            else
+                backCopy = delegate { };
             return new InvocationArgument("This", !isStatic, delegate (Instructions i)
             {
                 i.Emit(OpCodes.Ldarg_0);
-                if (method.DeclaringType.IsValueType)
+                // value type has to be boxed
+                if (boxUnboxValue)
                 {
-                    var declaringTypeSig = method.DeclaringType.ToTypeSig();
+                    i.Variables.Add(boxed);
+
                     i.Emit(OpCodes.Ldobj, declaringTypeSig);
                     i.Emit(OpCodes.Box, declaringTypeSig);
+
+                    i.Emit(OpCodes.Dup);
+                    i.EmitStloc(boxed);
                 }
                 // to fix peverify 0x80131854
                 else if (method.IsConstructor)

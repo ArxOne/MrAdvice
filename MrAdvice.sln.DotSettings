@@ -6,4 +6,5 @@ http://mradvice.arxone.com/&#xD;
 Released under MIT license http://opensource.org/licenses/mit-license.php</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=ID/@EntryIndexedValue">ID</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=PCL/@EntryIndexedValue">PCL</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=proceeder/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=weavable/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

@@ -398,7 +398,7 @@ namespace ArxOne.MrAdvice.Weaver
             return from node in ancestorsToChildren
                    where node.Method != null
                    let allMakersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context).Select(t => t.Item2))
-                   where allMakersNode.Definitions.Any() && IsIncludedByPointcut(allMakersNode, context) && !IsDeclaredByValue(node)
+                   where allMakersNode.Definitions.Any() && IsIncludedByPointcut(allMakersNode, context) //&& !IsDeclaredByValue(node)
                    let includedMarkersNode = new MarkedNode(node, allMakersNode.Definitions.Where(d => IsIncludedByNode(d, node, context)))
                    where includedMarkersNode.Definitions.Any()
                    select includedMarkersNode;

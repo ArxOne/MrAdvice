@@ -10,6 +10,7 @@
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
+    using System.CodeDom;
     using System.Collections.Generic;
     using System.Reflection;
     using dnlib.DotNet;
@@ -42,14 +43,15 @@ namespace ArxOne.MrAdvice.Weaver
         /// </value>
         public int Count => _instructions.Count;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Instructions"/> class.
-        /// </summary>
-        /// <param name="instructions">The instructions.</param>
+        public LocalList Variables { get; }
+
+        /// <summary>Initializes a new instance of the <see cref="Instructions"/> class.</summary>
+        /// <param name="body">The body.</param>
         /// <param name="module">The module definition.</param>
-        public Instructions(IList<Instruction> instructions, ModuleDef module)
+        public Instructions(CilBody body, ModuleDef module)
         {
-            _instructions = instructions;
+            _instructions = body.Instructions;
+            Variables = body.Variables;
             Module = module;
         }
 
@@ -291,7 +293,7 @@ namespace ArxOne.MrAdvice.Weaver
             return this;
         }
 
-        private bool MustBox(TypeSig targetTypeSig)
+        private static bool MustBox(TypeSig targetTypeSig)
         {
             // for generics and some unknown reason, an unbox_any is needed
             if (targetTypeSig.IsGenericParameter)

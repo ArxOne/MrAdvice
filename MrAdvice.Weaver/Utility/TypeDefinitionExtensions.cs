@@ -96,7 +96,7 @@ namespace ArxOne.MrAdvice.Utility
             typeDefinition.Methods.Add(propertyDefinition.SetMethod);
             var setterParameter = new ParamDefUser("value");
             propertyDefinition.SetMethod.ParamDefs.Add(setterParameter);
-            var setterInstructions = new Instructions(propertyDefinition.SetMethod.Body.Instructions, moduleDefinition);
+            var setterInstructions = new Instructions(propertyDefinition.SetMethod.Body, moduleDefinition);
             setterInstructions.Emit(OpCodes.Ldarg_0);
             setterInstructions.Emit(OpCodes.Ldarg_1);
             setterInstructions.Emit(OpCodes.Stfld, backingFieldDefinition);
@@ -105,7 +105,7 @@ namespace ArxOne.MrAdvice.Utility
             propertyDefinition.GetMethod = CreatePropertyMethod("get_" + name, typeReference.ToTypeSig());
             propertyDefinition.GetMethod.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute, typeResolver));
             typeDefinition.Methods.Add(propertyDefinition.GetMethod);
-            var getterInstructions = new Instructions(propertyDefinition.GetMethod.Body.Instructions, moduleDefinition);
+            var getterInstructions = new Instructions(propertyDefinition.GetMethod.Body, moduleDefinition);
             getterInstructions.Emit(OpCodes.Ldarg_0);
             getterInstructions.Emit(OpCodes.Ldfld, backingFieldDefinition);
             getterInstructions.Emit(OpCodes.Ret);

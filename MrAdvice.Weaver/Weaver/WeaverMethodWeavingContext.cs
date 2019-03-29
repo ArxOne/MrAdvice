@@ -106,7 +106,7 @@ namespace ArxOne.MrAdvice.Weaver
                 if (once && ctor.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as IMethod, true)))
                     continue;
 
-                var instructions = new Instructions(ctor.Body.Instructions, _typeDefinition.Module);
+                var instructions = new Instructions(ctor.Body, _typeDefinition.Module);
                 // last instruction is a RET, so move just before it
                 instructions.Cursor = instructions.Count - 1;
                 instructions.Emit(OpCodes.Ldarg_0);
