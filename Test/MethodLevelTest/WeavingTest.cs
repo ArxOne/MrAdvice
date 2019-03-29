@@ -264,4 +264,29 @@ namespace MethodLevelTest
             Assert.AreEqual(2, s.Access);
         }
     }
+
+    public class ExternalPropertyAdvice : Attribute, IMethodAdvice
+    {
+        public ConsoleColor Color { get; set; }
+
+        public void Advise(MethodAdviceContext context)
+        {
+        }
+    }
+
+    public class WeavedWithExternal
+    {
+        [ExternalPropertyAdvice(Color = ConsoleColor.Black)]
+        public int Z { get; set; }
+    }
+
+    [TestClass]
+    public class MiscTest
+    {
+        [TestMethod]
+        public void WeavedWithExternalTest()
+        {
+            var w = new WeavedWithExternal();
+        }
+    }
 }
