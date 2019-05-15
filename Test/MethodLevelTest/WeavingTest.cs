@@ -11,6 +11,7 @@ namespace MethodLevelTest
     using System.Threading.Tasks;
     using ArxOne.MrAdvice;
     using ArxOne.MrAdvice.Advice;
+    using ArxOne.MrAdvice.Annotation;
     using ExternalAdvices;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -287,6 +288,45 @@ namespace MethodLevelTest
         public void WeavedWithExternalTest()
         {
             var w = new WeavedWithExternal();
+        }
+    }
+
+    [IncludePointcut(Scope = VisibilityScope.PublicMember)]
+    public class PublicOnlyAdvice : Attribute, IMethodAdvice
+    {
+        /// <summary>
+        /// Implements advice logic.
+        /// Usually, advice must invoke context.Proceed()
+        /// </summary>
+        /// <param name="context">The method advice context.</param>
+        /// <code></code>
+        public void Advise(MethodAdviceContext context)
+        {
+            context.Proceed();
+            context.ReturnValue = (int)context.ReturnValue + 1;
+        }
+    }
+
+    [PublicOnlyAdvice]
+    public class UnadvisedClass
+    {
+        internal UnadvisedClass() { }
+
+        internal int F(int a)
+        {
+            return a + 1;
+        }
+    }
+
+    [TestClass]
+    public class PointcutTests
+    {
+        [TestMethod]
+        public void UnadvisedTest()
+        {
+            var u = new UnadvisedClass();
+            var r = u.F(1);
+            Assert.AreEqual(2, r);
         }
     }
 }
