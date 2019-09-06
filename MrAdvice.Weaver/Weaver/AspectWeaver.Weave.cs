@@ -185,7 +185,7 @@ namespace ArxOne.MrAdvice.Weaver
             }
         }
 
-        private MethodDef WriteDelegateProceeder(MethodDef innerMethod, string methodName, MethodParameters parametersList, ModuleDef module)
+        private static MethodDef WriteDelegateProceeder(MethodDef innerMethod, string methodName, MethodParameters parametersList, ModuleDef module)
         {
             if (innerMethod == null)
                 return null;
@@ -197,8 +197,7 @@ namespace ArxOne.MrAdvice.Weaver
             var proceederMethodSignature = new MethodSig(CallingConvention.Default, 0, module.CorLibTypes.Object,
                 new TypeSig[] { module.CorLibTypes.Object, new SZArraySig(module.CorLibTypes.Object) });
             var proceederMethodAttributes = MethodAttributes.Static | MethodAttributes.Private | MethodAttributes.HideBySig;
-            var proceederMethod = new MethodDefUser(GetDelegateProceederName(methodName, innerMethod.DeclaringType),
-                proceederMethodSignature, proceederMethodAttributes);
+            var proceederMethod = new MethodDefUser(GetDelegateProceederName(methodName, innerMethod.DeclaringType), proceederMethodSignature, proceederMethodAttributes);
             proceederMethod.Body = new CilBody();
             proceederMethod.GenericParameters.AddRange(innerMethod.GenericParameters.Select(p => p.Clone(innerMethod)));
 
@@ -209,12 +208,9 @@ namespace ArxOne.MrAdvice.Weaver
             if (innerMethod.DeclaringType.HasGenericParameters)
             {
                 var genericTypeArgs = new List<TypeSig>();
-                for (int genericTypeParameterIndex = 0;
-                    genericTypeParameterIndex < innerMethod.DeclaringType.GenericParameters.Count;
-                    genericTypeParameterIndex++)
-                    genericTypeArgs.Add(new GenericVar(genericTypeParameterIndex, innerMethod.DeclaringType));
+                for (int genericTypeArgIndex = 0; genericTypeArgIndex < innerMethod.DeclaringType.GenericParameters.Count; genericTypeArgIndex++)
+                    genericTypeArgs.Add(new GenericVar(genericTypeArgIndex, innerMethod.DeclaringType));
                 declaringType = new GenericInstSig((ClassOrValueTypeSig)innerMethod.DeclaringType.ToTypeSig(), genericTypeArgs);
-                //instructions.Emit(OpCodes.Castclass, innerMethod.DeclaringType.ToTypeSig()); // arg.0 --> (target type) arg.0
             }
 
             if (!innerMethod.IsStatic)
@@ -519,18 +515,29 @@ namespace ArxOne.MrAdvice.Weaver
             return method;
         }
 
-        private static InvocationArgument GetTargetArgument(MethodDef method, out Action<Instructions> backCopy)
+        private InvocationArgument GetTargetArgument(MethodDef method, out Action<Instructions> backCopy)
         {
             var isStatic = method.IsStatic;
             var boxed = new Local(method.Module.CorLibTypes.Object, "boxed");
-            var declaringTypeSig = method.DeclaringType.ToTypeSig();
+            TypeSig declaringTypeSig;
+            var isGeneric = method.DeclaringType.HasGenericParameters;
+            if (isGeneric)
+            {
+                var genericTypeArgs = new List<TypeSig>();
+                for (int genericTypeArgIndex = 0; genericTypeArgIndex < method.DeclaringType.GenericParameters.Count; genericTypeArgIndex++)
+                    genericTypeArgs.Add(new GenericVar(genericTypeArgIndex, method.DeclaringType));
+                declaringTypeSig = new GenericInstSig((ClassOrValueTypeSig)method.DeclaringType.ToTypeSig(), genericTypeArgs);
+            }
+            else
+                declaringTypeSig = method.DeclaringType.ToTypeSig();
+
             // for value types, the this is boxed to be advised (good luck managing this anyway)
             // so the boxed value content needs to be copied back to current instance
             var boxUnboxValue = method.DeclaringType.IsValueType;
             if (boxUnboxValue)
             {
                 // this unboxes and copies back to this (generates a "this=(TValue)boxed")
-                backCopy = delegate(Instructions i)
+                backCopy = delegate (Instructions i)
                 {
                     i.Emit(OpCodes.Ldarg_0);
                     i.EmitLdloc(boxed);
@@ -564,8 +571,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var methodParameters = new MethodParameters(method);
             var hasParameters = methodParameters.Count > 0;
-            var localParametersVariable = parametersVariable =
-                hasParameters ? new Local(new SZArraySig(method.Module.CorLibTypes.Object)) { Name = "parameters" } : null;
+            var localParametersVariable = parametersVariable = hasParameters ? new Local(new SZArraySig(method.Module.CorLibTypes.Object)) { Name = "parameters" } : null;
             return new InvocationArgument("Parameters", hasParameters,
                 delegate (Instructions instructions)
                 {

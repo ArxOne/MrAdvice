@@ -235,6 +235,29 @@ namespace MethodLevelTest
             Access = 0;
             Z = z;
         }
+
+        public void F()
+        {
+            object o = this;
+        }
+    }
+
+    public struct CountAdvisedStruct<T, T2>
+    {
+        public int Access;
+
+        public int Z { get; [CountAccesses] set; }
+
+        public CountAdvisedStruct(int z)
+        {
+            Access = 0;
+            Z = z;
+        }
+
+        public void F()
+        {
+            object o = this;
+        }
     }
 
     [TestClass]
@@ -260,6 +283,15 @@ namespace MethodLevelTest
         public void CountAdvisedMethodTest()
         {
             var s = new CountAdvisedStruct(30);
+            s.Z++;
+            Assert.AreEqual(31, s.Z);
+            Assert.AreEqual(2, s.Access);
+        }
+
+        [TestMethod]
+        public void CountAdvisedMethodOnGenericStructTest()
+        {
+            var s = new CountAdvisedStruct<int, float>(30);
             s.Z++;
             Assert.AreEqual(31, s.Z);
             Assert.AreEqual(2, s.Access);

@@ -73,7 +73,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
                 return customAttributes;
             }
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether this instance is generic.
         /// </summary>
