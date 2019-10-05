@@ -7,6 +7,10 @@
 
 #endregion
 
+using TestApplication;
+
+[assembly:TestAdvice]
+
 namespace TestApplication
 {
     using System;
@@ -15,6 +19,7 @@ namespace TestApplication
     using System.IO;
     using System.Threading.Tasks;
     using ArxOne.MrAdvice.Advice;
+    using ArxOne.MrAdvice.Annotation;
     using ArxOne.MrAdvice.Introduction;
     using ExternalAdvices;
     using MrAdvice.Advice;
@@ -81,9 +86,9 @@ namespace TestApplication
         //Task<ExternalData[]> I();
     }
 
-    public static class Program
+    public static class Program1
     {
-        public static void Main(string[] args)
+        public static void Main1(string[] args)
         {
             var a = new SomeAdvice();
             var ii = a.Handle<IExternalAdvisedInterface2>();
@@ -167,4 +172,85 @@ namespace TestApplication
             context.Proceed();
         }
     }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //Works
+            var tSucceed = new TaskSucceed();
+            var task1 = tSucceed.GetTask();
+            task1.Start();
+
+            //Works
+            var tExcludeAdvice = new TaskExcludeAdvice();
+            var task2 = tExcludeAdvice.GetTask();
+            task2.Start();
+
+            //Works
+            var tExcludePointcutBase = new TaskExcludePointcutBase();
+            var task3 = tExcludePointcutBase.GetTask();
+            task3.Start();
+
+            //Throws exception
+            var tExcludePointcut = new TaskExcludePointcut();
+            var task4 = tExcludePointcut.GetTask();
+            task4.Start();
+
+            Console.ReadLine();
+        }
+    }
+
+
+    [ExcludePointcut("*TaskExcludePointcut*")]
+    [ExcludePointcut("*TaskExcludePointcutBase*")]
+    [ExcludePointcut("*TaskExcludeAdvice*")]
+    public class TestAdvice : BaseAdvice
+    {
+
+    }
+    [ExcludePointcut("*TaskExcludePointcutBase*")]
+    public abstract class BaseAdvice : Attribute, IMethodAdvice
+    {
+        public virtual void Advise(MethodAdviceContext context)
+        {
+            Console.WriteLine($"<==========before proceed {context.TargetName}==========>");
+            context.Proceed();
+            Console.WriteLine("<==========end proceed==========>");
+        }
+
+    }
+
+    public class TaskSucceed
+    {
+        public Task<int> GetTask()
+        {
+            return new Task<int>(() => 10);
+        }
+    }
+    [ExcludeAdvices("*")]
+    public class TaskExcludeAdvice
+    {
+        public Task<int> GetTask()
+        {
+            return new Task<int>(() => 10);
+        }
+    }
+
+    public class TaskExcludePointcutBase
+    {
+        public Task<int> GetTask()
+        {
+            return new Task<int>(() => 10);
+        }
+    }
+
+    public class TaskExcludePointcut
+    {
+        public Task<int> GetTask()
+        {
+            return new Task<int>(() => 10);
+        }
+    }
+
 }
