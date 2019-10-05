@@ -191,7 +191,7 @@ if not "$(ConfigurationName)"=="Release" goto :noRelease
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <!-- This is the important line: -->
-  <Import Project="$(VSToolsPath)\TextTemplating\Microsoft.TextTemplating.targets" />
+<!--  <Import Project="$(VSToolsPath)\TextTemplating\Microsoft.TextTemplating.targets" />-->
   <PropertyGroup>
     <TransformOnBuild>true</TransformOnBuild>
   </PropertyGroup>
