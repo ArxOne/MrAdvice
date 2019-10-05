@@ -532,5 +532,69 @@ namespace MethodLevelTest
             UseStruct(s);
             Assert.AreEqual(1, s.I);
         }
+
+        [AttributeUsage(AttributeTargets.Method), ArxOne.MrAdvice.Annotation.Priority(Priority)]
+        public class Advice1Attribute : Attribute, IMethodInfoAdvice
+        {
+            public void Advise(MethodInfoAdviceContext context)
+            {
+                if (MethodInfoAdviceTests.Expected != Priority)
+                    throw new InvalidOperationException();
+
+                MethodInfoAdviceTests.Expected = Priority - 1;
+            }
+
+            public const int Priority = 1;
+        }
+
+        [AttributeUsage(AttributeTargets.Method), ArxOne.MrAdvice.Annotation.Priority(Priority)]
+        public class Advice2Attribute : Attribute, IMethodInfoAdvice
+        {
+            public void Advise(MethodInfoAdviceContext context)
+            {
+                if (MethodInfoAdviceTests.Expected != Priority)
+                    throw new InvalidOperationException();
+
+                MethodInfoAdviceTests.Expected = Priority - 1;
+            }
+
+            public const int Priority = 2;
+        }
+
+        class ClassA
+        {
+            [Advice1, Advice2]
+            public static void Method() { }
+        }
+
+        class ClassB
+        {
+            [Advice2, Advice1]
+            public static void Method() { }
+        }
+
+        [TestClass]
+        public class MethodInfoAdviceTests
+        {
+            [TestMethod]
+            [TestCategory("Priority")]
+            public void MethodInfoAdviceClassA_MethodA()
+            {
+                Expected = 2;
+                ClassA.Method();
+                Assert.AreEqual(0, Expected);
+            }
+
+            [TestMethod]
+            [TestCategory("Priority")]
+            public void MethodInfoAdviceClassB_MethodB()
+            {
+                Expected = 2;
+                ClassB.Method(); // fails
+                Assert.AreEqual(0, Expected);
+            }
+
+            public static int Expected;
+        }
     }
 }

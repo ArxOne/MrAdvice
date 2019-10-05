@@ -47,7 +47,16 @@ namespace ArxOne.MrAdvice.Annotation
         /// </summary>
         /// <param name="advice">The advice.</param>
         /// <returns></returns>
-        public static int GetLevel(IAdvice advice)
+        public static int GetLevel(IAdvice advice) => GetLevelInternal(advice);
+
+        /// <summary>
+        /// Gets priority level from the specified advice.
+        /// </summary>
+        /// <param name="advice">The advice.</param>
+        /// <returns></returns>
+        public static int GetLevel(IInfoAdvice advice) => GetLevelInternal(advice);
+
+        private static int GetLevelInternal(object advice)
         {
             var priorityAttribute = advice.GetType().GetInformationReader().GetCustomAttributes(typeof(PriorityAttribute), true)
                 .Cast<PriorityAttribute>().SingleOrDefault();

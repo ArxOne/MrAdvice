@@ -15,6 +15,7 @@ namespace ArxOne.MrAdvice
     using System.Reflection;
     using System.Threading.Tasks;
     using Advice;
+    using Annotation;
     using Aspect;
     using global::MrAdvice.Advice;
     using Pointcut;
@@ -309,7 +310,7 @@ namespace ArxOne.MrAdvice
         {
             if (methodInfo == null)
                 return;
-            var methodInfoAdvices = typeAndAssemblyMethodInfoAdvices.Union(methodInfo.GetAttributes<IMethodInfoAdvice>());
+            var methodInfoAdvices = typeAndAssemblyMethodInfoAdvices.Union(methodInfo.GetAttributes<IMethodInfoAdvice>()).OrderByDescending(PriorityAttribute.GetLevel);
             foreach (var methodInfoAdvice in methodInfoAdvices)
             {
                 // actually, introducing fields does not make sense here, until we introduce static fields
