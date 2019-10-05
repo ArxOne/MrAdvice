@@ -86,6 +86,42 @@ namespace ArxOne.MrAdvice
             // from here, we build an advice chain, with at least one final advice: the one who calls the method
             var adviceValues = new AdviceValues(target, aspectInfo.AdvisedMethod.DeclaringType, parameters);
             // at least there is one context
+            var adviceContext = CreateAdviceContext(adviceValues, aspectInfo);
+
+            // if the method is no task, then we return immediately
+            // (and the adviceTask is completed)
+            var adviceTask = adviceContext.Invoke();
+
+            var advisedMethodInfo = aspectInfo.AdvisedMethod as MethodInfo;
+            var returnType = advisedMethodInfo?.ReturnType;
+            // no Task means aspect was sync, so everything already ended
+            // or it may also been an async void, meaning that we don't care about it
+            if (adviceTask == null || returnType == null || !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
+            {
+                adviceTask?.Wait();
+                return adviceValues.ReturnValue;
+            }
+
+            // otherwise, see if it is a Task or Task<>
+
+            // Task is simple too: the advised method is a subtask,
+            // so the advice is completed after the method is completed too
+            if (returnType == typeof(Task))
+                return adviceTask;
+
+            // only Task<> left here
+            var taskType = returnType.GetTaskType();
+
+            // when the advised task is the same, no need to continue with something else
+            if (adviceValues.ReturnValue == adviceTask)
+                return adviceTask;
+
+            // a reflection equivalent of ContinueWith<TNewResult>, but this TNewResult, under taskType is known only at run-time
+            return adviceTask.ContinueWith(t => GetResult(t, adviceValues), taskType);
+        }
+
+        private static AdviceContext CreateAdviceContext(AdviceValues adviceValues, AspectInfo aspectInfo)
+        {
             AdviceContext adviceContext = new InnerMethodContext(adviceValues, aspectInfo.PointcutMethod, aspectInfo.PointcutMethodDelegate);
             for (var adviceIndex = aspectInfo.Advices.Count - 1; adviceIndex >= 0; adviceIndex--)
             {
@@ -112,31 +148,7 @@ namespace ArxOne.MrAdvice
                     adviceContext = new EventAdviceContext(advice.EventAdvice, aspectInfo.PointcutEvent, aspectInfo.IsPointcutEventAdder, adviceValues, adviceContext);
             }
 
-            // if the method is no task, then we return immediately
-            // (and the adviceTask is completed)
-            var adviceTask = adviceContext.Invoke();
-
-            var advisedMethodInfo = aspectInfo.AdvisedMethod as MethodInfo;
-            var returnType = advisedMethodInfo?.ReturnType;
-            // no Task means aspect was sync, so everything already ended
-            // or it may also been an async void, meaning that we don't care about it
-            if (adviceTask == null || returnType == null || !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
-            {
-                adviceTask?.Wait();
-                return adviceValues.ReturnValue;
-            }
-
-            // otherwise, see if it is a Task or Task<>
-
-            // Task is simple too: the advised method is a subtask,
-            // so the advice is completed after the method is completed too
-            if (returnType == typeof(Task))
-                return adviceTask;
-
-            // only Task<> left here
-            var taskType = returnType.GetTaskType();
-            // a reflection equivalent of ContinueWith<TNewResult>, but this TNewResult, under taskType is known only at run-time
-            return adviceTask.ContinueWith(t => GetResult(t, adviceValues), taskType);
+            return adviceContext;
         }
 
         /// <summary>
