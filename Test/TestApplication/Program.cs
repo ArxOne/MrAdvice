@@ -23,7 +23,7 @@ namespace TestApplication
     using ArxOne.MrAdvice.Introduction;
     using ExternalAdvices;
     using MrAdvice.Advice;
-
+#if no
     public class PublicClass
     {
         public void PublicMethod()
@@ -172,7 +172,7 @@ namespace TestApplication
             context.Proceed();
         }
     }
-
+#endif
     class Program
     {
         static void Main(string[] args)
@@ -207,8 +207,8 @@ namespace TestApplication
     [ExcludePointcut("*TaskExcludeAdvice*")]
     public class TestAdvice : BaseAdvice
     {
-
     }
+
     [ExcludePointcut("*TaskExcludePointcutBase*")]
     public abstract class BaseAdvice : Attribute, IMethodAdvice
     {
@@ -218,7 +218,6 @@ namespace TestApplication
             context.Proceed();
             Console.WriteLine("<==========end proceed==========>");
         }
-
     }
 
     public class TaskSucceed
@@ -228,6 +227,7 @@ namespace TestApplication
             return new Task<int>(() => 10);
         }
     }
+
     [ExcludeAdvices("*")]
     public class TaskExcludeAdvice
     {

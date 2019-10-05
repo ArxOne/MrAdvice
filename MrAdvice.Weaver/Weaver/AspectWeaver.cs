@@ -70,7 +70,7 @@ namespace ArxOne.MrAdvice.Weaver
 
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
-                Func<MarkedNode, bool> isWeavable = n => IsWeavable(n) && !IsFromComputerGeneratedType(n);
+                Func<MarkedNode, bool> isWeavable = n => !IsFromComputerGeneratedType(n) && IsWeavable(n);
                 var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(isWeavable).ToArray();
                 var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(isWeavable).ToArray();
                 auditTimer.NewZone("Abstract targets");
@@ -465,7 +465,7 @@ namespace ArxOne.MrAdvice.Weaver
                 .Select(n => new { Node = n, Attributes = n.CustomAttributes })
                 .SelectMany(n => n.Attributes.Select(a => new { Node = n.Node, Attribute = a })
                     .Where(a => !a.Attribute.AttributeType.DefinitionAssembly.IsSystem())
-                    .SelectMany(a => ResolveTypeOrGenericDefinition(a.Attribute.AttributeType).GetSelfAndParents(TypeResolver).Select(t => new { Node = a.Node, Type = t }))
+                    .Select(a => new { Node = a.Node, Type = ResolveTypeOrGenericDefinition(a.Attribute.AttributeType) })
                     .Where(t => IsMarker(t.Type, markerInterface)))
                 .Select(t => Tuple.Create(t.Node, GetMarkerDefinition(t.Type, context)));
             return markers;
@@ -538,13 +538,15 @@ namespace ArxOne.MrAdvice.Weaver
         private readonly IDictionary<Tuple<string, string>, bool> _isMarker = new Dictionary<Tuple<string, string>, bool>();
 
         /// <summary>
-        /// Determines whether the specified type reference is aspect.
+        /// Determines whether the specified type reference implements directly or indirectly a requested marker interface.
         /// </summary>
         /// <param name="typeReference">The type reference.</param>
         /// <param name="markerInterface">The aspect marker interface.</param>
         /// <returns></returns>
         private bool IsMarker(ITypeDefOrRef typeReference, ITypeDefOrRef markerInterface)
         {
+            if (typeReference is null)
+                return false;
             lock (_isMarker)
             {
                 var key = Tuple.Create(typeReference.FullName, markerInterface.FullName);
@@ -559,7 +561,8 @@ namespace ArxOne.MrAdvice.Weaver
                     return false;
                 var interfaces = typeDef.Interfaces;
                 _isMarker[key] = isMarker = typeReference.SafeEquivalent(markerInterface)
-                                            || interfaces.Any(i => IsMarker(i.Interface, markerInterface));
+                                            || interfaces.Any(i => IsMarker(i.Interface, markerInterface))
+                                            || IsMarker(typeDef.BaseType, markerInterface);
                 return isMarker;
             }
         }

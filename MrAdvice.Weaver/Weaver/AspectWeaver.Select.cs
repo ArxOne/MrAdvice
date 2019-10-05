@@ -96,6 +96,9 @@ namespace ArxOne.MrAdvice.Weaver
             var pointcutSelector = new PointcutSelector();
             foreach (var customAttribute in adviceTypeDef.CustomAttributes)
                 pointcutSelector += CreatePointcutSelector(customAttribute, context);
+            var baseType = adviceTypeDef.BaseType.ResolveTypeDef();
+            if (baseType != null)
+                pointcutSelector += GetPointcutSelector(baseType, context);
             return pointcutSelector;
         }
 
