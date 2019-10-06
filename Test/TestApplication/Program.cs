@@ -9,7 +9,7 @@
 
 using TestApplication;
 
-[assembly:TestAdvice]
+//[assembly:TestAdvice]
 
 namespace TestApplication
 {
@@ -175,6 +175,7 @@ namespace TestApplication
 #endif
     class Program
     {
+        [TestAdvice]
         static void Main(string[] args)
         {
             //Works
