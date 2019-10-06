@@ -324,7 +324,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="invokedMethod">The invoked method.</param>
         /// <param name="genericParameterIndex">Index of the generic parameter.</param>
         /// <returns></returns>
-        private IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(ModuleDef moduleDefinition,
+        private static IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(ModuleDef moduleDefinition,
             IMethodDefOrRef invokedMethod, int genericParameterIndex)
         {
             return moduleDefinition.GetTypes().SelectMany(t => t.Methods.Where(m => m.HasBody)
@@ -339,7 +339,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="invokedMethod">The invoked method.</param>
         /// <param name="genericParameterIndex">Index of the generic parameter.</param>
         /// <returns></returns>
-        private IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(MethodDef methodDefinition, IMethodDefOrRef invokedMethod, int genericParameterIndex)
+        private static IEnumerable<Tuple<ITypeDefOrRef, MethodDef>> GetAdviceHandledInterfaces(MethodDef methodDefinition, IMethodDefOrRef invokedMethod, int genericParameterIndex)
         {
             foreach (var instruction in methodDefinition.Body.Instructions)
             {
