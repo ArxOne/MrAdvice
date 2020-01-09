@@ -2,3 +2,4 @@
 #(Release)*: embed
 *: merge
 MrAdvice: embed
+Microsoft.*: embed
