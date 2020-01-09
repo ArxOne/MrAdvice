@@ -9,7 +9,9 @@
     <RootNamespace>ArxOne.MrAdvice</RootNamespace>
 	  <DefaultLanguage>en-US</DefaultLanguage>
 	  <FileAlignment>512</FileAlignment>
+	  <OutputDir>.</OutputDir>
 	  <OutputPath>.</OutputPath>
+      <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
 	<PropertyGroup>
@@ -19,6 +21,8 @@
     <DocumentationFile>bin\Debug\MrAdvice.XML</DocumentationFile>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NETSTANDARD</DefineConstants>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\MrAdvice.XML</DocumentationFile>
