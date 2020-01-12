@@ -1,7 +1,9 @@
 # Mr. Advice appveyor.yml script
 
 version: '{branch}-{build}'
-image: Visual Studio 2017
+image:
+  - Visual Studio 2019
+  - Visual Studio 2017
 
 branches:
   only:
@@ -22,6 +24,9 @@ build:
   publish_nuget: false
   publish_nuget_symbols: false
   verbosity: minimal
+
+build_script:
+  cmd: dotnet build 'Test\NetStandardTest\NetStandardTest.csproj'
 
 test:
   assemblies:
