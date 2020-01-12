@@ -27,6 +27,8 @@ build:
 
 build_script:
   - cmd: pwd
+  - cmd: ls
+  - cmd: ls 'Test\NetStandardTest\'
   - cmd: dotnet build 'Test\NetStandardTest\NetStandardTest.csproj'
 
 test:
