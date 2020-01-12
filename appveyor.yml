@@ -30,7 +30,7 @@ build_script:
   - cmd: ls
   - cmd: ls 'Test'
   - cmd: ls 'Test/NetStandardTest'
-  - cmd: dotnet build 'Test/NetStandardTest/NetStandardTest.csproj'
+  - ps: dotnet build './Test/NetStandardTest/NetStandardTest.csproj'
 
 test:
   assemblies:
