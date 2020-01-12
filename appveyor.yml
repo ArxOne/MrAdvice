@@ -26,7 +26,8 @@ build:
   verbosity: minimal
 
 build_script:
-  cmd: dotnet build 'Test\NetStandardTest\NetStandardTest.csproj'
+  - cmd: pwd
+  - cmd: dotnet build 'Test\NetStandardTest\NetStandardTest.csproj'
 
 test:
   assemblies:
