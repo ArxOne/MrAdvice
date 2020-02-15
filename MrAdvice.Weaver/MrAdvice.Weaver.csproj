@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ArxOne.MrAdvice</RootNamespace>
     <AssemblyName>MrAdvice.Weaver</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -125,7 +125,12 @@
       <DependentUpon>MrAdvice.tt</DependentUpon>
       <SubType>Designer</SubType>
     </None>
-    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Blobber" Version="0.9.0" />
+    <PackageReference Include="StitcherBoy">
+      <Version>1.3.0</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">

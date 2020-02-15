@@ -76,12 +76,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfTest", "Test\WpfTest\Wpf
 		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrAdvice.NetStandard", "MrAdvice.NetStandard\MrAdvice.NetStandard.csproj", "{C768EA0E-9B59-4F28-A8B2-12950993591C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MrAdvice.NetStandard", "MrAdvice.NetStandard\MrAdvice.NetStandard.csproj", "{C768EA0E-9B59-4F28-A8B2-12950993591C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCoreTest", "Test\DotNetCoreTest\DotNetCoreTest.csproj", "{721D7105-4A5A-42DF-B923-EB5C42AF52AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCoreTest", "Test\DotNetCoreTest\DotNetCoreTest.csproj", "{721D7105-4A5A-42DF-B923-EB5C42AF52AC}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		MrAdvice\MrAdvice.projitems*{d14f6ab2-9420-44ef-9dcd-4dba104742db}*SharedItemsImports = 4
 		MrAdvice\MrAdvice.projitems*{d8aa6017-594d-4616-907b-b450a5d2fcb9}*SharedItemsImports = 4
 		MrAdvice\MrAdvice.projitems*{e62b50b0-4a7d-4173-9ab8-9cfd5f4dd7c3}*SharedItemsImports = 13
 	EndGlobalSection
