@@ -40,6 +40,11 @@
 		  <DesignTime>True</DesignTime>
 		  <DependentUpon>ProductInfo.tt</DependentUpon>
 	  </Compile>
+	  <Compile Include="..\MrAdvice\Properties\ProductInfoValues.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>ProductInfoValues.tt</DependentUpon>
+	  </Compile>
   </ItemGroup>
 
   <ItemGroup>
