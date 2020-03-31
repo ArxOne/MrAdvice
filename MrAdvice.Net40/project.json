@@ -1,9 +1,0 @@
-﻿{
-  "dependencies": {},
-  "frameworks": {
-    "net40-client": {}
-  },
-  "runtimes": {
-    "win": {}
-  }
-}

@@ -58,7 +58,6 @@
     <None Include="..\MrAdvice\Properties\MrAdvice.snk">
       <Link>Properties\MrAdvice.snk</Link>
     </None>
-    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

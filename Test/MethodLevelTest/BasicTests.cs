@@ -356,6 +356,23 @@ namespace MethodLevelTest
             Assert.IsTrue(r.StartsWith("12"));
         }
 
+        [ChangeParameter(NewParameter = 12)]
+        public string RefConstrainedMethod<TValue>(int i, ref TValue v)
+            where TValue : struct
+        {
+            var o = (object)v;
+            return i.ToString() + v.ToString();
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void RefGenericConstraintTest()
+        {
+            double d = -4;
+            var r = RefConstrainedMethod(3, ref d);
+            Assert.IsTrue(r.StartsWith("12-4"));
+        }
+
         public interface IConstrainedInterface
         {
             TValue GetSomething<TValue>(int i, TValue v)

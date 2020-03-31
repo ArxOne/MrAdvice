@@ -10,7 +10,6 @@
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
-    using System.CodeDom;
     using System.Collections.Generic;
     using System.Reflection;
     using dnlib.DotNet;

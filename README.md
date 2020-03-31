@@ -11,7 +11,7 @@ Mr. Advice can weave assemblies for:
 * .NET framework (4 and above) / Mono
 * Silverlight (4 & 5)
 * Universal Windows Platform 
-* .NET Standard 1.6
+* .NET Standard 2.0
 
 Mr. Advice allows you to:
 * Advise methods or parameters, at assembly, type, method or parameter level

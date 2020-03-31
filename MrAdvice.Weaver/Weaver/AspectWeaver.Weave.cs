@@ -594,7 +594,10 @@ namespace ArxOne.MrAdvice.Weaver
                             if (parameterType is ByRefSig) // ...if ref, loads it as referenced value
                             {
                                 parameterType = parameter.Type.Next;
-                                instructions.EmitLdind(parameterType);
+                                if (parameterType.IsGenericParameter)
+                                    instructions.Emit(OpCodes.Ldobj, parameterType);
+                                else
+                                    instructions.EmitLdind(parameterType);
                             }
                             instructions.EmitBoxIfNecessary(parameterType); // ... and boxes it
                             instructions.Emit(OpCodes.Stelem_Ref);

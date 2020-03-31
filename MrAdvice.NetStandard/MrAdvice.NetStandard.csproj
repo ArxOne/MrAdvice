@@ -40,6 +40,11 @@
 		  <DesignTime>True</DesignTime>
 		  <DependentUpon>ProductInfo.tt</DependentUpon>
 	  </Compile>
+	  <Compile Include="..\MrAdvice\Properties\ProductInfoValues.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>ProductInfoValues.tt</DependentUpon>
+	  </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -53,7 +58,6 @@
 	  <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </None>
     <None Include="..\MrAdvice\Properties\ProductInfoValues.tt" Link="Properties\ProductInfoValues.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ProductInfoValues.cs</LastGenOutput>
     </None>
   </ItemGroup>
