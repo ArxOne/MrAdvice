@@ -87,7 +87,7 @@ namespace ArxOne.MrAdvice.Utility
             if (nameReference.Name == "mscorlib")
                 return true;
             var prefix = nameReference.Name.String.Split('.')[0];
-            return prefix == "System" || prefix == "Microsoft";
+            return prefix == "System" ;//|| prefix == "Microsoft";
         }
 
         private static readonly IDictionary<AssemblyRef, AssemblyDef> ResolutionCache =

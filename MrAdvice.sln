@@ -82,6 +82,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCoreTest", "Test\DotN
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		MrAdvice\MrAdvice.projitems*{c768ea0e-9b59-4f28-a8b2-12950993591c}*SharedItemsImports = 5
 		MrAdvice\MrAdvice.projitems*{d14f6ab2-9420-44ef-9dcd-4dba104742db}*SharedItemsImports = 4
 		MrAdvice\MrAdvice.projitems*{d8aa6017-594d-4616-907b-b450a5d2fcb9}*SharedItemsImports = 4
 		MrAdvice\MrAdvice.projitems*{e62b50b0-4a7d-4173-9ab8-9cfd5f4dd7c3}*SharedItemsImports = 13
