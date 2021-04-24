@@ -29,6 +29,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MrAdvice.Weaver", "MrAdvice.Weaver\MrAdvice.Weaver.csproj", "{2CCCBE1D-9CC5-40A9-A816-484F98B10774}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssemblyLevelTest", "Test\AssemblyLevelTest\AssemblyLevelTest.csproj", "{8B8EB6C4-78BC-442D-86B1-3E8E09DCF21F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2CCCBE1D-9CC5-40A9-A816-484F98B10774} = {2CCCBE1D-9CC5-40A9-A816-484F98B10774}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalAdvices", "Test\ExternalAdvices\ExternalAdvices.csproj", "{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}"
 EndProject

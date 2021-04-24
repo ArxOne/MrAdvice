@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!--<PropertyGroup>
-    <MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)..\build\MrAdvice.Weaver.exe</MrAdvicePath>
-  </PropertyGroup>
-
-  <Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
-    <Command Exec="'$(MrAdvicePath)' AssemblyPath='@(IntermediateAssembly)' ReferencePath='@(ReferencePath)' ReferenceCopyLocalPaths='@(ReferenceCopyLocalPaths)'
-                  AssemblyOriginatorKeyFile='$(AssemblyOriginatorKeyFile)' SignAssembly='$(SignAssembly)'" />
-  </Target>-->
+  <Target Name="MrAdviceWeaverTask" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
+    <PropertyGroup>
+      <MrAdvicePath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdvicePath>
+      <MrAdvicePath Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">"$(MSBuildThisFileDirectory)..\tools\net5.0\MrAdvice.Weaver.exe"</MrAdvicePath>
+      <!--<MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)tfwid="$(TargetFrameworkIdentifier)" </MrAdvicePath>-->
+    </PropertyGroup>
+    <Exec Command='$(MrAdvicePath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@(ReferencePath)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
+  </Target>
 </Project>

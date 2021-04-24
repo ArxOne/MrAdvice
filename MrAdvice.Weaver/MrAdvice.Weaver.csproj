@@ -12,6 +12,7 @@
     <Authors>Arx One</Authors>
     <PackageProjectUrl>https://github.com/ArxOne/MrAdvice.git</PackageProjectUrl>
     <DebugType>full</DebugType>
+    <OutputPath>..\tools</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <IsTool>true</IsTool>

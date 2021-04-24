@@ -194,3 +194,5 @@ MrAdvice.Fody/MrAdvice.nuspec
 *.diagsession
 
 ProductInfo.cs
+/MrAdvice.Weaver/tools
+/Tools
