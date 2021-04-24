@@ -21,7 +21,6 @@ namespace TestApplication
     using ArxOne.MrAdvice.Advice;
     using ArxOne.MrAdvice.Annotation;
     using ArxOne.MrAdvice.Introduction;
-    using ExternalAdvices;
     using MrAdvice.Advice;
 #if no
     public class PublicClass

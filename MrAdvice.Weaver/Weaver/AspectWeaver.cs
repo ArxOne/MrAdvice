@@ -4,6 +4,9 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
+using System.Reflection;
+
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
@@ -16,7 +19,6 @@ namespace ArxOne.MrAdvice.Weaver
     using dnlib.DotNet;
     using dnlib.DotNet.Emit;
     using Introduction;
-    using Properties;
     using Reflection;
     using Reflection.Groups;
     using StitcherBoy.Logging;
@@ -109,8 +111,9 @@ namespace ArxOne.MrAdvice.Weaver
                     Logging.WriteDebug("{0} : {1}ms", reportPart.Key.PadRight(maxLength), (int)reportPart.Value.TotalMilliseconds);
                 Logging.WriteDebug("--------------------------------------");
 
+                var version = GetType().Assembly.GetAttributes<AssemblyVersionAttribute>().Single().Version;
                 Logging.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
-                    moduleDefinition.Assembly.FullName, (int)report.Sum(r => r.Value.TotalMilliseconds), targetFramework.ToString(), Product.Version);
+                    moduleDefinition.Assembly.FullName, (int)report.Sum(r => r.Value.TotalMilliseconds), targetFramework.ToString(), version);
 
                 return true;
             }

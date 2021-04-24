@@ -5,7 +5,8 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
-using System.Reflection;
+using ArxOne.MrAdvice;
+using StitcherBoy;
 
-[assembly: AssemblyTitle("MrAdvice")]
-
+BlobberHelper.Setup();
+Stitcher.Run<MrAdviceStitcher>(args);

@@ -1,13 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)..\build\MrAdvice.Weaver.exe</MrAdvicePath>
   </PropertyGroup>
 
-  <UsingTask TaskName="MrAdviceTask" AssemblyFile="$(MrAdvicePath)" />
-  <Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" Outputs="@(IntermediateAssembly[0]).♥MrAdvice">
-    <MrAdviceTask AssemblyPath="@(IntermediateAssembly)" ReferencePath="@(ReferencePath)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
-                  AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)" />
-  </Target>
+  <Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
+    <Command Exec="'$(MrAdvicePath)' AssemblyPath='@(IntermediateAssembly)' ReferencePath='@(ReferencePath)' ReferenceCopyLocalPaths='@(ReferenceCopyLocalPaths)'
+                  AssemblyOriginatorKeyFile='$(AssemblyOriginatorKeyFile)' SignAssembly='$(SignAssembly)'" />
+  </Target>-->
 </Project>

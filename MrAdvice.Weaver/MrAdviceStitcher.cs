@@ -22,6 +22,8 @@ namespace ArxOne.MrAdvice
 
     public class MrAdviceStitcher : AssemblyStitcher
     {
+        public override string Name => "MrAdvice";
+
         private ILogging _logging;
 
         protected override bool Process(AssemblyStitcherContext context)

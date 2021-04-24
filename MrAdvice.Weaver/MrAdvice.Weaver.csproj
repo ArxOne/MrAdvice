@@ -1,211 +1,43 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2CCCBE1D-9CC5-40A9-A816-484F98B10774}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ArxOne.MrAdvice</RootNamespace>
-    <AssemblyName>MrAdvice.Weaver</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <OutputPath>.</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <TargetFrameworks>net461;net5.0</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AssemblyTitle>Mr. Advice weaver</AssemblyTitle>
+    <Description>MrAdvice allows to weave aspects at build-time (just like PostSharp, but free as in free beer). Write your own aspects in the form of attributes and apply them to target methods or properties.</Description>
+    <Copyright>Copyright [2015,…[ Arx One</Copyright>
+    <Version>2.9-test1</Version>
+    <Authors>Arx One</Authors>
+    <PackageProjectUrl>https://github.com/ArxOne/MrAdvice.git</PackageProjectUrl>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
+    <IsTool>true</IsTool>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NuspecProperties>id=$(AssemblyTitle);version=$(Version);author=$(Authors);description=$(Description);copyright=$(Copyright);configuration=$(Configuration)</NuspecProperties>
+    <NuspecFile>MrAdvice.nuspec</NuspecFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>MrAdvice.png</PackageIcon>
+    <RepositoryUrl>https://github.com/ArxOne/MrAdvice.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\MrAdvice\Properties\MrAdvice.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <PackageTags>weaver aspect advice pointcut aop .net attributes injection netstandard windows postsharp</PackageTags>
+    <RootNamespace>ArxOne.MrAdvice.Weaver</RootNamespace>
+    <Product>Mr. Advice</Product>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build.Framework">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Build.Utilities.v4.0">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Xml" />
+    <ProjectReference Include="..\MrAdvice\MrAdvice.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\MrAdvice\Introduction\IntroductionRules.cs">
-      <Link>Introduction\IntroductionRules.cs</Link>
-    </Compile>
-    <Compile Include="..\MrAdvice\Properties\ProductInfo.cs">
-      <Link>Properties\ProductInfo.cs</Link>
-    </Compile>
-    <Compile Include="Annotation\MarkedNode.cs" />
-    <Compile Include="Annotation\MarkerDefinition.cs" />
-    <Compile Include="AuditTimer.cs" />
-    <Compile Include="IO\DefaultLogging.cs" />
-    <Compile Include="Reflection\Groups\EventReflectionNode.cs" />
-    <Compile Include="Utility\SequenceEqualityComparer.cs" />
-    <Compile Include="Utility\TypeComparer.cs" />
-    <Compile Include="Weaver\AspectWeaver.Select.cs" />
-    <Compile Include="Weaver\MethodDefExtensions.cs" />
-    <Compile Include="Weaver\PointcutSelectorExtensions.cs" />
-    <Compile Include="Weaver\WeavingContext.cs" />
-    <None Include="app.config" />
-    <None Include="Blobber" />
-    <Compile Include="IO\FileLogging.cs" />
-    <Compile Include="IO\MultiLogging.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reflection\Groups\AssemblyReflectionNode.cs" />
-    <Compile Include="Reflection\Groups\MethodReflectionNode.cs" />
-    <Compile Include="Reflection\Groups\ModuleReflectionNode.cs" />
-    <Compile Include="Reflection\Groups\ParameterReflectionNode.cs" />
-    <Compile Include="Reflection\Groups\PropertyReflectionNode.cs" />
-    <Compile Include="Reflection\Groups\ReflectionNode.cs" />
-    <Compile Include="Reflection\Groups\TypeReflectionNode.cs" />
-    <Compile Include="Reflection\TargetFramework.cs" />
-    <Compile Include="Reflection\TargetFramework.PortableLiterals.cs" />
-    <Compile Include="Reflection\TypeImporter.cs" />
-    <Compile Include="Reflection\TypeLoader.cs" />
-    <Compile Include="Utility\AssemblyExtensions.cs" />
-    <Compile Include="Utility\EnumerableExtensions.cs" />
-    <Compile Include="Utility\MethodParameters.cs" />
-    <Compile Include="Utility\MethodReferenceComparer.cs" />
-    <Compile Include="Utility\ParamDefExtensions.cs" />
-    <Compile Include="Utility\PropertyDefinitionExtensions.cs" />
-    <Compile Include="Utility\TypeDefinitionExtensions.cs" />
-    <Compile Include="Utility\TypeReferenceComparer.cs" />
-    <Compile Include="Utility\ModuleDefinitionExtensions.cs" />
-    <Compile Include="Utility\ReflectionUtility.cs" />
-    <Compile Include="MrAdviceStitcher.cs" />
-    <Compile Include="MrAdviceTask.cs" />
-    <Compile Include="Weaver\AspectWeaver.cs" />
-    <Compile Include="Weaver\AspectWeaver.Names.cs" />
-    <Compile Include="Weaver\AspectWeaver.Weave.cs" />
-    <Compile Include="Weaver\InvocationArgument.cs" />
-    <Compile Include="Weaver\TypeResolver.cs" />
-    <Compile Include="Utility\CollectionExtensions.cs" />
-    <Compile Include="Utility\GenericParameterExtensions.cs" />
-    <Compile Include="Weaver\Instructions.cs" />
-    <Compile Include="Utility\TypeReferenceExtensions.cs" />
-    <Compile Include="Weaver\WeaverMethodWeavingContext.cs" />
-    <None Include="MrAdvice.nuspec">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MrAdvice.tt</DependentUpon>
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="..\MrAdvice\Properties\MrAdvice.snk" Link="Properties\MrAdvice.snk" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\MrAdvice\Properties\MrAdvice.snk">
-      <Link>Properties\MrAdvice.snk</Link>
-    </None>
-    <None Include="MrAdvice.targets">
-      <SubType>Designer</SubType>
-    </None>
+    <PackageReference Include="StitcherBoy" Version="2.0.0" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="MrAdvice.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>MrAdvice.nuspec</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Debug.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MrAdvice.Net40\MrAdvice.Net40.csproj">
-      <Project>{D8AA6017-594D-4616-907B-B450A5D2FCB9}</Project>
-      <Name>MrAdvice.Net40</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Blobber">
-      <Version>0.9.0</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="StitcherBoy">
-      <Version>1.3.1</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <PropertyGroup>
-    <PostBuildEvent>if not exist "$(SolutionDir)\build" mkdir "$(SolutionDir)\build"
-
-copy "$(TargetPath)" "$(SolutionDir)\build\$(TargetFileName)"
-copy "$(TargetPath)" "$(SolutionDir)\build\$(TargetFileName).debugTask"
-
-rem --- NuGet pack and push ------------------------------------------------------------------------------
-
-
-
-if not "$(ConfigurationName)"=="Release" goto :noRelease
-
-
-
-"$(SolutionDir)\.nuget\NuGet.exe" pack "$(ProjectDir)\MrAdvice.nuspec" -Verbosity detailed -NonInteractive -IncludeReferencedProjects -NonInteractive -Tool -Properties ConfigurationName=$(ConfigurationName) -Symbols
-
-
-
-:noRelease
-</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
-  <!-- Optionally make the import portable across VS versions -->
-  <PropertyGroup>
-    <!-- Get the Visual Studio version – defaults to 10: -->
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
-    <!-- Keep the next element all on one line: -->
-    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-  </PropertyGroup>
-  <!-- This is the important line: -->
-  <!--  <Import Project="$(VSToolsPath)\TextTemplating\Microsoft.TextTemplating.targets" />-->
-  <PropertyGroup>
-    <TransformOnBuild>true</TransformOnBuild>
-  </PropertyGroup>
 </Project>
