@@ -6,7 +6,9 @@
       <MrAdvicePath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdvicePath>
       <MrAdvicePath Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">"$(MSBuildThisFileDirectory)..\tools\net5.0\MrAdvice.Weaver.exe"</MrAdvicePath>
       <!--<MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)tfwid="$(TargetFrameworkIdentifier)" </MrAdvicePath>-->
+      <MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath</MrAdviceWeaverReferencePathFile>
     </PropertyGroup>
-    <Exec Command='$(MrAdvicePath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@(ReferencePath)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
+    <WriteLinesToFile File="$(MrAdviceWeaverReferencePathFile)" Lines="@(ReferencePath)" Overwrite="true" />
+    <Exec Command='$(MrAdvicePath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
   </Target>
 </Project>

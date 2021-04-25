@@ -31,6 +31,7 @@
     <PackageTags>weaver aspect advice pointcut aop .net attributes injection netstandard windows postsharp</PackageTags>
     <RootNamespace>ArxOne.MrAdvice.Weaver</RootNamespace>
     <Product>Mr. Advice</Product>
+    <UserSecretsId>3d16c508-282d-4a55-8eb1-1844a914534f</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\MrAdvice\MrAdvice.csproj" />
@@ -39,6 +40,6 @@
     <None Include="..\MrAdvice\Properties\MrAdvice.snk" Link="Properties\MrAdvice.snk" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="StitcherBoy" Version="2.0.0" />
+    <PackageReference Include="StitcherBoy" Version="2.0.1" />
   </ItemGroup>
 </Project>

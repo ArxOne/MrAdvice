@@ -30,16 +30,13 @@ namespace ArxOne.MrAdvice
         {
             BlobberHelper.Setup();
 
-            if (AlreadyProcessed(context))
-                return false;
-
 #if DEBUG
             _logging = new MultiLogging(new DefaultLogging(Logging), new FileLogging("MrAdvice.log"));
             _logging.WriteDebug("Start");
 #else
             _logging = Logging;
 #endif
-            if (context.Module == null)
+            if (context.Module is null)
             {
                 _logging.WriteError("Target assembly {0} could not be loaded", context.AssemblyPath);
                 return false;
@@ -47,23 +44,23 @@ namespace ArxOne.MrAdvice
 
             try
             {
-                try
-                {
-                    const string mrAdviceAssemblyName = "MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8";
-                    var mrAdviceAssembly = LoadEmbeddedAssembly(mrAdviceAssemblyName);
-                    if (mrAdviceAssembly == null)
-                    {
-                        _logging.WriteError("Can't find/load embedded MrAdvice assembly (WTF?), exiting");
-                        return false;
-                    }
-                }
-                catch (FileNotFoundException)
-                {
-                    _logging.WriteError("Can't load MrAdvice assembly (WTF?), exiting");
-                    foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                        _logging.Write("Assembly in AppDomain: {0}", assembly.GetName());
-                    return false;
-                }
+                //try
+                //{
+                //    const string mrAdviceAssemblyName = "MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8";
+                //    var mrAdviceAssembly = LoadEmbeddedAssembly(mrAdviceAssemblyName);
+                //    if (mrAdviceAssembly is null)
+                //    {
+                //        _logging.WriteError("Can't find/load embedded MrAdvice assembly (WTF?), exiting");
+                //        return false;
+                //    }
+                //}
+                //catch (FileNotFoundException)
+                //{
+                //    _logging.WriteError("Can't load MrAdvice assembly (WTF?), exiting");
+                //    foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                //        _logging.Write("Assembly in AppDomain: {0}", assembly.GetName());
+                //    return false;
+                //}
 
                 // instances are created here
                 // please also note poor man's dependency injection (which is enough for us here)
@@ -81,30 +78,10 @@ namespace ArxOne.MrAdvice
             catch (Exception e)
             {
                 _logging.WriteError("Internal error: {0}", e.ToString());
-                for (var ie = e.InnerException; ie != null; ie = ie.InnerException)
+                for (var ie = e.InnerException; ie is not null; ie = ie.InnerException)
                     _logging.WriteError("Inner exception: {0}", e.ToString());
             }
             return false;
-        }
-
-        private bool AlreadyProcessed(AssemblyStitcherContext context)
-        {
-            var processFilePath = GetProcessFilePath(context);
-            var processed = GetLastWriteDate(processFilePath) >= GetLastWriteDate(context.AssemblyPath);
-            if (!processed)
-            {
-                ModuleWritten += delegate
-                {
-                    File.WriteAllText(processFilePath,
-                        "This file is a marker for Mr.Advice to ensure the assembly wasn't processed twice (in which case it would be as bad as crossing the streams).");
-                };
-            }
-            return processed;
-        }
-
-        private static string GetProcessFilePath(AssemblyStitcherContext context)
-        {
-            return context.AssemblyPath + ".\u2665MrAdvice";
         }
 
         private static DateTime GetLastWriteDate(string path)
@@ -117,7 +94,7 @@ namespace ArxOne.MrAdvice
         private Assembly LoadEmbeddedAssembly(string assemblyName)
         {
             var existingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName);
-            if (existingAssembly != null)
+            if (existingAssembly is not null)
                 return existingAssembly;
             return BlobberHelper.LoadAssembly(GetType().Assembly, assemblyName);
         }

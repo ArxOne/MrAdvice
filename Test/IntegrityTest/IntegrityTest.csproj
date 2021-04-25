@@ -10,6 +10,7 @@
     <Copyright>Copyright © Microsoft 2015</Copyright>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.3" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.3" />
   </ItemGroup>
   <ItemGroup>

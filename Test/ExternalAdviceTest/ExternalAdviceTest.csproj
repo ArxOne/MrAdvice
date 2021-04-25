@@ -30,6 +30,7 @@
     <None Include="ExternalAdviceTest.snk" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.3" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.3" />
   </ItemGroup>
 </Project>
