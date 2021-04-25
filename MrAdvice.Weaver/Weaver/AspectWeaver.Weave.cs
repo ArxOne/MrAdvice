@@ -129,7 +129,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var methodName = method.Name;
 
                 // create inner method
-                const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | //MethodAttributes.PInvokeImpl |
+                const MethodAttributes attributesToKeep = MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.PinvokeImpl |
                                                           MethodAttributes.UnmanagedExport | MethodAttributes.HasSecurity |
                                                           MethodAttributes.RequireSecObject;
                 var innerMethodAttributes = method.Attributes & attributesToKeep |

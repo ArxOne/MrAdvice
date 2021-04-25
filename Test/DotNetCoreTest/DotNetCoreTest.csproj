@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\MrAdvice.Weaver\MrAdvice.Weaver.csproj" />
     <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\MrAdvice.Weaver\MrAdvice.targets" />
