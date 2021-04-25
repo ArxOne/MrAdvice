@@ -10,22 +10,23 @@
     <Copyright>Copyright [2015,…[ Arx One</Copyright>
     <Version>2.9-test1</Version>
     <Authors>Arx One</Authors>
-    <PackageProjectUrl>https://github.com/ArxOne/MrAdvice.git</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/ArxOne/MrAdvice</PackageProjectUrl>
     <DebugType>full</DebugType>
-    <OutputPath>..\tools</OutputPath>
+    <OutputPath>tools</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <IsTool>true</IsTool>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NuspecProperties>id=$(AssemblyTitle);version=$(Version);author=$(Authors);description=$(Description);copyright=$(Copyright);configuration=$(Configuration)</NuspecProperties>
     <NuspecFile>MrAdvice.nuspec</NuspecFile>
+    <PackageOutputPath>..</PackageOutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>MrAdvice.png</PackageIcon>
     <RepositoryUrl>https://github.com/ArxOne/MrAdvice.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\MrAdvice\Properties\MrAdvice.snk</AssemblyOriginatorKeyFile>
     <PackageTags>weaver aspect advice pointcut aop .net attributes injection netstandard windows postsharp</PackageTags>

@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Target Name="MrAdviceWeaverTask" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
+  <Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
     <PropertyGroup>
-      <MrAdvicePath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdvicePath>
-      <MrAdvicePath Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">"$(MSBuildThisFileDirectory)..\tools\net5.0\MrAdvice.Weaver.exe"</MrAdvicePath>
+      <MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+      <MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">"$(MSBuildThisFileDirectory)..\tools\net5.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
       <!--<MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)tfwid="$(TargetFrameworkIdentifier)" </MrAdvicePath>-->
       <MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath</MrAdviceWeaverReferencePathFile>
     </PropertyGroup>
     <WriteLinesToFile File="$(MrAdviceWeaverReferencePathFile)" Lines="@(ReferencePath)" Overwrite="true" />
-    <Exec Command='$(MrAdvicePath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
+    <Exec Command='$(MrAdviceWeaverPath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
   </Target>
 </Project>

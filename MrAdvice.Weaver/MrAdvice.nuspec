@@ -2,37 +2,26 @@
 <package>
   <metadata>
     <id>MrAdvice</id>
-    <version>2.8.12</version>
-    <title>Mr. Advice</title>
-    <authors>Arx One</authors>
-    <owners>Arx One</owners>
-    <licenseUrl>http://opensource.org/licenses/mit-license.php</licenseUrl>
-    <projectUrl>https://github.com/ArxOne/MrAdvice</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/ArxOne/MrAdvice/master/Icon/MrAdvice.png</iconUrl>
+    <version>$version$</version>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <description>$description$</description>
+    <copyright>$copyright$</copyright>
+    <title>Mr. Advice</title>
+    <projectUrl>https://github.com/ArxOne/MrAdvice</projectUrl>
+    <icon>MrAdvice.png</icon>
+    <repository type="git" url="https://github.com/ArxOne/MrAdvice.git" />
     <summary>.NET build step aspect weaver</summary>
-    <description>MrAdvice allows to weave aspects at build-time (just like PostSharp, but free as in free beer). Write your own aspects in the form of attributes and apply them to target methods or properties. This version does not require any dependency (on the opposite of MrAdvice.Fody which requires Fody).</description>
     <releaseNotes></releaseNotes>
-    <copyright>Copyright 2015-2016 Arx One</copyright>
-    <tags>weaver aspect advice pointcut aop .net attributes injection netstandard windows silverlight sl5 postsharp</tags>
+    <tags>weaver aspect advice pointcut aop .net attributes injection netstandard windows silverlight postsharp</tags>
     <developmentDependency>false</developmentDependency>
   </metadata>
   <files>
+    <file src="..\Icon\MrAdvice.png" target="" />
     <file src="MrAdvice.targets" target="build"/>
-    <file src="bin\$ConfigurationName$\MrAdvice.Weaver.exe" target="build"/>
-    <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.dll" target="build"/>
-    <!-- .Net 4.0 client -->
-    <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.dll" target="lib\net40-client"/>
-    <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.xml" target="lib\net40-client"/>
-    <file src="..\MrAdvice.Net40\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\net40-client"/>
-    <!-- UAP 1.0 -->
-    <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.dll" target="lib\uap10.0"/>
-    <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.xml" target="lib\uap10.0"/>
-    <file src="..\MrAdvice.Uwp10\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\uap10.0"/>
-    <!-- .NET Standard 1.6 -->
-    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.dll" target="lib\netstandard16"/>
-    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.xml" target="lib\netstandard16"/>
-    <file src="..\MrAdvice.NetStandard\bin\$ConfigurationName$\MrAdvice.pdb" target="lib\netstandard16"/>
-    <file src="..\MrAdvice\**\*.cs" target="src"/>
+    <file src="tools\**\*.*" target="tools" />
+    <file src="..\MrAdvice\bin\$configuration$\**\*.*" target="lib" />
   </files>
 </package>
