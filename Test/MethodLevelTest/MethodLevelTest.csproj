@@ -10,7 +10,7 @@
     <Product>MethodLevelTest</Product>
     <Copyright>Copyright ©  2015</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
-    <PostBuildEvent>"$(SolutionDir)\Tools\peverify.bat" "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent>"$(SolutionDir)\MrAdvice.Weaver\peverify.bat" "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>

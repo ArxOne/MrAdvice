@@ -48,7 +48,4 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy MrAdvice.targets bin\$(Configuration)" />
-  </Target>
 </Project>

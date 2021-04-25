@@ -19,11 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Icon", "Icon", "{C24CF080-E
 		Icon\MrAdvice.png = Icon\MrAdvice.png
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F3046528-416E-49F1-8FC5-72E442B64DAE}"
-	ProjectSection(SolutionItems) = preProject
-		Tools\peverify.bat = Tools\peverify.bat
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MrAdvice", "MrAdvice\MrAdvice.csproj", "{78DC845D-47B0-4473-A97B-B262324143C0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MrAdvice.Weaver", "MrAdvice.Weaver\MrAdvice.Weaver.csproj", "{2CCCBE1D-9CC5-40A9-A816-484F98B10774}"
