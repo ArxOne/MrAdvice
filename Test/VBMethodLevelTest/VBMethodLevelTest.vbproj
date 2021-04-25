@@ -29,7 +29,7 @@
   <PropertyGroup>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\MrAdvice.Weaver\bin\$(Configuration)\MrAdvice.targets" />
+  <Import Project="$(SolutionDir)\MrAdvice.Weaver\MrAdvice.targets" />
   <ItemGroup>
     <Import Include="System" />
     <Import Include="System.Collections" />
