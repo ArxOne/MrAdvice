@@ -29,7 +29,7 @@
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\MrAdvice.Weaver\bin\$(Configuration)\MrAdvice.targets" />
+  <Import Project="$(SolutionDir)\MrAdvice.Weaver\MrAdvice.targets" />
   <ItemGroup>
     <ProjectReference Include="..\..\MrAdvice.Weaver\MrAdvice.Weaver.csproj" />
     <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj" />

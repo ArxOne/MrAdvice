@@ -16,7 +16,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\MrAdvice.Weaver\bin\$(Configuration)\MrAdvice.targets" />
+  <Import Project="$(SolutionDir)\MrAdvice.Weaver\MrAdvice.targets" />
   <ItemGroup>
     <PackageReference Include="MSTest.TestFramework" Version="2.2.3" />
   </ItemGroup>
