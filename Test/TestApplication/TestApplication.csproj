@@ -22,6 +22,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MrAdvice.Weaver\MrAdvice.Weaver.csproj" />
     <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj" />
   </ItemGroup>
 </Project>
