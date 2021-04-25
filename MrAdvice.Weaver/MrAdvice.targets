@@ -8,8 +8,7 @@
       <!--<MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)tfwid="$(TargetFrameworkIdentifier)" </MrAdvicePath>-->
       <MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath</MrAdviceWeaverReferencePathFile>
     </PropertyGroup>
-    <WriteLinesToFile File="$(MrAdviceWeaverReferencePathFile)" Lines="@(ReferencePath)" Overwrite="true" />
-    <Message Text="MrAdviceWeaverPath=$(MrAdviceWeaverPath)"/>
+    <WriteLinesToFile Lines="@(ReferencePath)" File="$(MrAdviceWeaverReferencePathFile)" Overwrite="true" />
     <Exec Command='$(MrAdviceWeaverPath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
   </Target>
 </Project>

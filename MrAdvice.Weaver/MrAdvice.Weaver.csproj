@@ -12,6 +12,7 @@
     <Authors>Arx One</Authors>
     <PackageProjectUrl>https://github.com/ArxOne/MrAdvice</PackageProjectUrl>
     <DebugType>full</DebugType>
+    <OutputPath>..\tools</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <IsTool>true</IsTool>
@@ -42,10 +43,5 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StitcherBoy" Version="2.0.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="MrAdvice.targets">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>
