@@ -19,9 +19,9 @@
     <developmentDependency>false</developmentDependency>
   </metadata>
   <files>
-    <file src="..\Icon\MrAdvice.png" target="" />
-    <file src="MrAdvice.targets" target="build"/>
-    <file src="tools\**\*.*" target="tools" />
+    <!--<file src="MrAdvice.targets" target="build"/>-->
+    <file src=".\bin\$configuration$\**\*.*" target="build" />
     <file src="..\MrAdvice\bin\$configuration$\**\*.*" target="lib" />
+    <file src="..\Icon\MrAdvice.png" target="" />
   </files>
 </package>

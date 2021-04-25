@@ -32,7 +32,7 @@
   <PropertyGroup>
     <PostBuildEvent>"$(SolutionDir)\Tools\peverify.bat" "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\MrAdvice.Weaver\MrAdvice.targets" />
+  <Import Project="$(SolutionDir)\MrAdvice.Weaver\bin\$(Configuration)\MrAdvice.targets" />
   <ItemGroup>
     <Import Include="System" />
     <Import Include="System.Collections" />

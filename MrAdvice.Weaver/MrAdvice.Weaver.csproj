@@ -12,7 +12,6 @@
     <Authors>Arx One</Authors>
     <PackageProjectUrl>https://github.com/ArxOne/MrAdvice</PackageProjectUrl>
     <DebugType>full</DebugType>
-    <OutputPath>tools</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <IsTool>true</IsTool>
@@ -33,6 +32,7 @@
     <RootNamespace>ArxOne.MrAdvice.Weaver</RootNamespace>
     <Product>Mr. Advice</Product>
     <UserSecretsId>3d16c508-282d-4a55-8eb1-1844a914534f</UserSecretsId>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\MrAdvice\MrAdvice.csproj" />
@@ -43,4 +43,12 @@
   <ItemGroup>
     <PackageReference Include="StitcherBoy" Version="2.0.1" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="MrAdvice.targets">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy MrAdvice.targets bin\$(Configuration)" />
+  </Target>
 </Project>
