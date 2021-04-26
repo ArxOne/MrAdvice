@@ -8,9 +8,9 @@ More information about what is an aspect at [Wikipedia](http://en.wikipedia.org/
 
 Mr. Advice can weave assemblies for:
 
-* .NET framework (4 and above) / Mono
-* Silverlight (4 & 5)
-* Universal Windows Platform 
+* .NET framework (4.x) / Mono
+* .NET 5
+* ~~Universal Windows Platform~~ 
 * .NET Standard 2.0
 
 Mr. Advice allows you to:
