@@ -45,7 +45,7 @@ namespace ArxOne.MrAdvice
                 pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(methodExclude.AdvicesTypes));
             // 3. from property, if any
             var propertyInfo = GetPropertyInfo(methodBase);
-            if (propertyInfo != null)
+            if (propertyInfo is not null)
                 foreach (var propertyExclude in propertyInfo.Item1.GetAttributes<ExcludeAdvicesAttribute>())
                     pointcutSelector.ExcludeRules.Add(new PointcutSelectorRule(propertyExclude.AdvicesTypes));
             // 4. from type and outer types

@@ -213,7 +213,7 @@ namespace ArxOne.MrAdvice
             lock (AspectInfos)
             {
                 aspectInfo = FindAspectInfo(methodHandle, typeHandle);
-                if (aspectInfo == null)
+                if (aspectInfo is null)
                 {
                     var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
                     var innerMethod = innerMethodHandle != methodHandle
@@ -285,8 +285,7 @@ namespace ArxOne.MrAdvice
         /// <param name="type">The type.</param>
         public static void ProcessInfoAdvices(Type type)
         {
-            const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
-                                              BindingFlags.Static;
+            const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             var typeAndAssemblyAdvices = type.GetAssembly().GetAttributes<IMethodInfoAdvice>()
                 .Union(type.GetAttributes<IMethodInfoAdvice>()).ToArray();
             foreach (var methodInfo in type.GetMembersReader().GetMethods(bindingFlags))
@@ -345,12 +344,12 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         private static AspectInfo CreateAspectInfo(MethodBase method, RuntimeMethodHandle methodHandle, MethodInfo innerMethod, RuntimeMethodHandle innerMethodHandle, ProceedDelegate innerMethodDelegate, bool abstractedTarget)
         {
-            if (innerMethod == null && !abstractedTarget)
+            if (innerMethod is null && !abstractedTarget)
                 method = FindInterfaceMethod(method);
             var advices = GetAdvices<IAdvice>(method, out var relatedPropertyInfo, out var relatedEventInfo);
-            if (relatedPropertyInfo != null)
+            if (relatedPropertyInfo is not null)
                 return new AspectInfo(advices, innerMethod, innerMethodHandle, innerMethodDelegate, method, methodHandle, relatedPropertyInfo.Item1, relatedPropertyInfo.Item2);
-            if (relatedEventInfo != null)
+            if (relatedEventInfo is not null)
                 return new AspectInfo(advices, innerMethod, innerMethodHandle, innerMethodDelegate, method, methodHandle, relatedEventInfo.Item1, relatedEventInfo.Item2);
             return new AspectInfo(advices, innerMethod, innerMethodHandle, innerMethodDelegate, method, methodHandle);
         }
@@ -370,7 +369,7 @@ namespace ArxOne.MrAdvice
             foreach (var @interface in interfaces)
             {
                 var method = @interface.GetMembersReader().GetMethod(implementationMethodBase.Name, parametersTypes);
-                if (method != null)
+                if (method is not null)
                     return method;
             }
 
@@ -406,17 +405,17 @@ namespace ArxOne.MrAdvice
 
             // optional from property
             relatedPropertyInfo = GetPropertyInfo(targetMethod);
-            if (relatedPropertyInfo != null)
+            if (relatedPropertyInfo is not null)
                 allAdvices = allAdvices.Union(relatedPropertyInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
 
             // optional from event
             relatedEventInfo = GetEventInfo(targetMethod);
-            if (relatedEventInfo != null)
+            if (relatedEventInfo is not null)
                 allAdvices = allAdvices.Union(relatedEventInfo.Item1.GetAttributes<TAdvice>().Select(CreateAdvice)).ToArray();
 
             // now separate parameters
             var parameterAdvices = allAdvices.Where(a => a.Advice is IParameterAdvice).ToArray();
-            allAdvices = allAdvices.Where(a => !(a.Advice is IParameterAdvice)).ToArray();
+            allAdvices = allAdvices.Where(a => a.Advice is not IParameterAdvice).ToArray();
 
             // and parameters (not union but concat, because same attribute may be applied at different levels)
             // ... indexed parameters
@@ -431,8 +430,7 @@ namespace ArxOne.MrAdvice
                 allAdvices = allAdvices.ToArray();
             }
             // ... return value
-            var methodInfo = targetMethod as MethodInfo;
-            if (methodInfo != null)
+            if (targetMethod is MethodInfo methodInfo)
             {
                 allAdvices = allAdvices.Concat(parameterAdvices.Select(p => CreateAdviceIndex(p.Advice, -1)))
                     .Concat(methodInfo.ReturnParameter.GetAttributes<TAdvice>().Select(a => CreateAdviceIndex(a, -1)));

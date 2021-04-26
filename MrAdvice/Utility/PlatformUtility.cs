@@ -55,7 +55,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this Type provider)
         {
-            return provider.GetCustomAttributes(false).OfType<TAttribute>();
+            return provider.GetCustomAttributes(typeof(TAttribute), false).Cast<TAttribute>();
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this ICustomAttributeProvider attributeProvider)
         {
-            return attributeProvider.GetCustomAttributes(false).OfType<TAttribute>();
+            return attributeProvider.GetCustomAttributes(typeof(TAttribute), false).Cast<TAttribute>();
         }
 
         /// <summary>
