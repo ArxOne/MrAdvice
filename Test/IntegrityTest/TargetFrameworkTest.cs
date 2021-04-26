@@ -18,7 +18,7 @@ namespace IntegrityTest
         public void StandardNETFramework()
         {
             var t = new TargetFramework(".NETFramework,Version=v4.0");
-            Assert.AreEqual(new Version(4, 0), t.Net);
+            Assert.AreEqual(new Version(4, 0), t.NetFramework);
             Assert.IsNull(t.Silverlight);
             Assert.IsNull(t.WindowsPhone);
         }
@@ -28,7 +28,7 @@ namespace IntegrityTest
         public void PCL5()
         {
             var t = new TargetFramework(".NETPortable,Version=v4.0,Profile=Profile14");
-            Assert.AreEqual(new Version(4, 0), t.Net);
+            Assert.AreEqual(new Version(4, 0), t.NetFramework);
             Assert.AreEqual(new Version(5, 0), t.Silverlight);
             Assert.IsNull(t.WindowsPhone);
         }
@@ -38,7 +38,7 @@ namespace IntegrityTest
         public void Literal45()
         {
             var t = new TargetFramework(".NETFramework,Version=v4.5");
-            Assert.AreEqual(t.ToString(), ".NET 4.5");
+            Assert.AreEqual(t.ToString(), ".NET Framework 4.5");
         }
     }
 }
