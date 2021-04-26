@@ -51,7 +51,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified module definition.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
-        /// <exception cref="InvalidOperationException"></exception>
         public bool Weave(ModuleDefMD moduleDefinition)
         {
             var auditTimer = new AuditTimer();

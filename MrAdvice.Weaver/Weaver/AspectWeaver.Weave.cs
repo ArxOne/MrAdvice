@@ -98,7 +98,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="context">The context.</param>
-        /// <exception cref="InvalidOperationException"></exception>
         private void WeaveAdvices(MarkedNode markedMethod, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
@@ -337,7 +336,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="innerMethod">The inner method.</param>
         /// <param name="abstractedTarget">if set to <c>true</c> [abstracted target].</param>
         /// <param name="context">The context.</param>
-        /// <exception cref="System.InvalidOperationException"></exception>
         private void WritePointcutBody(MethodDef method, MethodDef innerMethod, bool abstractedTarget, WeavingContext context)
         {
             // now empty the old one and make it call the inner method...
@@ -399,8 +397,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="instructions">The instructions.</param>
         /// <param name="context">The context.</param>
         /// <param name="arguments">The arguments.</param>
-        /// <exception cref="InvalidOperationException">
-        /// </exception>
         private void WriteProceedCall(TypeDef methodDeclaringType, Instructions instructions, WeavingContext context, params InvocationArgument[] arguments)
         {
             var proceedMethod = GetProceedMethod(methodDeclaringType, arguments, instructions.Module, context);
@@ -422,7 +418,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="module"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         private IMethod GetProceedMethod(TypeDef methodDeclaringType, InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
         {
             if (methodDeclaringType.IsValueType)
@@ -441,7 +436,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="module"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         private IMethod LoadProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
         {
             // special case, full invoke
@@ -457,13 +451,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="module"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="TypeLoadException">Ignore</exception>
+        /// <exception cref="MissingMethodException">Ignore.</exception>
         private IMethod GetDefaultProceedMethod(ModuleDef module, WeavingContext context)
         {
             if (context.InvocationProceedMethod is null)
             {
-                var invocationType = TypeResolver.Resolve(module, typeof(Invocation)) ?? throw new InvalidOperationException();
-                var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice2)) ?? throw new InvalidOperationException();
+                var invocationType = TypeResolver.Resolve(module, typeof(Invocation)) ?? throw new TypeLoadException($"Can’t load {typeof(Invocation).AssemblyQualifiedName} (WTF?)");
+                var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice2)) ?? throw new MissingMethodException($"Can’t load {nameof(Invocation.ProceedAdvice2)} (WTF?)");
                 context.InvocationProceedMethod = module.SafeImport(proceedMethodReference);
             }
             return context.InvocationProceedMethod;
@@ -486,7 +481,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="module"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         private IMethod CreateProceedMethod(IReadOnlyList<InvocationArgument> arguments, ModuleDef module, WeavingContext context)
         {
             // get the class from shortcuts
@@ -761,7 +755,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="context">The context.</param>
-        /// <exception cref="InvalidOperationException"></exception>
         private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
@@ -786,7 +779,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="interfaceType">Type of the interface.</param>
         /// <param name="context">The context.</param>
-        /// <exception cref="InvalidOperationException"></exception>
         private void WeaveInterface(ModuleDefMD moduleDefinition, TypeDef interfaceType, WeavingContext context)
         {
             var importedInterfaceType = moduleDefinition.Import(interfaceType);
@@ -863,7 +855,6 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="injectAsPrivate">if set to <c>true</c> [inject as private].</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate, WeavingContext context)
         {
             var module = implementationType.Module;
