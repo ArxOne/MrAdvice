@@ -51,6 +51,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// Weaves the specified module definition.
         /// </summary>
         /// <param name="moduleDefinition">The module definition.</param>
+        /// <exception cref="InvalidOperationException"></exception>
         public bool Weave(ModuleDefMD moduleDefinition)
         {
             var auditTimer = new AuditTimer();
@@ -114,10 +115,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var thisAssembly = GetType().Assembly;
                 var thisVersion = thisAssembly.GetCustomAttribute<AssemblyVersionAttribute>()?.Version
                               ?? thisAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-                var thisTargetFrameworkAttribute = thisAssembly.GetCustomAttribute<TargetFrameworkAttribute>();
-                var thisTargetFramework = thisTargetFrameworkAttribute?.FrameworkDisplayName;
-                if (string.IsNullOrEmpty(thisTargetFramework))
-                    thisTargetFramework = thisTargetFrameworkAttribute?.FrameworkName;
+                var thisTargetFramework = TargetFramework.FromLiteral(thisAssembly.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName);
                 Logging.Write("MrAdvice {3}/{4} weaved module '{0}' (targeting framework {2}) in {1}ms",
                     moduleDefinition.Assembly.FullName, (int)report.Sum(r => r.Value.TotalMilliseconds), targetFramework.ToString(),
                     thisVersion, thisTargetFramework);
@@ -152,16 +150,16 @@ namespace ArxOne.MrAdvice.Weaver
 #pragma warning restore 618
             };
 
-            if (context.AdviceInterfaceType != null)
+            if (context.AdviceInterfaceType is not null)
             {
-                if (context.ExecutionPointAttributeDefaultCtor == null)
+                if (context.ExecutionPointAttributeDefaultCtor is null)
                     Logging.WriteError("ExecutionPointAttribute default ctor was not found");
 
-                if (context.ExcludePointcutAttributeType == null)
+                if (context.ExcludePointcutAttributeType is null)
                     Logging.WriteError("ExcludePointcutAttributeType was not found");
-                if (context.IncludePointcutAttributeType == null)
+                if (context.IncludePointcutAttributeType is null)
                     Logging.WriteError("IncludePointcutAttributeType was not found");
-                if (context.ExcludeAdviceAttributeType == null)
+                if (context.ExcludeAdviceAttributeType is null)
                     Logging.WriteError("ExcludeAdviceAttributeType was not found");
             }
 
@@ -193,7 +191,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             return from instruction in method.Body.Instructions
                    let fieldReference = instruction.Operand as IField
-                   where fieldReference != null && fieldReference.DeclaringType.SafeEquivalent(method.DeclaringType)
+                   where fieldReference is not null && fieldReference.DeclaringType.SafeEquivalent(method.DeclaringType)
                    let fieldDefinition = fieldReference.ResolveFieldDef()
                    where fieldDefinition.CustomAttributes.Any(a => a.AttributeType.SafeEquivalent(context.CompilerGeneratedAttributeType))
                    select fieldDefinition;
@@ -209,7 +207,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var targetFrameworkAttributeType = moduleDefinition.SafeImport(typeof(TargetFrameworkAttribute));
             var targetFrameworkAttribute = moduleDefinition.Assembly.CustomAttributes.SingleOrDefault(a => a.AttributeType.SafeEquivalent(targetFrameworkAttributeType));
-            if (targetFrameworkAttribute == null)
+            if (targetFrameworkAttribute is null)
             {
                 var literalRuntimeVersion = moduleDefinition.RuntimeVersion;
                 if (literalRuntimeVersion.StartsWith("v") && Version.TryParse(literalRuntimeVersion.Substring(1), out var runtimeVersion))
@@ -237,11 +235,11 @@ namespace ArxOne.MrAdvice.Weaver
             introducedFieldType = null;
             isShared = false;
             var genericAdviceMemberTypeReference = adviceMemberTypeReference.TryGetGenericInstSig();
-            if (genericAdviceMemberTypeReference == null)
+            if (genericAdviceMemberTypeReference is null)
                 return false;
 
             var genericAdviceMemberTypeDefinition = TypeResolver.Resolve(genericAdviceMemberTypeReference.GenericType.TypeDefOrRef);
-            if (genericAdviceMemberTypeDefinition == null) // in DEBUG or bogus cases, this may not be resolved. Whatever, this is not our field
+            if (genericAdviceMemberTypeDefinition is null) // in DEBUG or bogus cases, this may not be resolved. Whatever, this is not our field
                 return false;
 
             if (!genericAdviceMemberTypeDefinition.ImplementsType(context.IntroducedFieldType, TypeResolver))
@@ -300,12 +298,12 @@ namespace ArxOne.MrAdvice.Weaver
                     else
                     {
                         var interfaceDef = t.Item1 as TypeDef;
-                        if (interfaceDef == null)
+                        if (interfaceDef is null)
                         {
                             if (t.Item1 is TypeRef interfaceRef)
                                 interfaceDef = TypeResolver.Resolve(interfaceRef);
                         }
-                        if (interfaceDef == null)
+                        if (interfaceDef is null)
                         {
                             Logging.WriteError("Can not identify {0} as valid weavable interface. If you feel this is unfair --> https://github.com/ArxOne/MrAdvice/issues/new", t.Item1.ToString());
                             continue;
@@ -320,7 +318,7 @@ namespace ArxOne.MrAdvice.Weaver
                             }
                         }
                         else
-                            Logging.WriteError("Only interfaces can be weaved with Handle<>() extension method and {0} it not an interface (but I'm glad you asked)", interfaceDef.FullName);
+                            Logging.WriteError("Only interfaces can be weaved with Handle<>() extension method and {0} it not an interface (but I’m glad you asked)", interfaceDef.FullName);
                     }
                 }
             }
@@ -387,7 +385,7 @@ namespace ArxOne.MrAdvice.Weaver
         private bool IsFromComputerGeneratedType(MarkedNode markedMethod)
         {
             var parentType = markedMethod.Node.GetSelfAndAncestors().OfType<TypeReflectionNode>().FirstOrDefault();
-            if (parentType == null)
+            if (parentType is null)
                 return false;
             var isFromComputerGeneratedType = parentType.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName);
             if (isFromComputerGeneratedType)
@@ -406,7 +404,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var ancestorsToChildren = reflectionNode.GetAncestorsToDescendants().ToArray();
             return from node in ancestorsToChildren
-                   where node.Method != null
+                   where node.Method is not null
                    let allMakersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context).Select(t => t.Item2))
                    where allMakersNode.Definitions.Any() && IsIncludedByPointcut(allMakersNode, context) //&& !IsDeclaredByValue(node)
                    let includedMarkersNode = new MarkedNode(node, allMakersNode.Definitions.Where(d => IsIncludedByNode(d, node, context)))
@@ -561,13 +559,13 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 var key = Tuple.Create(typeReference.FullName, markerInterface.FullName);
                 // there is a cache, because the same attribute may be found several time
-                // and we're in a hurry, the developper is waiting for his program to start!
+                // and we’re in a hurry, the developer is waiting for his program to start!
                 if (_isMarker.TryGetValue(key, out var isMarker))
                     return isMarker;
 
                 // otherwise look for type or implemented interfaces (recursively)
                 var typeDef = ResolveTypeOrGenericDefinition(typeReference);
-                if (typeDef == null)
+                if (typeDef is null)
                     return false;
                 var interfaces = typeDef.Interfaces;
                 _isMarker[key] = isMarker = typeReference.SafeEquivalent(markerInterface)

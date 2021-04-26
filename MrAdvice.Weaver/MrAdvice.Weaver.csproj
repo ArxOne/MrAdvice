@@ -30,7 +30,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\MrAdvice\Properties\MrAdvice.snk</AssemblyOriginatorKeyFile>
     <PackageTags>weaver aspect advice pointcut aop .net attributes injection netstandard windows postsharp</PackageTags>
-    <RootNamespace>ArxOne.MrAdvice.Weaver</RootNamespace>
+    <RootNamespace>ArxOne.MrAdvice</RootNamespace>
     <Product>Mr. Advice</Product>
     <UserSecretsId>3d16c508-282d-4a55-8eb1-1844a914534f</UserSecretsId>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>

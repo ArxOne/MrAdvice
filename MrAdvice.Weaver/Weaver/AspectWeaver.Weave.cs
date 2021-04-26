@@ -48,7 +48,7 @@ namespace ArxOne.MrAdvice.Weaver
                                                              && parameters[0].Type.SafeEquivalent(
                                                                  moduleDefinition.SafeImport(useWholeAssembly ? typeof(Assembly) : typeof(Type)).ToTypeSig())
                                                        select m).SingleOrDefault();
-            if (proceedRuntimeInitializersReference == null)
+            if (proceedRuntimeInitializersReference is null)
             {
                 Logging.WriteWarning("Info advice method not found");
                 return;
@@ -79,7 +79,7 @@ namespace ArxOne.MrAdvice.Weaver
             var moduleDefinition = typeDef.Module;
             const string cctorMethodName = ".cctor";
             var staticCtor = typeDef.Methods.SingleOrDefault(m => m.Name == cctorMethodName);
-            if (staticCtor == null)
+            if (staticCtor is null)
             {
                 // the cctor needs to be called after all initialization (in case some info advices collect data)
                 typeDef.Attributes &= ~TypeAttributes.BeforeFieldInit;
@@ -98,6 +98,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="context">The context.</param>
+        /// <exception cref="InvalidOperationException"></exception>
         private void WeaveAdvices(MarkedNode markedMethod, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
@@ -227,7 +228,7 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 var parameter = parametersList[parameterIndex];
 
-                if (parameter.ParamDef == null)
+                if (parameter.ParamDef is null)
                     parameter.CreateParamDef();
 
                 var parameterType = parameter.Type;
@@ -249,11 +250,11 @@ namespace ArxOne.MrAdvice.Weaver
                     instructions.EmitUnboxOrCastIfNecessary(parameterType);
 
                     // when there is a local, use it (because we're going to pass the reference)
-                    if (local != null)
+                    if (local is not null)
                         instructions.EmitStloc(local);
                 }
                 // in all cases, if there is a local, it means we use it
-                if (local != null)
+                if (local is not null)
                     instructions.Emit(OpCodes.Ldloca_S, local);
             }
 
@@ -273,7 +274,7 @@ namespace ArxOne.MrAdvice.Weaver
             {
                 // when there is a local variable, it was either a ref or an out, so we need to box it again to array
                 var localVariable = localVariables[parameterIndex];
-                if (localVariable == null)
+                if (localVariable is null)
                     continue;
                 instructions.Emit(OpCodes.Ldarg_1); // array[...]
                 instructions.EmitLdc(parameterIndex); // index
@@ -296,7 +297,7 @@ namespace ArxOne.MrAdvice.Weaver
         private static void AddGeneratedAttribute(MethodDefUser innerMethod, WeavingContext context)
         {
             // does this happen? Not sure.
-            if (context.ExecutionPointAttributeDefaultCtor == null)
+            if (context.ExecutionPointAttributeDefaultCtor is null)
                 return;
             var generatedAttribute = new CustomAttribute(context.ExecutionPointAttributeDefaultCtor);
             innerMethod.CustomAttributes.Add(generatedAttribute);
@@ -413,6 +414,15 @@ namespace ArxOne.MrAdvice.Weaver
             instructions.Emit(OpCodes.Call, proceedMethod);
         }
 
+        /// <summary>
+        /// GetProceedMethod
+        /// </summary>
+        /// <param name="methodDeclaringType"></param>
+        /// <param name="arguments"></param>
+        /// <param name="module"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private IMethod GetProceedMethod(TypeDef methodDeclaringType, InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
         {
             if (methodDeclaringType.IsValueType)
@@ -424,6 +434,14 @@ namespace ArxOne.MrAdvice.Weaver
             return proceedMethod;
         }
 
+        /// <summary>
+        /// LoadProceedMethod
+        /// </summary>
+        /// <param name="arguments"></param>
+        /// <param name="module"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private IMethod LoadProceedMethod(InvocationArgument[] arguments, ModuleDef module, WeavingContext context)
         {
             // special case, full invoke
@@ -433,6 +451,13 @@ namespace ArxOne.MrAdvice.Weaver
             return CreateProceedMethod(arguments, module, context);
         }
 
+        /// <summary>
+        /// GetDefaultProceedMethod
+        /// </summary>
+        /// <param name="module"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private IMethod GetDefaultProceedMethod(ModuleDef module, WeavingContext context)
         {
             if (context.InvocationProceedMethod is null)
@@ -454,6 +479,14 @@ namespace ArxOne.MrAdvice.Weaver
             return module.Find($"{ShortcutTypeNamespace}.{ShortcutTypeName}", true);
         }
 
+        /// <summary>
+        /// CreateProceedMethod
+        /// </summary>
+        /// <param name="arguments"></param>
+        /// <param name="module"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private IMethod CreateProceedMethod(IReadOnlyList<InvocationArgument> arguments, ModuleDef module, WeavingContext context)
         {
             // get the class from shortcuts
@@ -509,7 +542,7 @@ namespace ArxOne.MrAdvice.Weaver
             return method;
         }
 
-        private InvocationArgument GetTargetArgument(MethodDef method, out Action<Instructions> backCopy)
+        private static InvocationArgument GetTargetArgument(MethodDef method, out Action<Instructions> backCopy)
         {
             var isStatic = method.IsStatic;
             var boxed = new Local(method.Module.CorLibTypes.Object, "boxed");
@@ -669,7 +702,7 @@ namespace ArxOne.MrAdvice.Weaver
                 }, instructions => instructions.Emit(OpCodes.Ldnull));
         }
 
-        private InvocationArgument GetInnerMethodDelegateArgument(MethodDef innerMethod, MethodDef method)
+        private static InvocationArgument GetInnerMethodDelegateArgument(MethodDef innerMethod, MethodDef method)
         {
             var innerMethodDelegate = WriteDelegateProceeder(innerMethod, method.Name, new MethodParameters(method), method.Module);
             return new InvocationArgument("InnerMethodDelegate", innerMethodDelegate != null,
@@ -728,6 +761,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="context">The context.</param>
+        /// <exception cref="InvalidOperationException"></exception>
         private void WeaveMethod(ModuleDef moduleDefinition, MarkedNode markedMethod, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
@@ -752,6 +786,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="interfaceType">Type of the interface.</param>
         /// <param name="context">The context.</param>
+        /// <exception cref="InvalidOperationException"></exception>
         private void WeaveInterface(ModuleDefMD moduleDefinition, TypeDef interfaceType, WeavingContext context)
         {
             var importedInterfaceType = moduleDefinition.Import(interfaceType);
@@ -801,9 +836,9 @@ namespace ArxOne.MrAdvice.Weaver
                 {
                     var implementationProperty = new PropertyDefUser(interfaceProperty.Name, interfaceProperty.PropertySig);
                     implementationType.Properties.Add(implementationProperty);
-                    if (interfaceProperty.GetMethod != null)
+                    if (interfaceProperty.GetMethod is not null)
                         implementationProperty.GetMethod = WeaveInterfaceMethod(interfaceProperty.GetMethod, implementationType, InjectAsPrivate, context);
-                    if (interfaceProperty.SetMethod != null)
+                    if (interfaceProperty.SetMethod is not null)
                         implementationProperty.SetMethod = WeaveInterfaceMethod(interfaceProperty.SetMethod, implementationType, InjectAsPrivate, context);
                 }
 
@@ -812,9 +847,9 @@ namespace ArxOne.MrAdvice.Weaver
                 {
                     var implementationEvent = new EventDefUser(interfaceEvent.Name, interfaceEvent.EventType);
                     implementationType.Events.Add(implementationEvent);
-                    if (interfaceEvent.AddMethod != null)
+                    if (interfaceEvent.AddMethod is not null)
                         implementationEvent.AddMethod = WeaveInterfaceMethod(interfaceEvent.AddMethod, implementationType, InjectAsPrivate, context);
-                    if (interfaceEvent.RemoveMethod != null)
+                    if (interfaceEvent.RemoveMethod is not null)
                         implementationEvent.RemoveMethod = WeaveInterfaceMethod(interfaceEvent.RemoveMethod, implementationType, InjectAsPrivate, context);
                 }
             }
@@ -828,6 +863,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="injectAsPrivate">if set to <c>true</c> [inject as private].</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private MethodDef WeaveInterfaceMethod(MethodDef interfaceMethod, TypeDef implementationType, bool injectAsPrivate, WeavingContext context)
         {
             var module = implementationType.Module;

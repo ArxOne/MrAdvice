@@ -122,7 +122,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public TypeDef Resolve(ModuleDef moduleDefinition, Type type)
         {
-            if (type == null)
+            if (type is null)
             {
                 Logging.WriteWarning("null type provided for resolution");
                 return null;
@@ -137,7 +137,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public TypeDef Resolve(ITypeDefOrRef typeRef)
         {
-            if (typeRef == null)
+            if (typeRef is null)
             {
                 Logging.WriteWarning("null typeRef provided for resolution");
                 return null;
@@ -157,12 +157,12 @@ namespace ArxOne.MrAdvice.Weaver
         }
 
 
-        private TypeDef AsTypeDef(ITypeDefOrRef typeDefOrRef)
+        private static TypeDef AsTypeDef(ITypeDefOrRef typeDefOrRef)
         {
             return typeDefOrRef as TypeDef;
         }
 
-        private TypeDef AsTypeSpecDef(ITypeDefOrRef typeDefOrRef)
+        private static TypeDef AsTypeSpecDef(ITypeDefOrRef typeDefOrRef)
         {
             return (typeDefOrRef as TypeSpec)?.ResolveTypeDef();
         }
@@ -185,7 +185,7 @@ namespace ArxOne.MrAdvice.Weaver
             foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue, Logging, IsMainModule(typeDefOrRef.Module)))
             {
                 var typeDef = reference.Find(typeDefOrRef);
-                if (typeDef != null)
+                if (typeDef is not null)
                     return typeDef;
             }
             return null;

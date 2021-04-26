@@ -31,7 +31,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         private PointcutSelector GetAdviceSelector(ReflectionNode node, WeavingContext context)
         {
-            if (node.AdviceSelector != null)
+            if (node.AdviceSelector is not null)
                 return node.AdviceSelector;
 
             return node.AdviceSelector = CreateAdviceSelector(node, context);
@@ -46,7 +46,7 @@ namespace ArxOne.MrAdvice.Weaver
                 Logging.WriteDebug("Excluding {0} from itself", typeReflectionNode.TypeDefinition.FullName);
                 adviceSelector.ExcludeRules.Add(new PointcutSelectorRule(typeReflectionNode.TypeDefinition.FullName));
             }
-            if (context.ExcludeAdviceAttributeType != null)
+            if (context.ExcludeAdviceAttributeType is not null)
             {
                 var excludeAdviceAttributes = node.CustomAttributes.Where(ca => ca.AttributeType.SafeEquivalent(context.ExcludeAdviceAttributeType));
                 foreach (var excludeAdviceAttribute in excludeAdviceAttributes)
@@ -66,7 +66,7 @@ namespace ArxOne.MrAdvice.Weaver
                     adviceSelector.ExcludeRules.Add(rule);
                 }
             }
-            if (node.Parent != null)
+            if (node.Parent is not null)
                 adviceSelector = GetAdviceSelector(node.Parent, context) + adviceSelector;
             return adviceSelector;
         }
@@ -97,7 +97,7 @@ namespace ArxOne.MrAdvice.Weaver
             foreach (var customAttribute in adviceTypeDef.CustomAttributes)
                 pointcutSelector += CreatePointcutSelector(customAttribute, context);
             var baseType = adviceTypeDef.BaseType.ResolveTypeDef();
-            if (baseType != null)
+            if (baseType is not null)
                 pointcutSelector += GetPointcutSelector(baseType, context);
             return pointcutSelector;
         }
@@ -110,12 +110,12 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="customAttribute">The custom attribute.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private PointcutSelector CreatePointcutSelector(CustomAttribute customAttribute, WeavingContext context)
+        private static PointcutSelector CreatePointcutSelector(CustomAttribute customAttribute, WeavingContext context)
         {
             var pointcutSelector = new PointcutSelector();
-            if (context.IncludePointcutAttributeType != null)
+            if (context.IncludePointcutAttributeType is not null)
                 pointcutSelector.IncludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.IncludePointcutAttributeType));
-            if (context.ExcludePointcutAttributeType != null)
+            if (context.ExcludePointcutAttributeType is not null)
                 pointcutSelector.ExcludeRules.AddRange(CreatePointcutSelectorRule(customAttribute, context.ExcludePointcutAttributeType));
             return pointcutSelector;
         }
@@ -126,7 +126,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="customAttribute">The custom attribute.</param>
         /// <param name="pointcutAttributeType">Type of the pointcut attribute.</param>
         /// <returns></returns>
-        private IEnumerable<PointcutSelectorRule> CreatePointcutSelectorRule(CustomAttribute customAttribute, ITypeDefOrRef pointcutAttributeType)
+        private static IEnumerable<PointcutSelectorRule> CreatePointcutSelectorRule(CustomAttribute customAttribute, ITypeDefOrRef pointcutAttributeType)
         {
             if (!customAttribute.AttributeType.SafeEquivalent(pointcutAttributeType))
                 yield break;

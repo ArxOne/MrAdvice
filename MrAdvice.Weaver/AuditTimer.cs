@@ -59,7 +59,7 @@ namespace ArxOne.MrAdvice
                     for (int index = 0; index < zone.Count - 1; index++)
                     {
                         var name = zone[index].Item1;
-                        if (name == null)
+                        if (name is null)
                             continue;
 
                         var ticks = zone[index + 1].Item2 - zone[index].Item2;
@@ -80,9 +80,8 @@ namespace ArxOne.MrAdvice
         {
             lock (_zones)
             {
-                IList<Tuple<string, long>> zone;
                 var managedThreadId = Thread.CurrentThread.ManagedThreadId;
-                if (_zones.TryGetValue(managedThreadId, out zone))
+                if (_zones.TryGetValue(managedThreadId, out var zone))
                     return zone;
                 _zones[managedThreadId] = zone = new List<Tuple<string, long>>();
                 return zone;

@@ -26,6 +26,12 @@ namespace ArxOne.MrAdvice
 
         private ILogging _logging;
 
+        /// <summary>
+        /// Processes the specified context.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">Ignore.</exception>
         protected override bool Process(AssemblyStitcherContext context)
         {
             BlobberHelper.Setup();
@@ -44,24 +50,6 @@ namespace ArxOne.MrAdvice
 
             try
             {
-                //try
-                //{
-                //    const string mrAdviceAssemblyName = "MrAdvice, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c0e7e6eab6f293d8";
-                //    var mrAdviceAssembly = LoadEmbeddedAssembly(mrAdviceAssemblyName);
-                //    if (mrAdviceAssembly is null)
-                //    {
-                //        _logging.WriteError("Can't find/load embedded MrAdvice assembly (WTF?), exiting");
-                //        return false;
-                //    }
-                //}
-                //catch (FileNotFoundException)
-                //{
-                //    _logging.WriteError("Can't load MrAdvice assembly (WTF?), exiting");
-                //    foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                //        _logging.Write("Assembly in AppDomain: {0}", assembly.GetName());
-                //    return false;
-                //}
-
                 // instances are created here
                 // please also note poor man's dependency injection (which is enough for us here)
                 var assemblyResolver = context.AssemblyResolver;
@@ -70,7 +58,7 @@ namespace ArxOne.MrAdvice
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
 
                 // second chance: someone had the marker file missing
-                if (aspectWeaver.FindShortcutType(context.Module) != null)
+                if (aspectWeaver.FindShortcutType(context.Module) is not null)
                     return false;
 
                 return aspectWeaver.Weave(context.Module);
@@ -82,21 +70,6 @@ namespace ArxOne.MrAdvice
                     _logging.WriteError("Inner exception: {0}", e.ToString());
             }
             return false;
-        }
-
-        private static DateTime GetLastWriteDate(string path)
-        {
-            if (!File.Exists(path))
-                return DateTime.MinValue;
-            return new FileInfo(path).LastWriteTimeUtc;
-        }
-
-        private Assembly LoadEmbeddedAssembly(string assemblyName)
-        {
-            var existingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName);
-            if (existingAssembly is not null)
-                return existingAssembly;
-            return BlobberHelper.LoadAssembly(GetType().Assembly, assemblyName);
         }
 
         /// <summary>
@@ -117,11 +90,6 @@ namespace ArxOne.MrAdvice
                     // right, this is dirty!
                     if (fileName == "MrAdvice.dll" && AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "MrAdvice"))
                         continue;
-
-                    //if (string.IsNullOrEmpty(referencePath))
-                    //{
-                    //    Logger.WriteDebug("Loading assembly from {0}", referencePath);
-                    //}
 
                     var referenceBytes = File.ReadAllBytes(referencePath);
                     Assembly.Load(referenceBytes);

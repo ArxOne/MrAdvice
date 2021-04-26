@@ -21,7 +21,16 @@ namespace ArxOne.MrAdvice.Reflection
         /// <value>
         /// The net.
         /// </value>
-        public Version Net { get; private set; }
+        public Version NetFramework { get; private set; }
+
+        /// <summary>
+        /// Gets the supported .NET Core version.
+        /// </summary>
+        /// <value>
+        /// The net.
+        /// </value>
+        public Version NetCore { get; }
+
         /// <summary>
         /// Gets the supported Silverlight version.
         /// </summary>
@@ -29,6 +38,7 @@ namespace ArxOne.MrAdvice.Reflection
         /// The silverlight.
         /// </value>
         public Version Silverlight { get; private set; }
+
         /// <summary>
         /// Gets the supported Windows Phone version.
         /// </summary>
@@ -37,14 +47,20 @@ namespace ArxOne.MrAdvice.Reflection
         /// </value>
         public Version WindowsPhone { get; private set; }
 
-
         /// <summary>
         /// Gets a value indicating whether this instance is a Portable Class Library.
         /// </summary>
         /// <value>
         ///   <c>true</c> if this instance is PCL; otherwise, <c>false</c>.
         /// </value>
-        public bool IsPCL { get; private set; }
+        public bool IsPCL { get; }
+
+        public static TargetFramework FromLiteral(string literalFrameworkName)
+        {
+            if (literalFrameworkName is null)
+                return null;
+            return new TargetFramework(literalFrameworkName);
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TargetFramework"/> class.
@@ -58,7 +74,10 @@ namespace ArxOne.MrAdvice.Reflection
             switch (frameworkName.Identifier)
             {
                 case ".NETFramework":
-                    Net = frameworkName.Version;
+                    NetFramework = frameworkName.Version;
+                    break;
+                case ".NETCoreApp":
+                    NetCore = frameworkName.Version;
                     break;
                 case "Silverlight":
                     Silverlight = frameworkName.Version;
@@ -92,13 +111,13 @@ namespace ArxOne.MrAdvice.Reflection
             var values = details.Split(',').Select(s => s.Trim()).ToArray();
             foreach (var value in values)
             {
-                if (CheckVersion(value, ".NET Framework", v => Net = v)
+                if (CheckVersion(value, ".NET Framework", v => NetFramework = v)
                     || CheckVersion(value, "Silverlight", v => Silverlight = v)
                     || CheckVersion(value, "Windows Phone Silverlight", v => { })
                     || CheckVersion(value, "Windows Phone", v => WindowsPhone = v)
                     || CheckVersion(value, "Windows", v => { }))
                     continue;
-                throw new ArgumentException(string.Format("Unrecognized profile '{0}' (as '{1}'", profile, details));
+                throw new ArgumentException($"Unrecognized profile '{profile}' (as '{details}'");
             }
         }
 
@@ -130,7 +149,7 @@ namespace ArxOne.MrAdvice.Reflection
         /// <param name="net">The net.</param>
         public TargetFramework(Version net)
         {
-            Net = net;
+            NetFramework = net;
         }
 
         /// <summary>
@@ -142,11 +161,18 @@ namespace ArxOne.MrAdvice.Reflection
         public override string ToString()
         {
             var literals = new List<string>();
-            if (Net != null)
-                literals.Add(".NET " + GetLiteralVersion(Net, 2));
-            if (Silverlight != null)
+            if (NetFramework is not null)
+                literals.Add(".NET Framework " + GetLiteralVersion(NetFramework, 2));
+            if (NetCore is not null)
+            {
+                if (NetCore.Major >= 5)
+                    literals.Add(".NET " + GetLiteralVersion(NetCore, 2));
+                else
+                    literals.Add(".NET Core " + GetLiteralVersion(NetCore, 2));
+            }
+            if (Silverlight is not null)
                 literals.Add("Silverlight " + GetLiteralVersion(Silverlight));
-            if (WindowsPhone != null)
+            if (WindowsPhone is not null)
                 literals.Add("Windows Phone " + GetLiteralVersion(WindowsPhone));
             return (IsPCL ? "(PCL) " : "") + string.Join(", ", literals.ToArray());
         }
