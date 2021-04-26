@@ -12,5 +12,7 @@
     <RootNamespace>ArxOne.MrAdvice</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Properties\MrAdvice.snk</AssemblyOriginatorKeyFile>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 </Project>
