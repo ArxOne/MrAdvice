@@ -63,12 +63,6 @@ Your aspects can be injected at assembly, type or method level, simply by settin
 * When the aspect is injected at type level, all of its methods are weaved.
 * And of course, if the aspect is injected on a method, only the method is weaved.
 
-## Contributing
-
-Currently, Mr. Advice still exists in two flavors:
-* The brand new version using dnlib, in [master branch](https://github.com/ArxOne/MrAdvice). This is the branch you can contribute to, by forking and submitting pull requests.
-* A legacy version using Fody and Cecil still exists in [fody branch](https://github.com/ArxOne/MrAdvice/tree/fody). This version still exists in NuGet, and is available under ID [MrAdvice.Fody](https://www.nuget.org/packages/MrAdvice.Fody/). However, it is not supported anymore and may disappear in the future.
-
 ## Other projects using Mr. Advice
 
 NuGet packages:
