@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
     <ProductVersion />
     <ProjectGuid>{8B8EB6C4-78BC-442D-86B1-3E8E09DCF21F}</ProjectGuid>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFrameworks>net461;net5.0</TargetFrameworks>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AssemblyTitle>AssemblyLevelTest</AssemblyTitle>
     <Company>Microsoft</Company>
@@ -17,6 +17,7 @@
   </PropertyGroup>
   <Import Project="$(SolutionDir)\MrAdvice.Weaver\MrAdvice.targets" />
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.3" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.3" />
   </ItemGroup>

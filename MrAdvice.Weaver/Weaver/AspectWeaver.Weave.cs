@@ -85,8 +85,7 @@ namespace ArxOne.MrAdvice.Weaver
                 typeDef.Attributes &= ~TypeAttributes.BeforeFieldInit;
                 var methodAttributes = (InjectAsPrivate ? MethodAttributes.Private : MethodAttributes.Public)
                                        | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
-                staticCtor =
-                    new MethodDefUser(cctorMethodName, MethodSig.CreateStatic(moduleDefinition.CorLibTypes.Void), methodAttributes) { Body = new CilBody() };
+                staticCtor = new MethodDefUser(cctorMethodName, MethodSig.CreateStatic(moduleDefinition.CorLibTypes.Void), methodAttributes) { Body = new CilBody() };
                 typeDef.Methods.Add(staticCtor);
                 staticCtor.Body.Instructions.Add(new Instruction(OpCodes.Ret));
             }
@@ -341,8 +340,7 @@ namespace ArxOne.MrAdvice.Weaver
         private void WritePointcutBody(MethodDef method, MethodDef innerMethod, bool abstractedTarget, WeavingContext context)
         {
             // now empty the old one and make it call the inner method...
-            if (method.Body == null)
-                method.Body = new CilBody();
+            method.Body ??= new CilBody();
             method.Body.InitLocals = true;
             method.Body.Instructions.Clear();
             method.Body.Variables.Clear();
@@ -437,14 +435,10 @@ namespace ArxOne.MrAdvice.Weaver
 
         private IMethod GetDefaultProceedMethod(ModuleDef module, WeavingContext context)
         {
-            if (context.InvocationProceedMethod == null)
+            if (context.InvocationProceedMethod is null)
             {
-                var invocationType = TypeResolver.Resolve(module, typeof(Invocation));
-                if (invocationType == null)
-                    throw new InvalidOperationException();
-                var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice2));
-                if (proceedMethodReference == null)
-                    throw new InvalidOperationException();
+                var invocationType = TypeResolver.Resolve(module, typeof(Invocation)) ?? throw new InvalidOperationException();
+                var proceedMethodReference = invocationType.Methods.SingleOrDefault(m => m.IsStatic && m.Name == nameof(Invocation.ProceedAdvice2)) ?? throw new InvalidOperationException();
                 context.InvocationProceedMethod = module.SafeImport(proceedMethodReference);
             }
             return context.InvocationProceedMethod;
@@ -464,7 +458,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             // get the class from shortcuts
             var shortcutType = context.ShortcutClass;
-            if (shortcutType == null)
+            if (shortcutType is null)
             {
                 shortcutType = new TypeDefUser(ShortcutTypeNamespace, ShortcutTypeName)
                 {
@@ -844,7 +838,7 @@ namespace ArxOne.MrAdvice.Weaver
             for (int parameterIndex = 0; parameterIndex < implementationMethod.Parameters.Count; parameterIndex++)
             {
                 var parameterType = implementationMethod.Parameters[parameterIndex].Type;
-                if (parameterType != null)
+                if (parameterType is not null)
                 {
                     var relocatedParameterType = typeImporter.TryRelocateTypeSig(parameterType) ?? parameterType;
                     implementationMethod.Parameters[parameterIndex].Type = module.Import(relocatedParameterType);

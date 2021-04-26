@@ -68,7 +68,7 @@ namespace ArxOne.MrAdvice.Weaver
                 // runtime check
                 auditTimer.NewZone("Runtime check");
                 var targetFramework = GetTargetFramework(moduleDefinition);
-                InjectAsPrivate = targetFramework.Silverlight == null && targetFramework.WindowsPhone == null;
+                InjectAsPrivate = targetFramework.Silverlight is null && targetFramework.WindowsPhone is null;
 
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
@@ -112,10 +112,15 @@ namespace ArxOne.MrAdvice.Weaver
                 Logging.WriteDebug("--------------------------------------");
 
                 var thisAssembly = GetType().Assembly;
-                var version = thisAssembly.GetAttributes<AssemblyVersionAttribute>().SingleOrDefault()?.Version
-                              ?? thisAssembly.GetAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault()?.InformationalVersion;
-                Logging.Write("MrAdvice {3} weaved module '{0}' (targeting framework {2}) in {1}ms",
-                    moduleDefinition.Assembly.FullName, (int)report.Sum(r => r.Value.TotalMilliseconds), targetFramework.ToString(), version);
+                var thisVersion = thisAssembly.GetCustomAttribute<AssemblyVersionAttribute>()?.Version
+                              ?? thisAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                var thisTargetFrameworkAttribute = thisAssembly.GetCustomAttribute<TargetFrameworkAttribute>();
+                var thisTargetFramework = thisTargetFrameworkAttribute?.FrameworkDisplayName;
+                if (string.IsNullOrEmpty(thisTargetFramework))
+                    thisTargetFramework = thisTargetFrameworkAttribute?.FrameworkName;
+                Logging.Write("MrAdvice {3}/{4} weaved module '{0}' (targeting framework {2}) in {1}ms",
+                    moduleDefinition.Assembly.FullName, (int)report.Sum(r => r.Value.TotalMilliseconds), targetFramework.ToString(),
+                    thisVersion, thisTargetFramework);
 
                 return true;
             }

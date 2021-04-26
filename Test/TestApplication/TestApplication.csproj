@@ -2,12 +2,12 @@
   <PropertyGroup>
     <ProjectGuid>{491EF845-625A-4535-932C-BC2B8B15FC94}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFrameworks>net461;net5.0</TargetFrameworks>
     <AssemblyTitle>TestApplication</AssemblyTitle>
     <Product>TestApplication</Product>
     <Copyright>Copyright ©  2016</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
-    <PostBuildEvent>"$(SolutionDir)\MrAdvice.Weaver\peverify.bat" "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent>echo "..\..\MrAdvice.Weaver\peverify.bat" "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -15,12 +15,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\MrAdvice.Weaver\MrAdvice.targets" />
-  <ItemGroup>
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Net.Http" />
-  </ItemGroup>
+  <Import Project="..\..\MrAdvice.Weaver\MrAdvice.targets" />
   <ItemGroup>
     <ProjectReference Include="..\..\MrAdvice.Weaver\MrAdvice.Weaver.csproj" />
     <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj" />
