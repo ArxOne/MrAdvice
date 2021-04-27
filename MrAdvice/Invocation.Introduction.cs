@@ -26,7 +26,7 @@ namespace ArxOne.MrAdvice
         private static void SafeInjectIntroducedFields(IAdvice advice, Type advisedType)
         {
             // shame, but easy here
-            if (advice == null)
+            if (advice is null)
                 return;
             InjectIntroducedFields(advice, advisedType, null);
         }
@@ -49,7 +49,7 @@ namespace ArxOne.MrAdvice
         /// <param name="introducedFields">The introduced fields.</param>
         private static void InjectIntroducedFields(IAdvice advice, Type advisedType, IList<MemberInfo> introducedFields)
         {
-            if (introducedFields == null)
+            if (introducedFields is null)
                 introducedFields = AdviceInfo.GetIntroducedFields(advice);
             if (introducedFields.Count == 0)
                 return;
@@ -92,7 +92,7 @@ namespace ArxOne.MrAdvice
             var introducedField = FindIntroducedFieldByName(advisedType, introducedFieldName, introducedFieldName, bindingFlags)
                      ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), null, bindingFlags)
                      ?? FindIntroducedFieldByTypeAndAvailability(advisedType, introducedFieldType, adviceMemberInfo.IsStatic(), introducedFieldName, bindingFlags);
-            if (introducedField == null)
+            if (introducedField is null)
                 throw new InvalidOperationException("Internal error, can not find matching introduced field");
             var introducedFieldAttribute = introducedField.GetAttributes<IntroducedFieldAttribute>().Single();
             introducedFieldAttribute.LinkID = introducedFieldName;
@@ -106,7 +106,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         private static bool IsIntroduction(MemberInfo memberInfo)
         {
-            return GetIntroducedType(memberInfo) != null;
+            return GetIntroducedType(memberInfo) is not null;
         }
 
         /// <summary>
@@ -140,10 +140,10 @@ namespace ArxOne.MrAdvice
         private static FieldInfo FindIntroducedFieldByName(Type advisedType, string introducedFieldName, string linkID, BindingFlags bindingFlags)
         {
             var introducedField = advisedType.GetMembersReader().GetField(introducedFieldName, bindingFlags);
-            if (introducedField == null)
+            if (introducedField is null)
                 return null;
             var introducedFieldAttribute = introducedField.GetAttributes<IntroducedFieldAttribute>().Single();
-            if (introducedFieldAttribute.LinkID != null && introducedFieldAttribute.LinkID != linkID)
+            if (introducedFieldAttribute.LinkID is not null && introducedFieldAttribute.LinkID != linkID)
                 return null;
             return introducedField;
         }
@@ -163,7 +163,7 @@ namespace ArxOne.MrAdvice
                     where fieldInfo.FieldType == fieldType
                           && fieldInfo.IsStatic == isStatic
                     let introducedFieldAttribute = fieldInfo.GetAttributes<IntroducedFieldAttribute>().SingleOrDefault()
-                    where introducedFieldAttribute != null
+                    where introducedFieldAttribute is not null
                           && introducedFieldAttribute.LinkID == linkID
                     select fieldInfo).FirstOrDefault();
         }

@@ -7,8 +7,6 @@
 
 #endregion
 
-using System.Runtime.ExceptionServices;
-
 namespace ArxOne.MrAdvice
 {
     using System;
@@ -143,23 +141,23 @@ namespace ArxOne.MrAdvice
                 var advice = aspectInfo.Advices[adviceIndex];
                 // aspects are processed from highest to lowest level, so they are linked here in the opposite order
                 // 3. as parameter
-                if (advice.ParameterAdvice != null && advice.ParameterIndex.HasValue)
+                if (advice.ParameterAdvice is not null && advice.ParameterIndex.HasValue)
                 {
                     var parameterIndex = advice.ParameterIndex.Value;
                     var parameterInfo = GetParameterInfo(aspectInfo.AdvisedMethod, parameterIndex);
                     adviceContext = new ParameterAdviceContext(advice.ParameterAdvice, parameterInfo, parameterIndex, adviceValues, adviceContext);
                 }
                 // 2. as method
-                if (advice.MethodAdvice != null)
+                if (advice.MethodAdvice is not null)
                     adviceContext = new MethodAdviceContext(advice.MethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
                 // 2b. as async method
-                if (advice.AsyncMethodAdvice != null)
+                if (advice.AsyncMethodAdvice is not null)
                     adviceContext = new MethodAsyncAdviceContext(advice.AsyncMethodAdvice, aspectInfo.AdvisedMethod, adviceValues, adviceContext);
                 // 1. as property
-                if (advice.PropertyAdvice != null && aspectInfo.PointcutProperty != null)
+                if (advice.PropertyAdvice is not null && aspectInfo.PointcutProperty is not null)
                     adviceContext = new PropertyAdviceContext(advice.PropertyAdvice, aspectInfo.PointcutProperty, aspectInfo.IsPointcutPropertySetter, adviceValues, adviceContext);
                 // 1b. as event
-                if (advice.EventAdvice != null && aspectInfo.PointcutEvent != null)
+                if (advice.EventAdvice is not null && aspectInfo.PointcutEvent is not null)
                     adviceContext = new EventAdviceContext(advice.EventAdvice, aspectInfo.PointcutEvent, aspectInfo.IsPointcutEventAdder, adviceValues, adviceContext);
             }
 
@@ -205,7 +203,7 @@ namespace ArxOne.MrAdvice
         /// <returns></returns>
         private static Exception FlattenException(Exception e)
         {
-            if (!(e is AggregateException a))
+            if (e is not AggregateException a)
                 return e;
             return a.InnerException;
         }
@@ -321,7 +319,7 @@ namespace ArxOne.MrAdvice
         /// <param name="typeAndAssemblyMethodInfoAdvices">The type and assembly method information advices.</param>
         private static void ProcessMethodInfoAdvices(MethodBase methodInfo, IEnumerable<IMethodInfoAdvice> typeAndAssemblyMethodInfoAdvices)
         {
-            if (methodInfo == null)
+            if (methodInfo is null)
                 return;
             var methodInfoAdvices = typeAndAssemblyMethodInfoAdvices.Union(methodInfo.GetAttributes<IMethodInfoAdvice>()).OrderByDescending(PriorityAttribute.GetLevel);
             foreach (var methodInfoAdvice in methodInfoAdvices)
@@ -486,7 +484,7 @@ namespace ArxOne.MrAdvice
         private static bool IsInheritable(object attribute)
         {
             var attributeUsage = attribute.GetType().GetAttributes<AttributeUsageAttribute>().FirstOrDefault();
-            if (attributeUsage == null)
+            if (attributeUsage is null)
                 return true;
             return attributeUsage.Inherited;
         }
@@ -531,7 +529,7 @@ namespace ArxOne.MrAdvice
         private static Tuple<PropertyInfo, bool> GetPropertyInfo(MemberInfo memberInfo)
         {
             var methodInfo = memberInfo as MethodInfo;
-            if (methodInfo == null || !methodInfo.IsSpecialName)
+            if (methodInfo is null || !methodInfo.IsSpecialName)
                 return null;
 
             var isGetter = methodInfo.Name.StartsWith("get_");
@@ -545,7 +543,7 @@ namespace ArxOne.MrAdvice
                 .GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public |
                                BindingFlags.NonPublic)
                 .SingleOrDefault(p => p.GetGetMethod(true) == methodInfo || p.GetSetMethod(true) == methodInfo);
-            if (propertyInfo == null)
+            if (propertyInfo is null)
                 return null; // this should never happen
 
             return Tuple.Create(propertyInfo, isSetter);
@@ -559,7 +557,7 @@ namespace ArxOne.MrAdvice
         private static Tuple<EventInfo, bool> GetEventInfo(MemberInfo memberInfo)
         {
             var methodInfo = memberInfo as MethodInfo;
-            if (methodInfo == null || !methodInfo.IsSpecialName)
+            if (methodInfo is null || !methodInfo.IsSpecialName)
                 return null;
 
             var isAdder = methodInfo.Name.StartsWith("add_");
@@ -572,7 +570,7 @@ namespace ArxOne.MrAdvice
             var eventInfo = methodInfo.DeclaringType.GetMembersReader()
                 .GetEvents(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                 .SingleOrDefault(p => p.GetAddMethod(true) == methodInfo || p.GetRemoveMethod(true) == methodInfo);
-            if (eventInfo == null)
+            if (eventInfo is null)
                 return null; // this should never happen
 
             return Tuple.Create(eventInfo, isAdder);

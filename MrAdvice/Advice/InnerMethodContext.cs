@@ -54,7 +54,7 @@ namespace ArxOne.MrAdvice.Advice
         /// <exception cref="InvalidOperationException">context.Proceed() must not be called on advised interfaces (think about it, it does not make sense).</exception>
         internal override Task Invoke()
         {
-            if (_innerMethodDelegate != null)
+            if (_innerMethodDelegate is not null)
             {
                 AdviceValues.ReturnValue = _innerMethodDelegate(AdviceValues.Target, AdviceValues.Arguments);
                 if (typeof(Task).GetAssignmentReader().IsAssignableFrom(_innerMethod.ReturnType))
@@ -64,7 +64,7 @@ namespace ArxOne.MrAdvice.Advice
 
             // _innerMethod is null for advised interfaces (because there is no implementation)
             // the advises should not call the final method
-            if (_innerMethod == null)
+            if (_innerMethod is null)
                 throw new InvalidOperationException("context.Proceed() must not be called on advised interfaces (think about it, it does not make sense).");
 
             try

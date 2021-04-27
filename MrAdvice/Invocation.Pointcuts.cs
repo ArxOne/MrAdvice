@@ -86,10 +86,10 @@ namespace ArxOne.MrAdvice
             foreach (PointcutAttribute pointcutAttribute in adviceType.GetInformationReader().GetCustomAttributes(typeof(PointcutAttribute), true))
             {
                 var includeRule = CreatePointcutSelectorRule(typeof(IncludePointcutAttribute), pointcutAttribute);
-                if (includeRule != null)
+                if (includeRule is not null)
                     pointcutSelector.IncludeRules.Add(includeRule);
                 var excludeRule = CreatePointcutSelectorRule(typeof(ExcludePointcutAttribute), pointcutAttribute);
-                if (excludeRule != null)
+                if (excludeRule is not null)
                     pointcutSelector.ExcludeRules.Add(excludeRule);
             }
             return pointcutSelector;
@@ -107,7 +107,7 @@ namespace ArxOne.MrAdvice
                 return null;
 
             var rule = new PointcutSelectorRule();
-            if (pointcutAttribute.Names != null)
+            if (pointcutAttribute.Names is not null)
                 rule.Names.AddRange(pointcutAttribute.Names);
             rule.Scope = pointcutAttribute.Scope;
             rule.Kind = pointcutAttribute.Kind;
