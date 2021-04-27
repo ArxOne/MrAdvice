@@ -4,6 +4,10 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
+using System.Linq;
+using System.Reflection;
+
 namespace MethodLevelTest
 {
     using System;
@@ -320,6 +324,16 @@ namespace MethodLevelTest
         public void WeavedWithExternalTest()
         {
             var w = new WeavedWithExternal();
+        }
+
+        [EnumAdvice(Option = ConsoleColor.DarkRed)]
+        [TestMethod]
+        public void Method7()
+        {
+            var thisMethod = GetType().GetMethod(nameof(Method7));
+            var customAttributes = thisMethod.GetCustomAttributes();
+            var attribute = customAttributes.OfType<EnumAdvice>().Single();
+            Assert.AreEqual(ConsoleColor.DarkRed, attribute.Option);
         }
     }
 
