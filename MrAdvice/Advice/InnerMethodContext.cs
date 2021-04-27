@@ -76,7 +76,7 @@ namespace ArxOne.MrAdvice.Advice
             }
             catch (TargetInvocationException tie)
             {
-                throw tie.InnerException.PreserveStackTrace();
+                throw tie.InnerException.Rethrow();
             }
         }
     }

@@ -7,6 +7,8 @@
 
 #endregion
 
+using System.Runtime.ExceptionServices;
+
 namespace ArxOne.MrAdvice
 {
     using System;
@@ -97,10 +99,22 @@ namespace ArxOne.MrAdvice
             var returnType = advisedMethodInfo?.ReturnType;
             // no Task means aspect was sync, so everything already ended
             // or it may also been an async void, meaning that we don't care about it
-            if (adviceTask == null || returnType == null || !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
+            if (adviceTask is null || returnType is null || !typeof(Task).GetAssignmentReader().IsAssignableFrom(returnType))
             {
-                adviceTask?.Wait();
+#if NETCOREAPP
+                adviceTask?.GetAwaiter().GetResult();
                 return adviceValues.ReturnValue;
+#else
+                try
+                {
+                    adviceTask?.Wait();
+                    return adviceValues.ReturnValue;
+                }
+                catch (AggregateException e) when (e.InnerExceptions.Count == 1)
+                {
+                    throw e.InnerException.Rethrow();
+                }
+#endif
             }
 
             // otherwise, see if it is a Task or Task<>
@@ -175,12 +189,12 @@ namespace ArxOne.MrAdvice
         {
             // when faulted here, no need to go further
             if (advisedTask.IsFaulted)
-                throw FlattenException(advisedTask.Exception).PreserveStackTrace();
+                throw FlattenException(advisedTask.Exception).Rethrow();
 
             // otherwise check inner value
             var returnValue = (Task)adviceValues.ReturnValue;
             if (returnValue.IsFaulted)
-                throw FlattenException(returnValue.Exception).PreserveStackTrace();
+                throw FlattenException(returnValue.Exception).Rethrow();
             return returnValue.GetResult();
         }
 

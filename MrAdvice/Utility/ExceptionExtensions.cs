@@ -7,6 +7,8 @@
 
 #endregion
 
+using System.Runtime.ExceptionServices;
+
 namespace ArxOne.MrAdvice.Utility
 {
     using System;
@@ -23,8 +25,12 @@ namespace ArxOne.MrAdvice.Utility
         /// </summary>
         /// <param name="exception">The exception.</param>
         /// <returns></returns>
-        public static Exception PreserveStackTrace(this Exception exception)
+        public static Exception Rethrow(this Exception exception)
         {
+#if NETCOREAPP
+            ExceptionDispatchInfo.Capture(exception).Throw();
+            return exception;
+#else
             var preserveStackTrace = typeof(Exception).GetMembersReader().GetMethod("PrepForRemoting", BindingFlags.Instance | BindingFlags.NonPublic)
                                      ?? typeof(Exception).GetMembersReader().GetMethod("InternalPreserveStackTrace", BindingFlags.Instance | BindingFlags.NonPublic);
             try
@@ -32,7 +38,8 @@ namespace ArxOne.MrAdvice.Utility
                 preserveStackTrace?.Invoke(exception, new object[0]);
             }
             catch (MemberAccessException) { }
-            return exception;
+            throw exception;
+#endif
         }
     }
 }

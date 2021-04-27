@@ -22,7 +22,7 @@ namespace MethodLevelTest
 
         [TestMethod]
         [EmptyReallyAsyncAdvice]
-        [ExpectedException(typeof(AggregateException))]
+        [ExpectedException(typeof(ApplicationException))]
         public void ReallyAsyncAdviceTest() => throw new ApplicationException("Something Happened!");
     }
 
