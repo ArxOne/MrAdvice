@@ -4,6 +4,7 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
@@ -11,6 +12,7 @@ namespace ArxOne.MrAdvice.Weaver
     using System.Linq;
     using dnlib.DotNet;
     using StitcherBoy.Logging;
+    using StitcherBoy.Weaving.Build;
     using Utility;
 
     /// <summary>
@@ -42,10 +44,12 @@ namespace ArxOne.MrAdvice.Weaver
         private IAssemblyResolver _assemblyResolver;
         private IResolver _resolver;
         private readonly ModuleDef _mainModule;
+        private readonly AssemblyDependency[] _dependencies;
 
-        public TypeResolver(ModuleDef mainModule)
+        public TypeResolver(ModuleDef mainModule, AssemblyDependency[] dependencies)
         {
             _mainModule = mainModule;
+            _dependencies = dependencies;
         }
 
         private bool IsMainModule(ModuleDef module)
@@ -103,7 +107,7 @@ namespace ArxOne.MrAdvice.Weaver
             //}
             lock (_resolvedTypesByName)
             {
-                var selfAndReferences = moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth, Logging, IsMainModule(moduleDefinition));
+                var selfAndReferences = moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth, Logging, IsMainModule(moduleDefinition), _dependencies);
                 return selfAndReferences.SelectMany(referencedModule => referencedModule.GetTypes()).FirstOrDefault(t => Matches(t, fullName));
             }
         }
@@ -182,7 +186,7 @@ namespace ArxOne.MrAdvice.Weaver
         {
             // this method is actually never called...
             // TODO: remove
-            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue, Logging, IsMainModule(typeDefOrRef.Module)))
+            foreach (var reference in typeDefOrRef.Module.GetSelfAndReferences(AssemblyResolver, false, int.MaxValue, Logging, IsMainModule(typeDefOrRef.Module), _dependencies))
             {
                 var typeDef = reference.Find(typeDefOrRef);
                 if (typeDef is not null)
