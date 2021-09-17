@@ -9,4 +9,4 @@ using ArxOne.MrAdvice;
 using StitcherBoy;
 
 BlobberHelper.Setup();
-Stitcher.Run<MrAdviceStitcher>(args);
+return Stitcher.Run<MrAdviceStitcher>(args);
