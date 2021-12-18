@@ -7,7 +7,7 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <AssemblyTitle>Mr. Advice</AssemblyTitle>
     <Copyright>Copyright [2015,…[ Arx One</Copyright>
-    <Version>2.9.4</Version>
+    <Version>2.9.5</Version>
     <Authors>Arx One</Authors>
     <RootNamespace>ArxOne.MrAdvice</RootNamespace>
     <SignAssembly>true</SignAssembly>
@@ -15,6 +15,6 @@
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <FileVersion></FileVersion>
-    <AssemblyVersion></AssemblyVersion>
+    <AssemblyVersion>2.0</AssemblyVersion>
   </PropertyGroup>
 </Project>
