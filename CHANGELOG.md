@@ -1,3 +1,7 @@
+## 2.9.5 (coming soon)
+
+- New: support for .NET6
+
 ## 2.9.3 (2021-11-27)
 
 - Fix: MrAdvice assembly file version was stuck to 2.0
