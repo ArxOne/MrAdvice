@@ -15,7 +15,7 @@
     <repository type="git" url="https://github.com/ArxOne/MrAdvice.git" />
     <summary>.NET build step aspect weaver</summary>
     <releaseNotes></releaseNotes>
-    <tags>weaver aspect advice pointcut aop .net attributes injection netstandard windows silverlight postsharp</tags>
+    <tags>weaver aspect advice pointcut aop .net attributes injection netstandard windows postsharp</tags>
     <developmentDependency>false</developmentDependency>
   </metadata>
   <files>

@@ -1,14 +1,14 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net461;net5.0</TargetFrameworks>
+    <TargetFrameworks>net461;net5.0;net6.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <AssemblyTitle>Mr. Advice weaver</AssemblyTitle>
     <Description>MrAdvice allows to weave aspects at build-time (just like PostSharp, but free as in free beer). Write your own aspects in the form of attributes and apply them to target methods or properties.</Description>
     <Copyright>Copyright [2015,…[ Arx One</Copyright>
-    <Version>2.9.5</Version>
+    <Version>2.9.6-testing1</Version>
     <Authors>Arx One</Authors>
     <PackageProjectUrl>https://github.com/ArxOne/MrAdvice</PackageProjectUrl>
     <DebugType>full</DebugType>
@@ -42,6 +42,6 @@
     <None Include="..\MrAdvice\Properties\MrAdvice.snk" Link="Properties\MrAdvice.snk" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="StitcherBoy" Version="2.0.1" />
+    <PackageReference Include="StitcherBoy" Version="2.0.2" />
   </ItemGroup>
 </Project>

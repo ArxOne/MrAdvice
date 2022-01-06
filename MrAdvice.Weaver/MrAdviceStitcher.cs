@@ -92,7 +92,17 @@ namespace ArxOne.MrAdvice
                         continue;
 
                     var referenceBytes = File.ReadAllBytes(referencePath);
-                    Assembly.Load(referenceBytes);
+                    try
+                    {
+                        Assembly.Load(referenceBytes);
+                    }
+                    catch (BadImageFormatException) { }
+
+                    try
+                    {
+                        Assembly.ReflectionOnlyLoad(referenceBytes);
+                    }
+                    catch (PlatformNotSupportedException) { }
                 }
                 catch (Exception e)
                 {

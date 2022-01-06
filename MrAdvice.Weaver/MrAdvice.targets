@@ -4,7 +4,8 @@
   <Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
     <PropertyGroup>
       <MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
-      <MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">"$(MSBuildThisFileDirectory)..\tools\net5.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+	  <MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net5.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+      <MrAdviceWeaverPath Condition="'$(TargetFramework)' == 'net6.0'">"$(MSBuildThisFileDirectory)..\tools\$(TargetFramework)\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
       <!--<MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)tfwid="$(TargetFrameworkIdentifier)" </MrAdvicePath>-->
       <MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath.txt</MrAdviceWeaverReferencePathFile>
       <MrAdviceWeaverLocalReferencePathFile>@(IntermediateAssembly).MrAdvice.LocalReferencePath.txt</MrAdviceWeaverLocalReferencePathFile>
