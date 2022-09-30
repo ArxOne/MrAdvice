@@ -26,6 +26,9 @@ namespace ArxOne.MrAdvice.Advice
         /// <remarks>On async methods, this method may return before the task completes. To wait for full completion, 
         /// implement <see cref="IMethodAsyncAdvice"/> and use ProceedAsync() method</remarks>
         [DebuggerStepThrough]
+#if NET6_0_OR_GREATER
+        [System.Diagnostics.StackTraceHidden]
+#endif
         public virtual void Proceed() => InvokeNext();
     }
 }
