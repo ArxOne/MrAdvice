@@ -52,6 +52,9 @@ namespace ArxOne.MrAdvice.Advice
         /// Here, the inner method is called
         /// </summary>
         /// <exception cref="InvalidOperationException">context.Proceed() must not be called on advised interfaces (think about it, it does not make sense).</exception>
+#if NET6_0_OR_GREATER
+        [System.Diagnostics.StackTraceHidden]
+#endif
         internal override Task Invoke()
         {
             if (_innerMethodDelegate is not null)
