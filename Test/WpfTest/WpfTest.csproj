@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{6EC087B5-B17C-45A7-BF50-3F936B210A41}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net481</TargetFramework>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AssemblyTitle>WpfTest</AssemblyTitle>
     <Product>WpfTest</Product>
