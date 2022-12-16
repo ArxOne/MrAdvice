@@ -37,7 +37,8 @@ namespace ArxOne.MrAdvice
             BlobberHelper.Setup();
 
 #if DEBUG
-            _logging = new MultiLogging(new DefaultLogging(Logging), new FileLogging("MrAdvice.log"));
+            // Prevent internal error during: System.IO.IOException: The process cannot access the file 'C:\git\MrAdvice\Test\TestApplication\MrAdvice.log' because it is being used by another process.
+            _logging = new MultiLogging(new DefaultLogging(Logging), new FileLogging($"MrAdvice_{System.Diagnostics.Process.GetCurrentProcess().Id}.log"));
             _logging.WriteDebug("Start");
 #else
             _logging = Logging;
