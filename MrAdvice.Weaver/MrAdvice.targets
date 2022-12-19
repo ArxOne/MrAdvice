@@ -1,18 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
-    <PropertyGroup>
-      <MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
-	  <MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net6.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
-      <MrAdviceWeaverPath Condition="$(TargetFramework.Contains('net5.0'))">dotnet "$(MSBuildThisFileDirectory)..\tools\net5.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
-      <MrAdviceWeaverPath Condition="$(TargetFramework.Contains('net6.0'))">dotnet "$(MSBuildThisFileDirectory)..\tools\net6.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
-      <!--<MrAdvicePath Condition="$(MrAdvicePath) == '' Or $(MrAdvicePath) == '*Undefined*'">$(MSBuildThisFileDirectory)tfwid="$(TargetFrameworkIdentifier)" </MrAdvicePath>-->
-      <MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath.txt</MrAdviceWeaverReferencePathFile>
-      <MrAdviceWeaverLocalReferencePathFile>@(IntermediateAssembly).MrAdvice.LocalReferencePath.txt</MrAdviceWeaverLocalReferencePathFile>
-    </PropertyGroup>
-    <WriteLinesToFile Lines="@(ReferencePath)" File="$(MrAdviceWeaverReferencePathFile)" Overwrite="true" />
-    <WriteLinesToFile Lines="@(ReferenceCopyLocalPaths)" File="$(MrAdviceWeaverLocalReferencePathFile)" Overwrite="true" />
-    <Exec Command='$(MrAdviceWeaverPath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@$(MrAdviceWeaverLocalReferencePathFile)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
-  </Target>
+	<Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
+		<PropertyGroup>
+			<TargetFrameworkVersionNumber>$([System.Text.RegularExpressions.Regex]::Replace($(TargetFrameworkVersion), '[^\d\.]+', '', System.Text.RegularExpressions.RegexOptions.IgnoreCase))</TargetFrameworkVersionNumber>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net6.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkVersionNumber)' &gt;= '5.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\net$(TargetFrameworkVersionNumber)\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
+			<MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath.txt</MrAdviceWeaverReferencePathFile>
+			<MrAdviceWeaverLocalReferencePathFile>@(IntermediateAssembly).MrAdvice.LocalReferencePath.txt</MrAdviceWeaverLocalReferencePathFile>
+		</PropertyGroup>
+		<WriteLinesToFile Lines="@(ReferencePath)" File="$(MrAdviceWeaverReferencePathFile)" Overwrite="true" />
+		<WriteLinesToFile Lines="@(ReferenceCopyLocalPaths)" File="$(MrAdviceWeaverLocalReferencePathFile)" Overwrite="true" />
+		<Exec Command='$(MrAdviceWeaverPath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@$(MrAdviceWeaverLocalReferencePathFile)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
+	</Target>
 </Project>
