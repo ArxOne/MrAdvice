@@ -4,7 +4,7 @@
 	<Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" >
 		<PropertyGroup>
 			<TargetFrameworkVersionNumber>$([System.Text.RegularExpressions.Regex]::Replace($(TargetFrameworkVersion), '[^\d\.]+', '', System.Text.RegularExpressions.RegexOptions.IgnoreCase))</TargetFrameworkVersionNumber>
-			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net481\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
 			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net6.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
 			<MrAdviceWeaverPath Condition="'$(TargetFrameworkVersionNumber)' &gt;= '5.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\net$(TargetFrameworkVersionNumber)\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
 			<MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath.txt</MrAdviceWeaverReferencePathFile>

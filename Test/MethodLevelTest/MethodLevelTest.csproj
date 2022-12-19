@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
     <ProjectGuid>{77928F8C-A708-4C49-B6E2-772256E75E4D}</ProjectGuid>
-    <TargetFrameworks>net481;net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net461;net5.0;net6.0;net7.0</TargetFrameworks>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>

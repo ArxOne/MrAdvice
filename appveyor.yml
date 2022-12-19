@@ -20,7 +20,7 @@ build:
   project: MrAdvice.sln
   publish_nuget: false
   publish_nuget_symbols: false
-  verbosity: detailed
+  verbosity: minimal
 
 test:
   assemblies:
