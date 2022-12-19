@@ -13,7 +13,7 @@ before_build:
   nuget restore MrAdvice.sln
 
 configuration: Release
-platform: Any CPU
+platform: AnyCPU
 
 build:
   parallel: true
