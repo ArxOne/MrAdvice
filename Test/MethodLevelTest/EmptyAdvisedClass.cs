@@ -6,6 +6,7 @@
 #endregion
 namespace MethodLevelTest
 {
+    using System;
     using System.Collections.Generic;
     using System.Reflection;
     using Advices;
@@ -156,7 +157,7 @@ namespace MethodLevelTest
         [EmptyMethodAdvice]
         public void MethodWithGenericParameterTest<TValue>(TValue six)
         {
-            Assert.AreEqual(6, six);
+            Assert.AreEqual(6, Int32.Parse(six.ToString()));
         }
 
         [ChangeParameter(NewParameter = 2)]
