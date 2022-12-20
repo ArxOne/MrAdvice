@@ -1,7 +1,8 @@
 # Mr. Advice appveyor.yml script
 
 version: '{branch}-{build}'
-image: Visual Studio 2022
+#image: Visual Studio 2022
+image: Ubuntu
 
 branches:
   only:
