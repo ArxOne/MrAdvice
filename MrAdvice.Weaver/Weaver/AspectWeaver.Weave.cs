@@ -742,7 +742,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="context">The context.</param>
         private void WeaveInfoAdvices(ModuleDef moduleDefinition, TypeDef typeDefinition, ITypeDefOrRef infoAdviceInterface, WeavingContext context)
         {
-            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition, null), infoAdviceInterface, context).Where(IsWeavable).Any())
+            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition, null), infoAdviceInterface, context).Where(IsInfoWeavable).Any())
             {
                 Logging.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
                 WeaveInfoAdvices(typeDefinition, moduleDefinition, false);

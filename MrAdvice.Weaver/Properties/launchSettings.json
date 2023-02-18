@@ -2,7 +2,7 @@
   "profiles": {
     "MrAdvice.Weaver": {
       "commandName": "Project",
-      "commandLineArgs": "@+C:\\Users\\Pascal\\Documents\\Developpement\\MrAdvice\\server.core.debug"
+      "commandLineArgs": "@+\"C:\\Users\\pascal\\Documents\\Developpement\\MrAdvice\\methodlevel.debug\""
     }
   }
 }

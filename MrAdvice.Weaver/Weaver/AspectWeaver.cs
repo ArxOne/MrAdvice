@@ -39,7 +39,7 @@ namespace ArxOne.MrAdvice.Weaver
         public ILogging Logging { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether all additional methods and fields are injected as prived.
+        /// Gets or sets a value indicating whether all additional methods and fields are injected as private.
         /// Just because Silverlight does not like invoking private methods or fields, even by reflection
         /// </summary>
         /// <value>
@@ -60,7 +60,7 @@ namespace ArxOne.MrAdvice.Weaver
                 auditTimer.NewZone("Types import");
                 // context
                 var context = CreateWeavingContext(moduleDefinition);
-                if (context.AdviceInterfaceType == null)
+                if (context.AdviceInterfaceType is null)
                 {
                     Logging.WriteWarning("IAdvice interface not found here (not referenced means not used), exiting");
                     return false;
@@ -72,9 +72,8 @@ namespace ArxOne.MrAdvice.Weaver
 
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
-                Func<MarkedNode, bool> isWeavable = n => !IsFromComputerGeneratedType(n) && IsWeavable(n);
-                var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(isWeavable).ToArray();
-                var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(isWeavable).ToArray();
+                var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(IsWeavable).ToArray();
+                var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(IsWeavable).ToArray();
                 auditTimer.NewZone("Abstract targets");
                 var generatedFieldsToBeRemoved = new List<FieldDef>();
                 var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
@@ -127,6 +126,11 @@ namespace ArxOne.MrAdvice.Weaver
                 Logging.WriteError("Please complain, whine, cry, yell at https://github.com/ArxOne/MrAdvice/issues/new");
                 return false;
             }
+        }
+
+        private bool IsWeavable(MarkedNode n)
+        {
+            return !IsFromComputerGeneratedType(n) && IsInfoWeavable(n);
         }
 
         private WeavingContext CreateWeavingContext(ModuleDef moduleDefinition)
@@ -369,7 +373,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
         /// <returns></returns>
-        private static bool IsWeavable(MarkedNode markedMethod)
+        private static bool IsInfoWeavable(MarkedNode markedMethod)
         {
             return markedMethod.Node.Method.HasBody || markedMethod.Node.Method.IsPinvokeImpl;
         }
