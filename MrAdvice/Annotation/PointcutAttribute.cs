@@ -61,7 +61,7 @@ namespace ArxOne.MrAdvice.Annotation
         /// Initializes a new instance of the <see cref="PointcutAttribute"/> class.
         /// </summary>
         protected PointcutAttribute()
-            : this(new string[0])
+            : this(Array.Empty<string>())
         { }
 
         /// <summary>

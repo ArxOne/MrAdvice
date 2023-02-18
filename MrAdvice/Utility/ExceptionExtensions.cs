@@ -35,7 +35,7 @@ namespace ArxOne.MrAdvice.Utility
                                      ?? typeof(Exception).GetMembersReader().GetMethod("InternalPreserveStackTrace", BindingFlags.Instance | BindingFlags.NonPublic);
             try
             {
-                preserveStackTrace?.Invoke(exception, new object[0]);
+                preserveStackTrace?.Invoke(exception, Array.Empty<object>());
             }
             catch (MemberAccessException) { }
             throw exception;

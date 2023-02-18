@@ -28,8 +28,8 @@ namespace MethodLevelTest
             public static void Initializer(object target)
             {
                 var property = target.GetType().GetProperty("WeavingAdvisedMethod_Friend");
-                var currentValue = (string)property.GetValue(target, new object[0]) ?? "";
-                property.SetValue(target, currentValue + "Hello", new object[0]);
+                var currentValue = (string)property.GetValue(target, Array.Empty<object>()) ?? "";
+                property.SetValue(target, currentValue + "Hello", Array.Empty<object>());
             }
         }
 
@@ -44,7 +44,7 @@ namespace MethodLevelTest
                 Assert.IsTrue(thisMethod.Name.StartsWith("WeavingAdvisedMethod_Renamed"));
                 var newProperty = GetType().GetProperty("WeavingAdvisedMethod_Friend");
                 Assert.IsNotNull(newProperty);
-                var newPropertyValue = (string)newProperty.GetValue(this, new object[0]);
+                var newPropertyValue = (string)newProperty.GetValue(this, Array.Empty<object>());
                 Assert.AreEqual("Hello", newPropertyValue);
             }
         }

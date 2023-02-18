@@ -4,6 +4,9 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
+using System;
+
 namespace ArxOne.MrAdvice.Reflection.Groups
 {
     using System.Collections.Generic;
@@ -25,7 +28,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         protected override ReflectionNode LoadParent() => new MethodReflectionNode(_methodDefinition, null);
 
-        private static readonly ReflectionNode[] NoChild = new ReflectionNode[0];
+        private static readonly ReflectionNode[] NoChild = Array.Empty<ReflectionNode>();
 
         /// <summary>
         /// Gets the children.

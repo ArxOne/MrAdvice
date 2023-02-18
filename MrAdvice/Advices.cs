@@ -31,7 +31,7 @@ namespace ArxOne.MrAdvice
         public static IAdvice[] Get(MethodBase methodBase)
         {
             if (methodBase.GetCustomAttributes(false).OfType<ExecutionPointAttribute>().Any())
-                return new IAdvice[0];
+                return Array.Empty<IAdvice>();
 
             // method here is not supposed to change AspectInfos,
             // so just try to read it

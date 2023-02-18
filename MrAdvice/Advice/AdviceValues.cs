@@ -55,7 +55,7 @@ namespace ArxOne.MrAdvice.Advice
             Target = target;
             TargetType = targetType;
             // null means empty, so actually empty fits better here
-            Arguments = arguments ?? new object[0];
+            Arguments = arguments ?? Array.Empty<object>();
         }
     }
 }

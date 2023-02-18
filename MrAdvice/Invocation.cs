@@ -35,7 +35,7 @@ namespace ArxOne.MrAdvice
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
-        private static readonly AdviceInfo[] NoAdvice = new AdviceInfo[0];
+        private static readonly AdviceInfo[] NoAdvice = Array.Empty<AdviceInfo>();
 
         /// <summary>
         /// Runs a method interception.

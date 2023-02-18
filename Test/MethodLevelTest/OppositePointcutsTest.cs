@@ -24,7 +24,7 @@ namespace MethodLevelTest
         public void AdvisedOnceTest()
         {
             var m = typeof(OppositePointcuts).GetMethod(nameof(OppositePointcuts.AdvisedOnce));
-            m.Invoke(null, new object[0]);
+            m.Invoke(null, Array.Empty<object>());
             var advices = ArxOne.MrAdvice.Advices.Get(m);
             Assert.AreEqual(1, advices.Length);
             Assert.AreEqual(typeof(AdviceA), advices[0].GetType());

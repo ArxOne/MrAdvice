@@ -15,7 +15,7 @@ namespace ArxOne.MrAdvice.Utility
     /// </summary>
     internal static class MemberInfoExtensions
     {
-        private static readonly object[] NoParameter = new object[0];
+        private static readonly object[] NoParameter = Array.Empty<object>();
 
         /// <summary>
         /// Gets the type of the member.
