@@ -44,7 +44,7 @@ namespace MrAdvice.Annotation
         /// <summary>
         /// An event remover
         /// </summary>
-        EventRemove = 0x0010,
+        EventRemove = 0x0020,
 
         /// <summary>
         /// All event manipulators
