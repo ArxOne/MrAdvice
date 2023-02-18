@@ -30,23 +30,16 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static VisibilityScope ToVisibilityScope(this MethodAttributes methodAttributes)
         {
-            switch (methodAttributes & MethodAttributes.MemberAccessMask)
+            return (methodAttributes & MethodAttributes.MemberAccessMask) switch
             {
-                case MethodAttributes.Private: // 1
-                    return VisibilityScope.PrivateMember;
-                case MethodAttributes.FamANDAssem: // 2
-                    return VisibilityScope.FamilyAndAssemblyMember;
-                case MethodAttributes.Assembly: // 3
-                    return VisibilityScope.AssemblyMember;
-                case MethodAttributes.Family: // 4
-                    return VisibilityScope.FamilyMember;
-                case MethodAttributes.FamORAssem: // 5
-                    return VisibilityScope.FamilyOrAssemblyMember;
-                case MethodAttributes.Public: // 6
-                    return VisibilityScope.PublicMember;
-                default: // WTF?
-                    return 0;
-            }
+                MethodAttributes.Private => VisibilityScope.PrivateMember,
+                MethodAttributes.FamANDAssem => VisibilityScope.FamilyAndAssemblyMember,
+                MethodAttributes.Assembly => VisibilityScope.AssemblyMember,
+                MethodAttributes.Family => VisibilityScope.FamilyMember,
+                MethodAttributes.FamORAssem => VisibilityScope.FamilyOrAssemblyMember,
+                MethodAttributes.Public => VisibilityScope.PublicMember,
+                _ => 0
+            };
         }
 
         /// <summary>
@@ -56,24 +49,21 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static MemberKind GetMemberKind(this MethodBase methodBase)
         {
-            if (methodBase is MethodInfo methodInfo)
-            {
-                if (methodBase.IsSpecialName)
-                {
-                    if (methodInfo.Name.StartsWith("get_"))
-                        return MemberKind.PropertyGet;
-                    if (methodInfo.Name.StartsWith("set_"))
-                        return MemberKind.PropertySet;
-                    if (methodInfo.Name.StartsWith("add_"))
-                        return MemberKind.EventAdd;
-                    if (methodInfo.Name.StartsWith("remove_"))
-                        return MemberKind.EventRemove;
-                }
-
+            if (methodBase is not MethodInfo methodInfo) 
+                return MemberKind.Constructor;
+            if (!methodBase.IsSpecialName) 
                 return MemberKind.Method;
-            }
+            if (methodInfo.Name.StartsWith("get_"))
+                return MemberKind.PropertyGet;
+            if (methodInfo.Name.StartsWith("set_"))
+                return MemberKind.PropertySet;
+            if (methodInfo.Name.StartsWith("add_"))
+                return MemberKind.EventAdd;
+            if (methodInfo.Name.StartsWith("remove_"))
+                return MemberKind.EventRemove;
 
-            return MemberKind.Constructor;
+            return MemberKind.Method;
+
         }
     }
 }

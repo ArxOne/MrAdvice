@@ -14,7 +14,7 @@ namespace ArxOne.MrAdvice.IO
     public class FileLogging : ILogging
     {
         private readonly StreamWriter _streamWriter;
-        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private readonly Stopwatch _stopwatch = new();
 
         public FileLogging(string logFilePath)
         {

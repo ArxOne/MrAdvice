@@ -83,7 +83,7 @@ namespace ArxOne.MrAdvice
         private static PointcutSelector CreatePointcutSelector(Type adviceType)
         {
             var pointcutSelector = new PointcutSelector();
-            foreach (PointcutAttribute pointcutAttribute in adviceType.GetInformationReader().GetCustomAttributes(typeof(PointcutAttribute), true))
+            foreach (var pointcutAttribute in adviceType.GetInformationReader().GetCustomAttributes<PointcutAttribute>(true))
             {
                 var includeRule = CreatePointcutSelectorRule(typeof(IncludePointcutAttribute), pointcutAttribute);
                 if (includeRule is not null)

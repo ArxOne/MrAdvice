@@ -82,27 +82,18 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static VisibilityScope ToVisibilityScope(this TypeAttributes typeAttributes)
         {
-            switch (typeAttributes & TypeAttributes.VisibilityMask)
+            return (typeAttributes & TypeAttributes.VisibilityMask) switch
             {
-                case TypeAttributes.NotPublic: // 0
-                    return VisibilityScope.PrivateGlobalType;
-                case TypeAttributes.Public: // 1
-                    return VisibilityScope.PublicGlobalType;
-                case TypeAttributes.NestedPublic: // 2
-                    return VisibilityScope.PublicNestedType;
-                case TypeAttributes.NestedPrivate: // 3
-                    return VisibilityScope.PrivateNestedType;
-                case TypeAttributes.NestedFamily: // 4
-                    return VisibilityScope.FamilyNestedType;
-                case TypeAttributes.NestedAssembly: // 5
-                    return VisibilityScope.AssemblyNestedType;
-                case TypeAttributes.NestedFamANDAssem: // 6
-                    return VisibilityScope.FamilyAndAssemblyType;
-                case TypeAttributes.NestedFamORAssem: // 7
-                    return VisibilityScope.FamilyOrAssemblyType;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                TypeAttributes.NotPublic => VisibilityScope.PrivateGlobalType,
+                TypeAttributes.Public => VisibilityScope.PublicGlobalType,
+                TypeAttributes.NestedPublic => VisibilityScope.PublicNestedType,
+                TypeAttributes.NestedPrivate => VisibilityScope.PrivateNestedType,
+                TypeAttributes.NestedFamily => VisibilityScope.FamilyNestedType,
+                TypeAttributes.NestedAssembly => VisibilityScope.AssemblyNestedType,
+                TypeAttributes.NestedFamANDAssem => VisibilityScope.FamilyAndAssemblyType,
+                TypeAttributes.NestedFamORAssem => VisibilityScope.FamilyOrAssemblyType,
+                _ => throw new ArgumentOutOfRangeException(nameof(typeAttributes))
+            };
         }
     }
 }

@@ -58,7 +58,7 @@ namespace ArxOne.MrAdvice
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
 
                 // second chance: someone had the marker file missing
-                if (aspectWeaver.FindShortcutType(context.Module) is not null)
+                if (AspectWeaver.FindShortcutType(context.Module) is not null)
                     return false;
 
                 return aspectWeaver.Weave(context.Module);

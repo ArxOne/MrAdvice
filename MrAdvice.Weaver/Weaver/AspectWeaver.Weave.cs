@@ -469,7 +469,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="module">The module.</param>
         /// <returns></returns>
-        public TypeDef FindShortcutType(ModuleDef module)
+        public static TypeDef FindShortcutType(ModuleDef module)
         {
             return module.Find($"{ShortcutTypeNamespace}.{ShortcutTypeName}", true);
         }
@@ -810,8 +810,10 @@ namespace ArxOne.MrAdvice.Weaver
             var baseEmptyConstructor = moduleDefinition.SafeImport(advisedInterfaceType.FindConstructors().Single());
             const MethodAttributes ctorAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName |
                                                     MethodAttributes.RTSpecialName;
-            var method = new MethodDefUser(".ctor", baseEmptyConstructor.MethodSig, ctorAttributes);
-            method.Body = new CilBody();
+            var method = new MethodDefUser(".ctor", baseEmptyConstructor.MethodSig, ctorAttributes)
+            {
+                Body = new CilBody()
+            };
             method.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             method.Body.Instructions.Add(Instruction.Create(OpCodes.Call, baseEmptyConstructor));
             method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));

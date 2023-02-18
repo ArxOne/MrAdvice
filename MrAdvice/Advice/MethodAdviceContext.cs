@@ -49,7 +49,7 @@ namespace ArxOne.MrAdvice.Advice
         {
             get
             {
-                if (!(TargetMethod is MethodInfo methodInfo)) // ctor
+                if (TargetMethod is not MethodInfo methodInfo) // ctor
                     return false;
                 return methodInfo.ReturnType != typeof(void);
             }

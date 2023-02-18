@@ -38,8 +38,7 @@ namespace ArxOne.MrAdvice.Reflection
             lock (_typesByName)
             {
                 var fullName = typeReference.FullName.Replace('/', '+');
-                Type type;
-                if (_typesByName.TryGetValue(fullName, out type))
+                if (_typesByName.TryGetValue(fullName, out var type))
                     return type;
                 type = FindType(fullName);
                 _typesByName[fullName] = type;

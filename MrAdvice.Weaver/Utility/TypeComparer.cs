@@ -43,6 +43,6 @@ namespace ArxOne.MrAdvice.Utility
         /// <summary>
         /// The instance
         /// </summary>
-        public static TypeComparer Instance = new TypeComparer();
+        public static readonly TypeComparer Instance = new TypeComparer();
     }
 }

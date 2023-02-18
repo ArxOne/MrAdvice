@@ -56,7 +56,7 @@ namespace ArxOne.MrAdvice.Pointcut
         /// <summary>
         /// The empty selector
         /// </summary>
-        public static readonly PointcutSelector EmptySelector = new PointcutSelector();
+        public static readonly PointcutSelector EmptySelector = new();
 
         /// <summary>
         /// Implements the operator +.

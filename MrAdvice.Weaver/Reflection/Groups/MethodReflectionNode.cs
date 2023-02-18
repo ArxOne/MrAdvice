@@ -135,6 +135,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator MethodReflectionNode(MethodDef methodDefinition) => new MethodReflectionNode(methodDefinition, null);
+        public static implicit operator MethodReflectionNode(MethodDef methodDefinition) => new(methodDefinition, null);
     }
 }

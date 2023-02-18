@@ -150,7 +150,7 @@ namespace ArxOne.MrAdvice.Pointcut
         /// <param name="rule">The rule.</param>
         /// <param name="reflectionName">Name of the reflection.</param>
         /// <returns></returns>
-        private bool MatchName(string rule, string reflectionName)
+        private static bool MatchName(string rule, string reflectionName)
         {
             if (reflectionName == null)
                 return true;

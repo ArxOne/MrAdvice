@@ -531,8 +531,7 @@ namespace ArxOne.MrAdvice
         /// <returns>A tuple with the PropertyInfo and true is method is a setter (false for a getter)</returns>
         private static Tuple<PropertyInfo, bool> GetPropertyInfo(MemberInfo memberInfo)
         {
-            var methodInfo = memberInfo as MethodInfo;
-            if (methodInfo is null || !methodInfo.IsSpecialName)
+            if (memberInfo is not MethodInfo {IsSpecialName: true} methodInfo)
                 return null;
 
             var isGetter = methodInfo.Name.StartsWith("get_");
@@ -559,8 +558,7 @@ namespace ArxOne.MrAdvice
         /// <returns>A tuple with the PropertyInfo and true is method is a setter (false for a getter)</returns>
         private static Tuple<EventInfo, bool> GetEventInfo(MemberInfo memberInfo)
         {
-            var methodInfo = memberInfo as MethodInfo;
-            if (methodInfo is null || !methodInfo.IsSpecialName)
+            if (memberInfo is not MethodInfo {IsSpecialName: true} methodInfo)
                 return null;
 
             var isAdder = methodInfo.Name.StartsWith("add_");

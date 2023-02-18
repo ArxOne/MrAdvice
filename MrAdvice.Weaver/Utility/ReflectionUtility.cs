@@ -166,7 +166,7 @@ namespace ArxOne.MrAdvice.Utility
             else if (memberInfo is PropertyInfo info)
                 info.GetSetMethod(true).Invoke(instance, new[] { value });
             else
-                throw new ArgumentException("memberInfo");
+                throw new ArgumentException(nameof(memberInfo));
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace ArxOne.MrAdvice.Utility
                 return info.FieldType;
             if (memberInfo is PropertyInfo propertyInfo)
                 return propertyInfo.PropertyType;
-            throw new ArgumentException("memberInfo");
+            throw new ArgumentException(nameof(memberInfo));
         }
 
         /// <summary>

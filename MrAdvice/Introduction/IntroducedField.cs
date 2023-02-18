@@ -19,7 +19,7 @@ namespace ArxOne.MrAdvice.Introduction
     /// </summary>
     public abstract class IntroducedField
     {
-        private static readonly object FieldInfosLock = new object();
+        private static readonly object FieldInfosLock = new();
 
         private readonly IAdvice _ownerAdvice;
         private readonly MemberInfo _ownerMemberInfo;

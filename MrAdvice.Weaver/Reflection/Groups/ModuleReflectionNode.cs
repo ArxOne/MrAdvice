@@ -71,6 +71,6 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        public static implicit operator ModuleReflectionNode(ModuleDef moduleDefinition) => new ModuleReflectionNode(moduleDefinition, null);
+        public static implicit operator ModuleReflectionNode(ModuleDef moduleDefinition) => new(moduleDefinition, null);
     }
 }

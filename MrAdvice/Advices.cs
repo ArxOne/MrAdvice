@@ -30,7 +30,7 @@ namespace ArxOne.MrAdvice
         /// - null if method is not advised</returns>
         public static IAdvice[] Get(MethodBase methodBase)
         {
-            if (methodBase.GetCustomAttributes(false).OfType<ExecutionPointAttribute>().Any())
+            if (methodBase.GetCustomAttributes<ExecutionPointAttribute>(false).Any())
                 return Array.Empty<IAdvice>();
 
             // method here is not supposed to change AspectInfos,

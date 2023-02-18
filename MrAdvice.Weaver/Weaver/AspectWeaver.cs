@@ -435,9 +435,6 @@ namespace ArxOne.MrAdvice.Weaver
         private bool IsDeclaredByValue(ReflectionNode node)
         {
             var ownerType = node.GetSelfAndAncestors().OfType<TypeReflectionNode>().First();
-            // this should not happen
-            if (ownerType is null)
-                return false;
             return !ownerType.TypeDefinition.IsClass;
         }
 

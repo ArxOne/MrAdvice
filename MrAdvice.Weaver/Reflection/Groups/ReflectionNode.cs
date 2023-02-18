@@ -28,12 +28,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         public ReflectionNode Parent
         {
-            get
-            {
-                if (_parent == null)
-                    _parent = LoadParent();
-                return _parent;
-            }
+            get { return _parent ??= LoadParent(); }
             protected set { _parent = value; }
         }
 
@@ -51,15 +46,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The children.
         /// </value>
-        public IEnumerable<ReflectionNode> Children
-        {
-            get
-            {
-                if (_children == null)
-                    _children = LoadChildren().ToArray();
-                return _children;
-            }
-        }
+        public IEnumerable<ReflectionNode> Children => _children ??= LoadChildren().ToArray();
 
         /// <summary>
         /// Loads the children.

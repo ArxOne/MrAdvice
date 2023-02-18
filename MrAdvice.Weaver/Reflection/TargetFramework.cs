@@ -92,7 +92,7 @@ namespace ArxOne.MrAdvice.Reflection
             }
         }
 
-        private static readonly Regex ProfileEx = new Regex(@"(?<profile>Profile\d*)[^\(]*\((?<details>[^\)]*)\)");
+        private static readonly Regex ProfileEx = new(@"(?<profile>Profile\d*)[^\(]*\((?<details>[^\)]*)\)");
 
         /// <summary>
         /// Initializes from a portable profile.

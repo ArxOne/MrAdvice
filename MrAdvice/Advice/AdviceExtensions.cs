@@ -68,15 +68,14 @@ namespace ArxOne.MrAdvice.Advice
                 var interfaceAssembly = interfaceType.GetInformationReader().Assembly;
                 var assemblies = new[] { interfaceAssembly, PlatformUtility.GetCallingAssembly(), referenceAssembly, referenceType?.GetInformationReader().Assembly };
                 implementationType = (from assembly in assemblies
-                                      where !(assembly is null)
+                                      where assembly is not null
                                       from t in assembly.GetTypes()
                                       where t.GetInformationReader().BaseType == typeof(AdvisedInterface)
                                       let i = t.GetAssignmentReader().GetInterfaces()
                                       where i.Contains(interfaceType)
                                       select t).FirstOrDefault();
-                if (implementationType == null)
-                    throw new ArgumentException("Interface implementation was not found. Ensure that the Handle<> method is called directly (without reflection) or that the interface is marked with [" + nameof(DynamicHandleAttribute) + "].");
-                Types[interfaceType] = implementationType;
+                Types[interfaceType] = implementationType 
+                                       ?? throw new ArgumentException("Interface implementation was not found. Ensure that the Handle<> method is called directly (without reflection) or that the interface is marked with [" + nameof(DynamicHandleAttribute) + "].");
                 return implementationType;
             }
         }

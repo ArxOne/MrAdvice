@@ -11,7 +11,8 @@ namespace ArxOne.MrAdvice.Annotation
     /// <summary>
     /// Applied to generated inner methods
     /// </summary>
-    public class ExecutionPointAttribute: Attribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ExecutionPointAttribute : Attribute
     {
     }
 }
