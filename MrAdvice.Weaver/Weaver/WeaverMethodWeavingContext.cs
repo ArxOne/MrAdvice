@@ -15,6 +15,7 @@ namespace ArxOne.MrAdvice.Weaver
     using dnlib.DotNet.Emit;
     using IO;
     using StitcherBoy.Logging;
+    using System.Reflection;
     using Utility;
 
     internal class WeaverMethodWeavingContext : MethodWeavingContext
@@ -79,39 +80,70 @@ namespace ArxOne.MrAdvice.Weaver
             AddInitializer(initializer, true);
         }
 
-        public void AddInitializer(Action<object> initializer, bool once)
+        private void AddInitializer(Action<object> initializer, bool once)
         {
-            bool error = false;
-            var methodInfo = initializer.Method;
-            if (!methodInfo.IsStatic)
-            {
-                _logging.WriteError("The method {0}.{1} must be static", methodInfo.DeclaringType.FullName, methodInfo.Name);
-                error = true;
-            }
-            if (!methodInfo.IsPublic)
-            {
-                _logging.WriteError("The method {0}.{1} must be public", methodInfo.DeclaringType.FullName, methodInfo.Name);
-                error = true;
-            }
-            if (error)
+            Add(initializer.Method, once, _typeDefinition.FindConstructors().Where(c => !c.IsStaticConstructor));
+        }
+
+        public override void AddMethod(string methodName, Action<object> method, Type interfaceImplicitImplementation = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void AddMethod<T1>(string methodName, Action<object, T1> method, Type interfaceImplicitImplementation = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void AddMethod<T1, T2>(string methodName, Action<object, T1, T2> method, Type interfaceImplicitImplementation = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void AddFinalizer(Action<object> finalizer)
+        {
+            var typeFinalizer = _typeDefinition.GetOrCreateFinalizer(_typeResolver);
+            Add(finalizer.Method, typeFinalizer);
+        }
+
+        private void Add(MethodInfo methodInfo, MethodDef holderMethod)
+        {
+            Add(methodInfo, false, new[] { holderMethod });
+        }
+        private void Add(MethodInfo methodInfo, bool once, IEnumerable<MethodDef> holderMethods)
+        {
+            if (!IsMethodValid(methodInfo))
                 return;
 
             var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
-            foreach (var ctor in _typeDefinition.FindConstructors().ToArray())
+            foreach (var holderMethod in holderMethods)
             {
-                // the initializer is never inserted in cctor
-                if (ctor.IsStaticConstructor)
+                if (once && holderMethod.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as IMethod, true)))
                     continue;
 
-                if (once && ctor.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as IMethod, true)))
-                    continue;
-
-                var instructions = new Instructions(ctor.Body, _typeDefinition.Module);
+                var instructions = new Instructions(holderMethod.Body, _typeDefinition.Module);
                 // last instruction is a RET, so move just before it
-                instructions.Cursor = instructions.Count - 1;
+                if (holderMethod.Name == "Finalize")
+                {
+                    var finallyExceptionHandler = holderMethod.Body.ExceptionHandlers.First(e => e.HandlerType == ExceptionHandlerType.Finally);
+                    instructions.Cursor = holderMethod.Body.Instructions.IndexOf(finallyExceptionHandler.TryEnd) - 1;
+                }
+                else
+                    instructions.Cursor = instructions.Count - 1;
                 instructions.Emit(OpCodes.Ldarg_0);
                 instructions.Emit(OpCodes.Call, methodReference);
             }
+        }
+
+        private bool IsMethodValid(MethodInfo methodInfo)
+        {
+            bool valid = true;
+            if (!methodInfo.IsStatic)
+            {
+                _logging.WriteError("The method {0}.{1} must be static", methodInfo.DeclaringType.FullName, methodInfo.Name);
+                valid = false;
+            }
+            return valid;
         }
     }
 }

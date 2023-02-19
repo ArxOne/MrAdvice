@@ -23,6 +23,11 @@ namespace MethodLevelTest
                 context.TargetMethodName += "_Renamed";
                 context.AddInitializerOnce(Initializer);
                 context.AddInitializerOnce(Initializer);
+                context.AddFinalizer(Z);
+            }
+
+            public static void Z(object target)
+            {
             }
 
             public static void Initializer(object target)
@@ -30,6 +35,33 @@ namespace MethodLevelTest
                 var property = target.GetType().GetProperty("WeavingAdvisedMethod_Friend");
                 var currentValue = (string)property.GetValue(target, Array.Empty<object>()) ?? "";
                 property.SetValue(target, currentValue + "Hello", Array.Empty<object>());
+            }
+        }
+
+        public class A
+        {
+            private int z = 0;
+
+            ~A()
+            {
+                try
+                {
+                    z++;
+                }
+                finally
+                {
+                    z++;
+                }
+            }
+        }
+
+        public class B
+        {
+            private int y = 0;
+
+            ~B()
+            {
+                y++;
             }
         }
 
@@ -47,6 +79,8 @@ namespace MethodLevelTest
                 var newPropertyValue = (string)newProperty.GetValue(this, Array.Empty<object>());
                 Assert.AreEqual("Hello", newPropertyValue);
             }
+
+            //~WeavingAdvisedClass() { }
         }
 
         [TestMethod]

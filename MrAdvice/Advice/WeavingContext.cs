@@ -44,11 +44,17 @@ namespace ArxOne.MrAdvice.Advice
         /// </summary>
         /// <param name="initializer">The initializer, which receives the instance as parameter.</param>
         public abstract void AddInitializer(Action<object> initializer);
-      
+
         /// <summary>
         /// Adds an initializer once to all ctors (even if the method is called several times).
         /// </summary>
         /// <param name="initializer">The initializer.</param>
         public abstract void AddInitializerOnce(Action<object> initializer);
+
+        public abstract void AddMethod(string methodName, Action<object> method, Type interfaceImplicitImplementation = null);
+        public abstract void AddMethod<T1>(string methodName, Action<object, T1> method, Type interfaceImplicitImplementation = null);
+        public abstract void AddMethod<T1, T2>(string methodName, Action<object, T1, T2> method, Type interfaceImplicitImplementation = null);
+
+        public abstract void AddFinalizer(Action<object> finalizer);
     }
 }

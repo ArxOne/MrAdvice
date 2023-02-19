@@ -5,6 +5,8 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using System.Xml;
+
 namespace ArxOne.MrAdvice.Utility
 {
     using System;
@@ -25,13 +27,13 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="typeResolver">The type resolver.</param>
         /// <returns></returns>
-        public static IEnumerable<TypeDef> GetSelfAndParents(this TypeDef typeDefinition, TypeResolver typeResolver = null)
+        public static IEnumerable<TypeDef> GetSelfAndAncestors(this TypeDef typeDefinition, TypeResolver typeResolver = null)
         {
-            while (typeDefinition != null)
+            while (typeDefinition is not null)
             {
                 yield return typeDefinition;
                 var baseType = typeDefinition.BaseType;
-                if (baseType == null)
+                if (baseType is null)
                     break;
                 typeDefinition = SafeResolve(typeResolver, baseType);
             }
@@ -46,7 +48,7 @@ namespace ArxOne.MrAdvice.Utility
         public static TypeDef SafeResolve(this TypeResolver typeResolver, ITypeDefOrRef typeDefOrRef)
         {
             TypeDef typeDefinition;
-            if (typeResolver == null)
+            if (typeResolver is null)
                 typeDefinition = typeDefOrRef.ResolveTypeDef();
             else
                 typeDefinition = typeResolver.Resolve(typeDefOrRef);
@@ -139,13 +141,83 @@ namespace ArxOne.MrAdvice.Utility
         /// <returns></returns>
         public static bool ImplementsType(this TypeDef typeDefinition, ITypeDefOrRef parent, TypeResolver typeResolver = null)
         {
-            foreach (var ancestorType in typeDefinition.GetSelfAndParents(typeResolver))
+            foreach (var ancestorType in typeDefinition.GetSelfAndAncestors(typeResolver))
             {
                 if (ancestorType.SafeEquivalent(parent))
                     return true;
             }
 
             return false;
+        }
+
+        public static MethodDef GetOrCreateMethod(this TypeDef typeDefinition, string methodName, MethodSig methodSig, MethodAttributes attributes)
+        {
+            return GetOrCreateAnyMethod(typeDefinition, methodName, methodSig, attributes).Item1;
+        }
+
+        private static Tuple<MethodDef, bool> GetOrCreateAnyMethod(this TypeDef typeDefinition, string methodName, MethodSig methodSig, MethodAttributes attributes)
+        {
+            var existingMethod = typeDefinition.FindMethod(methodName, methodSig);
+            if (existingMethod is not null)
+                return Tuple.Create(existingMethod, false);
+            var newMethod = new MethodDefUser(methodName, methodSig)
+            {
+                Body = new CilBody(),
+                Attributes = attributes
+            };
+            newMethod.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+            typeDefinition.Methods.Add(newMethod);
+            return Tuple.Create<MethodDef, bool>(newMethod, true);
+        }
+
+        public static MethodDef FindMethodCheckBaseType(this TypeDef typeDefinition, string methodName, MethodSig methodSig, TypeResolver typeResolver)
+        {
+            foreach (var selfAndParent in typeDefinition.GetSelfAndAncestors(typeResolver))
+            {
+                var methodDef = methodSig is null
+                    ? selfAndParent.FindMethod(methodName)
+                    : selfAndParent.FindMethod(methodName, methodSig);
+                if (methodDef is not null)
+                    return methodDef;
+            }
+            return null;
+        }
+
+        public static MethodDef GetOrCreateFinalizer(this TypeDef typeDefinition, TypeResolver typeResolver)
+        {
+            const string finalizerName = "Finalize";
+            var finalizerSig = new MethodSig(CallingConvention.HasThis, 0, typeDefinition.Module.CorLibTypes.Void, Array.Empty<TypeSig>());
+            const MethodAttributes attributes = MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Virtual;
+            var existingMethod = typeDefinition.FindMethod(finalizerName, finalizerSig);
+            if (existingMethod is not null)
+                return existingMethod;
+
+            var objectFinalizer = typeDefinition.Module.SafeImport(typeResolver.Resolve(typeDefinition.Module.CorLibTypes.Object.TypeRef).FindMethodCheckBaseType(finalizerName, finalizerSig, typeResolver));
+
+            var newMethod = new MethodDefUser(finalizerName, finalizerSig)
+            {
+                Body = new CilBody { InitLocals = true },
+                Attributes = attributes
+            };
+            var instructions = new Instructions(newMethod.Body, typeDefinition.Module);
+            var finalRet = Instruction.Create(OpCodes.Ret);
+            instructions.Emit(OpCodes.Nop).KeepLast(out var tryFirst);
+            instructions.Emit(OpCodes.Leave, finalRet);
+            instructions.Emit(OpCodes.Ldarg_0).KeepLast(out var finallyFirst);
+            instructions.Emit(OpCodes.Call, objectFinalizer);
+            instructions.Emit(OpCodes.Endfinally);
+            instructions.Emit(finalRet);
+            newMethod.Body.ExceptionHandlers.Add(new ExceptionHandler
+            {
+                HandlerType = ExceptionHandlerType.Finally,
+                TryStart = tryFirst,
+                TryEnd = finallyFirst, HandlerStart = finallyFirst,
+                HandlerEnd = finalRet
+            });
+
+
+            typeDefinition.Methods.Add(newMethod);
+            return newMethod;
         }
     }
 }

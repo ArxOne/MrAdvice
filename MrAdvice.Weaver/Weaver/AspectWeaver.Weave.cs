@@ -186,7 +186,7 @@ namespace ArxOne.MrAdvice.Weaver
 
         private static MethodDef WriteDelegateProceeder(MethodDef innerMethod, string methodName, MethodParameters parametersList, ModuleDef module)
         {
-            if (innerMethod == null)
+            if (innerMethod is null)
                 return null;
             // currently, this is unsupported
             // (since I have no idea how it works)
@@ -196,8 +196,10 @@ namespace ArxOne.MrAdvice.Weaver
             var proceederMethodSignature = new MethodSig(CallingConvention.Default, 0, module.CorLibTypes.Object,
                 new TypeSig[] { module.CorLibTypes.Object, new SZArraySig(module.CorLibTypes.Object) });
             var proceederMethodAttributes = MethodAttributes.Static | MethodAttributes.Private | MethodAttributes.HideBySig;
-            var proceederMethod = new MethodDefUser(GetDelegateProceederName(methodName, innerMethod.DeclaringType), proceederMethodSignature, proceederMethodAttributes);
-            proceederMethod.Body = new CilBody();
+            var proceederMethod = new MethodDefUser(GetDelegateProceederName(methodName, innerMethod.DeclaringType), proceederMethodSignature, proceederMethodAttributes)
+                {
+                    Body = new CilBody()
+                };
             proceederMethod.GenericParameters.AddRange(innerMethod.GenericParameters.Select(p => p.Clone(innerMethod)));
 
             // object, object[] -> this, arguments
