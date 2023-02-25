@@ -197,9 +197,9 @@ namespace ArxOne.MrAdvice.Weaver
                 new TypeSig[] { module.CorLibTypes.Object, new SZArraySig(module.CorLibTypes.Object) });
             var proceederMethodAttributes = MethodAttributes.Static | MethodAttributes.Private | MethodAttributes.HideBySig;
             var proceederMethod = new MethodDefUser(GetDelegateProceederName(methodName, innerMethod.DeclaringType), proceederMethodSignature, proceederMethodAttributes)
-                {
-                    Body = new CilBody()
-                };
+            {
+                Body = new CilBody()
+            };
             proceederMethod.GenericParameters.AddRange(innerMethod.GenericParameters.Select(p => p.Clone(innerMethod)));
 
             // object, object[] -> this, arguments
@@ -318,7 +318,8 @@ namespace ArxOne.MrAdvice.Weaver
             var weavingAdvicesMarkers = GetAllMarkers(markedMethod.Node, context.WeavingAdviceInterfaceType, context).Select(t => t.Item2).ToArray();
             var typeDefinition = markedMethod.Node.Method.DeclaringType;
             var initialType = TypeLoader.GetType(typeDefinition);
-            var weaverMethodWeavingContext = new WeaverMethodWeavingContext(typeDefinition, initialType, methodName, context, TypeResolver, Logging);
+            var typeWeaver = new TypeWeaver(typeDefinition, initialType, context, TypeResolver, Logging);
+            var weaverMethodWeavingContext = new MethodWeavingContext(methodName, typeWeaver);
             foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
             {
                 Logging.WriteDebug("Weaving method '{0}' using weaving advice '{1}'", method.FullName, weavingAdviceMarker.Type.FullName);

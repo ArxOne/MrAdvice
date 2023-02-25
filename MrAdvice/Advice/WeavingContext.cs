@@ -5,56 +5,58 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
-namespace ArxOne.MrAdvice.Advice
+using System.Reflection;
+using ArxOne.MrAdvice.Advice.Builder;
+
+namespace ArxOne.MrAdvice.Advice;
+
+using System;
+
+/// <summary>
+/// Base context to type
+/// </summary>
+public class WeavingContext
 {
-    using System;
+    /// <summary>
+    /// Gets the type.
+    /// </summary>
+    /// <value>
+    /// The type.
+    /// </value>
+    public Type Type => TypeWeaver.Type;
+
+    public ITypeWeaver TypeWeaver { get; }
 
     /// <summary>
-    /// Base context to type
+    /// Initializes a new instance of the <see cref="WeavingContext"/> class.
     /// </summary>
-    public abstract class WeavingContext
+    /// <param name="typeWeaver"></param>
+    public WeavingContext(ITypeWeaver typeWeaver)
     {
-        /// <summary>
-        /// Gets the type.
-        /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        public Type Type { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WeavingContext"/> class.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        protected WeavingContext(Type type)
-        {
-            Type = type;
-        }
-
-        /// <summary>
-        /// Adds the public automatic property.
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="propertyType"></param>
-        /// <returns></returns>
-        public abstract void AddPublicAutoProperty(string propertyName, Type propertyType);
-
-        /// <summary>
-        /// Adds an initializer to all ctors (at the end of them).
-        /// </summary>
-        /// <param name="initializer">The initializer, which receives the instance as parameter.</param>
-        public abstract void AddInitializer(Action<object> initializer);
-
-        /// <summary>
-        /// Adds an initializer once to all ctors (even if the method is called several times).
-        /// </summary>
-        /// <param name="initializer">The initializer.</param>
-        public abstract void AddInitializerOnce(Action<object> initializer);
-
-        public abstract void AddMethod(string methodName, Action<object> method, Type interfaceImplicitImplementation = null);
-        public abstract void AddMethod<T1>(string methodName, Action<object, T1> method, Type interfaceImplicitImplementation = null);
-        public abstract void AddMethod<T1, T2>(string methodName, Action<object, T1, T2> method, Type interfaceImplicitImplementation = null);
-
-        public abstract void AddFinalizer(Action<object> finalizer);
+        TypeWeaver = typeWeaver;
     }
+
+    /// <summary>
+    /// Adds the public automatic property.
+    /// </summary>
+    /// <param name="propertyName"></param>
+    /// <param name="propertyType"></param>
+    /// <returns></returns>
+    [Obsolete("Use TypeWeaver")]
+    public void AddPublicAutoProperty(string propertyName, Type propertyType) => TypeWeaver.AddAutoProperty(propertyName, propertyType, MethodAttributes.Public);
+
+    /// <summary>
+    /// Adds an initializer to all ctors (at the end of them).
+    /// </summary>
+    /// <param name="initializer">The initializer, which receives the instance as parameter.</param>
+    [Obsolete("Use TypeWeaver")]
+    public void AddInitializer(Action<object> initializer) => TypeWeaver.AddInitializer(initializer, WeaverAddFlags.Default);
+
+    /// <summary>
+    /// Adds an initializer once to all ctors (even if the method is called several times).
+    /// </summary>
+    /// <param name="initializer">The initializer.</param>
+    [Obsolete("Use TypeWeaver")]
+    public void AddInitializerOnce(Action<object> initializer) => TypeWeaver.AddInitializer(initializer, WeaverAddFlags.Once);
 }
+

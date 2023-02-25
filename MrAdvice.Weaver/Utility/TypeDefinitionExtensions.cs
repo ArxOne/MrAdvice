@@ -82,7 +82,9 @@ namespace ArxOne.MrAdvice.Utility
         /// <param name="typeReference">The type reference.</param>
         /// <param name="moduleDefinition">The module definition.</param>
         /// <param name="typeResolver">The type resolver.</param>
-        internal static void AddPublicAutoProperty(this TypeDef typeDefinition, string name, ITypeDefOrRef typeReference, ModuleDef moduleDefinition, TypeResolver typeResolver)
+        /// <param name="methodAttributes">The method attributes.</param>
+        internal static void AddAutoProperty(this TypeDef typeDefinition, string name, ITypeDefOrRef typeReference, ModuleDef moduleDefinition, TypeResolver typeResolver,
+            System.Reflection.MethodAttributes methodAttributes)
         {
             var compilerGeneratedAttribute = moduleDefinition.SafeImport(typeof(CompilerGeneratedAttribute));
             // backing field
@@ -93,7 +95,7 @@ namespace ArxOne.MrAdvice.Utility
             var propertyDefinition = new PropertyDefUser(name, new PropertySig(true, typeReference.ToTypeSig()));
             typeDefinition.Properties.Add(propertyDefinition);
             // ...setter
-            propertyDefinition.SetMethod = CreatePropertyMethod("set_" + name, moduleDefinition.CorLibTypes.Void, Tuple.Create(typeReference.ToTypeSig(), "value"));
+            propertyDefinition.SetMethod = CreatePropertyMethod("set_" + name, moduleDefinition.CorLibTypes.Void, methodAttributes, Tuple.Create(typeReference.ToTypeSig(), "value"));
             propertyDefinition.SetMethod.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute, typeResolver));
             typeDefinition.Methods.Add(propertyDefinition.SetMethod);
             var setterParameter = new ParamDefUser("value");
@@ -104,7 +106,7 @@ namespace ArxOne.MrAdvice.Utility
             setterInstructions.Emit(OpCodes.Stfld, backingFieldDefinition);
             setterInstructions.Emit(OpCodes.Ret);
             // ...getter
-            propertyDefinition.GetMethod = CreatePropertyMethod("get_" + name, typeReference.ToTypeSig());
+            propertyDefinition.GetMethod = CreatePropertyMethod("get_" + name, typeReference.ToTypeSig(), methodAttributes);
             propertyDefinition.GetMethod.CustomAttributes.Add(moduleDefinition.CreateCustomAttribute(compilerGeneratedAttribute, typeResolver));
             typeDefinition.Methods.Add(propertyDefinition.GetMethod);
             var getterInstructions = new Instructions(propertyDefinition.GetMethod.Body, moduleDefinition);
@@ -113,16 +115,23 @@ namespace ArxOne.MrAdvice.Utility
             getterInstructions.Emit(OpCodes.Ret);
         }
 
+        private static MethodAttributes ToMethodAttributes(this System.Reflection.MethodAttributes attributes)
+        {
+            return (MethodAttributes)(attributes & System.Reflection.MethodAttributes.MemberAccessMask);
+        }
+
         /// <summary>
         /// Creates a property method (getter or setter).
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="returnType">Type of the return.</param>
+        /// <param name="attributes"></param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        private static MethodDefUser CreatePropertyMethod(string name, TypeSig returnType, params Tuple<TypeSig, string>[] parameters)
+        private static MethodDefUser CreatePropertyMethod(string name, TypeSig returnType,
+            System.Reflection.MethodAttributes attributes, params Tuple<TypeSig, string>[] parameters)
         {
-            const MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig;
+            var methodAttributes = ToMethodAttributes(attributes) | MethodAttributes.SpecialName | MethodAttributes.HideBySig;
             var methodSig = new MethodSig(CallingConvention.HasThis, 0, returnType, parameters.Select(p => p.Item1).ToArray());
             var methodDefinition = new MethodDefUser(name, methodSig, methodAttributes);
             var methodParameters = new MethodParameters(methodDefinition);
@@ -211,7 +220,8 @@ namespace ArxOne.MrAdvice.Utility
             {
                 HandlerType = ExceptionHandlerType.Finally,
                 TryStart = tryFirst,
-                TryEnd = finallyFirst, HandlerStart = finallyFirst,
+                TryEnd = finallyFirst,
+                HandlerStart = finallyFirst,
                 HandlerEnd = finalRet
             });
 

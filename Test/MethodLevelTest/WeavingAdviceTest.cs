@@ -5,6 +5,8 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using ArxOne.MrAdvice.Advice.Builder;
+
 namespace MethodLevelTest
 {
     using System;
@@ -23,13 +25,8 @@ namespace MethodLevelTest
                 context.TargetMethodName += "_Renamed";
                 context.AddInitializerOnce(Initializer);
                 context.AddInitializerOnce(Initializer);
-                context.AddFinalizer(Z);
             }
-
-            public static void Z(object target)
-            {
-            }
-
+            
             public static void Initializer(object target)
             {
                 var property = target.GetType().GetProperty("WeavingAdvisedMethod_Friend");
