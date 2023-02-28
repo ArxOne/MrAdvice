@@ -72,22 +72,22 @@ internal class TypeWeaver : ITypeWeaver
         _typeDefinition.AddAutoProperty(propertyName, moduleDefinition.Import(propertyType), moduleDefinition, _typeResolver, attributes);
     }
 
-    public void AddInitializer(Delegate initializer, WeaverAddFlags flags)
+    public void AfterConstructors(Delegate initializer, WeaverAddFlags flags)
     {
         var ctors = _typeDefinition.FindConstructors().Where(c => !c.IsStaticConstructor);
         Add(initializer.Method, flags, new Methods(ctors));
     }
 
-    public void AddFinalizer(Delegate finalizer, WeaverAddFlags flags)
+    public void AfterFinalizer(Delegate finalizer, WeaverAddFlags flags)
     {
         var typeFinalizer = _typeDefinition.GetOrCreateFinalizer(_typeResolver);
         Add(finalizer.Method, flags, typeFinalizer);
     }
 
-    public void AddMethod(string methodName, Delegate method, WeaverAddFlags flags = WeaverAddFlags.Default,
-        MethodAttributes methodAttributes = MethodAttributes.Public)
+    public void AfterMethod(string methodName, Delegate method, WeaverAddFlags flags = WeaverAddFlags.Default)
     {
-        throw new NotImplementedException();
+        var methods = _typeDefinition.FindMethods(methodName);
+        Add(method.Method, flags, new Methods(methods));
     }
 
     private void Add(MethodInfo methodInfo, WeaverAddFlags flags, Methods holderMethods)

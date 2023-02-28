@@ -26,7 +26,7 @@ namespace MethodLevelTest
                 context.AddInitializerOnce(Initializer);
                 context.AddInitializerOnce(Initializer);
             }
-            
+
             public static void Initializer(object target)
             {
                 var property = target.GetType().GetProperty("WeavingAdvisedMethod_Friend");
@@ -62,7 +62,7 @@ namespace MethodLevelTest
             }
         }
 
-        public class WeavingAdvisedClass
+        public class WeavingAdvisedMethods
         {
             //public string CompilerAutoProperty { get; set; }
 
@@ -77,15 +77,66 @@ namespace MethodLevelTest
                 Assert.AreEqual("Hello", newPropertyValue);
             }
 
-            //~WeavingAdvisedClass() { }
+            //~WeavingAdvisedMethods() { }
         }
 
         [TestMethod]
         [TestCategory("Weaving advice")]
         public void SimpleWeavingAdviceTest()
         {
-            var c = new WeavingAdvisedClass();
+            var c = new WeavingAdvisedMethods();
             c.WeavingAdvisedMethod();
+        }
+
+        private interface ICount
+        {
+            int Constructors { get; set; }
+            int Methods { get; set; }
+        }
+
+        public class TypeWeavingAdvice : Attribute, ITypeWeavingAdvice
+        {
+            public void Advise(WeavingContext context)
+            {
+                Action<object> constructor = o => ((ICount)o).Constructors++;
+                Action<object> method = o => ((ICount)o).Methods++;
+                context.TypeWeaver.AfterConstructors(constructor);
+                context.TypeWeaver.AfterMethod("F", method);
+            }
+        }
+
+        [TypeWeavingAdvice]
+        public class WeavingAdvisedType : ICount
+        {
+            public int Constructors { get; set; }
+            public int Methods { get; set; }
+
+            public WeavingAdvisedType()
+            {
+            }
+
+            public void F()
+            { }
+
+            public int F(int b)
+            {
+                return b + 1;
+            }
+
+            public void G()
+            { }
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving advice")]
+        public void SimpleTypeWeavingAdviceTest()
+        {
+            var x = new WeavingAdvisedType();
+            x.F();
+            _ = x.F(1);
+            x.G();
+            Assert.AreEqual(1, x.Constructors);
+            Assert.AreEqual(2, x.Methods);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace ArxOne.MrAdvice.Utility
     public static class TypeDefinitionExtensions
     {
         /// <summary>
-        /// Gets the self and parents.
+        /// Gets the self and ancestors, from closest to farthest.
         /// </summary>
         /// <param name="typeDefinition">The type definition.</param>
         /// <param name="typeResolver">The type resolver.</param>
@@ -37,6 +37,17 @@ namespace ArxOne.MrAdvice.Utility
                     break;
                 typeDefinition = SafeResolve(typeResolver, baseType);
             }
+        }
+
+        /// <summary>
+        /// Gets the ancestors, from closest to farthest.
+        /// </summary>
+        /// <param name="typeDefinition">The type definition.</param>
+        /// <param name="typeResolver">The type resolver.</param>
+        /// <returns></returns>
+        public static IEnumerable<TypeDef> GetAncestors(this TypeDef typeDefinition, TypeResolver typeResolver = null)
+        {
+            return GetSelfAndAncestors(typeDefinition).Skip(1);
         }
 
         /// <summary>
@@ -201,7 +212,7 @@ namespace ArxOne.MrAdvice.Utility
             if (existingMethod is not null)
                 return existingMethod;
 
-            var objectFinalizer = typeDefinition.Module.SafeImport(typeResolver.Resolve(typeDefinition.Module.CorLibTypes.Object.TypeRef).FindMethodCheckBaseType(finalizerName, finalizerSig, typeResolver));
+            var baseFinalizer = typeDefinition.Module.SafeImport(typeDefinition.FindMethodCheckBaseType(finalizerName, finalizerSig, typeResolver));
 
             var newMethod = new MethodDefUser(finalizerName, finalizerSig)
             {
@@ -213,7 +224,8 @@ namespace ArxOne.MrAdvice.Utility
             instructions.Emit(OpCodes.Nop).KeepLast(out var tryFirst);
             instructions.Emit(OpCodes.Leave, finalRet);
             instructions.Emit(OpCodes.Ldarg_0).KeepLast(out var finallyFirst);
-            instructions.Emit(OpCodes.Call, objectFinalizer);
+            if (baseFinalizer is not null)
+                instructions.Emit(OpCodes.Call, baseFinalizer);
             instructions.Emit(OpCodes.Endfinally);
             instructions.Emit(finalRet);
             newMethod.Body.ExceptionHandlers.Add(new ExceptionHandler

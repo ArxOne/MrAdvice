@@ -50,13 +50,12 @@ public class WeavingContext
     /// </summary>
     /// <param name="initializer">The initializer, which receives the instance as parameter.</param>
     [Obsolete("Use TypeWeaver")]
-    public void AddInitializer(Action<object> initializer) => TypeWeaver.AddInitializer(initializer, WeaverAddFlags.Default);
+    public void AddInitializer(Action<object> initializer) => TypeWeaver.AfterConstructors(initializer, WeaverAddFlags.Default);
 
     /// <summary>
     /// Adds an initializer once to all ctors (even if the method is called several times).
     /// </summary>
     /// <param name="initializer">The initializer.</param>
     [Obsolete("Use TypeWeaver")]
-    public void AddInitializerOnce(Action<object> initializer) => TypeWeaver.AddInitializer(initializer, WeaverAddFlags.Once);
+    public void AddInitializerOnce(Action<object> initializer) => TypeWeaver.AfterConstructors(initializer, WeaverAddFlags.Once);
 }
-
