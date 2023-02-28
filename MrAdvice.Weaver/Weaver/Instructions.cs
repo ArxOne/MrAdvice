@@ -25,32 +25,13 @@ namespace ArxOne.MrAdvice.Weaver
 
         public ModuleDef Module { get; }
 
-        private int _cursor;
         /// <summary>
         /// Gets or sets the cursor.
         /// </summary>
         /// <value>
         /// The cursor.
         /// </value>
-        public int Cursor
-        {
-            get { return _cursor; }
-            set
-            {
-                _cursor = value;
-                if (_body.Instructions.Count == 0)
-                    Offset = 0;
-                else if (_cursor == 0)
-                    Offset = 0;
-                else
-                {
-                    var previousInstruction = _body.Instructions[_cursor - 1];
-                    Offset = previousInstruction.Offset + (uint)previousInstruction.GetSize();
-                }
-            }
-        }
-
-        public uint Offset { get; private set; }
+        public int Cursor { get; set; }
 
         /// <summary>
         /// Gets the count.
@@ -81,14 +62,8 @@ namespace ArxOne.MrAdvice.Weaver
 
         private Instructions Insert(Instruction instruction)
         {
-            instruction.Offset = Offset;
             Last = instruction;
-            _body.Instructions.Insert(_cursor++, instruction);
-            var instructionSize = (uint)instruction.GetSize();
-            Offset += instructionSize;
-            for (int index = Cursor; index < _body.Instructions.Count; index++)
-                _body.Instructions[index].Offset += instructionSize;
-
+            _body.Instructions.Insert(Cursor++, instruction);
             return this;
         }
 
