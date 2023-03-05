@@ -72,8 +72,9 @@ namespace ArxOne.MrAdvice.Weaver
 
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
-                var weavingAdvicesMethods = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(IsWeavable).ToArray();
-                var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(IsWeavable).ToArray();
+                var weavingMethodsAdvices = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
+                var weavingTypesAdvices = GetMarkedTypes(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(n => !IsFromComputerGeneratedType(n)).ToArray();
+                var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
                 auditTimer.NewZone("Abstract targets");
                 var generatedFieldsToBeRemoved = new List<FieldDef>();
                 var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
@@ -83,8 +84,10 @@ namespace ArxOne.MrAdvice.Weaver
                     foreach (var fieldReference in generatedFieldsToBeRemoved)
                         Logging.WriteDebug("Field {0} to be removed", fieldReference.FullName);
                 }
+                auditTimer.NewZone("Types weaving advice");
+                weavingTypesAdvices.ForAll(t => RunTypesWeavingAdvices(t, context));
                 auditTimer.NewZone("Methods weaving advice");
-                weavingAdvicesMethods.ForAll(i => RunWeavingAdvices(i, context));
+                weavingMethodsAdvices.ForAll(i => RunMethodsWeavingAdvices(i, context));
                 auditTimer.NewZone("Methods weaving");
                 weavableMethods.ForAll(m => WeaveMethod(moduleDefinition, m, context));
 
@@ -128,9 +131,9 @@ namespace ArxOne.MrAdvice.Weaver
             }
         }
 
-        private bool IsWeavable(MarkedNode n)
+        private bool IsMethodWeavable(MarkedNode n)
         {
-            return !IsFromComputerGeneratedType(n) && IsInfoWeavable(n);
+            return !IsFromComputerGeneratedType(n) && IsMethodInfoWeavable(n);
         }
 
         private WeavingContext CreateWeavingContext(ModuleDef moduleDefinition)
@@ -373,7 +376,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// </summary>
         /// <param name="markedMethod">The marked method.</param>
         /// <returns></returns>
-        private static bool IsInfoWeavable(MarkedNode markedMethod)
+        private static bool IsMethodInfoWeavable(MarkedNode markedMethod)
         {
             return markedMethod.Node.Method.HasBody || markedMethod.Node.Method.IsPinvokeImpl;
         }
@@ -397,6 +400,18 @@ namespace ArxOne.MrAdvice.Weaver
         }
 
         /// <summary>
+        /// Gets the marked types.
+        /// </summary>
+        /// <param name="reflectionNode">The reflection node.</param>
+        /// <param name="markerInterface">The marker interface.</param>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
+        private IEnumerable<MarkedNode> GetMarkedTypes(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, WeavingContext context)
+        {
+            return GetMarked(reflectionNode, n => n is TypeReflectionNode, markerInterface, context);
+        }
+
+        /// <summary>
         /// Gets the marked methods.
         /// </summary>
         /// <param name="reflectionNode">The reflection node.</param>
@@ -405,12 +420,25 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         private IEnumerable<MarkedNode> GetMarkedMethods(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, WeavingContext context)
         {
+            return GetMarked(reflectionNode, n => n.Method is not null, markerInterface, context);
+        }
+
+        /// <summary>
+        /// Gets the marked items.
+        /// </summary>
+        /// <param name="reflectionNode">The reflection node.</param>
+        /// <param name="selectNode">The select node.</param>
+        /// <param name="markerInterface">The marker interface.</param>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
+        private IEnumerable<MarkedNode> GetMarked(ReflectionNode reflectionNode, Func<ReflectionNode, bool> selectNode, ITypeDefOrRef markerInterface, WeavingContext context)
+        {
             var ancestorsToChildren = reflectionNode.GetAncestorsToDescendants().ToArray();
             return from node in ancestorsToChildren
-                   where node.Method is not null
-                   let allMakersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context).Select(t => t.Item2))
-                   where allMakersNode.Definitions.Any() && IsIncludedByPointcut(allMakersNode, context) //&& !IsDeclaredByValue(node)
-                   let includedMarkersNode = new MarkedNode(node, allMakersNode.Definitions.Where(d => IsIncludedByNode(d, node, context)))
+                   where selectNode(node)
+                   let allMarkersNode = new MarkedNode(node, GetAllMarkers(node, markerInterface, context).Select(t => t.Item2))
+                   where allMarkersNode.Definitions.Any() && IsIncludedByPointcut(allMarkersNode, context) //&& !IsDeclaredByValue(node)
+                   let includedMarkersNode = new MarkedNode(node, allMarkersNode.Definitions.Where(d => IsIncludedByNode(d, node, context)))
                    where includedMarkersNode.Definitions.Any()
                    select includedMarkersNode;
         }
@@ -425,6 +453,9 @@ namespace ArxOne.MrAdvice.Weaver
         /// </returns>
         private bool IsIncludedByPointcut(MarkedNode markedNode, WeavingContext context)
         {
+            // when advising types, there is no target method
+            if (markedNode.Node.Method is null)
+                return true;
             var isIncludedByPointcut = GetPointcutSelectors(markedNode, context).Any(s => s.Select(markedNode.Node.Method));
             if (!isIncludedByPointcut)
                 Logging.WriteDebug("Excluding method '{0}' according to pointcut rules", markedNode.Node.Method.FullName);
@@ -439,7 +470,7 @@ namespace ArxOne.MrAdvice.Weaver
         private bool IsDeclaredByValue(ReflectionNode node)
         {
             var ownerType = node.GetSelfAndAncestors().OfType<TypeReflectionNode>().First();
-            return !ownerType.TypeDefinition.IsClass;
+            return !ownerType.Type.IsClass;
         }
 
         /// <summary>

@@ -92,7 +92,7 @@ internal class TypeWeaver : ITypeWeaver
 
     private void Add(MethodInfo methodInfo, WeaverAddFlags flags, Methods holderMethods)
     {
-        if (!IsMethodValid(methodInfo))
+        if (!IsValid(methodInfo))
             return;
 
         var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
@@ -126,13 +126,30 @@ internal class TypeWeaver : ITypeWeaver
         return true;
     }
 
-    private bool IsMethodValid(MethodInfo methodInfo)
+    private bool IsValid(MethodInfo methodInfo)
     {
-        if (!methodInfo.IsStatic)
-        {
-            _logging.WriteError("The method {0}.{1} must be static", methodInfo.DeclaringType.FullName, methodInfo.Name);
-            return false;
-        }
-        return true;
+        return IsAllValid(methodInfo).Aggregate(true, (isValid, singleResult) => singleResult || isValid);
+    }
+
+    private IEnumerable<bool> IsAllValid(MethodInfo methodInfo)
+    {
+        yield return IsStatic(methodInfo);
+        yield return IsPublic(methodInfo);
+    }
+
+    private bool IsStatic(MethodInfo methodInfo)
+    {
+        if (methodInfo.IsStatic)
+            return true;
+        _logging.WriteError("The method {0}.{1} must be static", methodInfo.DeclaringType.FullName, methodInfo.Name);
+        return false;
+    }
+
+    private bool IsPublic(MethodInfo methodInfo)
+    {
+        if (methodInfo.IsPublic)
+            return true;
+        _logging.WriteError("The method {0}.{1} must be public", methodInfo.DeclaringType.FullName, methodInfo.Name);
+        return false;
     }
 }

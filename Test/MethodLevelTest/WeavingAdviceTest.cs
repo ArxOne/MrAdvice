@@ -98,10 +98,18 @@ namespace MethodLevelTest
         {
             public void Advise(WeavingContext context)
             {
-                Action<object> constructor = o => ((ICount)o).Constructors++;
-                Action<object> method = o => ((ICount)o).Methods++;
-                context.TypeWeaver.AfterConstructors(constructor);
-                context.TypeWeaver.AfterMethod("F", method);
+                context.TypeWeaver.AfterConstructors(CountConstructors);
+                context.TypeWeaver.AfterMethod("F", CountMethods);
+            }
+
+            public static void CountConstructors(object o)
+            {
+                ((ICount)o).Constructors++;
+            }
+
+            public static void CountMethods(object o)
+            {
+                ((ICount)o).Methods++;
             }
         }
 

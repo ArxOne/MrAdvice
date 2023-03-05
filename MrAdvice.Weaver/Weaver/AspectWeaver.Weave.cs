@@ -307,9 +307,31 @@ namespace ArxOne.MrAdvice.Weaver
         /// <summary>
         /// Weaves method with weaving advices <see cref="IWeavingAdvice"/>.
         /// </summary>
+        /// <param name="markedType">The marked method.</param>
+        /// <param name="context">The context.</param>
+        private void RunTypesWeavingAdvices(MarkedNode markedType, WeavingContext context)
+        {
+            var weavingAdvicesMarkers = GetAllMarkers(markedType.Node, context.WeavingAdviceInterfaceType, context).Select(t => t.Item2).ToArray();
+            var typeDefinition = markedType.Node.Type;
+            var initialType = TypeLoader.GetType(typeDefinition);
+            var typeWeaver = new TypeWeaver(typeDefinition, initialType, context, TypeResolver, Logging);
+            var weaverMethodWeavingContext = new Advice.WeavingContext(typeWeaver);
+            foreach (var weavingAdviceMarker in weavingAdvicesMarkers)
+            {
+                Logging.WriteDebug("Weaving type '{0}' using weaving advice '{1}'", typeDefinition.Name, weavingAdviceMarker.Type.FullName);
+                var weavingAdviceType = TypeLoader.GetType(weavingAdviceMarker.Type);
+                var weavingAdvice = (IWeavingAdvice)Activator.CreateInstance(weavingAdviceType);
+                if (weavingAdvice is ITypeWeavingAdvice typeWeavingAdvice)
+                    typeWeavingAdvice.Advise(weaverMethodWeavingContext);
+            }
+        }
+
+        /// <summary>
+        /// Weaves method with weaving advices <see cref="IWeavingAdvice"/>.
+        /// </summary>
         /// <param name="markedMethod">The marked method.</param>
         /// <param name="context">The context.</param>
-        private void RunWeavingAdvices(MarkedNode markedMethod, WeavingContext context)
+        private void RunMethodsWeavingAdvices(MarkedNode markedMethod, WeavingContext context)
         {
             var method = markedMethod.Node.Method;
             var methodName = method.Name;
@@ -745,7 +767,7 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="context">The context.</param>
         private void WeaveInfoAdvices(ModuleDef moduleDefinition, TypeDef typeDefinition, ITypeDefOrRef infoAdviceInterface, WeavingContext context)
         {
-            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition, null), infoAdviceInterface, context).Where(IsInfoWeavable).Any())
+            if (GetMarkedMethods(new TypeReflectionNode(typeDefinition, null), infoAdviceInterface, context).Where(IsMethodInfoWeavable).Any())
             {
                 Logging.WriteDebug("Weaving type '{0}' for info", typeDefinition.FullName);
                 WeaveInfoAdvices(typeDefinition, moduleDefinition, false);
@@ -905,13 +927,12 @@ namespace ArxOne.MrAdvice.Weaver
         private void IntroduceMember(ModuleDef moduleDefinition, string memberName, ITypeDefOrRef memberType, bool isStatic,
             ITypeDefOrRef adviceType, TypeDef advisedType, ICustomAttributeType markerAttribute, string introducedMemberName, bool isNotSerialized, WeavingContext context)
         {
-            if (IsIntroduction(memberType, out var introducedFieldType, out var isShared, context))
-            {
-                var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, isShared ? null : introducedMemberName, memberName);
-                IntroduceMember(moduleDefinition, advisedType, markerAttribute, isStatic, isNotSerialized, introducedFieldName, introducedFieldType.ToTypeSig());
-                // also introduce registry (this is done once anyway)
-                IntroduceMember(moduleDefinition, advisedType, markerAttribute, false, true, IntroductionRules.RegistryName, context.IntroducedFieldsType.ToTypeSig()); // introduced as object by pure laziness
-            }
+            if (!IsIntroduction(memberType, out var introducedFieldType, out var isShared, context))
+                return;
+            var introducedFieldName = IntroductionRules.GetName(adviceType.Namespace, adviceType.Name, isShared ? null : introducedMemberName, memberName);
+            IntroduceMember(moduleDefinition, advisedType, markerAttribute, isStatic, isNotSerialized, introducedFieldName, introducedFieldType.ToTypeSig());
+            // also introduce registry (this is done once anyway)
+            IntroduceMember(moduleDefinition, advisedType, markerAttribute, false, true, IntroductionRules.RegistryName, context.IntroducedFieldsType.ToTypeSig()); // introduced as object by pure laziness
         }
 
         private void IntroduceMember(ModuleDef moduleDefinition, TypeDef advisedType, ICustomAttributeType markerAttribute, bool isStatic, bool isNotSerialized,
@@ -920,18 +941,17 @@ namespace ArxOne.MrAdvice.Weaver
         {
             lock (advisedType.Fields)
             {
-                if (advisedType.Fields.All(f => f.Name != introducedFieldName))
-                {
-                    var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public)
-                                          | (isNotSerialized ? FieldAttributes.NotSerialized : 0);
-                    if (isStatic)
-                        fieldAttributes |= FieldAttributes.Static;
-                    Logging.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);
-                    var introducedFieldTypeReference = TypeImporter.Import(moduleDefinition, introducedFieldType);
-                    var introducedField = new FieldDefUser(introducedFieldName, new FieldSig(introducedFieldTypeReference), fieldAttributes);
-                    introducedField.CustomAttributes.Add(new CustomAttribute(markerAttribute));
-                    advisedType.Fields.Add(introducedField);
-                }
+                if (advisedType.Fields.Any(f => f.Name == introducedFieldName))
+                    return;
+                var fieldAttributes = (InjectAsPrivate ? FieldAttributes.Private : FieldAttributes.Public)
+                                      | (isNotSerialized ? FieldAttributes.NotSerialized : 0);
+                if (isStatic)
+                    fieldAttributes |= FieldAttributes.Static;
+                Logging.WriteDebug("Introduced field type '{0}'", introducedFieldType.FullName);
+                var introducedFieldTypeReference = TypeImporter.Import(moduleDefinition, introducedFieldType);
+                var introducedField = new FieldDefUser(introducedFieldName, new FieldSig(introducedFieldTypeReference), fieldAttributes);
+                introducedField.CustomAttributes.Add(new CustomAttribute(markerAttribute));
+                advisedType.Fields.Add(introducedField);
             }
         }
     }
