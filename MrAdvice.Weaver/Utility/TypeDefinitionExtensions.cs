@@ -237,7 +237,6 @@ namespace ArxOne.MrAdvice.Utility
                 HandlerEnd = finalRet
             });
 
-
             typeDefinition.Methods.Add(newMethod);
             return newMethod;
         }

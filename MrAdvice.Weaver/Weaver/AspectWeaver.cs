@@ -76,14 +76,7 @@ namespace ArxOne.MrAdvice.Weaver
                 var weavingTypesAdvices = GetMarkedTypes(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(n => !IsFromComputerGeneratedType(n)).ToArray();
                 var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
                 auditTimer.NewZone("Abstract targets");
-                var generatedFieldsToBeRemoved = new List<FieldDef>();
-                var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
-                if (methodsWithAbstractTarget.Length > 0)
-                {
-                    generatedFieldsToBeRemoved.AddRange(GetRemovableFields(methodsWithAbstractTarget, context));
-                    foreach (var fieldReference in generatedFieldsToBeRemoved)
-                        Logging.WriteDebug("Field {0} to be removed", fieldReference.FullName);
-                }
+                var generatedFieldsToBeRemoved = GenerateFieldsToBeRemoved(weavableMethods, context);
                 auditTimer.NewZone("Types weaving advice");
                 weavingTypesAdvices.ForAll(t => RunTypesWeavingAdvices(t, context));
                 auditTimer.NewZone("Methods weaving advice");
@@ -102,8 +95,7 @@ namespace ArxOne.MrAdvice.Weaver
                 moduleDefinition.GetTypes().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, context));
 
                 auditTimer.NewZone("Abstract targets cleanup");
-                foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
-                    generatedFieldToBeRemoved.DeclaringType.Fields.Remove(generatedFieldToBeRemoved);
+                RemoveFields(generatedFieldsToBeRemoved);
                 auditTimer.LastZone();
 
                 var report = auditTimer.GetReport();
@@ -129,6 +121,26 @@ namespace ArxOne.MrAdvice.Weaver
                 Logging.WriteError("Please complain, whine, cry, yell at https://github.com/ArxOne/MrAdvice/issues/new");
                 return false;
             }
+        }
+
+        private static void RemoveFields(List<FieldDef> generatedFieldsToBeRemoved)
+        {
+            foreach (var generatedFieldToBeRemoved in generatedFieldsToBeRemoved)
+                generatedFieldToBeRemoved.DeclaringType.Fields.Remove(generatedFieldToBeRemoved);
+        }
+
+        private List<FieldDef> GenerateFieldsToBeRemoved(MarkedNode[] weavableMethods, WeavingContext context)
+        {
+            var generatedFieldsToBeRemoved = new List<FieldDef>();
+            var methodsWithAbstractTarget = weavableMethods.Where(m => m.AbstractTarget).ToArray();
+            if (methodsWithAbstractTarget.Length > 0)
+            {
+                generatedFieldsToBeRemoved.AddRange(GetRemovableFields(methodsWithAbstractTarget, context));
+                foreach (var fieldReference in generatedFieldsToBeRemoved)
+                    Logging.WriteDebug("Field {0} to be removed", fieldReference.FullName);
+            }
+
+            return generatedFieldsToBeRemoved;
         }
 
         private bool IsMethodWeavable(MarkedNode n)

@@ -7,6 +7,8 @@
 
 #endregion
 
+#pragma warning disable SA1402
+
 using TestApplication;
 
 //[assembly:TestAdvice]
@@ -190,7 +192,6 @@ namespace TestApplication
         //[AutoDisposable]
         void Dispose()
         {
-
         }
     }
 
@@ -199,7 +200,6 @@ namespace TestApplication
         //[AutoDisposable]
         void IDisposable.Dispose()
         {
-
         }
     }
 
