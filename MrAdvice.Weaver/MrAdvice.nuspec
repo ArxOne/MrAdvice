@@ -1,27 +1,29 @@
 ﻿<?xml version="1.0"?>
 <package>
-  <metadata>
-    <id>MrAdvice</id>
-    <version>$version$</version>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <license type="expression">MIT</license>
-    <description>$description$</description>
-    <copyright>$copyright$</copyright>
-    <title>Mr. Advice</title>
-    <projectUrl>https://github.com/ArxOne/MrAdvice</projectUrl>
-    <icon>MrAdvice.png</icon>
-    <repository type="git" url="https://github.com/ArxOne/MrAdvice.git" />
-    <summary>.NET build step aspect weaver</summary>
-    <releaseNotes></releaseNotes>
-    <tags>weaver aspect advice pointcut aop .net attributes injection netstandard windows postsharp</tags>
-    <developmentDependency>false</developmentDependency>
-  </metadata>
-  <files>
-    <file src="MrAdvice.targets" target="build" />
-    <file src="..\tools\**\*.*" target="tools" />
-    <file src="..\MrAdvice\bin\$configuration$\**\*.*" target="lib" />
-    <file src="..\Icon\MrAdvice.png" target="" />
-  </files>
+	<metadata>
+		<id>MrAdvice</id>
+		<version>$version$</version>
+		<authors>$author$</authors>
+		<owners>$author$</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<license type="expression">MIT</license>
+		<description>$description$</description>
+		<copyright>$copyright$</copyright>
+		<title>Mr. Advice</title>
+		<projectUrl>https://github.com/ArxOne/MrAdvice</projectUrl>
+		<icon>MrAdvice.png</icon>
+		<readme>README.md</readme>
+		<repository type="git" url="https://github.com/ArxOne/MrAdvice.git" />
+		<summary>.NET build step aspect weaver</summary>
+		<releaseNotes></releaseNotes>
+		<tags>weaver aspect advice pointcut aop .net attributes injection netstandard windows postsharp</tags>
+		<developmentDependency>false</developmentDependency>
+	</metadata>
+	<files>
+		<file src="MrAdvice.targets" target="build" />
+		<file src="..\tools\**\*.*" target="tools" />
+		<file src="..\MrAdvice\bin\$configuration$\**\*.*" target="lib" />
+		<file src="..\Icon\MrAdvice.png" target="" />
+		<file src="..\README.md" target="" />
+	</files>
 </package>
