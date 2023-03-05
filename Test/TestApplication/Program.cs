@@ -7,6 +7,8 @@
 
 #endregion
 
+#pragma warning disable SA1402
+
 using TestApplication;
 
 //[assembly:TestAdvice]
@@ -172,11 +174,50 @@ namespace TestApplication
         }
     }
 #endif
+
+    public class AutoDisposable : Attribute, IMethodWeavingAdvice, IMethodAdvice
+    {
+        public void Advise(MethodAdviceContext context)
+        {
+            context.Proceed();
+        }
+
+        public void Advise(MethodWeavingContext context)
+        {
+        }
+    }
+
+    public interface IAutoDisposable 
+    {
+        //[AutoDisposable]
+        void Dispose()
+        {
+        }
+    }
+
+    public class AutoDisposableImpl : IDisposable
+    {
+        //[AutoDisposable]
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public class DisposeSample : IAutoDisposable
+    {
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     class Program
     {
         [TestAdvice]
         static void Main(string[] args)
         {
+            //using var z = new DisposeSample();
+
             //Works
             var tSucceed = new TaskSucceed();
             var task1 = tSucceed.GetTask();

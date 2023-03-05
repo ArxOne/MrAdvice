@@ -10,7 +10,6 @@
 namespace ArxOne.MrAdvice.Weaver
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
     using dnlib.DotNet;
     using dnlib.DotNet.Emit;
@@ -18,11 +17,11 @@ namespace ArxOne.MrAdvice.Weaver
 
     /// <summary>
     /// Allows to Emit() to Instructions set and keep a cursor
-    /// This way, this class allows to apped or insert IL instructions in method body
+    /// This way, this class allows to append or insert IL instructions in method body
     /// </summary>
     public class Instructions
     {
-        private readonly IList<Instruction> _instructions;
+        private readonly CilBody _body;
 
         public ModuleDef Module { get; }
 
@@ -40,24 +39,37 @@ namespace ArxOne.MrAdvice.Weaver
         /// <value>
         /// The count.
         /// </value>
-        public int Count => _instructions.Count;
+        public int Count => _body.Instructions.Count;
 
-        public LocalList Variables { get; }
+        public LocalList Variables => _body.Variables;
+
+        public Instruction Last { get; private set; }
 
         /// <summary>Initializes a new instance of the <see cref="Instructions"/> class.</summary>
         /// <param name="body">The body.</param>
         /// <param name="module">The module definition.</param>
         public Instructions(CilBody body, ModuleDef module)
         {
-            _instructions = body.Instructions;
-            Variables = body.Variables;
+            _body = body;
             Module = module;
+        }
+
+        public Instructions KeepLast(out Instruction last)
+        {
+            last = Last;
+            return this;
         }
 
         private Instructions Insert(Instruction instruction)
         {
-            _instructions.Insert(Cursor++, instruction);
+            Last = instruction;
+            _body.Instructions.Insert(Cursor++, instruction);
             return this;
+        }
+
+        public Instructions Emit(Instruction instruction)
+        {
+            return Insert(instruction);
         }
 
         public Instructions Emit(OpCode opCode)
@@ -68,6 +80,11 @@ namespace ArxOne.MrAdvice.Weaver
         public Instructions Emit(OpCode opCode, byte value)
         {
             return Insert(Instruction.Create(opCode, value));
+        }
+
+        public Instructions Emit(OpCode opCode, Instruction instruction)
+        {
+            return Insert(Instruction.Create(opCode, instruction));
         }
 
         public Instructions Emit(OpCode opCode, sbyte value)
@@ -168,19 +185,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <returns></returns>
         public Instructions EmitLdarg(Parameter parameter)
         {
-            switch (parameter.Index)
+            return parameter.Index switch
             {
-                case 0:
-                    return Emit(OpCodes.Ldarg_0);
-                case 1:
-                    return Emit(OpCodes.Ldarg_1);
-                case 2:
-                    return Emit(OpCodes.Ldarg_2);
-                case 3:
-                    return Emit(OpCodes.Ldarg_3);
-                default:
-                    return Emit(OpCodes.Ldarg_S, parameter);
-            }
+                0 => Emit(OpCodes.Ldarg_0),
+                1 => Emit(OpCodes.Ldarg_1),
+                2 => Emit(OpCodes.Ldarg_2),
+                3 => Emit(OpCodes.Ldarg_3),
+                _ => Emit(OpCodes.Ldarg_S, parameter)
+            };
         }
 
         /// <summary>
@@ -189,19 +201,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="variableDefinition">The variable definition.</param>
         public Instructions EmitLdloc(Local variableDefinition)
         {
-            switch (variableDefinition.Index)
+            return variableDefinition.Index switch
             {
-                case 0:
-                    return Emit(OpCodes.Ldloc_0);
-                case 1:
-                    return Emit(OpCodes.Ldloc_1);
-                case 2:
-                    return Emit(OpCodes.Ldloc_2);
-                case 3:
-                    return Emit(OpCodes.Ldloc_3);
-                default:
-                    return Emit(OpCodes.Ldloc_S, variableDefinition);
-            }
+                0 => Emit(OpCodes.Ldloc_0),
+                1 => Emit(OpCodes.Ldloc_1),
+                2 => Emit(OpCodes.Ldloc_2),
+                3 => Emit(OpCodes.Ldloc_3),
+                _ => Emit(OpCodes.Ldloc_S, variableDefinition)
+            };
         }
 
         /// <summary>
@@ -210,19 +217,14 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="variableDefinition">The variable definition.</param>
         public Instructions EmitStloc(Local variableDefinition)
         {
-            switch (variableDefinition.Index)
+            return variableDefinition.Index switch
             {
-                case 0:
-                    return Emit(OpCodes.Stloc_0);
-                case 1:
-                    return Emit(OpCodes.Stloc_1);
-                case 2:
-                    return Emit(OpCodes.Stloc_2);
-                case 3:
-                    return Emit(OpCodes.Stloc_3);
-                default:
-                    return Emit(OpCodes.Stloc_S, variableDefinition);
-            }
+                0 => Emit(OpCodes.Stloc_0),
+                1 => Emit(OpCodes.Stloc_1),
+                2 => Emit(OpCodes.Stloc_2),
+                3 => Emit(OpCodes.Stloc_3),
+                _ => Emit(OpCodes.Stloc_S, variableDefinition)
+            };
         }
 
         /// <summary>
@@ -231,31 +233,20 @@ namespace ArxOne.MrAdvice.Weaver
         /// <param name="value">The value.</param>
         public Instructions EmitLdc(int value)
         {
-            switch (value)
+            return value switch
             {
-                case 0:
-                    return Emit(OpCodes.Ldc_I4_0);
-                case 1:
-                    return Emit(OpCodes.Ldc_I4_1);
-                case 2:
-                    return Emit(OpCodes.Ldc_I4_2);
-                case 3:
-                    return Emit(OpCodes.Ldc_I4_3);
-                case 4:
-                    return Emit(OpCodes.Ldc_I4_4);
-                case 5:
-                    return Emit(OpCodes.Ldc_I4_5);
-                case 6:
-                    return Emit(OpCodes.Ldc_I4_6);
-                case 7:
-                    return Emit(OpCodes.Ldc_I4_7);
-                case 8:
-                    return Emit(OpCodes.Ldc_I4_8);
-                default:
-                    if (value < 128)
-                        return Emit(OpCodes.Ldc_I4_S, (sbyte) value);
-                    return Emit(OpCodes.Ldc_I4, value);
-            }
+                0 => Emit(OpCodes.Ldc_I4_0),
+                1 => Emit(OpCodes.Ldc_I4_1),
+                2 => Emit(OpCodes.Ldc_I4_2),
+                3 => Emit(OpCodes.Ldc_I4_3),
+                4 => Emit(OpCodes.Ldc_I4_4),
+                5 => Emit(OpCodes.Ldc_I4_5),
+                6 => Emit(OpCodes.Ldc_I4_6),
+                7 => Emit(OpCodes.Ldc_I4_7),
+                8 => Emit(OpCodes.Ldc_I4_8),
+                < 128 => Emit(OpCodes.Ldc_I4_S, (sbyte)value),
+                _ => Emit(OpCodes.Ldc_I4, value)
+            };
         }
 
         /// <summary>
@@ -301,7 +292,7 @@ namespace ArxOne.MrAdvice.Weaver
                 return true;
             }
             if (targetTypeSig.IsGenericInstanceType)
-                return MustBox(((GenericInstSig) targetTypeSig).GenericType);
+                return MustBox(((GenericInstSig)targetTypeSig).GenericType);
             //if (targetTypeSig.SafeEquivalent(Module.ImportAsTypeSig(typeof(Nullable<>))))
             //    return false;
             if (targetTypeSig.IsValueType || targetTypeSig.IsPrimitive)

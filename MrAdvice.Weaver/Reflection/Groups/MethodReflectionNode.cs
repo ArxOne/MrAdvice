@@ -29,9 +29,9 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         protected override ReflectionNode LoadParent()
         {
-            if (_propertyDefinition != null)
+            if (_propertyDefinition is not null)
                 return new PropertyReflectionNode(_propertyDefinition, null);
-            if (_eventDefinition != null)
+            if (_eventDefinition is not null)
                 return new EventReflectionNode(_eventDefinition, null);
             // a bit tricky here, since a method can belong to a property
             var declaringType = _methodDefinition.DeclaringType;

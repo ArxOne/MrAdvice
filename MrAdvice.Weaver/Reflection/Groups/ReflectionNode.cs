@@ -77,6 +77,8 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// The method.
         /// </value>
         public virtual MethodDef Method => null;
+        
+        public virtual TypeDef Type => null;
 
         /// <summary>
         /// Gets the name.
@@ -100,7 +102,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <returns></returns>
         public IEnumerable<ReflectionNode> GetSelfAndAncestors()
         {
-            for (var ancestor = this; ancestor != null; ancestor = ancestor.Parent)
+            for (var ancestor = this; ancestor is not null; ancestor = ancestor.Parent)
                 yield return ancestor;
         }
 

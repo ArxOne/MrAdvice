@@ -21,7 +21,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The type definition.
         /// </value>
-        public TypeDef TypeDefinition { get; }
+        public override TypeDef Type { get; }
 
         /// <summary>
         /// Gets the parent.
@@ -29,7 +29,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The parent, or null if top-level.
         /// </value>
-        protected override ReflectionNode LoadParent() => new ModuleReflectionNode(TypeDefinition.Module, null);
+        protected override ReflectionNode LoadParent() => new ModuleReflectionNode(Type.Module, null);
 
         /// <summary>
         /// Gets the children.
@@ -39,13 +39,13 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// </value>
         protected override IEnumerable<ReflectionNode> LoadChildren()
         {
-            foreach (var eventDefinition in TypeDefinition.Events.OrderBy(p => p.Name))
+            foreach (var eventDefinition in Type.Events.OrderBy(p => p.Name))
                 yield return new EventReflectionNode(eventDefinition, this);
-            foreach (var propertyDefinition in TypeDefinition.Properties.OrderBy(p => p.Name))
+            foreach (var propertyDefinition in Type.Properties.OrderBy(p => p.Name))
                 yield return new PropertyReflectionNode(propertyDefinition, this);
-            foreach (var constructorMethodDefinition in TypeDefinition.FindConstructors())
+            foreach (var constructorMethodDefinition in Type.FindConstructors())
                 yield return new MethodReflectionNode(constructorMethodDefinition, this);
-            foreach (var methodDefinition in TypeDefinition.Methods.OrderBy(m => m.Name).Where(m => !m.IsSpecialName))
+            foreach (var methodDefinition in Type.Methods.OrderBy(m => m.Name).Where(m => !m.IsSpecialName))
                 yield return new MethodReflectionNode(methodDefinition, this);
         }
 
@@ -55,7 +55,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// The custom attributes.
         /// </value>
-        public override IEnumerable<CustomAttribute> CustomAttributes => TypeDefinition.CustomAttributes;
+        public override IEnumerable<CustomAttribute> CustomAttributes => Type.CustomAttributes;
 
         /// <summary>
         /// Gets a value indicating whether this instance is generic.
@@ -63,11 +63,11 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <value>
         /// <c>true</c> if this instance is generic; otherwise, <c>false</c>.
         /// </value>
-        public override bool IsGeneric => TypeDefinition.HasGenericParameters;
+        public override bool IsGeneric => Type.HasGenericParameters;
 
-        public override string Name => TypeDefinition.FullName;
+        public override string Name => Type.FullName;
 
-        private string DebugString => $"Type {TypeDefinition.FullName}";
+        private string DebugString => $"Type {Type.FullName}";
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
@@ -87,7 +87,7 @@ namespace ArxOne.MrAdvice.Reflection.Groups
         /// <param name="parent">The parent.</param>
         public TypeReflectionNode(TypeDef typeDefinition, ReflectionNode parent)
         {
-            TypeDefinition = typeDefinition;
+            Type = typeDefinition;
             Parent = parent;
         }
     }

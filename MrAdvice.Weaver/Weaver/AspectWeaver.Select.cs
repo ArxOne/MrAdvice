@@ -41,10 +41,10 @@ namespace ArxOne.MrAdvice.Weaver
         {
             var adviceSelector = new PointcutSelector();
             // Advices should not advise themselves
-            if (node is TypeReflectionNode typeReflectionNode && IsMarker(typeReflectionNode.TypeDefinition, context.AdviceInterfaceType))
+            if (node is TypeReflectionNode typeReflectionNode && IsMarker(typeReflectionNode.Type, context.AdviceInterfaceType))
             {
-                Logging.WriteDebug("Excluding {0} from itself", typeReflectionNode.TypeDefinition.FullName);
-                adviceSelector.ExcludeRules.Add(new PointcutSelectorRule(typeReflectionNode.TypeDefinition.FullName));
+                Logging.WriteDebug("Excluding {0} from itself", typeReflectionNode.Type.FullName);
+                adviceSelector.ExcludeRules.Add(new PointcutSelectorRule(typeReflectionNode.Type.FullName));
             }
             if (context.ExcludeAdviceAttributeType is not null)
             {
