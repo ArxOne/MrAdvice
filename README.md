@@ -4,7 +4,7 @@
 
 Mr. Advice is an open source (and free of charge) alternative to PostSharp (which is still far more advanced, see https://www.postsharp.net).  
 It intends to inject aspects at build-time. Advices are written in the form of attributes, and marking methods with them makes the pointcut, resulting in a nice and easy aspect injection.  
-More information about what is an aspect at [Wikipedia](http://en.wikipedia.org/wiki/Aspect-oriented_programming).  
+More information about what is an aspect at [Wikipedia](https://en.wikipedia.org/wiki/Aspect-oriented_programming).  
 
 Mr. Advice can weave assemblies for:
 
@@ -20,7 +20,7 @@ Mr. Advice allows you to:
 
 ## How it works
 
-It is available as a [![NuGet Status](http://img.shields.io/nuget/v/MrAdvice.svg?style=flat-square)](https://www.nuget.org/packages/MrAdvice) package. There is also an automatic build with tests at appveyor. The current status is [![Build status](https://ci.appveyor.com/api/projects/status/96i8xbxf954x79vw?svg=true)](https://ci.appveyor.com/project/picrap/mradvice)
+It is available as a [![NuGet Status](https://img.shields.io/nuget/v/MrAdvice.svg?style=flat-square)](https://www.nuget.org/packages/MrAdvice) package. There is also an automatic build with tests at appveyor. The current status is [![Build status](https://ci.appveyor.com/api/projects/status/96i8xbxf954x79vw?svg=true)](https://ci.appveyor.com/project/picrap/mradvice)
 
 
 ## Philosophy
@@ -75,4 +75,4 @@ Miscellaneous projects:
 ## Contact and links
 
 Project owner is [picrap](https://github.com/picrap), feel free to drop a mail :email:.  
-Project company is [Arx One](http://arx.one), a french company editor of backup software solutions.  
+Project company is [Arx One](https://arx.one), a french company editor of backup software solutions.  
