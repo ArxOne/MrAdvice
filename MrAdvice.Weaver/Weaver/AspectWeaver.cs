@@ -73,7 +73,10 @@ namespace ArxOne.MrAdvice.Weaver
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
                 var weavingMethodsAdvices = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
-                var weavingTypesAdvices = GetMarkedTypes(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(n => !IsFromComputerGeneratedType(n)).ToArray();
+                var weavingTypesAdvices = GetMarkedTypes(moduleDefinition, context.WeavingAdviceInterfaceType, context)
+                    .Where(n => !IsFromComputerGeneratedType(n))
+                    // sorting here will make ancestor types being weaved before children (because of finalizers)
+                    .OrderBy(n=>n.Node.Type.GetSelfAndAncestors().Count()).ToArray();
                 var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
                 auditTimer.NewZone("Abstract targets");
                 var generatedFieldsToBeRemoved = GenerateFieldsToBeRemoved(weavableMethods, context);
