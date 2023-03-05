@@ -5,14 +5,14 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using ArxOne.MrAdvice.Advice.Builder;
+
 namespace ArxOne.MrAdvice.Advice
 {
-    using System;
-
     /// <summary>
     /// Context for <see cref="IMethodWeavingAdvice"/>
     /// </summary>
-    public abstract class MethodWeavingContext : WeavingContext
+    public class MethodWeavingContext : WeavingContext
     {
         /// <summary>
         /// Gets or sets the name of the target method.
@@ -25,10 +25,10 @@ namespace ArxOne.MrAdvice.Advice
         /// <summary>
         /// Initializes a new instance of the <see cref="MethodWeavingContext" /> class.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="targetMethodName">Name of the target method.</param>
-        protected MethodWeavingContext(Type type, string targetMethodName)
-            : base(type)
+        /// <param name="typeWeaver">The type weaver.</param>
+        public MethodWeavingContext(string targetMethodName, ITypeWeaver typeWeaver)
+            : base(typeWeaver)
         {
             TargetMethodName = targetMethodName;
         }
