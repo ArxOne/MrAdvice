@@ -7,6 +7,9 @@
 
 #endregion
 
+// https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1402.md
+#pragma warning disable SA1402
+
 using TestApplication;
 
 //[assembly:TestAdvice]
