@@ -192,5 +192,14 @@ namespace ArxOne.MrAdvice.Utility
             var importedCtor = moduleDefinition.SafeImport(constructor);
             return new CustomAttribute((ICustomAttributeType)importedCtor, new byte[] { 1, 0, 0, 0 });
         }
+
+        public static MethodSig ImportSignature(this ModuleDef moduleDefinition, MethodInfo methodInfo)
+        {
+            var callingConvention = methodInfo.CallingConvention.ToCallingConvention();
+            var genParamCount = (uint)methodInfo.GetGenericArguments().Length;
+            var retType = moduleDefinition.SafeImport(methodInfo.ReturnType).ToTypeSig();
+            var typeSigs = methodInfo.GetParameters().Select(p => moduleDefinition.SafeImport(p.ParameterType).ToTypeSig()).ToArray();
+            return new MethodSig(callingConvention, genParamCount, retType, typeSigs);
+        }
     }
 }

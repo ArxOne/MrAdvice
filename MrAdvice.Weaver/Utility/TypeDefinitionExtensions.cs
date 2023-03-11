@@ -5,6 +5,7 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using System.Reflection;
 using System.Xml;
 
 namespace ArxOne.MrAdvice.Utility
@@ -201,6 +202,12 @@ namespace ArxOne.MrAdvice.Utility
                     return methodDef;
             }
             return null;
+        }
+
+        public static MethodDef FindMethodCheckBaseType(this TypeDef typeDefinition, MethodInfo methodInfo)
+        {
+            var methodSig = typeDefinition.Module.ImportSignature(methodInfo);
+            return typeDefinition.FindMethodCheckBaseType(methodInfo.Name, methodSig);
         }
 
         public static MethodDef GetOrCreateFinalizer(this TypeDef typeDefinition, TypeResolver typeResolver)

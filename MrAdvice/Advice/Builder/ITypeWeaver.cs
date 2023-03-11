@@ -26,9 +26,11 @@ public interface ITypeWeaver
     /// <summary>
     /// Adds a finalizer action.
     /// </summary>
-    /// <param name="finalizer">The finalizer.</param>
+    /// <param name="advice">The advice.</param>
     /// <param name="flags">The flags.</param>
-    void AfterFinalizer(Delegate finalizer, WeaverAddFlags flags = WeaverAddFlags.Default);
+    void AfterFinalizer(Delegate advice, WeaverAddFlags flags = WeaverAddFlags.Default);
 
-    void AfterMethod(string methodName, Delegate method, WeaverAddFlags flags = WeaverAddFlags.Default);
+    void AfterMethod(string methodName, Delegate advice, WeaverAddFlags flags = WeaverAddFlags.Default);
+
+    void After(MethodInfo methodInfo, Delegate advice, WeaverAddFlags flags = WeaverAddFlags.Default);
 }

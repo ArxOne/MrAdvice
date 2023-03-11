@@ -78,16 +78,22 @@ internal class TypeWeaver : ITypeWeaver
         Add(initializer.Method, flags, new Methods(ctors));
     }
 
-    public void AfterFinalizer(Delegate finalizer, WeaverAddFlags flags)
+    public void AfterFinalizer(Delegate advice, WeaverAddFlags flags)
     {
         var typeFinalizer = _typeDefinition.GetOrCreateFinalizer(_typeResolver);
-        Add(finalizer.Method, flags, typeFinalizer);
+        Add(advice.Method, flags, typeFinalizer);
     }
 
-    public void AfterMethod(string methodName, Delegate method, WeaverAddFlags flags = WeaverAddFlags.Default)
+    public void AfterMethod(string methodName, Delegate advice, WeaverAddFlags flags = WeaverAddFlags.Default)
     {
         var methods = _typeDefinition.FindMethods(methodName);
-        Add(method.Method, flags, new Methods(methods));
+        Add(advice.Method, flags, new Methods(methods));
+    }
+
+    public void After(MethodInfo methodInfo, Delegate advice, WeaverAddFlags flags = WeaverAddFlags.Default)
+    {
+        var methodDef = _typeDefinition.FindMethodCheckBaseType(methodInfo);
+        Add(advice.Method, flags, methodDef);
     }
 
     private void Add(MethodInfo methodInfo, WeaverAddFlags flags, Methods holderMethods)

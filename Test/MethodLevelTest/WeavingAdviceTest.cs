@@ -6,6 +6,7 @@
 #endregion
 
 using ArxOne.MrAdvice.Advice.Builder;
+using ArxOne.MrAdvice.Introduction;
 
 namespace MethodLevelTest
 {
@@ -146,5 +147,55 @@ namespace MethodLevelTest
             Assert.AreEqual(1, x.Constructors);
             Assert.AreEqual(2, x.Methods);
         }
+
+        public class DisposingAdvice : Attribute, ITypeWeavingAdvice
+        {
+            public void Advise(WeavingContext context)
+            {
+                var dispose = context.TypeWeaver.Type.GetMethod("Dispose", BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy, null, CallingConventions.Any, new Type[0], new ParameterModifier[0]);
+                TypeWeaverExtensions.After(context.TypeWeaver, dispose, DisposeSurrogate);
+                context.TypeWeaver.AfterFinalizer(FinalizeSurrogate);
+            }
+
+            private static void InvokeDispose(object target, bool disposing)
+            {
+                var dispose = target.GetType().GetMethod("Dispose", BindingFlags.NonPublic | BindingFlags.Instance, null, CallingConventions.Any, new[] { typeof(bool) },
+                    new[] { new ParameterModifier() });
+                if (disposing)
+                    GC.SuppressFinalize(target);
+                dispose.Invoke(target, new object[] { disposing });
+            }
+
+            public static void DisposeSurrogate(object target) => InvokeDispose(target, true);
+
+            public static void FinalizeSurrogate(object target) => InvokeDispose(target, false);
+        }
+
+        public class AutoDispose : IDisposable
+        {
+            public void Dispose() { }
+        }
+
+        [DisposingAdvice]
+        public class DisposingTest : AutoDispose
+        {
+            public bool? Disposed;
+
+            protected virtual void Dispose(bool disposing)
+            {
+                Disposed = disposing;
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving advice")]
+        public void DisposingAdviceTest()
+        {
+            DisposingTest y;
+            using (var x = new DisposingTest())
+                y = x;
+            Assert.AreEqual(true, y.Disposed);
+        }
+
     }
 }
