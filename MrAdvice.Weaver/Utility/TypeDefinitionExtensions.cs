@@ -204,10 +204,11 @@ namespace ArxOne.MrAdvice.Utility
             return null;
         }
 
-        public static MethodDef FindMethodCheckBaseType(this TypeDef typeDefinition, MethodInfo methodInfo)
+        public static MethodDef FindMethodCheckBaseTypeAndInterfaces(this TypeDef typeDefinition, MethodInfo methodInfo, TypeResolver typeResolver = null)
         {
             var methodSig = typeDefinition.Module.ImportSignature(methodInfo);
-            return typeDefinition.FindMethodCheckBaseType(methodInfo.Name, methodSig);
+            return typeDefinition.FindMethodCheckBaseType(methodInfo.Name, methodSig)
+                ?? typeDefinition.GetAllInterfaces(typeResolver).Select(i => i.FindMethod(methodInfo.Name, methodSig)).FirstOrDefault(m => m is not null);
         }
 
         public static MethodDef GetOrCreateFinalizer(this TypeDef typeDefinition, TypeResolver typeResolver)

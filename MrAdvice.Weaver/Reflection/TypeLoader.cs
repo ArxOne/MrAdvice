@@ -5,6 +5,8 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using System.Reflection;
+
 namespace ArxOne.MrAdvice.Reflection
 {
     using System;
@@ -12,15 +14,19 @@ namespace ArxOne.MrAdvice.Reflection
     using System.Linq;
     using dnlib.DotNet;
 
+    public delegate Assembly TypeLoaderTryResolve(string assemblyName);
+
     public class TypeLoader
     {
-        private Action _assembliesLoader;
+        private readonly TypeLoaderTryResolve _tryResolve;
+        private readonly Assembly[] _assemblies;
 
         private readonly IDictionary<string, Type> _typesByName = new Dictionary<string, Type>();
 
-        public TypeLoader(Action assembliesLoader)
+        public TypeLoader(TypeLoaderTryResolve tryResolve, params Assembly[] assemblies)
         {
-            _assembliesLoader = assembliesLoader;
+            _tryResolve = tryResolve;
+            _assemblies = assemblies;
         }
 
         /// <summary>
@@ -30,25 +36,39 @@ namespace ArxOne.MrAdvice.Reflection
         /// <returns></returns>
         public Type GetType(ITypeDefOrRef typeReference)
         {
-            if (_assembliesLoader != null)
-            {
-                _assembliesLoader();
-                _assembliesLoader = null;
-            }
             lock (_typesByName)
             {
                 var fullName = typeReference.FullName.Replace('/', '+');
                 if (_typesByName.TryGetValue(fullName, out var type))
                     return type;
+
+                Assembly ResolveAssembly(object sender, ResolveEventArgs args) => _tryResolve(args.Name);
+
+                AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
                 type = FindType(fullName);
+                AppDomain.CurrentDomain.AssemblyResolve -= ResolveAssembly;
                 _typesByName[fullName] = type;
                 return type;
             }
         }
 
-        private static Type FindType(string fullName)
+        private Type FindType(string fullName)
         {
-            return AppDomain.CurrentDomain.GetAssemblies().Select(assembly => assembly.GetType(fullName)).FirstOrDefault(type => type != null);
+            Type GetType(Assembly assembly)
+            {
+                var type = assembly.GetType(fullName);
+                if (type is not null)
+                    return type;
+                try
+                {
+                    type = assembly.GetTypes().FirstOrDefault(t => t.FullName == fullName);
+                    return type;
+                }
+                catch { }
+                return null;
+            }
+
+            return _assemblies.Concat(AppDomain.CurrentDomain.GetAssemblies()).Select(GetType).FirstOrDefault(type => type is not null);
         }
     }
 }

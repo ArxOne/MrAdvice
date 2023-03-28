@@ -92,7 +92,7 @@ internal class TypeWeaver : ITypeWeaver
 
     public void After(MethodInfo methodInfo, Delegate advice, WeaverAddFlags flags = WeaverAddFlags.Default)
     {
-        var methodDef = _typeDefinition.FindMethodCheckBaseType(methodInfo);
+        var methodDef = _typeDefinition.FindMethodCheckBaseTypeAndInterfaces(methodInfo, _typeResolver);
         Add(advice.Method, flags, methodDef);
     }
 
@@ -104,15 +104,17 @@ internal class TypeWeaver : ITypeWeaver
         var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
         foreach (var holderMethod in holderMethods)
         {
-            if (!CanAddMethod(methodInfo, flags, holderMethod))
+            var advisedMethod = AdviseMethod(holderMethod);
+
+            if (!CanAddMethod(methodInfo, flags, advisedMethod))
                 continue;
 
-            var instructions = new Instructions(holderMethod.Body, _typeDefinition.Module);
+            var instructions = new Instructions(advisedMethod.Body, _typeDefinition.Module);
             // last instruction is a RET, so move just before it
-            if (holderMethod.Name == "Finalize")
+            if (advisedMethod.Name == "Finalize")
             {
-                var finallyExceptionHandler = holderMethod.Body.ExceptionHandlers.First(e => e.HandlerType == ExceptionHandlerType.Finally);
-                instructions.Cursor = holderMethod.Body.Instructions.IndexOf(finallyExceptionHandler.TryEnd) - 1;
+                var finallyExceptionHandler = advisedMethod.Body.ExceptionHandlers.First(e => e.HandlerType == ExceptionHandlerType.Finally);
+                instructions.Cursor = advisedMethod.Body.Instructions.IndexOf(finallyExceptionHandler.TryEnd) - 1;
             }
             else
                 instructions.Cursor = instructions.Count - 1;
@@ -122,11 +124,20 @@ internal class TypeWeaver : ITypeWeaver
         }
     }
 
+    private MethodDef AdviseMethod(MethodDef holderMethod)
+    {
+        if (holderMethod.DeclaringType.SafeEquivalent(_typeDefinition))
+            return holderMethod;
+        var newMethod = _typeDefinition.GetOrCreateMethod(holderMethod.Name, holderMethod.MethodSig,
+            dnlib.DotNet.MethodAttributes.HideBySig | dnlib.DotNet.MethodAttributes.NewSlot | dnlib.DotNet.MethodAttributes.Virtual | dnlib.DotNet.MethodAttributes.Final | dnlib.DotNet.MethodAttributes.Public);
+        return newMethod;
+    }
+
     private bool CanAddMethod(MethodInfo methodInfo, WeaverAddFlags flags, MethodDef methodDef)
     {
-        var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
         if (!flags.HasFlag(WeaverAddFlags.Once))
             return false;
+        var methodReference = _typeDefinition.Module.SafeImport(methodInfo);
         if (methodDef.Body.Instructions.Any(i => i.OpCode == OpCodes.Call && methodReference.SafeEquivalent(i.Operand as IMethod, true)))
             return false;
         return true;

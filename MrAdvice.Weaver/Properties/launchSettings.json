@@ -1,8 +1,16 @@
 {
   "profiles": {
-    "MrAdvice.Weaver": {
+    "Backup": {
+      "commandName": "Project",
+      "commandLineArgs": "@+\"C:\\Users\\pascal\\Documents\\Developpement\\MrAdvice\\backup.core.debug\""
+    },
+    "MethodLevel": {
       "commandName": "Project",
       "commandLineArgs": "@+\"C:\\Users\\pascal\\Documents\\Developpement\\MrAdvice\\methodlevel.debug\""
+    },
+    "DotNetCore": {
+      "commandName": "Project",
+      "commandLineArgs": "@+\"C:\\Users\\pascal\\Documents\\Developpement\\MrAdvice\\dotnetcore.debug\""
     }
   }
 }
