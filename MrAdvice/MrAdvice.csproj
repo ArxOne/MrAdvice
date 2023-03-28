@@ -7,7 +7,7 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <AssemblyTitle>Mr. Advice</AssemblyTitle>
     <Copyright>Copyright [2015,…[ Arx One</Copyright>
-    <Version>2.12</Version>
+    <Version>2.12.1</Version>
     <Authors>Arx One</Authors>
     <RootNamespace>ArxOne.MrAdvice</RootNamespace>
     <SignAssembly>true</SignAssembly>

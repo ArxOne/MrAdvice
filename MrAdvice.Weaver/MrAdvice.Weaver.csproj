@@ -8,7 +8,7 @@
     <AssemblyTitle>Mr. Advice weaver</AssemblyTitle>
     <Description>MrAdvice allows to weave aspects at build-time (just like PostSharp, but free as in free beer). Write your own aspects in the form of attributes and apply them to target methods or properties.</Description>
     <Copyright>Copyright [2015,…[ Arx One</Copyright>
-    <Version>2.12</Version>
+    <Version>2.12.1</Version>
     <Authors>Arx One</Authors>
     <PackageProjectUrl>https://github.com/ArxOne/MrAdvice</PackageProjectUrl>
     <DebugType>full</DebugType>
