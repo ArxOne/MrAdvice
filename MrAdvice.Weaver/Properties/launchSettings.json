@@ -11,6 +11,10 @@
     "DotNetCore": {
       "commandName": "Project",
       "commandLineArgs": "@+\"C:\\Users\\pascal\\Documents\\Developpement\\MrAdvice\\dotnetcore.debug\""
+    },
+    "ExternalAdviceTest": {
+      "commandName": "Project",
+      "commandLineArgs": "@+\"C:\\Users\\pascal\\Documents\\Developpement\\MrAdvice\\ExternalAdviceTest.debug\""
     }
   }
 }

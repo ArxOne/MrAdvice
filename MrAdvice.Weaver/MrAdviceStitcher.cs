@@ -145,6 +145,9 @@ namespace ArxOne.MrAdvice
                 if (fileName == "MrAdvice.dll" && AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "MrAdvice"))
                     return null;
 
+                if (referencePath is null)
+                    return null;
+
                 return TryLoad(referencePath);
             }
             catch (Exception e)

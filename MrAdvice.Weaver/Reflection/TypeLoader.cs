@@ -45,17 +45,19 @@ namespace ArxOne.MrAdvice.Reflection
                 Assembly ResolveAssembly(object sender, ResolveEventArgs args) => _tryResolve(args.Name);
 
                 AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
-                type = FindType(fullName);
+                type = FindType(fullName, typeReference.DefinitionAssembly.FullNameToken);
                 AppDomain.CurrentDomain.AssemblyResolve -= ResolveAssembly;
                 _typesByName[fullName] = type;
                 return type;
             }
         }
 
-        private Type FindType(string fullName)
+        private Type FindType(string fullName, string assemblyFullName)
         {
             Type GetType(Assembly assembly)
             {
+                if (assembly is null)
+                    return null;
                 var type = assembly.GetType(fullName);
                 if (type is not null)
                     return type;
@@ -68,7 +70,8 @@ namespace ArxOne.MrAdvice.Reflection
                 return null;
             }
 
-            return _assemblies.Concat(AppDomain.CurrentDomain.GetAssemblies()).Select(GetType).FirstOrDefault(type => type is not null);
+            var ownerAssembly = _tryResolve(assemblyFullName);
+            return new[] { ownerAssembly }.Concat(_assemblies).Concat(AppDomain.CurrentDomain.GetAssemblies()).Select(GetType).FirstOrDefault(type => type is not null);
         }
     }
 }
