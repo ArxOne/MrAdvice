@@ -5,8 +5,8 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using System.Diagnostics;
 using System.Reflection;
-using System.Xml;
 
 namespace ArxOne.MrAdvice.Utility
 {
@@ -80,6 +80,11 @@ namespace ArxOne.MrAdvice.Utility
             foreach (var parentInterfaceImpl in typeDefinition.Interfaces)
             {
                 var @interface = typeResolver.SafeResolve(parentInterfaceImpl.Interface);
+                if (@interface is null)
+                {
+                    Trace.WriteLine($"Error: can’t resolve interface {parentInterfaceImpl.Interface.Name}");
+                    continue;
+                }
                 allInterfaces.AddRange(GetAllInterfacesRaw(@interface, typeResolver));
             }
 
