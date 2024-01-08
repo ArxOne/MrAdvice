@@ -1,4 +1,9 @@
-## 2.9.5 (coming soon)
+## 2.14
+
+Soory for missing changelog in previous release.
+- Fix: NullReferenceException in TypeDefinitionExtensions.GetAllInterfacesRaw
+
+## 2.9.5
 
 - New: support for .NET6
 
