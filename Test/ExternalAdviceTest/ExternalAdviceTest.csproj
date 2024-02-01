@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
     <ProjectGuid>{B9F3D5B6-8FF9-491B-8CE3-BD014885BBA9}</ProjectGuid>
-    <TargetFrameworks>net461;net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net461;net6.0;net7.0;net8.0</TargetFrameworks>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TestProjectType>UnitTest</TestProjectType>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
