@@ -1,6 +1,10 @@
+﻿## 2.15
+
+- New: Upgraded dnlib dependency, now supports all `PDB` formats (thaks to @rgroenewoudt)
+
 ## 2.14
 
-Soory for missing changelog in previous release.
+Sorry for missing changelog in previous releases 😥
 - Fix: NullReferenceException in TypeDefinitionExtensions.GetAllInterfacesRaw
 
 ## 2.9.5
