@@ -7,7 +7,7 @@
 
 using AssemblyLevelTest;
 
-[assembly: SelfExcludingAdvice]
+[assembly: SelfExcludingAdvice(1)]
 
 namespace AssemblyLevelTest
 {
@@ -16,8 +16,13 @@ namespace AssemblyLevelTest
 
     public class SelfExcludingAdvice : Attribute, IMethodAdvice
     {
+        public int increment;
+        public static int counter = 0;
+        public SelfExcludingAdvice(int increment) { this.increment = increment; }
+
         public void Advise(MethodAdviceContext context)
         {
+            counter += increment;
             context.Proceed();
         }
     }

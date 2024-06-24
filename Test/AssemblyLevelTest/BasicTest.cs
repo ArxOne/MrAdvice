@@ -41,6 +41,21 @@ namespace AssemblyLevelTest
             Assert.AreEqual(1, a.A);
             Assert.AreEqual("b", a.B);
         }
+
+        [SelfExcludingAdvice(2)]
+        public void IncrementBy2()
+        {
+        }
+
+        [TestMethod]
+        [TestCategory("Weaving")]
+        public void MethodOverrideTest()
+        {
+            SelfExcludingAdvice.counter = 0;
+            IncrementBy2();
+            Assert.AreEqual(2, SelfExcludingAdvice.counter);
+        }
+
     }
 }
 
