@@ -411,11 +411,13 @@ namespace ArxOne.MrAdvice
             // assemblies
             var assemblyAndParents = typeAndParents.Select(t => t.GetInformationReader().Assembly).Distinct();
 
+            var adviceComparer = new AdviceComparer<IAdvice>();
+
             // advices down to method
-            IEnumerable<AdviceInfo> allAdvices = assemblyAndParents.SelectMany(a => a.GetAttributes<TAdvice>())
-                .Union(GetTypeAndParentAdvices<TAdvice>(targetMethod.DeclaringType))
-                .Union(targetMethod.GetAttributes<TAdvice>())
-                .Select(CreateAdvice)
+            IEnumerable<AdviceInfo> allAdvices = (targetMethod.GetAttributes<TAdvice>())
+                .Union(GetTypeAndParentAdvices<TAdvice>(targetMethod.DeclaringType), adviceComparer)
+                .Union(assemblyAndParents.SelectMany(a => a.GetAttributes<TAdvice>()), adviceComparer)
+                .Select(x => CreateAdvice((TAdvice)x))
                 .ToArray();
 
             // optional from property
