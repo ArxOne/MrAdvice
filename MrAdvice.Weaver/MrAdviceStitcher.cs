@@ -112,8 +112,9 @@ namespace ArxOne.MrAdvice
 
                     try
                     {
-                        if (loadedAssembly is null)
-                            loadedAssembly = Assembly.ReflectionOnlyLoad(referenceBytes);
+#pragma warning disable SYSLIB0018
+                        loadedAssembly ??= Assembly.ReflectionOnlyLoad(referenceBytes);
+#pragma warning restore SYSLIB0018
                     }
                     catch (PlatformNotSupportedException)
                     {
@@ -171,7 +172,9 @@ namespace ArxOne.MrAdvice
 
             try
             {
+#pragma warning disable SYSLIB0018
                 return Assembly.ReflectionOnlyLoad(referenceBytes);
+#pragma warning restore SYSLIB0018
             }
             catch (PlatformNotSupportedException)
             {

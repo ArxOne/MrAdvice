@@ -19,7 +19,9 @@ namespace DotNetCoreTest
     public class BasicTest
     {
         [EmptyAsyncAdvice]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> AsyncAdvised()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return true;
         }
@@ -51,7 +53,7 @@ namespace DotNetCoreTest
                     r.Wait();
                     Assert.AreEqual("OK", r.Result);
                 }
-                catch (Exception ex)
+                catch (Exception /*ex*/)
                 {
                     //Console.WriteLine(ex.ToString());
                 }

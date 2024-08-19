@@ -40,7 +40,7 @@ namespace DotNetCoreTest
             {
                 //!!!!!!! here will be the exception
                 Console.WriteLine(ex.ToString());
-                throw ex;
+                throw;
             }
         }
 

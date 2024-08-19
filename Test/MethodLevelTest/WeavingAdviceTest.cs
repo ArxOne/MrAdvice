@@ -22,10 +22,10 @@ namespace MethodLevelTest
         {
             public void Advise(MethodWeavingContext context)
             {
-                context.AddPublicAutoProperty(context.TargetMethodName + "_Friend", typeof(string));
+                context.TypeWeaver.AddAutoProperty(context.TargetMethodName + "_Friend", typeof(string), MethodAttributes.Public);
                 context.TargetMethodName += "_Renamed";
-                context.AddInitializerOnce(Initializer);
-                context.AddInitializerOnce(Initializer);
+                context.TypeWeaver.AfterConstructors(Initializer);
+                context.TypeWeaver.AfterConstructors(Initializer);
             }
 
             public static void Initializer(object target)

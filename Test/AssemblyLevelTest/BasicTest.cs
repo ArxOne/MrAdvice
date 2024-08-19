@@ -70,13 +70,17 @@ public class Pouet
     }
 
     //Fatal error
+#pragma warning disable S3168
     public async void StartTask1()
+#pragma warning restore S3168
     {
         long r = await AddWhatever();
     }
 
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async System.Threading.Tasks.Task<long> AddWhatever()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         return -1;
     }

@@ -5,6 +5,8 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using System.Reflection;
+
 namespace ExternalAdvices
 {
     using System;
@@ -14,7 +16,7 @@ namespace ExternalAdvices
     {
         public void Advise(MethodWeavingContext context)
         {
-            context.AddPublicAutoProperty(context.TargetMethodName + "_Property", typeof(string));
+            context.TypeWeaver.AddAutoProperty(context.TargetMethodName + "_Property", typeof(string), MethodAttributes.Public);
         }
     }
 }

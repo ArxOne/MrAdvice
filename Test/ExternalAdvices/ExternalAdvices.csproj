@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
     <ProjectGuid>{C99CF600-A5DB-4CF2-B16E-7688C8CEAE3D}</ProjectGuid>
-    <TargetFrameworks>net461;net6.0;net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net461;net6.0;net8.0</TargetFrameworks>
     <AssemblyTitle>ExternalAdvices</AssemblyTitle>
     <Product>ExternalAdvices</Product>
     <Copyright>Copyright ©  2015</Copyright>
