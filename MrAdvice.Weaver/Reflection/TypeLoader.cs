@@ -58,20 +58,24 @@ namespace ArxOne.MrAdvice.Reflection
             {
                 if (assembly is null)
                     return null;
-                var type = assembly.GetType(fullName);
-                if (type is not null)
-                    return type;
-                try
-                {
-                    type = assembly.GetTypes().FirstOrDefault(t => t.FullName == fullName);
-                    return type;
-                }
-                catch { }
-                return null;
+                return TryGetType(() => assembly.GetType(fullName))
+                       ?? TryGetType(() => assembly.GetTypes().FirstOrDefault(t => t.FullName == fullName))
+                       ;
             }
 
             var ownerAssembly = _tryResolve(assemblyFullName);
             return new[] { ownerAssembly }.Concat(_assemblies).Concat(AppDomain.CurrentDomain.GetAssemblies()).Select(GetType).FirstOrDefault(type => type is not null);
+        }
+
+        private static Type TryGetType(Func<Type> getType)
+        {
+            try
+            {
+                return getType();
+            }
+            catch { }
+
+            return null;
         }
     }
 }
