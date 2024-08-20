@@ -2,7 +2,7 @@
   "profiles": {
     "Backup": {
       "commandName": "Project",
-      "commandLineArgs": "@+\"C:\\Users\\pascal\\Documents\\Developpement\\MrAdvice\\backup.server.debug\""
+      "commandLineArgs": "@+\"C:\\Users\\pascal\\Documents\\Developpement\\MrAdvice\\backup.core.debug\""
     },
     "MethodLevel": {
       "commandName": "Project",

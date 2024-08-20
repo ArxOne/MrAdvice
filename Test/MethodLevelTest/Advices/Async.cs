@@ -24,7 +24,7 @@ namespace MethodLevelTest.Advices
         public void Advise(MethodAdviceContext context)
         {
             if (KillExisting && _thread != null && _thread.IsAlive)
-                _thread.Abort();
+                _thread.Interrupt();
             _thread = new Thread(context.Proceed) { IsBackground = true, Name = context.TargetMethod.Name };
             _thread.Start();
         }
