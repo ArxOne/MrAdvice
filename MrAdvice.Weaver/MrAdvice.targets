@@ -13,6 +13,6 @@
 		</PropertyGroup>
 		<WriteLinesToFile Lines="@(ReferencePath)" File="$(MrAdviceWeaverReferencePathFile)" Overwrite="true" />
 		<WriteLinesToFile Lines="@(ReferenceCopyLocalPaths)" File="$(MrAdviceWeaverLocalReferencePathFile)" Overwrite="true" />
-		<Exec Command='$(MrAdviceWeaverPath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@$(MrAdviceWeaverLocalReferencePathFile)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
+		<Exec IgnoreExitCode="false" Command='$(MrAdviceWeaverPath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@$(MrAdviceWeaverLocalReferencePathFile)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
 	</Target>
 </Project>

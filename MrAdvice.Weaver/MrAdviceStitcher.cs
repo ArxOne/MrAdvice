@@ -57,7 +57,7 @@ namespace ArxOne.MrAdvice
                 var typeResolver = new TypeResolver(context.Module, context.Dependencies) { Logging = _logging, AssemblyResolver = assemblyResolver };
                 var bytes = File.ReadAllBytes(context.Module.Assembly.ManifestModule.Location);
                 var typeAssembly = Assembly.Load(bytes);
-                var typeLoader = new TypeLoader(a => TryLoad(a, context, assemblyResolver), typeAssembly);
+                var typeLoader = new TypeLoader(a => TryResolve(a, context, assemblyResolver), typeAssembly);
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
 
                 // second chance: someone had the marker file missing
@@ -133,6 +133,16 @@ namespace ArxOne.MrAdvice
             yield return Tuple.Create(context.Module.Assembly.FullName, Assembly.Load(bytes));
         }
 
+        private readonly IDictionary<string, Assembly> _resolvedAssemblies = new Dictionary<string, Assembly>();
+
+        private Assembly TryResolve(string assemblyName, AssemblyStitcherContext context, IAssemblyResolver assemblyResolver)
+        {
+            if (_resolvedAssemblies.TryGetValue(assemblyName, out var assembly))
+                return assembly;
+            _resolvedAssemblies[assemblyName] = assembly = TryLoad(assemblyName, context, assemblyResolver);
+            return assembly;
+        }
+
         private Assembly TryLoad(string assemblyName, AssemblyStitcherContext context, IAssemblyResolver assemblyResolver)
         {
             try
@@ -140,13 +150,18 @@ namespace ArxOne.MrAdvice
                 var assemblyRef = new AssemblyRefUser(assemblyName);
                 if (assemblyRef.Name == "MrAdvice")
                     return null;
+
+                var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.GetName().Name == assemblyName);
+                if (loadedAssembly is not null)
+                    return loadedAssembly;
+
                 var referencePath = GetReferencePath(context, assemblyResolver, assemblyRef);
+                if (referencePath is null)
+                    return null;
+
                 var fileName = Path.GetFileName(referencePath);
                 // right, this is dirty!
                 if (fileName == "MrAdvice.dll" && AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "MrAdvice"))
-                    return null;
-
-                if (referencePath is null)
                     return null;
 
                 return TryLoad(referencePath);
@@ -211,9 +226,9 @@ namespace ArxOne.MrAdvice
         private static string GetReferencePathFromName(AssemblyStitcherContext context, AssemblyRef assemblyRef)
         {
             var referenceDirectory = Path.GetDirectoryName(context.AssemblyPath);
-            var assemblyName = assemblyRef.Name.ToString();
-            return GetExisting(assemblyName + ".dll") ?? GetExisting(assemblyName + ".exe")
-                ?? GetExisting(Path.Combine(referenceDirectory, assemblyName + ".dll")) ?? GetExisting(Path.Combine(referenceDirectory, assemblyName + ".exe"));
+            var assemblyName = new AssemblyName(assemblyRef.Name.ToString());
+            return GetExisting(assemblyName.Name + ".dll") ?? GetExisting(assemblyName.Name + ".exe")
+                ?? GetExisting(Path.Combine(referenceDirectory, assemblyName.Name + ".dll")) ?? GetExisting(Path.Combine(referenceDirectory, assemblyName.Name + ".exe"));
         }
 
         private static string GetExisting(string path)
