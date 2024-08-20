@@ -1,4 +1,8 @@
-﻿## 2.15
+﻿## 2.16
+
+- Fix: multiple load of same assembly was leading to type resolution failure
+
+## 2.15
 
 - New: Upgraded dnlib dependency, now supports all `PDB` formats (thaks to @rgroenewoudt)
 
