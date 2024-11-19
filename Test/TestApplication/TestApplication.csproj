@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{491EF845-625A-4535-932C-BC2B8B15FC94}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
     <AssemblyTitle>TestApplication</AssemblyTitle>
     <Product>TestApplication</Product>
     <Copyright>Copyright ©  2016</Copyright>
