@@ -14,8 +14,7 @@ branches:
   only:
     - fody
     - master
-    - net5
-
+ 
 before_build:
   nuget restore MrAdvice.sln
 
