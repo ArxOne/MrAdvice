@@ -1,6 +1,6 @@
-﻿## 2.18
+﻿## 2.19
 
-- Improvement: using a `ConcurrentDictionary` to speedup aspect information lookup
+- Improvement: using a `ConcurrentDictionary` to speedup aspect information lookup (v2.18 was bogus)
 
 ## 2.17
 
