@@ -237,6 +237,9 @@ namespace ArxOne.MrAdvice
             var delegateMethod = delegatableMethodHandle != innerMethodHandle
                 ? PlatformUtility.CreateDelegate<ProceedDelegate>((MethodInfo)GetMethodFromHandle(delegatableMethodHandle, typeHandle))
                 : null;
+            // advice constructors can’t be advised
+            if (methodBase.IsConstructor && typeof(IAdvice).IsAssignableFrom(methodBase.DeclaringType))
+                return new AspectInfo(Array.Empty<AdviceInfo>(), (MethodInfo)innerMethod, innerMethodHandle, delegateMethod, methodBase, methodHandle);
             return CreateAspectInfo(methodBase, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, delegateMethod, abstractedTarget);
         }
 
