@@ -10,6 +10,7 @@
 namespace ArxOne.MrAdvice
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -31,7 +32,7 @@ namespace ArxOne.MrAdvice
     public static partial class Invocation
     {
         internal static readonly IDictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>> AspectInfos
-            = new Dictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>();
+            = new ConcurrentDictionary<RuntimeMethodHandle, IDictionary<RuntimeTypeHandle, AspectInfo>>();
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
@@ -39,7 +40,7 @@ namespace ArxOne.MrAdvice
 
         /// <summary>
         /// Runs a method interception.
-        /// This version is kept for compatibility, the new method to be colled is <see cref="ProceedAdvice2"/>
+        /// This version is kept for compatibility, the new method to be called is <see cref="ProceedAdvice2"/>
         /// it will be easier from C# code
         /// </summary>
         /// <param name="target">The target.</param>
@@ -224,33 +225,30 @@ namespace ArxOne.MrAdvice
         private static AspectInfo GetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle,
             RuntimeMethodHandle delegatableMethodHandle, RuntimeTypeHandle typeHandle, bool abstractedTarget, Type[] genericArguments)
         {
-            AspectInfo aspectInfo;
-            lock (AspectInfos)
-            {
-                aspectInfo = FindAspectInfo(methodHandle, typeHandle);
-                if (aspectInfo is null)
-                {
-                    var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
-                    var innerMethod = innerMethodHandle != methodHandle
-                        ? GetMethodFromHandle(innerMethodHandle, typeHandle)
-                        : null;
-                    var delegateMethod = delegatableMethodHandle != innerMethodHandle
-                        ? PlatformUtility.CreateDelegate<ProceedDelegate>((MethodInfo)GetMethodFromHandle(delegatableMethodHandle, typeHandle))
-                        : null;
-                    // this is to handle one special case:
-                    // when an assembly advice is applied at assembly level, its ctor is also advised
-                    // and getting its attributes, it creates an infinite loop
-                    // so since an advice won't advise itself anyway
-                    // we create an empty AspectInfo
-                    SetAspectInfo(methodHandle, typeHandle,
-                        new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, delegateMethod, methodBase, methodHandle));
-                    // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
-                    aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, delegateMethod, abstractedTarget);
-                    SetAspectInfo(methodHandle, typeHandle, aspectInfo);
-                }
-            }
-
+            var aspectInfo = FindAspectInfo(methodHandle, typeHandle) ?? LoadAspectInfo(methodHandle, innerMethodHandle, delegatableMethodHandle, typeHandle, abstractedTarget);
             aspectInfo = aspectInfo.ApplyGenericParameters(genericArguments);
+            return aspectInfo;
+        }
+
+        private static AspectInfo LoadAspectInfo(RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle, RuntimeMethodHandle delegatableMethodHandle,
+            RuntimeTypeHandle typeHandle, bool abstractedTarget)
+        {
+            var methodBase = GetMethodFromHandle(methodHandle, typeHandle);
+            var innerMethod = innerMethodHandle != methodHandle
+                ? GetMethodFromHandle(innerMethodHandle, typeHandle)
+                : null;
+            var delegateMethod = delegatableMethodHandle != innerMethodHandle
+                ? PlatformUtility.CreateDelegate<ProceedDelegate>((MethodInfo)GetMethodFromHandle(delegatableMethodHandle, typeHandle))
+                : null;
+            // this is to handle one special case:
+            // when an assembly advice is applied at assembly level, its ctor is also advised
+            // and getting its attributes, it creates an infinite loop
+            // so since an advice won't advise itself anyway
+            // we create an empty AspectInfo
+            SetAspectInfo(methodHandle, typeHandle, new AspectInfo(NoAdvice, (MethodInfo)innerMethod, innerMethodHandle, delegateMethod, methodBase, methodHandle));
+            // the innerMethod is always a MethodInfo, because we created it, so this cast here is totally safe
+            var aspectInfo = CreateAspectInfo(methodBase, methodHandle, (MethodInfo)innerMethod, innerMethodHandle, delegateMethod, abstractedTarget);
+            SetAspectInfo(methodHandle, typeHandle, aspectInfo);
             return aspectInfo;
         }
 
@@ -266,7 +264,7 @@ namespace ArxOne.MrAdvice
         private static void SetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeTypeHandle typeHandle, AspectInfo aspectInfo)
         {
             if (!AspectInfos.TryGetValue(methodHandle, out var methodsByType))
-                AspectInfos[methodHandle] = methodsByType = new Dictionary<RuntimeTypeHandle, AspectInfo>();
+                AspectInfos[methodHandle] = methodsByType = new ConcurrentDictionary<RuntimeTypeHandle, AspectInfo>();
             methodsByType[typeHandle] = aspectInfo;
         }
 
@@ -533,7 +531,7 @@ namespace ArxOne.MrAdvice
         /// <returns>A tuple with the PropertyInfo and true is method is a setter (false for a getter)</returns>
         private static Tuple<PropertyInfo, bool> GetPropertyInfo(MemberInfo memberInfo)
         {
-            if (memberInfo is not MethodInfo {IsSpecialName: true} methodInfo)
+            if (memberInfo is not MethodInfo { IsSpecialName: true } methodInfo)
                 return null;
 
             var isGetter = methodInfo.Name.StartsWith("get_");
@@ -560,7 +558,7 @@ namespace ArxOne.MrAdvice
         /// <returns>A tuple with the PropertyInfo and true is method is a setter (false for a getter)</returns>
         private static Tuple<EventInfo, bool> GetEventInfo(MemberInfo memberInfo)
         {
-            if (memberInfo is not MethodInfo {IsSpecialName: true} methodInfo)
+            if (memberInfo is not MethodInfo { IsSpecialName: true } methodInfo)
                 return null;
 
             var isAdder = methodInfo.Name.StartsWith("add_");

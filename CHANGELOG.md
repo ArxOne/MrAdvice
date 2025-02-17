@@ -1,4 +1,8 @@
-﻿## 2.17
+﻿## 2.18
+
+- Improvement: using a `ConcurrentDictionary` to speedup aspect information lookup
+
+## 2.17
 
 - Improvement: support for dotnet9
 
