@@ -31,7 +31,7 @@ namespace ArxOne.MrAdvice
     // ReSharper disable once UnusedMember.Global
     public static partial class Invocation
     {
-        internal static readonly ConcurrentDictionary<(RuntimeMethodHandle, RuntimeTypeHandle), AspectInfo> AspectInfos = new();
+        internal static readonly ConcurrentDictionary<(RuntimeMethodHandle Method, RuntimeTypeHandle Type), AspectInfo> AspectInfos = new();
 
         private static readonly RuntimeTypeHandle VoidTypeHandle = typeof(void).TypeHandle;
 
@@ -222,7 +222,7 @@ namespace ArxOne.MrAdvice
         private static AspectInfo GetAspectInfo(RuntimeMethodHandle methodHandle, RuntimeMethodHandle innerMethodHandle,
             RuntimeMethodHandle delegatableMethodHandle, RuntimeTypeHandle typeHandle, bool abstractedTarget, Type[] genericArguments)
         {
-            var aspectInfo = AspectInfos.GetOrAdd((methodHandle, typeHandle), t => LoadAspectInfo(t.Item1, innerMethodHandle, delegatableMethodHandle, t.Item2, abstractedTarget));
+            var aspectInfo = AspectInfos.GetOrAdd((methodHandle, typeHandle), t => LoadAspectInfo(t.Method, innerMethodHandle, delegatableMethodHandle, t.Type, abstractedTarget));
             aspectInfo = aspectInfo.ApplyGenericParameters(genericArguments);
             return aspectInfo;
         }
