@@ -36,17 +36,6 @@ namespace ArxOne.MrAdvice.Advice
             _innerMethodDelegate = innerMethodDelegate;
         }
 
-        ///// <summary>
-        ///// Initializes a new instance of the <see cref="InnerMethodContext"/> class.
-        ///// </summary>
-        ///// <param name="target">The target.</param>
-        ///// <param name="targetType">Type of the target.</param>
-        ///// <param name="parameters">The parameters.</param>
-        ///// <param name="innerMethod">The inner method.</param>
-        //protected InnerMethodContext(object target, Type targetType, object[] parameters, MethodInfo innerMethod)
-        //    : this(new AdviceValues(target, targetType, parameters), innerMethod)
-        //{ }
-
         /// <summary>
         /// Invokes the current aspect (related to this instance).
         /// Here, the inner method is called
@@ -60,9 +49,7 @@ namespace ArxOne.MrAdvice.Advice
             if (_innerMethodDelegate is not null)
             {
                 AdviceValues.ReturnValue = _innerMethodDelegate(AdviceValues.Target, AdviceValues.Arguments);
-                if (typeof(Task).GetAssignmentReader().IsAssignableFrom(_innerMethod.ReturnType))
-                    return (Task)AdviceValues.ReturnValue;
-                return Tasks.Void();
+                return IsTask ? (Task)AdviceValues.ReturnValue : Tasks.Void();
             }
 
             // _innerMethod is null for advised interfaces (because there is no implementation)
@@ -73,14 +60,15 @@ namespace ArxOne.MrAdvice.Advice
             try
             {
                 AdviceValues.ReturnValue = _innerMethod.Invoke(AdviceValues.Target, AdviceValues.Arguments);
-                if (typeof(Task).GetAssignmentReader().IsAssignableFrom(_innerMethod.ReturnType))
-                    return (Task)AdviceValues.ReturnValue;
-                return Tasks.Void();
+                return IsTask ? (Task)AdviceValues.ReturnValue : Tasks.Void();
             }
             catch (TargetInvocationException tie)
             {
                 throw tie.InnerException.Rethrow();
             }
         }
+
+        private bool? _isTask;
+        private bool IsTask => _isTask ??= typeof(Task).GetAssignmentReader().IsAssignableFrom(_innerMethod.ReturnType);
     }
 }
