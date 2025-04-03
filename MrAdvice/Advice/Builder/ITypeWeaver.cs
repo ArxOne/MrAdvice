@@ -1,8 +1,8 @@
-﻿using System;
+﻿namespace ArxOne.MrAdvice.Advice.Builder;
+
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-
-namespace ArxOne.MrAdvice.Advice.Builder;
 
 public interface ITypeWeaver
 {

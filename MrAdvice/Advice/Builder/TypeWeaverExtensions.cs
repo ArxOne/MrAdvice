@@ -7,10 +7,10 @@
 
 #endregion
 
+namespace ArxOne.MrAdvice.Advice.Builder;
+
 using System;
 using System.Reflection;
-
-namespace ArxOne.MrAdvice.Advice.Builder;
 
 public static class TypeWeaverExtensions
 {

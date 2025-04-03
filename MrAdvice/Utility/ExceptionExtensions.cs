@@ -7,39 +7,37 @@
 
 #endregion
 
+namespace ArxOne.MrAdvice.Utility;
+
+using System;
 using System.Runtime.ExceptionServices;
+using System.Reflection;
 
-namespace ArxOne.MrAdvice.Utility
+/// <summary>
+/// Extensions to exception
+/// </summary>
+public static class ExceptionExtensions
 {
-    using System;
-    using System.Reflection;
-
     /// <summary>
-    /// Extensions to exception
+    /// Preserves the stack trace.
+    /// I know there is a better solution in .NET 4.5, but this is PCL here
     /// </summary>
-    public static class ExceptionExtensions
+    /// <param name="exception">The exception.</param>
+    /// <returns></returns>
+    public static Exception Rethrow(this Exception exception)
     {
-        /// <summary>
-        /// Preserves the stack trace.
-        /// I know there is a better solution in .NET 4.5, but this is PCL here
-        /// </summary>
-        /// <param name="exception">The exception.</param>
-        /// <returns></returns>
-        public static Exception Rethrow(this Exception exception)
-        {
 #if NETCOREAPP
-            ExceptionDispatchInfo.Capture(exception).Throw();
-            return exception;
+        ExceptionDispatchInfo.Capture(exception).Throw();
+        return exception;
 #else
-            var preserveStackTrace = typeof(Exception).GetMembersReader().GetMethod("PrepForRemoting", BindingFlags.Instance | BindingFlags.NonPublic)
-                                     ?? typeof(Exception).GetMembersReader().GetMethod("InternalPreserveStackTrace", BindingFlags.Instance | BindingFlags.NonPublic);
-            try
-            {
-                preserveStackTrace?.Invoke(exception, Array.Empty<object>());
-            }
-            catch (MemberAccessException) { }
-            throw exception;
-#endif
+        var preserveStackTrace = typeof(Exception).GetMembersReader().GetMethod("PrepForRemoting", BindingFlags.Instance | BindingFlags.NonPublic)
+                                 ?? typeof(Exception).GetMembersReader().GetMethod("InternalPreserveStackTrace", BindingFlags.Instance | BindingFlags.NonPublic);
+        try
+        {
+            preserveStackTrace?.Invoke(exception, Array.Empty<object>());
         }
+        catch (MemberAccessException) { }
+        throw exception;
+#endif
     }
 }

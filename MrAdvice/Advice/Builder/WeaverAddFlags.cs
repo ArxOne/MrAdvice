@@ -7,9 +7,9 @@
 
 #endregion
 
-using System;
-
 namespace ArxOne.MrAdvice.Advice.Builder;
+
+using System;
 
 [Flags]
 public enum WeaverAddFlags

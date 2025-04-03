@@ -7,10 +7,10 @@
 
 #endregion
 
+namespace ArxOne.MrAdvice.Utility;
+
 using System.Reflection;
 using dnlib.DotNet;
-
-namespace ArxOne.MrAdvice.Utility;
 
 public static class CallingConventionExtensions
 {

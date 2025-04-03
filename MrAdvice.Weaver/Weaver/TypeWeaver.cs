@@ -1,4 +1,6 @@
-﻿using System;
+﻿namespace ArxOne.MrAdvice.Weaver;
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +11,6 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using StitcherBoy.Logging;
 using MethodAttributes = System.Reflection.MethodAttributes;
-
-namespace ArxOne.MrAdvice.Weaver;
 
 internal class TypeWeaver : ITypeWeaver
 {

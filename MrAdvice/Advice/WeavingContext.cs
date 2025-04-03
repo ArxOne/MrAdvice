@@ -5,10 +5,10 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+namespace ArxOne.MrAdvice.Advice;
+
 using System.Reflection;
 using ArxOne.MrAdvice.Advice.Builder;
-
-namespace ArxOne.MrAdvice.Advice;
 
 using System;
 
