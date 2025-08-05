@@ -64,7 +64,35 @@ namespace ArxOne.MrAdvice.Weaver
                 instructions.Emit(OpCodes.Ldtoken, TypeImporter.Import(moduleDefinition, infoAdvisedType.ToTypeSig()));
                 // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                 var getTypeFromHandleMethodInfo = ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()));
+#if NETCOREAPP
+                if (String.Equals(getTypeFromHandleMethodInfo.DeclaringType.Assembly.GetName().Name, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase))
+                {
+                    var getTypeFromHandleRef = moduleDefinition.GetMemberRefs().FirstOrDefault(memberRef => memberRef.IsMethodRef
+                                                                                                && String.Equals(memberRef.Class.FullName, "System.Type", StringComparison.Ordinal)
+                                                                                                && String.Equals(memberRef.Name, "GetTypeFromHandle", StringComparison.Ordinal)
+                                                                                                && String.Equals(memberRef.ReturnType.FullName, "System.Type", StringComparison.Ordinal)
+                                                                                                && memberRef.MethodSig.Params.Count == 1
+                                                                                                && String.Equals(memberRef.MethodSig.Params[0].FullName, "System.RuntimeTypeHandle", StringComparison.Ordinal));
+
+                    if (getTypeFromHandleRef == null)
+                    {
+                        var systemTypeRef = moduleDefinition.GetTypeRefs().FirstOrDefault(typeRef => String.Equals(typeRef.Name, "Type", StringComparison.Ordinal) && String.Equals(typeRef.Namespace, "System", StringComparison.Ordinal))
+                                              ?? new TypeRefUser(moduleDefinition, "System", "Type", moduleDefinition.CorLibTypes.AssemblyRef);
+                        var systemRuntimeTypeHandleRef = moduleDefinition.GetTypeRefs().FirstOrDefault(t => String.Equals(t.Name, "RuntimeTypeHandle", StringComparison.Ordinal) && String.Equals(t.Namespace, "System", StringComparison.Ordinal))
+                                                           ?? new TypeRefUser(moduleDefinition, "System", "RuntimeTypeHandle", moduleDefinition.CorLibTypes.AssemblyRef);
+
+                        getTypeFromHandleRef = new MemberRefUser(moduleDefinition, "GetTypeFromHandle", MethodSig.CreateStatic(systemTypeRef.ToTypeSig(), new ValueTypeSig(systemRuntimeTypeHandleRef)), systemTypeRef);
+                    }
+
+                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(getTypeFromHandleRef));
+                }
+                else
+                {
+                    instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(getTypeFromHandleMethodInfo));
+                }
+#else
                 instructions.Emit(OpCodes.Call, moduleDefinition.SafeImport(getTypeFromHandleMethodInfo));
+#endif
             }
             instructions.Emit(OpCodes.Call, proceedMethod);
         }
@@ -689,6 +717,17 @@ namespace ArxOne.MrAdvice.Weaver
             var genericParametersVariable = hasGeneric
                 ? new Local(new SZArraySig(method.Module.SafeImport(typeof(Type)).ToTypeSig())) { Name = "genericParameters" }
                 : null;
+
+#if NETCOREAPP
+            if (String.Equals(UTF8String.ToSystemStringOrEmpty(genericParametersVariable?.Type?.DefinitionAssembly?.Name), "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase))
+            {
+                var systemTypeRef = method.Module.GetTypeRefs().FirstOrDefault(typeRef => String.Equals(typeRef.Name, "Type", StringComparison.Ordinal) && String.Equals(typeRef.Namespace, "System", StringComparison.Ordinal))
+                                      ?? new TypeRefUser(method.Module, "System", "Type", method.Module.CorLibTypes.AssemblyRef);
+
+                genericParametersVariable = new Local(new SZArraySig(systemTypeRef.ToTypeSig())) { Name = "genericParameters" };
+            }
+#endif
+
             return new InvocationArgument("GenericArguments", hasGeneric,
                 delegate (Instructions instructions)
                 {
@@ -697,7 +736,16 @@ namespace ArxOne.MrAdvice.Weaver
                     method.Body.Variables.Add(genericParametersVariable);
 
                     instructions.EmitLdc(typeGenericParametersCount + method.GenericParameters.Count);
-                    instructions.Emit(OpCodes.Newarr, method.Module.SafeImport(typeof(Type)));
+                    var systemTypeRef = method.Module.SafeImport(typeof(Type));
+#if NETCOREAPP
+                    if (String.Equals(UTF8String.ToSystemStringOrEmpty(systemTypeRef.DefinitionAssembly.Name), "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase))
+                    {
+                        systemTypeRef = method.Module.GetTypeRefs().FirstOrDefault(typeRef => String.Equals(typeRef.Name, "Type", StringComparison.Ordinal) && String.Equals(typeRef.Namespace, "System", StringComparison.Ordinal))
+                                          ?? new TypeRefUser(method.Module, "System", "Type", method.Module.CorLibTypes.AssemblyRef);
+                    }
+#endif
+
+                    instructions.Emit(OpCodes.Newarr, systemTypeRef);
                     instructions.EmitStloc(genericParametersVariable);
 
                     var methodGenericParametersCount = method.GenericParameters.Count;
@@ -714,7 +762,35 @@ namespace ArxOne.MrAdvice.Weaver
                             instructions.Emit(OpCodes.Ldtoken, new GenericMVar(genericParameterIndex - typeGenericParametersCount, method));
                         //genericParameters[genericParameterIndex]);
                         // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                        instructions.Emit(OpCodes.Call, ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle())));
+                        var methodInfo = ReflectionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(new RuntimeTypeHandle()));
+#if NETCOREAPP
+                        if (String.Equals(methodInfo.DeclaringType.Assembly.GetName().Name, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var getTypeFromHandleRef = method.Module.GetMemberRefs().FirstOrDefault(memberRef => memberRef.IsMethodRef
+                                                                                                      && String.Equals(memberRef.Class.FullName, "System.Type", StringComparison.Ordinal)
+                                                                                                      && String.Equals(memberRef.Name, "GetTypeFromHandle", StringComparison.Ordinal)
+                                                                                                      && String.Equals(memberRef.ReturnType.FullName, "System.Type", StringComparison.Ordinal)
+                                                                                                      && memberRef.MethodSig.Params.Count == 1
+                                                                                                      && String.Equals(memberRef.MethodSig.Params[0].FullName, "System.RuntimeTypeHandle", StringComparison.Ordinal));
+
+                            if (getTypeFromHandleRef == null)
+                            {
+                                var systemRuntimeTypeHandleRef = method.Module.GetTypeRefs().FirstOrDefault(t => String.Equals(t.Name, "RuntimeTypeHandle", StringComparison.Ordinal) && String.Equals(t.Namespace, "System", StringComparison.Ordinal))
+                                                                   ?? new TypeRefUser(method.Module, "System", "RuntimeTypeHandle", method.Module.CorLibTypes.AssemblyRef);
+
+                                getTypeFromHandleRef = new MemberRefUser(method.Module, "GetTypeFromHandle", MethodSig.CreateStatic(systemTypeRef.ToTypeSig(), new ValueTypeSig(systemRuntimeTypeHandleRef)), systemTypeRef);
+                            }
+
+                            instructions.Emit(OpCodes.Call, (IMethodDefOrRef)getTypeFromHandleRef);
+                        }
+                        else
+                        {
+                            instructions.Emit(OpCodes.Call, methodInfo);
+                        }
+#else
+                        instructions.Emit(OpCodes.Call, methodInfo);
+#endif
+
                         instructions.Emit(OpCodes.Stelem_Ref);
                     }
                     instructions.EmitLdloc(genericParametersVariable);
