@@ -18,6 +18,9 @@
 		<releaseNotes></releaseNotes>
 		<tags>weaver aspect advice pointcut aop .net attributes injection netstandard windows postsharp</tags>
 		<developmentDependency>false</developmentDependency>
+		<dependencies>
+			<dependency id="StitcherBoy" version="2.1.0" />
+		</dependencies>
 	</metadata>
 	<files>
 		<file src="MrAdvice.targets" target="build" />
