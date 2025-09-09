@@ -6,6 +6,7 @@
     <Product>ExternalAdvices</Product>
     <Copyright>Copyright ©  2015</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Platforms>AnyCPU;x86;x64</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>

@@ -13,6 +13,7 @@
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
     <DocumentationFile>VBMethodLevelTest.xml</DocumentationFile>
     <PostBuildEvent>"$(SolutionDir)\MrAdvice.Weaver\peverify.bat" "$(TargetPath)"</PostBuildEvent>
+    <Platforms>AnyCPU;x86;x64</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <OptionExplicit>On</OptionExplicit>

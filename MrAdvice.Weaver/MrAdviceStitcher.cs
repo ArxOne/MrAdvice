@@ -55,7 +55,14 @@ namespace ArxOne.MrAdvice
                 // please also note poor man's dependency injection (which is enough for us here)
                 var assemblyResolver = context.AssemblyResolver;
                 var typeResolver = new TypeResolver(context.Module, context.Dependencies) { Logging = _logging, AssemblyResolver = assemblyResolver };
-                var bytes = File.ReadAllBytes(context.Module.Assembly.ManifestModule.Location);
+                string location = context.Module.Assembly.ManifestModule.Location;
+                if (location.Contains(".dll."))
+                    location = location.Substring(0,
+                        context.Module.Assembly.ManifestModule.Location.LastIndexOf(".dll", StringComparison.Ordinal) + 4);
+                if (location.Contains(".exe."))
+                    location = location.Substring(0,
+                        context.Module.Assembly.ManifestModule.Location.LastIndexOf(".exe", StringComparison.Ordinal) + 4);
+                var bytes = File.ReadAllBytes(location);
                 var typeAssembly = Assembly.Load(bytes);
                 var typeLoader = new TypeLoader(a => TryResolve(a, context, assemblyResolver), typeAssembly);
                 var aspectWeaver = new AspectWeaver { Logging = _logging, TypeResolver = typeResolver, TypeLoader = typeLoader };
