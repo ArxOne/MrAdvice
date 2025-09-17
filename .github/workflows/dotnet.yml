@@ -20,9 +20,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-    - name: Restore dependencies
-      run: dotnet restore
     - name: Build-Win-x64
-      run: dotnet build MrAdvice.Weaver\\MrAdvice.Weaver.csproj --no-restore -r win-x64 -v diagnostic
+      run: dotnet build MrAdvice.Weaver\\MrAdvice.Weaver.csproj -r win-x64 -v diagnostic
     - name: Build-Win-x86
-      run: dotnet build MrAdvice.Weaver\\MrAdvice.Weaver.csproj --no-restore -r win-x86 -v diagnostic
+      run: dotnet build MrAdvice.Weaver\\MrAdvice.Weaver.csproj -r win-x86 -v diagnostic
