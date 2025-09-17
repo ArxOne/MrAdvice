@@ -21,8 +21,6 @@ jobs:
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ matrix.dotnet-version }}
     - name: Build-win-x64
       run: dotnet build MrAdvice.Weaver\\MrAdvice.Weaver.csproj -r win-x64 -v diagnostic
     - name: Build-win-x86
