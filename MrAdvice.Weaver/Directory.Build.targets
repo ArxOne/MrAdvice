@@ -1,7 +1,6 @@
 <Project>
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
   <Target Name="WSBuild" BeforeTargets="BeforeBuild" Condition="'$(Platform)' != 'x86'">
-	  <Message Text="ASDASD $(TargetFramework)" />
 	  <Exec Command="dotnet build --runtime win-x86 -p:Platform=x86 -p:AppendRuntimeIdentifierToOutputPath=false --framework $(TargetFramework)" />
   </Target>
 </Project>
