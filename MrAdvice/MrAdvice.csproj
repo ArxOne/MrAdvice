@@ -16,5 +16,6 @@
     <DebugSymbols>true</DebugSymbols>
     <FileVersion></FileVersion>
     <AssemblyVersion>2.0</AssemblyVersion>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 </Project>

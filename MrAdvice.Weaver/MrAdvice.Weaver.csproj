@@ -12,7 +12,8 @@
     <Authors>Arx One</Authors>
     <PackageProjectUrl>https://github.com/ArxOne/MrAdvice</PackageProjectUrl>
     <DebugType>full</DebugType>
-    <OutputPath>..\tools</OutputPath>
+    <OutputPath>..\tools\$(platform)</OutputPath>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <IsTool>true</IsTool>
