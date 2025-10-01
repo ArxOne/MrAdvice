@@ -1,4 +1,4 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
+<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
   <PropertyGroup>
     <ProjectGuid>{77928F8C-A708-4C49-B6E2-772256E75E4D}</ProjectGuid>
     <TargetFrameworks>net461;net6.0;net8.0;net9.0</TargetFrameworks>
