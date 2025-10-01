@@ -13,17 +13,20 @@
 			<WeavingTargetPlatform Condition="'$(WeavingTargetPlatform)' == ''">AnyCPU</WeavingTargetPlatform>
 
 			<TargetFrameworkVersionNumber>$([System.Text.RegularExpressions.Regex]::Replace($(TargetFrameworkVersion), '[^\d\.]+', '', System.Text.RegularExpressions.RegexOptions.IgnoreCase))</TargetFrameworkVersionNumber>
-			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\$(platform)\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
-			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\$(platform)\net6.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(WeavingTargetPlatform)' != 'x86'">"$(MSBuildThisFileDirectory)..\tools\AnyCPU\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' And '$(WeavingTargetPlatform)' != 'x86'">"$(MSBuildThisFileDirectory)..\tools\AnyCPU\net6.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
 
-			<MrAdviceWeaverPath Condition="'$(OS)' != 'Windows_NT' And '$(TargetFrameworkVersionNumber)' &gt;= '8.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\$(platform)\net8.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
-			<MrAdviceWeaverPath Condition="'$(OS)' != 'Windows_NT' And '$(TargetFrameworkVersionNumber)' &gt;= '9.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\$(platform)\net9.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' And '$(WeavingTargetPlatform)' == 'x86'">"$(MSBuildThisFileDirectory)..\tools\x86\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' And '$(WeavingTargetPlatform)' == 'x86'">"$(MSBuildThisFileDirectory)..\tools\x86\net6.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+
+			<MrAdviceWeaverPath Condition="'$(OS)' != 'Windows_NT' And '$(TargetFrameworkVersionNumber)' &gt;= '8.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\AnyCPU\net8.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(OS)' != 'Windows_NT' And '$(TargetFrameworkVersionNumber)' &gt;= '9.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\AnyCPU\net9.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
 			
-			<MrAdviceWeaverPath Condition="'$(OS)' == 'Windows_NT' And '$(WeavingTargetPlatform)' != 'x86' And '$(TargetFrameworkVersionNumber)' &gt;= '8.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\$(platform)\net8.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
-			<MrAdviceWeaverPath Condition="'$(OS)' == 'Windows_NT' And '$(WeavingTargetPlatform)' != 'x86' And '$(TargetFrameworkVersionNumber)' &gt;= '9.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\$(platform)\net9.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(OS)' == 'Windows_NT' And '$(WeavingTargetPlatform)' != 'x86' And '$(TargetFrameworkVersionNumber)' &gt;= '8.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\AnyCPU\net8.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(OS)' == 'Windows_NT' And '$(WeavingTargetPlatform)' != 'x86' And '$(TargetFrameworkVersionNumber)' &gt;= '9.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\AnyCPU\net9.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
 			
-			<MrAdviceWeaverPath Condition="'$(OS)' == 'Windows_NT' And '$(WeavingTargetPlatform)' == 'x86' And '$(TargetFrameworkVersionNumber)' &gt;= '8.0'">"$(MSBuildThisFileDirectory)..\tools\$(platform)\net8.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
-			<MrAdviceWeaverPath Condition="'$(OS)' == 'Windows_NT' And '$(WeavingTargetPlatform)' == 'x86' And '$(TargetFrameworkVersionNumber)' &gt;= '9.0'">"$(MSBuildThisFileDirectory)..\tools\$(platform)\net9.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(OS)' == 'Windows_NT' And '$(WeavingTargetPlatform)' == 'x86' And '$(TargetFrameworkVersionNumber)' &gt;= '8.0'">"$(MSBuildThisFileDirectory)..\tools\x86\net8.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(OS)' == 'Windows_NT' And '$(WeavingTargetPlatform)' == 'x86' And '$(TargetFrameworkVersionNumber)' &gt;= '9.0'">"$(MSBuildThisFileDirectory)..\tools\x86\net9.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
 
 			<MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath.txt</MrAdviceWeaverReferencePathFile>
 			<MrAdviceWeaverLocalReferencePathFile>@(IntermediateAssembly).MrAdvice.LocalReferencePath.txt</MrAdviceWeaverLocalReferencePathFile>
