@@ -1,7 +1,7 @@
 # Mr. Advice appveyor.yml script
 
 version: '{branch}-{build}'
-image: Visual Studio 2022
+image: Visual Studio 2026
 
 branches:
   only:
@@ -9,13 +9,13 @@ branches:
     - master
  
 before_build:
-  nuget restore MrAdvice.sln
+  nuget restore MrAdvice.slnx
 
 configuration: Release
 
 build:
   parallel: true
-  project: MrAdvice.sln
+  project: MrAdvice.slnx
   publish_nuget: false
   publish_nuget_symbols: false
   verbosity: minimal
