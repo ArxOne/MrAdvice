@@ -17,13 +17,17 @@ namespace MethodLevelTest
     {
         [TestMethod]
         [EmptyAsyncAdvice]
-        [ExpectedException(typeof(ApplicationException))]
-        public void AsyncAdviceTest() => throw new ApplicationException("Something Happened!");
+        public void AsyncAdviceTest()
+        {
+            Assert.Throws<ApplicationException>(() => { throw new ApplicationException("Something Happened!"); });
+        }
 
         [TestMethod]
         [EmptyReallyAsyncAdvice]
-        [ExpectedException(typeof(ApplicationException))]
-        public void ReallyAsyncAdviceTest() => throw new ApplicationException("Something Happened!");
+        public void ReallyAsyncAdviceTest()
+        {
+            Assert.Throws<ApplicationException>(() => { throw new ApplicationException("Something Happened!"); });
+        }
     }
 
     public class EmptyAsyncAdviceAttribute : Attribute, IMethodAsyncAdvice

@@ -223,66 +223,74 @@ namespace MethodLevelTest
 
         [TestMethod]
         [TestCategory("Async")]
-        [ExpectedException(typeof(CustomException))]
         public void ImmediateExceptionTest()
         {
-            try
+            Assert.Throws<CustomException>(() =>
             {
-                var t = Task.Run(() => ThrowException(true));
-                t.Wait();
-            }
-            catch (AggregateException e) when (e.InnerException is CustomException)
-            {
-                throw e.InnerException;
-            }
+                try
+                {
+                    var t = Task.Run(() => ThrowException(true));
+                    t.Wait();
+                }
+                catch (AggregateException e) when (e.InnerException is CustomException)
+                {
+                    throw e.InnerException;
+                }
+            });
         }
 
         [TestMethod]
         [TestCategory("Async")]
-        [ExpectedException(typeof(CustomException))]
         public void DelayedExceptionTest()
         {
-            try
+            Assert.Throws<CustomException>(() =>
             {
-                var t = Task.Run(() => ThrowException(false));
-                t.Wait();
-            }
-            catch (AggregateException e) when (e.InnerException is CustomException)
-            {
-                throw e.InnerException;
-            }
+                try
+                {
+                    var t = Task.Run(() => ThrowException(false));
+                    t.Wait();
+                }
+                catch (AggregateException e) when (e.InnerException is CustomException)
+                {
+                    throw e.InnerException;
+                }
+            });
         }
 
         [TestMethod]
         [TestCategory("Async")]
-        [ExpectedException(typeof(CustomException2))]
         public void DelayedTranslatedExceptionTest()
         {
-            try
+            Assert.Throws<CustomException>(() =>
             {
-                var t = Task.Run(() => ThrowTranslatedException(false));
-                t.Wait();
-            }
-            catch (AggregateException e) when (e.InnerException is CustomException2)
-            {
-                throw e.InnerException;
-            }
+                try
+                {
+                    var t = Task.Run(() => ThrowTranslatedException(false));
+                    t.Wait();
+                }
+                catch (AggregateException e) when (e.InnerException is CustomException2)
+                {
+                    throw e.InnerException;
+                }
+            });
         }
 
         [TestMethod]
         [TestCategory("Async")]
-        [ExpectedException(typeof(CustomException))]
         public void NotAdvisedExceptionTest()
         {
-            try
+            Assert.Throws<CustomException>(() =>
             {
-                var t = Task.Run(() => RawThrowException(false));
-                t.Wait();
-            }
-            catch (AggregateException e) when (e.InnerException is CustomException)
-            {
-                throw e.InnerException;
-            }
+                try
+                {
+                    var t = Task.Run(() => RawThrowException(false));
+                    t.Wait();
+                }
+                catch (AggregateException e) when (e.InnerException is CustomException)
+                {
+                    throw e.InnerException;
+                }
+            });
         }
 
         [AsyncPlusOne]
@@ -403,11 +411,13 @@ namespace MethodLevelTest
 
         [TestMethod]
         [TestCategory("Async")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public async Task AsyncRunTest()
         {
-            var c = new Class();
-            await c.Method2(null);
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+                        {
+                            var c = new Class();
+                            await c.Method2(null);
+                        });
         }
     }
 }

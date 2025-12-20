@@ -226,18 +226,20 @@ namespace MethodLevelTest
 
         [TestMethod]
         [TestCategory("Exception")]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ExceptionTest()
         {
-            try
+            Assert.Throws<InvalidOperationException>(() =>
             {
-                var c = new AdvisedClass();
-                c.ThrowInvalidOperationException();
-            }
-            catch
-            {
-                throw;
-            }
+                try
+                {
+                    var c = new AdvisedClass();
+                    c.ThrowInvalidOperationException();
+                }
+                catch
+                {
+                    throw;
+                }
+            });
         }
 
         [TestMethod]
