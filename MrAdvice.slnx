@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/Resources/">
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="appveyor.yml" />
+    <File Path="CHANGELOG.md" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Resources/Icon/">
+    <File Path="Icon/MrAdvice.ai" />
+    <File Path="Icon/MrAdvice.png" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Test/AssemblyLevelTest/AssemblyLevelTest.csproj">
+      <BuildDependency Project="MrAdvice.Weaver/MrAdvice.Weaver.csproj" />
+    </Project>
+    <Project Path="Test/DotNetCoreTest/DotNetCoreTest.csproj" />
+    <Project Path="Test/ExternalAdvices/ExternalAdvices.csproj" />
+    <Project Path="Test/ExternalAdviceTest/ExternalAdviceTest.csproj" />
+    <Project Path="Test/IntegrityTest/IntegrityTest.csproj" />
+    <Project Path="Test/MethodLevelTest/MethodLevelTest.csproj" />
+    <Project Path="Test/TestApplication/TestApplication.csproj" />
+    <Project Path="Test/VBMethodLevelTest/VBMethodLevelTest.vbproj" />
+    <Project Path="Test/WpfTest/WpfTest.csproj" />
+  </Folder>
+  <Project Path="MrAdvice.Weaver/MrAdvice.Weaver.csproj" />
+  <Project Path="MrAdvice/MrAdvice.csproj" />
+</Solution>
