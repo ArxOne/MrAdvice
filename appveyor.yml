@@ -9,13 +9,13 @@ branches:
     - master
  
 before_build:
-  nuget restore MrAdvice.slnx
+  nuget restore MrAdvice.sln
 
 configuration: Release
 
 build:
   parallel: true
-  project: MrAdvice.slnx
+  project: MrAdvice.sln
   publish_nuget: false
   publish_nuget_symbols: false
   verbosity: minimal
