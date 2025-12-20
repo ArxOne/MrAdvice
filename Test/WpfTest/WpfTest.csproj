@@ -1,28 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-  <PropertyGroup>
-    <ProjectGuid>{6EC087B5-B17C-45A7-BF50-3F936B210A41}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net10.0-windows7.0</TargetFrameworks>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <AssemblyTitle>WpfTest</AssemblyTitle>
-    <Product>WpfTest</Product>
-    <Copyright>Copyright ©  2016</Copyright>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
-  <Import Project="..\..\MrAdvice.Weaver\MrAdvice.targets" />
-  <ItemGroup>
-	  <PackageReference Include="NUnit" Version="4.3.2" />
-	  <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
-	  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\MrAdvice.Weaver\MrAdvice.Weaver.csproj" />
-    <ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFrameworks>net10.0-windows7.0</TargetFrameworks>
+		<ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+		<AssemblyTitle>WpfTest</AssemblyTitle>
+		<Product>WpfTest</Product>
+		<Copyright>Copyright ©  2016</Copyright>
+		<UseWPF>true</UseWPF>
+		<StartupObject>WpfTest.App</StartupObject>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugType>full</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DebugType>pdbonly</DebugType>
+	</PropertyGroup>
+	<Import Project="..\..\MrAdvice.Weaver\MrAdvice.targets" />
+	<ItemGroup>
+		<ProjectReference Include="..\..\MrAdvice.Weaver\MrAdvice.Weaver.csproj" />
+		<ProjectReference Include="..\..\MrAdvice\MrAdvice.csproj" />
+	</ItemGroup>
 </Project>
