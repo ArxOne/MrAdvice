@@ -9,6 +9,7 @@
 			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net6.0\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
 			<MrAdviceWeaverPath Condition="'$(TargetFrameworkVersionNumber)' &gt;= '8.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\net8.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
 			<MrAdviceWeaverPath Condition="'$(TargetFrameworkVersionNumber)' &gt;= '9.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\net9.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkVersionNumber)' &gt;= '10.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\net10.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
 			<MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath.txt</MrAdviceWeaverReferencePathFile>
 			<MrAdviceWeaverLocalReferencePathFile>@(IntermediateAssembly).MrAdvice.LocalReferencePath.txt</MrAdviceWeaverLocalReferencePathFile>
 		</PropertyGroup>
