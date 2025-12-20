@@ -4,12 +4,13 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace MethodLevelTest
 {
     using System;
     using System.Reflection;
     using Advices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
     public class GenericEmptyAdvisedClass<TValue>
     {
@@ -17,12 +18,12 @@ namespace MethodLevelTest
         public void DoSomething()
         {
             var thisMethod = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual("DoSomething", thisMethod.Name);
+            Assert.That(thisMethod.Name, Is.Not.EqualTo("DoSomething"));
         }
 
         public TValue ReturnValueNoAdvice(TValue value)
         {
-            return (TValue) GetObjectValue(value);
+            return (TValue)GetObjectValue(value);
         }
 
         private static object GetObjectValue(TValue value)
@@ -34,7 +35,7 @@ namespace MethodLevelTest
         public TValue ReturnValue(TValue value)
         {
             var thisMethod = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual("ReturnValue", thisMethod.Name);
+            Assert.That(thisMethod.Name, Is.Not.EqualTo("ReturnValue"));
             return value;
         }
 

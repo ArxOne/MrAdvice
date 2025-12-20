@@ -4,13 +4,14 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace MethodLevelTest
 {
     using System;
     using System.Collections.Generic;
     using System.Reflection;
     using Advices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
     public class EmptyAdvisedClass
     {
@@ -18,37 +19,37 @@ namespace MethodLevelTest
         public void MethodTest()
         {
             var thisMethod = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual("MethodTest", thisMethod.Name);
+            Assert.That(thisMethod.Name, Is.Not.EqualTo("MethodTest"));
         }
 
         [EmptyMethodAdvice2]
         public void IndirectMethodTest()
         {
             var thisMethod = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual("IndirectMethodTest", thisMethod.Name);
+            Assert.That(thisMethod.Name, Is.Not.EqualTo("IndirectMethodTest"));
         }
 
         [EmptyMethodAdvice]
         public static void StaticMethodTest()
         {
             var thisMethod = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual("StaticMethodTest", thisMethod.Name);
+            Assert.That(thisMethod.Name, Is.Not.EqualTo("StaticMethodTest"));
         }
 
         [EmptyMethodAdvice]
         public void MethodWithParameterTest(int two)
         {
             var thisMethod = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual("MethodWithParameterTest", thisMethod.Name);
-            Assert.AreEqual(2, two);
+            Assert.That(thisMethod.Name, Is.Not.EqualTo("MethodWithParameterTest"));
+            Assert.That(two, Is.EqualTo(2));
         }
 
         [EmptyMethodAdvice]
         public static void StaticMethodWithParameterTest(int three)
         {
             var thisMethod = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual("StaticMethodWithParameterTest", thisMethod.Name);
-            Assert.AreEqual(3, three);
+            Assert.That(thisMethod.Name, Is.Not.EqualTo("StaticMethodWithParameterTest"));
+            Assert.That(three, Is.EqualTo(3));
         }
 
         [EmptyMethodAdvice]
@@ -71,13 +72,13 @@ namespace MethodLevelTest
             get
             {
                 var thisMethod = MethodBase.GetCurrentMethod();
-                Assert.AreNotEqual("get_Property", thisMethod.Name);
+                Assert.That(thisMethod.Name, Is.Not.EqualTo("get_Property"));
                 return _property;
             }
             set
             {
                 var thisMethod = MethodBase.GetCurrentMethod();
-                Assert.AreNotEqual("set_Property", thisMethod.Name);
+                Assert.That(thisMethod.Name, Is.Not.EqualTo("set_Property"));
                 _property = value;
             }
         }
@@ -88,13 +89,13 @@ namespace MethodLevelTest
             get
             {
                 var thisMethod = MethodBase.GetCurrentMethod();
-                Assert.AreNotEqual("get_Property2", thisMethod.Name);
+                Assert.That(thisMethod.Name, Is.Not.EqualTo("get_Property2"));
                 return _property;
             }
             set
             {
                 var thisMethod = MethodBase.GetCurrentMethod();
-                Assert.AreNotEqual("set_Property2", thisMethod.Name);
+                Assert.That(thisMethod.Name, Is.Not.EqualTo("set_Property2"));
                 _property = value;
             }
         }
@@ -149,15 +150,15 @@ namespace MethodLevelTest
         public void ParameterAdvisedMethod([EmptyParameterAdvice] int a)
         { }
 
-        public string ReturnAdvisedProperty { [return: EmptyParameterAdvice]get; set; }
+        public string ReturnAdvisedProperty { [return: EmptyParameterAdvice] get; set; }
 
-        public string this[[EmptyParameterAdvice]string index]
+        public string this[[EmptyParameterAdvice] string index]
         { get { return null; } set { } }
 
         [EmptyMethodAdvice]
         public void MethodWithGenericParameterTest<TValue>(TValue six)
         {
-            Assert.AreEqual(6, Int32.Parse(six.ToString()));
+            Assert.That(Int32.Parse(six.ToString()), Is.EqualTo(6));
         }
 
         [ChangeParameter(NewParameter = 2)]

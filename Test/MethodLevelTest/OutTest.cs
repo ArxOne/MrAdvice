@@ -10,9 +10,10 @@
 namespace MethodLevelTest
 {
     using System;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Out Parameters")]
     public class OutTest
     {
         [AdvicesTest.EmptyAdvice]
@@ -25,18 +26,18 @@ namespace MethodLevelTest
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TrySomeInt()
         {
             A.TrySomething(out int a);
-            Assert.AreEqual(0, a);
+            Assert.That(a, Is.EqualTo(0));
         }
 
-        [TestMethod]
+        [Test]
         public void TrySomeDateTime()
         {
             A.TrySomething(out DateTime a);
-            Assert.AreEqual(DateTime.MinValue, a);
+            Assert.That(a, Is.EqualTo(DateTime.MinValue));
         }
     }
 }

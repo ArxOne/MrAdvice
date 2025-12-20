@@ -5,6 +5,8 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using NUnit.Framework;
+
 namespace MethodLevelTest
 {
     using System;
@@ -13,7 +15,6 @@ namespace MethodLevelTest
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using ArxOne.MrAdvice.Advice;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     public class CustomException : Exception
     {
@@ -29,7 +30,7 @@ namespace MethodLevelTest
         {
             var target = (AsyncTest)context.Target;
             context.Proceed();
-            Assert.AreEqual(AsyncTest.FinalStep, target.AwaitStep);
+            Assert.That(target.AwaitStep, Is.EqualTo(AsyncTest.FinalStep));
         }
     }
 
@@ -47,7 +48,7 @@ namespace MethodLevelTest
         {
             var target = (AsyncTest)context.Target;
             await context.ProceedAsync();
-            Assert.AreEqual(AsyncTest.FinalStep, target.AwaitStep);
+            Assert.That(target.AwaitStep, Is.EqualTo(AsyncTest.FinalStep));
         }
     }
 
@@ -89,7 +90,8 @@ namespace MethodLevelTest
         }
     }
 
-    [TestClass]
+    [TestFixture]
+    [Category("Async")]
     public class AsyncTest
     {
         public int AwaitStep { get; set; }
@@ -188,41 +190,36 @@ namespace MethodLevelTest
             Task.Run(AwaitSteps).Wait();
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void VoidAsyncTest()
         {
             Task.Run(AwaitSteps2).Wait();
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void IntSyncTest()
         {
             var t = Task.Run(() => SumTo(3));
             t.Wait();
-            Assert.AreEqual(1 + 2 + 3, t.Result);
+            Assert.That(t.Result, Is.EqualTo(1 + 2 + 3));
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void IntAsyncTest()
         {
             var t = Task.Run(() => SumTo2(4));
             t.Wait();
-            Assert.AreEqual(1 + 2 + 3 + 4, t.Result);
+            Assert.That(t.Result, Is.EqualTo(1 + 2 + 3 + 4));
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void AsyncOnSyncTest()
         {
             var t = RegularSumTo(5);
-            Assert.AreEqual(1 + 2 + 3 + 4 + 5, t);
+            Assert.That(t, Is.EqualTo(1 + 2 + 3 + 4 + 5));
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void ImmediateExceptionTest()
         {
             Assert.Throws<CustomException>(() =>
@@ -239,8 +236,7 @@ namespace MethodLevelTest
             });
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void DelayedExceptionTest()
         {
             Assert.Throws<CustomException>(() =>
@@ -257,11 +253,10 @@ namespace MethodLevelTest
             });
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void DelayedTranslatedExceptionTest()
         {
-            Assert.Throws<CustomException>(() =>
+            Assert.Throws<CustomException2>(() =>
             {
                 try
                 {
@@ -275,8 +270,7 @@ namespace MethodLevelTest
             });
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void NotAdvisedExceptionTest()
         {
             Assert.Throws<CustomException>(() =>
@@ -300,14 +294,13 @@ namespace MethodLevelTest
             return 100;
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void PlusOneTest()
         {
             var t = Task.Run(Get100);
             t.Wait();
             var r = t.Result;
-            Assert.AreEqual(101, r);
+            Assert.That(r, Is.EqualTo(101));
         }
 
         public class AsyncPlusOne2 : Attribute, IMethodAsyncAdvice
@@ -337,12 +330,11 @@ namespace MethodLevelTest
             return 1000;
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public void AsyncOnSync2Test()
         {
             var r = Get1000();
-            Assert.AreEqual(1001, r);
+            Assert.That(r, Is.EqualTo(1001));
         }
 
         [AsyncAdvice]
@@ -409,15 +401,14 @@ namespace MethodLevelTest
             }
         }
 
-        [TestMethod]
-        [TestCategory("Async")]
+        [Test]
         public async Task AsyncRunTest()
         {
-            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-                        {
-                            var c = new Class();
-                            await c.Method2(null);
-                        });
+            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                var c = new Class();
+                await c.Method2(null);
+            });
         }
     }
 }

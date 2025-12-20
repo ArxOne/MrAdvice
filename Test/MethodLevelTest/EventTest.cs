@@ -11,7 +11,7 @@ namespace MethodLevelTest
 {
     using System;
     using ArxOne.MrAdvice.Advice;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
     public class EventBlockerAdvice : Attribute, IMethodAdvice
     {
@@ -20,7 +20,7 @@ namespace MethodLevelTest
             //context.Proceed();
         }
     }
-    
+
     public class EventClass
     {
         [EventBlockerAdvice]
@@ -32,10 +32,11 @@ namespace MethodLevelTest
         }
     }
 
-    [TestClass]
+    [TestFixture]
+    [Category("Events")] // Attribut remonté au niveau de la classe
     public class EventTest
     {
-        [TestMethod]
+        [Test]
         public void AdviseEventTest()
         {
             bool wasInvoked = false;
@@ -43,7 +44,7 @@ namespace MethodLevelTest
             ec.SimpleEvent += delegate { wasInvoked = true; };
 
             ec.OnSimpleEvent();
-            Assert.IsFalse(wasInvoked);
+            Assert.That(wasInvoked, Is.False);
         }
     }
 }

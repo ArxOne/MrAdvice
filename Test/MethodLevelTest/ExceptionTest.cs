@@ -10,23 +10,26 @@ namespace MethodLevelTest
     using System;
     using System.Threading.Tasks;
     using ArxOne.MrAdvice.Advice;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Exceptions")]
     public class ExceptionTest
     {
-        [TestMethod]
+        [Test]
         [EmptyAsyncAdvice]
         public void AsyncAdviceTest()
         {
-            Assert.Throws<ApplicationException>(() => { throw new ApplicationException("Something Happened!"); });
+            Assert.That(() => { throw new ApplicationException("Something Happened!"); },
+                Throws.TypeOf<ApplicationException>());
         }
 
-        [TestMethod]
+        [Test]
         [EmptyReallyAsyncAdvice]
         public void ReallyAsyncAdviceTest()
         {
-            Assert.Throws<ApplicationException>(() => { throw new ApplicationException("Something Happened!"); });
+            Assert.That(() => { throw new ApplicationException("Something Happened!"); },
+                Throws.TypeOf<ApplicationException>());
         }
     }
 

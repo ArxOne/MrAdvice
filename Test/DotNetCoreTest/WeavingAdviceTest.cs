@@ -1,10 +1,10 @@
 ﻿using System;
 using ArxOne.MrAdvice.Advice;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace DotNetCoreTest
 {
-    [TestClass]
+    [TestFixture]
     public class WeavingAdviceTest
     {
         public class Disposer : Attribute, ITypeWeavingAdvice
@@ -35,12 +35,12 @@ namespace DotNetCoreTest
             public int Disposed;
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideDisposeTest()
         {
             var ad = new AutoDispose();
             using (ad) { }
-            Assert.AreEqual(1, ad.Disposed);
+            Assert.That(ad.Disposed, Is.EqualTo(1));
         }
     }
 }

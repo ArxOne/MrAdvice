@@ -11,9 +11,10 @@ namespace MethodLevelTest
     using System.Reflection;
     using ArxOne.MrAdvice.Advice;
     using ArxOne.MrAdvice.Annotation;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Pointcut selection")]
     public class PointcutRulesTest
     {
         [IncludePointcut("*.Set@")]
@@ -69,39 +70,37 @@ namespace MethodLevelTest
             private void Internal() { }
         }
 
-        [TestMethod]
-        [TestCategory("Pointcut selection")]
+        [Test]
         public void SetterRulesTest()
         {
             var t = typeof(SetterAdvisedType);
-            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(t.GetConstructor(new Type[0])));
-            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.ZetA))));
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.SetA))));
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.SetB))));
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetConstructor(new Type[0])), Is.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.ZetA))), Is.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.SetA))), Is.Not.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(SetterAdvisedType.SetB))), Is.Not.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Pointcut selection")]
+        [Test]
         public void ExcludeAdviceTest()
         {
             var t = typeof(AnyAdvisedType);
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetConstructor(new Type[0])));
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.F))));
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.G))));
-            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.H))));
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetConstructor(new Type[0])), Is.Not.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.F))), Is.Not.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.G))), Is.Not.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(AnyAdvisedType.H))), Is.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Pointcut selection")]
+        [Test]
         public void PublicAdviceTest()
         {
             var t = typeof(PublicAdvisedType);
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetConstructor(new Type[0])));
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(PublicAdvisedType.Public))));
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetConstructor(new Type[0])), Is.Not.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod(nameof(PublicAdvisedType.Public))), Is.Not.Null);
+
             var bindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
-            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod("Protected", bindingFlags)));
-            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod("Private", bindingFlags)));
-            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(t.GetMethod("Internal", bindingFlags)));
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod("Protected", bindingFlags)), Is.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod("Private", bindingFlags)), Is.Null);
+            Assert.That(ArxOne.MrAdvice.Advices.Get(t.GetMethod("Internal", bindingFlags)), Is.Null);
         }
     }
 }

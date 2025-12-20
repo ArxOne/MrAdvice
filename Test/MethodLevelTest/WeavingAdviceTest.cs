@@ -13,9 +13,10 @@ namespace MethodLevelTest
     using System;
     using System.Reflection;
     using ArxOne.MrAdvice.Advice;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Weaving advice")]
     public class WeavingAdviceTest
     {
         public class MethodWeavingAdvice : Attribute, IMethodWeavingAdvice
@@ -65,24 +66,21 @@ namespace MethodLevelTest
 
         public class WeavingAdvisedMethods
         {
-            //public string CompilerAutoProperty { get; set; }
-
             [MethodWeavingAdvice]
             public void WeavingAdvisedMethod()
             {
                 var thisMethod = MethodBase.GetCurrentMethod();
-                Assert.IsTrue(thisMethod.Name.StartsWith("WeavingAdvisedMethod_Renamed"));
-                var newProperty = GetType().GetProperty("WeavingAdvisedMethod_Friend");
-                Assert.IsNotNull(newProperty);
-                var newPropertyValue = (string)newProperty.GetValue(this, Array.Empty<object>());
-                Assert.AreEqual("Hello", newPropertyValue);
-            }
+                Assert.That(thisMethod.Name, Does.StartWith("WeavingAdvisedMethod_Renamed"));
 
-            //~WeavingAdvisedMethods() { }
+                var newProperty = GetType().GetProperty("WeavingAdvisedMethod_Friend");
+                Assert.That(newProperty, Is.Not.Null);
+
+                var newPropertyValue = (string)newProperty.GetValue(this, Array.Empty<object>());
+                Assert.That(newPropertyValue, Is.EqualTo("Hello"));
+            }
         }
 
-        [TestMethod]
-        [TestCategory("Weaving advice")]
+        [Test]
         public void SimpleWeavingAdviceTest()
         {
             var c = new WeavingAdvisedMethods();
@@ -136,16 +134,16 @@ namespace MethodLevelTest
             { }
         }
 
-        [TestMethod]
-        [TestCategory("Weaving advice")]
+        [Test]
         public void SimpleTypeWeavingAdviceTest()
         {
             var x = new WeavingAdvisedType();
             x.F();
             _ = x.F(1);
             x.G();
-            Assert.AreEqual(1, x.Constructors);
-            Assert.AreEqual(2, x.Methods);
+
+            Assert.That(x.Constructors, Is.EqualTo(1));
+            Assert.That(x.Methods, Is.EqualTo(2));
         }
     }
 }

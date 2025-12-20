@@ -16,7 +16,7 @@ namespace MethodLevelTest
     using Advices;
     using ArxOne.MrAdvice;
     using ArxOne.MrAdvice.Advice;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
     public class MethodAdvisedCtorClass
     {
@@ -42,208 +42,192 @@ namespace MethodLevelTest
         }
     }
 
-    [TestClass]
+    [TestFixture]
     public class BasicTests
     {
         [EmptyMethodAdvice]
         public delegate void SomeDelegate();
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void MethodTest()
         {
             new EmptyAdvisedClass().MethodTest();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void IndirectMethodTest()
         {
             new EmptyAdvisedClass().IndirectMethodTest();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void StaticMethodTest()
         {
             EmptyAdvisedClass.StaticMethodTest();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void MethodWithParameterTest()
         {
             new EmptyAdvisedClass().MethodWithParameterTest(2);
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void StaticMethodWithParameterTest()
         {
             EmptyAdvisedClass.StaticMethodWithParameterTest(3);
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void PropertyAtMethodLevelTest()
         {
             var c = new EmptyAdvisedClass();
-            c.Property++; // which calls a getter and a setter
+            c.Property++;
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void PropertyAtPropertyLevelTest()
         {
             var c = new EmptyAdvisedClass();
-            c.Property2++; // which calls a getter and a setter
+            c.Property2++;
         }
 
-        [TestMethod]
-        [TestCategory("Interception")]
+        [Test]
+        [Category("Interception")]
         public void ResolveOverloadTest()
         {
             var r = EmptyAdvisedClass.Overload(2);
-            Assert.AreEqual(2, r);
+            Assert.That(r, Is.EqualTo(2));
         }
 
-        [TestMethod]
-        [TestCategory("Constructor")]
+        [Test]
+        [Category("Constructor")]
         public void EmptyAdvisedWithMethodCtorTest()
         {
             var count = RecordCall.Count;
             var instance = new MethodAdvisedCtorClass();
-            Assert.AreEqual(count + 1, RecordCall.Count);
+            Assert.That(RecordCall.Count, Is.EqualTo(count + 1));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void RefParameterTest()
         {
             var c = new EmptyAdvisedClass();
             int b = 10;
             var r = c.UsesRef(3, ref b);
-            Assert.AreEqual(r, b);
-            Assert.AreEqual(13, b);
+            Assert.That(b, Is.EqualTo(r));
+            Assert.That(b, Is.EqualTo(13));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void OutParameterTest()
         {
             var c = new EmptyAdvisedClass();
             int b;
             c.UsesOut(4, out b);
-            Assert.AreEqual(4, b);
+            Assert.That(b, Is.EqualTo(4));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void OutGenericParameterTest()
         {
             var c = new EmptyAdvisedClass();
             List<int> b;
             c.UsesOut(new List<int> { 5 }, out b);
-            Assert.AreEqual(1, b.Count);
-            Assert.AreEqual(5, b[0]);
+            Assert.That(b.Count, Is.EqualTo(1));
+            Assert.That(b[0], Is.EqualTo(5));
         }
 
-        //[TestMethod]
-        //public void NonGenericExpression()
-        //{
-        //    Z(new Action(NonGenericExpression));
-        //    //Expression<Action> e = () => NonGenericExpression();
-        //    //var m = (MethodInfo)MethodBase.GetCurrentMethod();
-        //    //var f = Expression.Call(m,Expression.Constant(this));
-        //}
-
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void TryBlockUnusedTest()
         {
             new EmptyAdvisedClass().TryBlockUnused();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void TryBlockUsedTest()
         {
             new EmptyAdvisedClass().TryBlockUsed();
         }
 
-        [TestMethod]
-        [TestCategory("Interception")]
+        [Test]
+        [Category("Interception")]
         public void AsyncTest()
         {
             var c = new AdvisedClass();
-            Assert.IsTrue(c.LaunchAsyncMethod());
+            Assert.That(c.LaunchAsyncMethod(), Is.True);
         }
 
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void MethodFromGenericClassTest()
         {
             new GenericEmptyAdvisedClass<int>().DoSomething();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void MethodFromGenericClassWithParameterTest()
         {
             var r = new GenericEmptyAdvisedClass<int>().ReturnValue(12);
-            Assert.AreEqual(12, r);
+            Assert.That(r, Is.EqualTo(12));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void TwoAspectsTest()
         {
             int c = RecordCall.Count;
             var r = new EmptyAdvisedClass();
             var z = r.ReturnParameter(10);
-            Assert.AreEqual(2, z);
-            Assert.AreEqual(c + 1, RecordCall.Count);
+            Assert.That(z, Is.EqualTo(2));
+            Assert.That(RecordCall.Count, Is.EqualTo(c + 1));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void PriorityTest()
         {
             var c = new AdvisedClass();
             var r = c.GetString("...");
-            Assert.AreEqual("...ABCDE", r);
+            Assert.That(r, Is.EqualTo("...ABCDE"));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void InheritedPriorityTest()
         {
             var c = new AdvisedClass();
             var r = c.GetString2(":)");
-            Assert.AreEqual(":)ABCDE", r);
+            Assert.That(r, Is.EqualTo(":)ABCDE"));
         }
 
-        [TestMethod]
-        [TestCategory("Exception")]
+        [Test]
+        [Category("Exception")]
         public void ExceptionTest()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                try
-                {
-                    var c = new AdvisedClass();
-                    c.ThrowInvalidOperationException();
-                }
-                catch
-                {
-                    throw;
-                }
+                var c = new AdvisedClass();
+                c.ThrowInvalidOperationException();
             });
         }
 
-        [TestMethod]
-        [TestCategory("Exception")]
+        [Test]
+        [Category("Exception")]
         public void ExceptionWithStackTraceTest()
         {
             try
@@ -259,28 +243,28 @@ namespace MethodLevelTest
             }
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void MethodWithGenericParameterTest()
         {
             new EmptyAdvisedClass().MethodWithGenericParameterTest(6);
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void StaticMethodWithGenericParameterTest()
         {
             var t = GenericEmptyAdvisedClass<int>.StaticMethod<string>("hop");
-            Assert.AreEqual(typeof(int), t[0]);
-            Assert.AreEqual(typeof(string), t[1]);
+            Assert.That(t[0], Is.EqualTo(typeof(int)));
+            Assert.That(t[1], Is.EqualTo(typeof(string)));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void ManyParametersTest()
         {
             var r = new EmptyAdvisedClass().Add(1, 2, 3, 4, 5);
-            Assert.AreEqual(r, 1 + 2 + 3 + 4 + 5);
+            Assert.That(r, Is.EqualTo(1 + 2 + 3 + 4 + 5));
         }
 
         public class CtorClass
@@ -291,8 +275,8 @@ namespace MethodLevelTest
             }
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void CtorWith8ArgumentsTest()
         {
             var r = new CtorClass(1, 2, 3, 4, 5, 6, 7, 8, 9);
@@ -312,30 +296,21 @@ namespace MethodLevelTest
             }
         }
 
-        //[TestMethod]
-        //[TestCategory("Weaving")]
-        //public void AbstractTestTest()
-        //{
-        //    var c = new ConcreteClass();
-        //    var r = c.Add(1, 2);
-        //    Assert.AreEqual(12, r);
-        //}
-
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void OverloadedIndexerTest()
         {
             var o = new OverloadedIndexerAdvisedClass();
-            Assert.AreEqual(10, o["dude"]);
-            Assert.AreEqual(20, o[1234]);
+            Assert.That(o["dude"], Is.EqualTo(10));
+            Assert.That(o[1234], Is.EqualTo(20));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void PInvokeTest()
         {
             var p = PInvoker.GetCurrentProcess();
-            Assert.AreEqual(1234, p.ToInt32());
+            Assert.That(p.ToInt32(), Is.EqualTo(1234));
         }
 
         public class A
@@ -350,12 +325,12 @@ namespace MethodLevelTest
             return i.ToString() + v.ToString();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void GenericConstraintTest()
         {
             var r = ConstrainedMethod(3, new A());
-            Assert.IsTrue(r.StartsWith("12"));
+            Assert.That(r, Does.StartWith("12"));
         }
 
         [ChangeParameter(NewParameter = 12)]
@@ -366,13 +341,13 @@ namespace MethodLevelTest
             return i.ToString() + v.ToString();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void RefGenericConstraintTest()
         {
             double d = -4;
             var r = RefConstrainedMethod(3, ref d);
-            Assert.IsTrue(r.StartsWith("12-4"));
+            Assert.That(r, Does.StartWith("12-4"));
         }
 
         public interface IConstrainedInterface
@@ -392,51 +367,22 @@ namespace MethodLevelTest
             }
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void InterfaceGenericConstraintTest()
         {
             var c = new ConstrainedClass();
             var r = c.GetSomething(5, new A());
-            Assert.AreEqual(34, r.V);
+            Assert.That(r.V, Is.EqualTo(34));
         }
-
-#if NO
-        public class NoAdvice : Attribute, IMethodAdvice
-        {
-            public NoAdvice() { }
-
-            public void Advise(MethodAdviceContext context)
-            {
-                context.Proceed();
-            }
-        }
-
-        public class NotAdvised
-        {
-            [NoAdvice]
-            public void F<T>()
-            { }
-        }
-
-        [TestMethod]
-        [TestCategory("Generic")]
-        public void InstancesTest()
-        {
-            var na = new NotAdvised();
-            na.F<int>();
-            na.F<int>();
-            na.F<string>();
-        }
-#endif
 
         [EmptyMethodAdvice]
         public void F(byte? a)
         {
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void InNullableByteTest()
         {
             F(1);
@@ -449,13 +395,13 @@ namespace MethodLevelTest
                 a++;
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void RefNullableByteTest()
         {
             byte? a = 12;
             FR(ref a);
-            Assert.AreEqual((byte?)13, a);
+            Assert.That(a, Is.EqualTo((byte?)13));
         }
 
         [EmptyMethodAdvice]
@@ -464,50 +410,26 @@ namespace MethodLevelTest
             a = 34;
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void OutNullableByteTest()
         {
             byte? a;
             FO(out a);
-            Assert.AreEqual((byte?)34, a);
+            Assert.That(a, Is.EqualTo((byte?)34));
         }
-
-        //public void Z1()
-        //{
-        //    byte a = 1;
-        //    var o = new object[] {a};
-        //}
-
-        //public void Z2()
-        //{
-        //    byte? a = 1;
-        //    var o = new object[] {a};
-        //}
-
-        //public void Z3()
-        //{
-        //    var o = new object[1] {(byte) 2};
-        //    var a = (byte) o[0];
-        //}
-
-        //public void Z4()
-        //{
-        //    var o = new object[1] {(byte) 2};
-        //    var a = (byte?) o[0];
-        //}
 
         [EmptyMethodAdvice]
         public class Ctor
         {
             public Ctor(object o)
             {
-                Assert.IsNotNull(o);
+                Assert.That(o, Is.Not.Null);
             }
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void NonNullCtorParameterTest()
         {
             var c = new Ctor(new object());
@@ -523,13 +445,12 @@ namespace MethodLevelTest
             public void F()
             {
                 var o = (object)this;
-
                 var z = (TestStruct)o;
             }
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void StructSetterTest()
         {
             var r = new TestStruct();
@@ -539,17 +460,17 @@ namespace MethodLevelTest
         [EmptyMethodAdvice]
         public void UseStruct(TestStruct a)
         {
-            Assert.AreEqual(1, a.I);
+            Assert.That(a.I, Is.EqualTo(1));
             a.I = 2;
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void UseStructTest()
         {
             var s = new TestStruct { I = 1 };
             UseStruct(s);
-            Assert.AreEqual(1, s.I);
+            Assert.That(s.I, Is.EqualTo(1));
         }
 
         [AttributeUsage(AttributeTargets.Method), ArxOne.MrAdvice.Annotation.Priority(Priority)]
@@ -592,25 +513,24 @@ namespace MethodLevelTest
             public static void Method() { }
         }
 
-        [TestClass]
+        [TestFixture]
+        [Category("Priority")]
         public class MethodInfoAdviceTests
         {
-            [TestMethod]
-            [TestCategory("Priority")]
+            [Test]
             public void MethodInfoAdviceClassA_MethodA()
             {
                 Expected = 2;
                 ClassA.Method();
-                Assert.AreEqual(0, Expected);
+                Assert.That(Expected, Is.EqualTo(0));
             }
 
-            [TestMethod]
-            [TestCategory("Priority")]
+            [Test]
             public void MethodInfoAdviceClassB_MethodB()
             {
                 Expected = 2;
-                ClassB.Method(); // fails
-                Assert.AreEqual(0, Expected);
+                ClassB.Method();
+                Assert.That(Expected, Is.EqualTo(0));
             }
 
             public static int Expected;

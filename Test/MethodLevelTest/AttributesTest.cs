@@ -1,10 +1,18 @@
-﻿using System;
+﻿#region Mr. Advice
+// Mr. Advice
+// A simple post build weaving package
+// http://mradvice.arxone.com/
+// Released under MIT license http://opensource.org/licenses/mit-license.php
+#endregion
+
+using System;
 using ArxOne.MrAdvice.Advice;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace MethodLevelTest
 {
-    [TestClass]
+    [TestFixture]
+    [Category("Attributes")]
     public class AttributesTest
     {
         public class CountingAdvice : Attribute, IMethodAdvice
@@ -27,13 +35,12 @@ namespace MethodLevelTest
         {
         }
 
-        [TestMethod]
-        [TestCategory("Attributes")]
+        [Test]
         public void AttributeCreatedOnceTest()
         {
             CountingAdvice.InstancesCount = 0;
             Advised();
-            Assert.AreEqual(1, CountingAdvice.InstancesCount);
+            Assert.That(CountingAdvice.InstancesCount, Is.EqualTo(1));
         }
     }
 }

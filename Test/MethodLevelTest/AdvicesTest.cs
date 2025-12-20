@@ -10,9 +10,10 @@ namespace MethodLevelTest
     using System;
     using System.Reflection;
     using ArxOne.MrAdvice.Advice;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Advices")]
     public class AdvicesTest
     {
         public class EmptyAdvice : Attribute, IMethodAdvice
@@ -26,37 +27,33 @@ namespace MethodLevelTest
         [EmptyAdvice]
         public void Advised()
         {
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(MethodBase.GetCurrentMethod()));
+            Assert.That(ArxOne.MrAdvice.Advices.Get(MethodBase.GetCurrentMethod()), Is.Not.Null);
         }
 
         public void NotAdvised()
         {
-            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(MethodBase.GetCurrentMethod()));
+            Assert.That(ArxOne.MrAdvice.Advices.Get(MethodBase.GetCurrentMethod()), Is.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Advices")]
+        [Test]
         public void AdvisedFromOutsideTest()
         {
-            Assert.IsNotNull(ArxOne.MrAdvice.Advices.Get(GetType().GetMethod(nameof(Advised))));
+            Assert.That(ArxOne.MrAdvice.Advices.Get(GetType().GetMethod(nameof(Advised))), Is.Not.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Advices")]
+        [Test]
         public void AdvisedFromInsideTest()
         {
             Advised();
         }
 
-        [TestMethod]
-        [TestCategory("Advices")]
+        [Test]
         public void NotAdvisedFromOutsideTest()
         {
-            Assert.IsNull(ArxOne.MrAdvice.Advices.Get(GetType().GetMethod(nameof(NotAdvised))));
+            Assert.That(ArxOne.MrAdvice.Advices.Get(GetType().GetMethod(nameof(NotAdvised))), Is.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Advices")]
+        [Test]
         public void NotAdvisedFromInsideTest()
         {
             NotAdvised();

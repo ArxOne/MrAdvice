@@ -2,12 +2,11 @@
   <PropertyGroup>
     <ProjectGuid>{6EC087B5-B17C-45A7-BF50-3F936B210A41}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net8.0-windows;net9.0-windows7.0;net10.0-windows7.0</TargetFrameworks>
+    <TargetFrameworks>net10.0-windows7.0</TargetFrameworks>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AssemblyTitle>WpfTest</AssemblyTitle>
     <Product>WpfTest</Product>
     <Copyright>Copyright ©  2016</Copyright>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -18,15 +17,9 @@
   </PropertyGroup>
   <Import Project="..\..\MrAdvice.Weaver\MrAdvice.targets" />
   <ItemGroup>
-    <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
+	  <PackageReference Include="NUnit" Version="4.3.2" />
+	  <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+	  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MrAdvice.Weaver\MrAdvice.Weaver.csproj" />

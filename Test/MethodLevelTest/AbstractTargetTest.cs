@@ -10,9 +10,10 @@ namespace MethodLevelTest
     using System.Linq;
     using System.Reflection;
     using Advices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Weaving")]
     public class AbstractTargetTest
     {
         public class Abstracted
@@ -27,23 +28,24 @@ namespace MethodLevelTest
             public int Value { get; set; } = 12;
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
         public void AbstractedTargetTest()
         {
             var fields = typeof(Abstracted).GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.AreEqual(0, fields.Length);
+
+            Assert.That(fields.Length, Is.EqualTo(0));
+
             var a = new Abstracted();
             a.Value = 12;
-            Assert.AreEqual(12, a.Value);
+            Assert.That(a.Value, Is.EqualTo(12));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
         public void NotAbstractedTargetTest()
         {
             var fields = typeof(NotAbstracted).GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.AreNotEqual(0, fields.Count());
+
+            Assert.That(fields.Length, Is.Not.Zero);
         }
     }
 }

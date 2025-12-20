@@ -11,88 +11,86 @@ namespace MethodLevelTest
     using Advices;
     using ArxOne.MrAdvice.Advice;
     using ExternalAdvices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Interface")]
     public class InterfaceTest
     {
         public interface IExternalAdvisedInterface2 : IExternalAdvisedInterface { }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void WeaveExternalInterfaceTest()
         {
             var a = new InterfaceMethodAdvice();
             var i = a.Handle<IExternalAdvisedInterface>();
-            Assert.IsNotNull(i);
+            Assert.That(i, Is.Not.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void WeaveExternalInterface2Test()
         {
             var a = new InterfaceMethodAdvice();
             var i = a.Handle<IExternalAdvisedInterface2>();
-            Assert.IsNotNull(i);
+            Assert.That(i, Is.Not.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
+        [Category("Weaving")]
         public void WeaveInterfaceTest()
         {
             var a = new InterfaceMethodAdvice();
             var i = a.Handle<IAdvisedInterface>();
-            Assert.IsNotNull(i);
+            Assert.That(i, Is.Not.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void EmptyCallTest()
         {
             var a = new InterfaceMethodAdvice();
             var i = a.Handle<IAdvisedInterface>();
             var r = i.DoSomething(1, 2);
+            // Pas d'assertion dans l'original, on vérifie juste que l'appel ne crash pas
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void OverrideReturnValueTest()
         {
             var a = new InterfaceMethodAdvice { NewReturnValue = 12 };
             var i = a.Handle<IAdvisedInterface>();
             var r = i.DoSomething(1, 2);
-            Assert.AreEqual(12, r);
+            Assert.That(r, Is.EqualTo(12));
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void OverrideRefParameterTest()
         {
             var a = new InterfaceMethodAdvice { NewFirstParameter = 45 };
             var i = a.Handle<IAdvisedInterface>();
             int v = 0;
             i.DoSomethingWithRef(ref v);
-            Assert.AreEqual(45, v);
+            Assert.That(v, Is.EqualTo(45));
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void OverrideOutParameterTest()
         {
             var a = new InterfaceMethodAdvice { NewFirstParameter = 99 };
             var i = a.Handle<IAdvisedInterface>();
             int v;
             i.DoSomethingWithOut(out v);
-            Assert.AreEqual(99, v);
+            Assert.That(v, Is.EqualTo(99));
         }
-        [TestMethod]
-        [TestCategory("Interface")]
+
+        [Test]
         public void PropertyGetTest()
         {
             var a = new InterfacePropertyAdvice { NewReturnValue = 67 };
             var i = a.Handle<IAdvisedInterface>();
             var v = i.SomeProperty;
-            Assert.AreEqual(67, v);
+            Assert.That(v, Is.EqualTo(67));
         }
 
         private TInterface Handle<TAdvice, TInterface>(TAdvice advice)
@@ -101,18 +99,16 @@ namespace MethodLevelTest
             return advice.Handle<TInterface>();
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void IndirectWeavingTest()
         {
             var a = new InterfaceMethodAdvice { NewReturnValue = 87 };
             var i = Handle<IAdvice, IIndirectAdvisedInterface>(a);
             var r = i.DoSomething(4, 3);
-            Assert.AreEqual(87, r);
+            Assert.That(r, Is.EqualTo(87));
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void InterfaceTypeTest()
         {
             var a = new InterfaceCheckAdvice();
@@ -120,8 +116,7 @@ namespace MethodLevelTest
             i.DoNothing();
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void DynamicHandleTest()
         {
             var a = new InterfaceCheckAdvice();
@@ -129,8 +124,7 @@ namespace MethodLevelTest
             i.Nop();
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void DynamicHandleFromInheritedTest()
         {
             var a = new InterfaceCheckAdvice();
@@ -138,8 +132,7 @@ namespace MethodLevelTest
             i.B();
         }
 
-        [TestMethod]
-        [TestCategory("Interface")]
+        [Test]
         public void DynamicHandleFromBaseTest()
         {
             var a = new InterfaceCheckAdvice();

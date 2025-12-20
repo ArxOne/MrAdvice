@@ -39,11 +39,8 @@
     <None Include="MethodLevelTest.snk" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.CSharp">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\Microsoft.CSharp.dll</HintPath>
-    </Reference>
+	  <PackageReference Include="NUnit" Version="4.3.2" />
+	  <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+	  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
   </ItemGroup>
 </Project>
