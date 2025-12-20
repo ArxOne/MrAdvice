@@ -1,4 +1,9 @@
-﻿## 2.19.1
+﻿## 2.20
+
+- Improvement: support for .NET 10
+- Improvement: moved tests to NUnit
+
+## 2.19.1
 
 - Improvement: very small speedup
 
