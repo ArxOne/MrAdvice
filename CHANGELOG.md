@@ -1,4 +1,8 @@
-﻿## 2.20
+﻿## 2.20.1
+
+- Fix: weaving advices were not working on .NET 10
+
+## 2.20
 
 - Improvement: support for .NET 10
 - Improvement: moved tests to NUnit
