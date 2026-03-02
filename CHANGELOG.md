@@ -1,6 +1,10 @@
-﻿## 2.20.2
+﻿## 2.20.3
 
-- Fix: null Aggregate.InnerException was used
+- Fix: on cancelled `Task`, a `NullReferenceException` was throw (we need to propagate a `TaskCanceledException`)
+
+## 2.20.2
+
+- Fix: null `Aggregate.InnerException` was used
 
 ## 2.20.1
 
