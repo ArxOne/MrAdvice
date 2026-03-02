@@ -206,7 +206,9 @@ namespace ArxOne.MrAdvice
         {
             if (e is not AggregateException a)
                 return e;
-            return a.InnerException;
+            if (a.InnerExceptions.Count != 1)
+                return a;
+            return a.InnerExceptions[0];
         }
 
         /// <summary>

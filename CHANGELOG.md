@@ -1,4 +1,8 @@
-﻿## 2.20.1
+﻿## 2.20.2
+
+- Fix: null Aggregate.InnerException was used
+
+## 2.20.1
 
 - Fix: weaving advices were not working on .NET 10
 
