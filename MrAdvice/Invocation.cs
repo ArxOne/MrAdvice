@@ -187,8 +187,10 @@ namespace ArxOne.MrAdvice
         private static object GetResult(Task advisedTask, AdviceValues adviceValues)
         {
             // when faulted here, no need to go further
-            if (advisedTask.IsFaulted || advisedTask.IsCanceled)
+            if (advisedTask.IsFaulted)
                 throw FlattenException(advisedTask.Exception).Rethrow();
+            if (advisedTask.IsCanceled)
+                return null; // this does not matter, an exception will be thrown
 
             // otherwise check inner value
             var returnValue = (Task)adviceValues.ReturnValue;
