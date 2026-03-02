@@ -190,7 +190,11 @@ namespace ArxOne.MrAdvice
             if (advisedTask.IsFaulted)
                 throw FlattenException(advisedTask.Exception).Rethrow();
             if (advisedTask.IsCanceled)
-                return null; // this does not matter, an exception will be thrown
+            {
+                if (advisedTask.Exception is not null)
+                    throw FlattenException(advisedTask.Exception).Rethrow();
+                advisedTask.GetResult();
+            }
 
             // otherwise check inner value
             var returnValue = (Task)adviceValues.ReturnValue;
