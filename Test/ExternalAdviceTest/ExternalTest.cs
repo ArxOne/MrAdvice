@@ -4,23 +4,24 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
+using NUnit.Framework;
+
 namespace ExternalAdviceTest
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Weaving")]
     public class ExternalTest
     {
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
         public void ExternalAdviceTest()
         {
             var emptyExternalAdvisedClass = new EmptyExternalAdvisedClass();
             emptyExternalAdvisedClass.MethodTest();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
         public void ExternalWeavingAdviceTest()
         {
             var emptyExternalAdvisedClass = new EmptyExternalAdvisedClass();

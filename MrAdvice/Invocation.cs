@@ -189,6 +189,12 @@ namespace ArxOne.MrAdvice
             // when faulted here, no need to go further
             if (advisedTask.IsFaulted)
                 throw FlattenException(advisedTask.Exception).Rethrow();
+            if (advisedTask.IsCanceled)
+            {
+                if (advisedTask.Exception is not null)
+                    throw FlattenException(advisedTask.Exception).Rethrow();
+                advisedTask.GetResult();
+            }
 
             // otherwise check inner value
             var returnValue = (Task)adviceValues.ReturnValue;
@@ -206,7 +212,9 @@ namespace ArxOne.MrAdvice
         {
             if (e is not AggregateException a)
                 return e;
-            return a.InnerException;
+            if (a.InnerExceptions.Count != 1)
+                return a;
+            return a.InnerExceptions[0];
         }
 
         /// <summary>

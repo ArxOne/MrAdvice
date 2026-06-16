@@ -9,13 +9,14 @@
 //[assembly:EmptyAsyncAdvice]
 
 
+using NUnit.Framework;
+
 namespace DotNetCoreTest
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    [TestClass]
+    [TestFixture]
     public class BasicTest
     {
         [EmptyAsyncAdvice]
@@ -26,16 +27,16 @@ namespace DotNetCoreTest
             return true;
         }
 
-        [TestMethod]
+        [Test]
         public void TypedTaskTest()
         {
             var t = AsyncAdvised();
             t.Wait();
             var b = t.Result;
-            Assert.IsTrue(b);
+            Assert.That(b);
         }
 
-        [TestMethod]
+        [Test]
         public void NestedAsyncTest()
         {
 
@@ -51,7 +52,7 @@ namespace DotNetCoreTest
                     // c1 c = new c1();
                     var r = c.TM2Async();
                     r.Wait();
-                    Assert.AreEqual("OK", r.Result);
+                    Assert.That(r.Result, Is.EqualTo("OK"));
                 }
                 catch (Exception /*ex*/)
                 {

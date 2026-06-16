@@ -1,4 +1,21 @@
-﻿## 2.19.1
+﻿## 2.20.3
+
+- Fix: on cancelled `Task`, a `NullReferenceException` was throw (we need to propagate a `TaskCanceledException`)
+
+## 2.20.2
+
+- Fix: null `Aggregate.InnerException` was used
+
+## 2.20.1
+
+- Fix: weaving advices were not working on .NET 10
+
+## 2.20
+
+- Improvement: support for .NET 10
+- Improvement: moved tests to NUnit
+
+## 2.19.1
 
 - Improvement: very small speedup
 

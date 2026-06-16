@@ -5,18 +5,19 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using NUnit.Framework;
+
 namespace MethodLevelTest.Advices
 {
     using System;
     using ArxOne.MrAdvice.Advice;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     public class InterfaceCheckAdvice : Attribute, IMethodAdvice
     {
         public void Advise(MethodAdviceContext context)
         {
             var targetType = context.TargetMethod.DeclaringType;
-            Assert.IsTrue(targetType.IsInterface);
+            Assert.That(targetType.IsInterface);
         }
     }
 }

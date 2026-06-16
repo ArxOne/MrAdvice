@@ -7,17 +7,14 @@
 
 using System.Linq;
 using System.Reflection;
+using NUnit.Framework;
 
 namespace MethodLevelTest
 {
     using System;
-    using System.Runtime.InteropServices;
-    using System.Threading.Tasks;
-    using ArxOne.MrAdvice;
     using ArxOne.MrAdvice.Advice;
     using ArxOne.MrAdvice.Annotation;
     using ExternalAdvices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     // https://github.com/ArxOne/MrAdvice/issues/32
     public class Test
@@ -166,33 +163,33 @@ namespace MethodLevelTest
         }
     }
 
-    [TestClass]
+    [TestFixture]
     public class InheritanceTest
     {
-        [TestMethod]
+        [Test]
         public void InheritedTest()
         {
             var m = typeof(InheritableDerivedTestClass).GetMethod("VF");
             var advices = ArxOne.MrAdvice.Advices.Get(m);
-            Assert.IsNotNull(advices);
-            Assert.AreEqual(1, advices.Length);
+            Assert.That(advices, Is.Not.Null);
+            Assert.That(advices.Length, Is.EqualTo(1));
         }
 
-        [TestMethod]
+        [Test]
         public void NotInheritedBaseTest()
         {
             var m = typeof(NonInheritableTestClass).GetMethod("VF");
             var advices = ArxOne.MrAdvice.Advices.Get(m);
-            Assert.IsNotNull(advices);
-            Assert.AreEqual(1, advices.Length);
+            Assert.That(advices, Is.Not.Null);
+            Assert.That(advices.Length, Is.EqualTo(1));
         }
 
-        [TestMethod]
+        [Test]
         public void NotInheritedTest()
         {
             var m = typeof(NonInheritableDerivedTestClass).GetMethod("VF");
             var advices = ArxOne.MrAdvice.Advices.Get(m);
-            Assert.IsNull(advices);
+            Assert.That(advices, Is.Null);
         }
     }
 
@@ -264,41 +261,41 @@ namespace MethodLevelTest
         }
     }
 
-    [TestClass]
+    [TestFixture]
     public class StructTest
     {
-        [TestMethod]
+        [Test]
         public void RawMethodTest()
         {
             RawStruct s = new RawStruct(10);
             s.Z++;
-            Assert.AreEqual(11, s.Z);
+            Assert.That(s.Z, Is.EqualTo(11));
         }
 
-        [TestMethod]
+        [Test]
         public void AdvisedMethodTest()
         {
             var s = new EmptyAdvisedStruct(20);
             s.Z++;
-            Assert.AreEqual(21, s.Z);
+            Assert.That(s.Z, Is.EqualTo(21));
         }
 
-        [TestMethod]
+        [Test]
         public void CountAdvisedMethodTest()
         {
             var s = new CountAdvisedStruct(30);
             s.Z++;
-            Assert.AreEqual(31, s.Z);
-            Assert.AreEqual(2, s.Access);
+            Assert.That(s.Z, Is.EqualTo(31));
+            Assert.That(s.Access, Is.EqualTo(2));
         }
 
-        [TestMethod]
+        [Test]
         public void CountAdvisedMethodOnGenericStructTest()
         {
             var s = new CountAdvisedStruct<int, float>(30);
             s.Z++;
-            Assert.AreEqual(31, s.Z);
-            Assert.AreEqual(2, s.Access);
+            Assert.That(s.Z, Is.EqualTo(31));
+            Assert.That(s.Access, Is.EqualTo(2));
         }
     }
 
@@ -317,23 +314,23 @@ namespace MethodLevelTest
         public int Z { get; set; }
     }
 
-    [TestClass]
+    [TestFixture]
     public class MiscTest
     {
-        [TestMethod]
+        [Test]
         public void WeavedWithExternalTest()
         {
             var w = new WeavedWithExternal();
         }
 
         [EnumAdvice(Option = ConsoleColor.DarkRed)]
-        [TestMethod]
+        [Test]
         public void Method7()
         {
             var thisMethod = GetType().GetMethod(nameof(Method7));
             var customAttributes = thisMethod.GetCustomAttributes();
             var attribute = customAttributes.OfType<EnumAdvice>().Single();
-            Assert.AreEqual(ConsoleColor.DarkRed, attribute.Option);
+            Assert.That(attribute.Option, Is.EqualTo(ConsoleColor.DarkRed));
         }
     }
 
@@ -364,15 +361,15 @@ namespace MethodLevelTest
         }
     }
 
-    [TestClass]
+    [TestFixture]
     public class PointcutTests
     {
-        [TestMethod]
+        [Test]
         public void UnadvisedTest()
         {
             var u = new UnadvisedClass();
             var r = u.F(1);
-            Assert.AreEqual(2, r);
+            Assert.That(r, Is.EqualTo(2));
         }
     }
 }

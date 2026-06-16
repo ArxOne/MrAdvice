@@ -3,7 +3,7 @@ using MethodLevelTest.Advices;
 
 namespace MethodLevelTest
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
     using System;
 
     public class IncrementParameter : Attribute, IParameterAdvice
@@ -30,22 +30,24 @@ namespace MethodLevelTest
         private int F(int p) => p;
     }
 
-    [TestClass]
+    [TestFixture]
+    [Category("ExplicitImplementation")]
     public class ExplicitImplementationTest
     {
-        [TestMethod]
+        [Test]
         public void UseWeavedClassExplicitMarkerTest()
         {
             IA a = new A();
             var x = a.X(1);
-            Assert.AreEqual(2, x);
+            Assert.That(x, Is.EqualTo(2));
         }
-        [TestMethod]
+
+        [Test]
         public void UseWeavedClassTest2()
         {
             IA a = new A();
             var x = a.F(1);
-            Assert.AreEqual(2, x);
+            Assert.That(x, Is.EqualTo(2));
         }
     }
 }

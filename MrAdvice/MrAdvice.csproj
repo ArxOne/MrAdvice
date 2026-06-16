@@ -1,13 +1,13 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.22">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netstandard2.0;net6.0;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <AssemblyTitle>Mr. Advice</AssemblyTitle>
     <Copyright>Copyright [2015,…[ Arx One</Copyright>
-    <Version>2.19.1</Version>
+    <Version>2.20.5</Version>
     <Authors>Arx One</Authors>
     <RootNamespace>ArxOne.MrAdvice</RootNamespace>
     <SignAssembly>true</SignAssembly>

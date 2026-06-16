@@ -4,7 +4,7 @@ namespace MethodLevelTest
     using System.Reflection;
     using ArxOne.MrAdvice.Advice;
     using ArxOne.MrAdvice.Annotation;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
     [AdviceA, AdviceB]
     public static class OppositePointcuts
@@ -12,22 +12,23 @@ namespace MethodLevelTest
         public static void AdvisedOnce()
         {
             var currentMethod = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual(nameof(AdvisedOnce), currentMethod.Name);
+            Assert.That(currentMethod.Name, Is.Not.EqualTo(nameof(AdvisedOnce)));
         }
     }
 
-    [TestClass]
+    [TestFixture]
+    [Category("Pointcut selection")]
     public class OppositePointcutsTest
     {
-        [TestMethod]
-        [TestCategory("Pointcut selection")]
+        [Test]
         public void AdvisedOnceTest()
         {
             var m = typeof(OppositePointcuts).GetMethod(nameof(OppositePointcuts.AdvisedOnce));
             m.Invoke(null, Array.Empty<object>());
             var advices = ArxOne.MrAdvice.Advices.Get(m);
-            Assert.AreEqual(1, advices.Length);
-            Assert.AreEqual(typeof(AdviceA), advices[0].GetType());
+
+            Assert.That(advices.Length, Is.EqualTo(1));
+            Assert.That(advices[0].GetType(), Is.EqualTo(typeof(AdviceA)));
         }
     }
 

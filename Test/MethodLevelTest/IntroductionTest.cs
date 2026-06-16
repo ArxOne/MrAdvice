@@ -4,27 +4,27 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace MethodLevelTest
 {
     using Advices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Introduction")]
     public class IntroductionTest
     {
-        [TestMethod]
-        [TestCategory("Introduction")]
+        [Test]
         public void SimpleIntroductionByFieldTest()
         {
             var c = new IntroducedClass();
             c.AMethod();
             c.AMethod();
 
-            Assert.AreEqual(2, IntroductionAdvice.LastAdvicesCount);
+            Assert.That(IntroductionAdvice.LastAdvicesCount, Is.EqualTo(2));
         }
 
-        [TestMethod]
-        [TestCategory("Introduction")]
+        [Test]
         public void SimpleStaticIntroductionByFieldTest()
         {
             var z = StaticIntroductionAdvice.LastStaticAdvicesCount;
@@ -34,11 +34,10 @@ namespace MethodLevelTest
             c1.BMethod();
             c2.BMethod();
 
-            Assert.AreEqual(2, StaticIntroductionAdvice.LastStaticAdvicesCount - z);
+            Assert.That(StaticIntroductionAdvice.LastStaticAdvicesCount - z, Is.EqualTo(2));
         }
 
-        [TestMethod]
-        [TestCategory("Introduction")]
+        [Test]
         public void SimpleSharedIntroductionByFieldTest()
         {
             var z = SharedIntroductionAdvice.LastSharedAdvicesCount;
@@ -47,22 +46,20 @@ namespace MethodLevelTest
             c1.CMethod();
             c1.C2Method();
 
-            Assert.AreEqual(2, SharedIntroductionAdvice.LastSharedAdvicesCount - z);
+            Assert.That(SharedIntroductionAdvice.LastSharedAdvicesCount - z, Is.EqualTo(2));
         }
 
-        [TestMethod]
-        [TestCategory("Introduction")]
+        [Test]
         public void SimpleIntroductionByPropertyTest()
         {
             var c = new IntroducedClass();
             c.AMethod();
             c.AMethod();
 
-            Assert.AreEqual("10", IntroductionAdvice.LastRandomString);
+            Assert.That(IntroductionAdvice.LastRandomString, Is.EqualTo("10"));
         }
 
-        [TestMethod]
-        [TestCategory("Introduction")]
+        [Test]
         public void ComplexIntroductionTest()
         {
             var c = new ComplexIntroducedClass();

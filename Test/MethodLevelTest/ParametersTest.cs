@@ -4,25 +4,26 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace MethodLevelTest
 {
     using Advices;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
     /// <summary>
     /// Summary description for ParametersTest
     /// </summary>
-    [TestClass]
+    [TestFixture]
+    [Category("Parameters")]
     public class ParametersTest
     {
         [ChangeParameter(NewParameter = 2)]
         public void TakeTwo(int oneIsTwo)
         {
-            Assert.AreEqual(2, oneIsTwo);
+            Assert.That(oneIsTwo, Is.EqualTo(2));
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void ChangeParameterMethod()
         {
             TakeTwo(1);
@@ -34,11 +35,10 @@ namespace MethodLevelTest
             return 3;
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void ChangeReturnValueMethod()
         {
-            Assert.AreEqual(4, GetThree());
+            Assert.That(GetThree(), Is.EqualTo(4));
         }
 
         public int Add1([ParameterAdvice] int a, int b)
@@ -78,63 +78,56 @@ namespace MethodLevelTest
             return a + b;
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void ChangeValueParameterParameter()
         {
             int r = Add1(3, 6);
-            Assert.AreEqual(10, r);
+            Assert.That(r, Is.EqualTo(10));
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void ChangeValueParameter2Parameter()
         {
             int r = Add2(3, 6);
-            Assert.AreEqual(10, r);
+            Assert.That(r, Is.EqualTo(10));
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void ChangeStringParameterParameter()
         {
             var r = Add1("here", "everywhere");
-            Assert.AreEqual("herethereeverywhere", r);
+            Assert.That(r, Is.EqualTo("herethereeverywhere"));
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void ChangeValueResultParameterParameter()
         {
             var r = AddV(1, 2);
-            Assert.AreEqual(6, r);
+            Assert.That(r, Is.EqualTo(6));
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void ChangeValueRefParameterParameter()
         {
             int a = 7;
             var r = AddR1(ref a, 3);
-            Assert.AreEqual(8, a);
-            Assert.AreEqual(11, r);
+            Assert.That(a, Is.EqualTo(8));
+            Assert.That(r, Is.EqualTo(11));
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void ChangeValueOutParameterParameter()
         {
             int a;
             AddO1(out a, 12);
-            Assert.AreEqual(24, a);
+            Assert.That(a, Is.EqualTo(24));
         }
 
-        [TestMethod]
-        [TestCategory("Parameters")]
+        [Test]
         public void AllParametersAtMethodLevel()
         {
             var r = Add2B(5, 8);
-            Assert.AreEqual((5 + 1 + 8 + 1) * 2, r);
+            Assert.That(r, Is.EqualTo((5 + 1 + 8 + 1) * 2));
         }
     }
 }

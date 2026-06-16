@@ -5,41 +5,39 @@
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
 
+using System.Reflection;
 using System.Threading.Tasks;
 using AssemblyLevelTest;
 using ExternalAdvices;
+using NUnit.Framework;
 
 [assembly: AssemblyAdvice]
 [assembly: MethodInfoAdvice]
 
 namespace AssemblyLevelTest
 {
-    using System.Reflection;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    [TestClass]
+    [TestFixture]
+    [Category("Weaving")]
     public class BasicTest
     {
         public void Advised()
         {
             var method = MethodBase.GetCurrentMethod();
-            Assert.AreNotEqual("Advised", method.Name);
+            Assert.That(method.Name, Is.Not.EqualTo("Advised"));
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
         public void AssemblyAdviceTest()
         {
             Advised();
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
         public void AnonymousClassCtorTest()
         {
             var a = new { A = 1, B = "b" };
-            Assert.AreEqual(1, a.A);
-            Assert.AreEqual("b", a.B);
+            Assert.That(a.A, Is.EqualTo(1));
+            Assert.That(a.B, Is.EqualTo("b"));
         }
 
         [SelfExcludingAdvice(2)]
@@ -47,13 +45,12 @@ namespace AssemblyLevelTest
         {
         }
 
-        [TestMethod]
-        [TestCategory("Weaving")]
+        [Test]
         public void MethodOverrideTest()
         {
             SelfExcludingAdvice.counter = 0;
             IncrementBy2();
-            Assert.AreEqual(2, SelfExcludingAdvice.counter);
+            Assert.That(SelfExcludingAdvice.counter, Is.EqualTo(2));
         }
 
     }

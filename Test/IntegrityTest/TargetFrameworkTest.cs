@@ -4,41 +4,43 @@
 // http://mradvice.arxone.com/
 // Released under MIT license http://opensource.org/licenses/mit-license.php
 #endregion
+
 namespace IntegrityTest
 {
     using System;
     using ArxOne.MrAdvice.Reflection;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
 
-    [TestClass]
+    [TestFixture]
+    [Category("Integrity")]
     public class TargetFrameworkTest
     {
-        [TestMethod]
-        [TestCategory("Integrity")]
+        [Test]
         public void StandardNETFramework()
         {
             var t = new TargetFramework(".NETFramework,Version=v4.0");
-            Assert.AreEqual(new Version(4, 0), t.NetFramework);
-            Assert.IsNull(t.Silverlight);
-            Assert.IsNull(t.WindowsPhone);
+
+            Assert.That(t.NetFramework, Is.EqualTo(new Version(4, 0)));
+            Assert.That(t.Silverlight, Is.Null);
+            Assert.That(t.WindowsPhone, Is.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Integrity")]
+        [Test]
         public void PCL5()
         {
             var t = new TargetFramework(".NETPortable,Version=v4.0,Profile=Profile14");
-            Assert.AreEqual(new Version(4, 0), t.NetFramework);
-            Assert.AreEqual(new Version(5, 0), t.Silverlight);
-            Assert.IsNull(t.WindowsPhone);
+
+            Assert.That(t.NetFramework, Is.EqualTo(new Version(4, 0)));
+            Assert.That(t.Silverlight, Is.EqualTo(new Version(5, 0)));
+            Assert.That(t.WindowsPhone, Is.Null);
         }
 
-        [TestMethod]
-        [TestCategory("Integrity")]
+        [Test]
         public void Literal45()
         {
             var t = new TargetFramework(".NETFramework,Version=v4.5");
-            Assert.AreEqual(t.ToString(), ".NET Framework 4.5");
+
+            Assert.That(t.ToString(), Is.EqualTo(".NET Framework 4.5"));
         }
     }
 }
