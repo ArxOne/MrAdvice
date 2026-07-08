@@ -384,6 +384,11 @@ namespace ArxOne.MrAdvice
             out Tuple<PropertyInfo, bool> relatedPropertyInfo, out Tuple<EventInfo, bool> relatedEventInfo)
             where TAdvice : class, IAdvice
         {
+            if (targetMethod is null)
+                throw new ArgumentNullException(nameof(targetMethod), "Must provide method");
+            if (targetMethod.DeclaringType is null)
+                throw new ArgumentNullException(nameof(targetMethod), $"Method {targetMethod.Name} has no declaring type");
+
             // inheritance hierarchy
             var typeAndParents = targetMethod.DeclaringType.GetSelfAndEnclosing()
                 .SelectMany(t => t.GetSelfAndAncestors())
