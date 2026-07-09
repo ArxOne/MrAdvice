@@ -350,14 +350,39 @@ namespace ArxOne.MrAdvice
             return new AspectInfo(advices, innerMethod, innerMethodHandle, innerMethodDelegate, method, methodHandle);
         }
 
+        private static MethodBase FindInterfaceMethod(MethodBase implementationMethodBase)
+        {
+            return FindInterfaceMethodByMap(implementationMethodBase) ?? FindInterfaceMethodByName(implementationMethodBase);
+        }
+
         /// <summary>
         /// Finds the interface method implemented.
         /// </summary>
         /// <param name="implementationMethodBase">The method base.</param>
         /// <returns></returns>
-        private static MethodBase FindInterfaceMethod(MethodBase implementationMethodBase)
+        private static MethodBase FindInterfaceMethodByMap(MethodBase implementationMethodBase)
         {
-            // GetInterfaceMap is unfortunately unavailable in PCL :'(
+            // ReSharper disable once PossibleNullReferenceException
+            var declaringType = implementationMethodBase.DeclaringType;
+            var interfaces = declaringType.GetAssignmentReader().GetInterfaces();
+            foreach (var @interface in interfaces)
+            {
+                var map = declaringType.GetInterfaceMap(@interface);
+                for (int mapIndex = 0; mapIndex < map.InterfaceMethods.Length; mapIndex++)
+                    if (map.TargetMethods[mapIndex] == implementationMethodBase)
+                        return map.InterfaceMethods[mapIndex];
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Finds the interface method implemented.
+        /// </summary>
+        /// <param name="implementationMethodBase">The method base.</param>
+        /// <returns></returns>
+        private static MethodBase FindInterfaceMethodByName(MethodBase implementationMethodBase)
+        {
             // ReSharper disable once PossibleNullReferenceException
             var interfaces = implementationMethodBase.DeclaringType.GetAssignmentReader().GetInterfaces();
             var parameterInfos = implementationMethodBase.GetParameters();
