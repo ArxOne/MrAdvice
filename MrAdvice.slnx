@@ -4,6 +4,7 @@
     <File Path=".gitignore" />
     <File Path="appveyor.yml" />
     <File Path="CHANGELOG.md" />
+    <File Path="MrAdvice.Weaver/MrAdvice.nuspec" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Resources/Icon/">

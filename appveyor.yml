@@ -1,26 +1,22 @@
 # Mr. Advice appveyor.yml script
 
 version: '{branch}-{build}'
-image: Visual Studio 2022
+image: Visual Studio 2026
 
 branches:
   only:
     - fody
     - master
  
-install:
-- ps: |
-    Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -UseBasicParsing -OutFile "$env:temp\dotnet-install.ps1"
-    & $env:temp\dotnet-install.ps1 -Architecture x64 -Version '10.0.100' -InstallDir "$env:ProgramFiles\dotnet"
 before_build:
   - cmd: dotnet --version
-  - nuget restore MrAdvice.sln
+  - nuget restore MrAdvice.slnx
 
 configuration: Release
 
 build:
   parallel: true
-  project: MrAdvice.sln
+  project: MrAdvice.slnx
   publish_nuget: false
   publish_nuget_symbols: false
   verbosity: minimal
