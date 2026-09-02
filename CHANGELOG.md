@@ -1,4 +1,12 @@
-﻿## 2.20.3
+## 2.21.1
+
+- Fix: .NET weaver was invoked directly as `.exe` causing it to break on x86 architectures
+
+## 2.21
+
+- Improvement: using .NET interface mapping reflection to match more accurately advised interface methods
+
+## 2.20.3
 
 - Fix: on cancelled `Task`, a `NullReferenceException` was throw (we need to propagate a `TaskCanceledException`)
 
