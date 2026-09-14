@@ -1,3 +1,7 @@
+## 2.22
+
+- Fix: on interfaces advice, pure [out] parameters were read before pointcut invocation (and handled as ref)
+
 ## 2.21.1
 
 - Fix: .NET weaver was invoked directly as `.exe` causing it to break on x86 architectures

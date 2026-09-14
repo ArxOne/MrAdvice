@@ -146,7 +146,7 @@ namespace MethodLevelTest
             public bool V { get; set; }
             public void Advise(MethodAdviceContext context)
             {
-                context.Arguments[0] = true;
+                context.Arguments[0] = V;
             }
         }
 
