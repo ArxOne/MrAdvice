@@ -51,13 +51,7 @@ namespace ArxOne.MrAdvice.Utility
         public void SetParamDefs(MethodDef targetMethod)
         {
             for (int parameterIndex = 0; parameterIndex < Count; parameterIndex++)
-            {
-                var paramDefUser = new ParamDefUser();
-                paramDefUser.Set(this[parameterIndex].ParamDef);
-                targetMethod.ParamDefs.Add(paramDefUser);
-                //targetMethod.Parameters[parameterIndex].CreateParamDef();
-                //targetMethod.Parameters[parameterIndex].ParamDef.Set(this[parameterIndex].ParamDef);
-            }
+                targetMethod.ParamDefs.Add(this[parameterIndex].ParamDef.Clone());
         }
     }
 }

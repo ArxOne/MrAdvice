@@ -889,6 +889,7 @@ namespace ArxOne.MrAdvice.Weaver
             var methodAttributes = MethodAttributes.NewSlot | MethodAttributes.Virtual | (injectAsPrivate ? MethodAttributes.Public : MethodAttributes.Private);
             var implementationMethodSig = interfaceMethod.MethodSig.Clone();
             var implementationMethod = new MethodDefUser(interfaceMethod.Name, /*interfaceMethod.MethodSig */implementationMethodSig, methodAttributes);
+            implementationMethod.ParamDefs.AddRange(interfaceMethod.ParamDefs.Select(p => p.Clone()));
             for (int parameterIndex = 0; parameterIndex < implementationMethod.Parameters.Count; parameterIndex++)
             {
                 var parameterType = implementationMethod.Parameters[parameterIndex].Type;

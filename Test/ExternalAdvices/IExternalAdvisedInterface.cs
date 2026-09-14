@@ -22,5 +22,7 @@ namespace ExternalAdvices
 
         void T(ExternalEnum e);
         void T2(Task<ExternalEnum> ee);
+
+        void OutBool(out bool b);
     }
 }

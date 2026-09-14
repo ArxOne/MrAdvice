@@ -139,5 +139,26 @@ namespace MethodLevelTest
             var i = (IDynamicHandledInheritedInterface)a.Handle(typeof(IDynamicHandledInheritedInterface));
             i.A();
         }
+
+
+        public class OutBoolMethodAdvice : Attribute, IMethodAdvice
+        {
+            public bool V { get; set; }
+            public void Advise(MethodAdviceContext context)
+            {
+                context.Arguments[0] = true;
+            }
+        }
+
+        [Test]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void OutBoolTest(bool v)
+        {
+            var a = new OutBoolMethodAdvice { V = v };
+            var i = (IExternalAdvisedInterface)a.Handle(typeof(IExternalAdvisedInterface));
+            i.OutBool(out var b);
+            Assert.That(b, Is.EqualTo(v));
+        }
     }
 }
