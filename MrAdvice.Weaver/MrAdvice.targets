@@ -1,20 +1,40 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-	<Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory" 
-	        Condition="'$(DesignTimeBuild)' != 'true'" >
+	<Target Name="ResolveMrAdviceWeaverPath">
 		<PropertyGroup>
 			<TargetFrameworkVersionNumber>$([System.Text.RegularExpressions.Regex]::Replace($(TargetFrameworkVersion), '[^\d\.]+', '', System.Text.RegularExpressions.RegexOptions.IgnoreCase))</TargetFrameworkVersionNumber>
-			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)..\tools\net461\MrAdvice.Weaver.exe"</MrAdviceWeaverPath>
-			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">dotnet "$(MSBuildThisFileDirectory)..\tools\net8.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
-			<MrAdviceWeaverPath Condition="'$(TargetFrameworkVersionNumber)' &gt;= '8.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\net8.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
-			<MrAdviceWeaverPath Condition="'$(TargetFrameworkVersionNumber)' &gt;= '9.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\net9.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
-			<MrAdviceWeaverPath Condition="'$(TargetFrameworkVersionNumber)' &gt;= '10.0'">dotnet "$(MSBuildThisFileDirectory)..\tools\net10.0\MrAdvice.Weaver.dll"</MrAdviceWeaverPath>
+			<MrAdviceWeaverDirectory Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)..\tools\net461\</MrAdviceWeaverDirectory>
+			<MrAdviceWeaverDirectory Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">$(MSBuildThisFileDirectory)..\tools\net8.0\</MrAdviceWeaverDirectory>
+			<MrAdviceWeaverDirectory Condition="'$(TargetFrameworkVersionNumber)' &gt;= '8.0'">$(MSBuildThisFileDirectory)..\tools\net8.0\</MrAdviceWeaverDirectory>
+			<MrAdviceWeaverDirectory Condition="'$(TargetFrameworkVersionNumber)' &gt;= '9.0'">$(MSBuildThisFileDirectory)..\tools\net9.0\</MrAdviceWeaverDirectory>
+			<MrAdviceWeaverDirectory Condition="'$(TargetFrameworkVersionNumber)' &gt;= '10.0'">$(MSBuildThisFileDirectory)..\tools\net10.0\</MrAdviceWeaverDirectory>
+			<MrAdviceWeaverAssembly Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MrAdviceWeaverDirectory)MrAdvice.Weaver.exe</MrAdviceWeaverAssembly>
+			<MrAdviceWeaverAssembly Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">$(MrAdviceWeaverDirectory)MrAdvice.Weaver.dll</MrAdviceWeaverAssembly>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MrAdviceWeaverAssembly)"</MrAdviceWeaverPath>
+			<MrAdviceWeaverPath Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">dotnet "$(MrAdviceWeaverAssembly)"</MrAdviceWeaverPath>
+		</PropertyGroup>
+		<ItemGroup>
+			<MrAdviceWeaverFiles Include="$(MrAdviceWeaverDirectory)*.dll;$(MrAdviceWeaverDirectory)*.exe" />
+		</ItemGroup>
+	</Target>
+
+	<Target Name="MrAdviceWeaver" AfterTargets="CoreCompile" BeforeTargets="CopyFilesToOutputDirectory"
+	        Condition="'$(DesignTimeBuild)' != 'true'"
+	        DependsOnTargets="ResolveMrAdviceWeaverPath"
+	        Inputs="@(IntermediateAssembly);@(MrAdviceWeaverFiles);$(MSBuildThisFileFullPath)"
+	        Outputs="@(IntermediateAssembly->'%(FullPath).MrAdvice.stamp')" >
+		<PropertyGroup>
 			<MrAdviceWeaverReferencePathFile>@(IntermediateAssembly).MrAdvice.ReferencePath.txt</MrAdviceWeaverReferencePathFile>
 			<MrAdviceWeaverLocalReferencePathFile>@(IntermediateAssembly).MrAdvice.LocalReferencePath.txt</MrAdviceWeaverLocalReferencePathFile>
+			<MrAdviceWeaverStampFile>@(IntermediateAssembly).MrAdvice.stamp</MrAdviceWeaverStampFile>
 		</PropertyGroup>
 		<WriteLinesToFile Lines="@(ReferencePath)" File="$(MrAdviceWeaverReferencePathFile)" Overwrite="true" />
 		<WriteLinesToFile Lines="@(ReferenceCopyLocalPaths)" File="$(MrAdviceWeaverLocalReferencePathFile)" Overwrite="true" />
 		<Exec IgnoreExitCode="false" Command='$(MrAdviceWeaverPath) AssemblyPath="@(IntermediateAssembly)" ReferencePath="@$(MrAdviceWeaverReferencePathFile)" ReferenceCopyLocalPaths="@$(MrAdviceWeaverLocalReferencePathFile)" AssemblyOriginatorKeyFile="$(AssemblyOriginatorKeyFile)" SignAssembly="$(SignAssembly)"' />
+		<Touch Files="$(MrAdviceWeaverStampFile)" AlwaysCreate="true" />
+		<ItemGroup>
+			<FileWrites Include="$(MrAdviceWeaverStampFile)" />
+		</ItemGroup>
 	</Target>
 </Project>
