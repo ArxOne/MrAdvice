@@ -1,3 +1,7 @@
+## 2.23
+
+- Improvement: weaver is not invoked when assembly is not rebuilt
+
 ## 2.22
 
 - Fix: on interfaces advice, pure [out] parameters were read before pointcut invocation (and handled as ref)
