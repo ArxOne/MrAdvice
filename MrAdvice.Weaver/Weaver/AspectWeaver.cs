@@ -81,6 +81,10 @@ namespace ArxOne.MrAdvice.Weaver
                     // sorting here will make ancestor types being weaved before children (because of finalizers)
                     .OrderBy(n=>n.Node.Type.GetSelfAndAncestors().Count()).ToArray();
                 var weavableMethods = GetMarkedMethods(moduleNode, context.AdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
+                var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IInfoAdvice));
+                // weaving advices may add info advices, so their presence forces the info advices pass
+                var mayHaveInfoAdvices = infoAdviceInterface is null || weavingMethodsAdvices.Length > 0 || weavingTypesAdvices.Length > 0
+                                         || GetMarkedMethods(moduleNode, infoAdviceInterface, context).Any(IsMethodInfoWeavable);
                 _nodeMarkers = null;
                 auditTimer.NewZone("Abstract targets");
                 var generatedFieldsToBeRemoved = GenerateFieldsToBeRemoved(weavableMethods, context);
@@ -98,8 +102,8 @@ namespace ArxOne.MrAdvice.Weaver
 
                 // and then, the info advices
                 auditTimer.NewZone("Info advices weaving");
-                var infoAdviceInterface = TypeResolver.Resolve(moduleDefinition, typeof(IInfoAdvice));
-                moduleDefinition.GetTypes().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, context));
+                if (mayHaveInfoAdvices || weavableInterfaces.Length > 0)
+                    moduleDefinition.GetTypes().ForAll(t => WeaveInfoAdvices(moduleDefinition, t, infoAdviceInterface, context));
 
                 auditTimer.NewZone("Abstract targets cleanup");
                 RemoveFields(generatedFieldsToBeRemoved);
