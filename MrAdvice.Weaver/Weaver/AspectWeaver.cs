@@ -296,6 +296,9 @@ namespace ArxOne.MrAdvice.Weaver
             // the first method to look for in the final AdviceExtensions.Handle<>() method
             var adviceExtensionsType = TypeResolver.Resolve(moduleDefinition, typeof(AdviceExtensions));
             var adviceHandleMethod = adviceExtensionsType.Methods.Single(m => m.IsPublic && m.HasGenericParameters && m.Name == nameof(AdviceExtensions.Handle));
+            // calls to Handle<>() from this module go through a MemberRef, so without one no method body needs to be scanned
+            if (!moduleDefinition.GetMemberRefs().Any(m => m.Name == adviceHandleMethod.Name && m.SafeEquivalent(adviceHandleMethod)))
+                yield break;
             var methodsSearched = new HashSet<MethodDef>(new MethodReferenceComparer()) { adviceHandleMethod };
             var foundHandledInterfaces = new HashSet<ITypeDefOrRef>(new TypeReferenceComparer());
             var methodsToSearch = new List<Tuple<MethodDef, int>> { Tuple.Create(adviceHandleMethod, 0) };
