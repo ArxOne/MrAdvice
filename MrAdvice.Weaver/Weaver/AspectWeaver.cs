@@ -72,12 +72,16 @@ namespace ArxOne.MrAdvice.Weaver
 
                 // weave methods (they can be property-related, too)
                 auditTimer.NewZone("Weavable methods detection");
-                var weavingMethodsAdvices = GetMarkedMethods(moduleDefinition, context.WeavingAdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
-                var weavingTypesAdvices = GetMarkedTypes(moduleDefinition, context.WeavingAdviceInterfaceType, context)
+                // all detections run on the same tree, before anything is weaved, so markers found per node can be cached
+                ReflectionNode moduleNode = moduleDefinition;
+                _nodeMarkers = new Dictionary<Tuple<ReflectionNode, ITypeDefOrRef>, MarkerDefinition[]>();
+                var weavingMethodsAdvices = GetMarkedMethods(moduleNode, context.WeavingAdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
+                var weavingTypesAdvices = GetMarkedTypes(moduleNode, context.WeavingAdviceInterfaceType, context)
                     .Where(n => !IsFromComputerGeneratedType(n))
                     // sorting here will make ancestor types being weaved before children (because of finalizers)
                     .OrderBy(n=>n.Node.Type.GetSelfAndAncestors().Count()).ToArray();
-                var weavableMethods = GetMarkedMethods(moduleDefinition, context.AdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
+                var weavableMethods = GetMarkedMethods(moduleNode, context.AdviceInterfaceType, context).Where(IsMethodWeavable).ToArray();
+                _nodeMarkers = null;
                 auditTimer.NewZone("Abstract targets");
                 var generatedFieldsToBeRemoved = GenerateFieldsToBeRemoved(weavableMethods, context);
                 auditTimer.NewZone("Types weaving advice");
@@ -516,13 +520,28 @@ namespace ArxOne.MrAdvice.Weaver
         private IEnumerable<Tuple<ReflectionNode, MarkerDefinition>> GetAllMarkers(ReflectionNode reflectionNode, ITypeDefOrRef markerInterface, WeavingContext context)
         {
             var markers = reflectionNode.GetAncestorsToDescendants()
-                .Select(n => new { Node = n, Attributes = n.CustomAttributes })
-                .SelectMany(n => n.Attributes.Select(a => new { Node = n.Node, Attribute = a })
-                    .Where(a => !a.Attribute.AttributeType.DefinitionAssembly.IsSystem())
-                    .Select(a => new { Node = a.Node, Type = ResolveTypeOrGenericDefinition(a.Attribute.AttributeType) })
-                    .Where(t => IsMarker(t.Type, markerInterface)))
-                .Select(t => Tuple.Create(t.Node, GetMarkerDefinition(t.Type, context)));
+                .SelectMany(n => GetNodeMarkers(n, markerInterface, context).Select(d => Tuple.Create(n, d)));
             return markers;
+        }
+
+        /// <summary>
+        /// Markers declared by each node, set while detecting only: the tree is not modified then, and each node is visited again for all its descendants
+        /// </summary>
+        private Dictionary<Tuple<ReflectionNode, ITypeDefOrRef>, MarkerDefinition[]> _nodeMarkers;
+
+        private IEnumerable<MarkerDefinition> GetNodeMarkers(ReflectionNode node, ITypeDefOrRef markerInterface, WeavingContext context)
+        {
+            var markers = node.CustomAttributes
+                .Where(a => !a.AttributeType.DefinitionAssembly.IsSystem())
+                .Select(a => ResolveTypeOrGenericDefinition(a.AttributeType))
+                .Where(t => IsMarker(t, markerInterface))
+                .Select(t => GetMarkerDefinition(t, context));
+            if (_nodeMarkers is null)
+                return markers;
+            var key = Tuple.Create(node, markerInterface);
+            if (!_nodeMarkers.TryGetValue(key, out var nodeMarkers))
+                _nodeMarkers[key] = nodeMarkers = markers.ToArray();
+            return nodeMarkers;
         }
 
         private TypeDef ResolveTypeOrGenericDefinition(ITypeDefOrRef typeDefOrRef)
