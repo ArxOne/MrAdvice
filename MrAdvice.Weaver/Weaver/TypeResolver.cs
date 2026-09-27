@@ -108,14 +108,19 @@ namespace ArxOne.MrAdvice.Weaver
             lock (_resolvedTypesByName)
             {
                 var selfAndReferences = moduleDefinition.GetSelfAndReferences(AssemblyResolver, ignoreSystem, depth, Logging, IsMainModule(moduleDefinition), _dependencies);
-                return selfAndReferences.SelectMany(referencedModule => referencedModule.GetTypes()).FirstOrDefault(t => Matches(t, fullName));
+                return selfAndReferences.Select(referencedModule => FindType(referencedModule, fullName)).FirstOrDefault(t => t is not null);
             }
         }
 
-        private static bool Matches(TypeDef type, string fullName)
+        private readonly IDictionary<ModuleDef, IDictionary<string, TypeDef>> _typesByModule = new Dictionary<ModuleDef, IDictionary<string, TypeDef>>();
+
+        // modules are indexed on first lookup, which is before weaving adds types to the main module
+        private TypeDef FindType(ModuleDef module, string fullName)
         {
-            //Logger.WriteDebug("Checking type {0}", type.FullName);
-            return type.FullName == fullName;
+            if (!_typesByModule.TryGetValue(module, out var types))
+                _typesByModule[module] = types = module.GetTypes().GroupBy(t => t.FullName).ToDictionary(g => g.Key, g => g.First());
+            types.TryGetValue(fullName, out var type);
+            return type;
         }
 
         /// <summary>
