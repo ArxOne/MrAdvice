@@ -1,6 +1,7 @@
 ## 2.23
 
 - Improvement: weaver is not invoked when assembly is not rebuilt
+- Improvement: global speedup
 
 ## 2.22
 
