@@ -37,7 +37,7 @@ artifacts:
 deploy:
   provider: NuGet
   api_key:
-    secure: 1FFrOQ1to7x108dE3YPb8ACDEx7kJOJUXBw1M3RE5b8JeMa/G5qYffI1ZJg3td7o
+    secure: +NAQK+nc4JAiLB2PHAsiQG5DwMt8SpKqwofg5qk2e03IH9uhsosLiCaeC6C/tWie
   skip_symbols: false
 
 after_test:
