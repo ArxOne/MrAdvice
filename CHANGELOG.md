@@ -1,3 +1,7 @@
+## 2.24
+
+- Improvement: support for .NET 11
+
 ## 2.23
 
 - Improvement: weaver is not invoked when assembly is not rebuilt
